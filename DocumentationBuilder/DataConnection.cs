@@ -39,6 +39,18 @@ namespace DocumentationBuilder{
 			//table=new DataTable();
 		}
 
+		///<summary>Only used to fill the list of databases in the ChooseDatabase window and from Employees.GetAsteriskMissedCalls.</summary>
+		public DataConnection(string serverName,string database,string mysqlUser,string mysqlPass) {
+			ConnStr="Server="+serverName
+				+";Database="+database
+				+";User ID="+mysqlUser
+				+";Password="+mysqlPass
+				+";CharSet=utf8";
+			con=new MySqlConnection(ConnStr);
+			cmd=new MySqlCommand();
+			cmd.Connection=con;
+		}
+
 		///<summary></summary>
 		private string GetConnectionString(){
 			XmlDocument document=new XmlDocument();

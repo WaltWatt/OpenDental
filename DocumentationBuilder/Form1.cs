@@ -25,30 +25,53 @@ namespace DocumentationBuilder {
 		private string command;
 		private XPathNavigator Navigator;
 		private List<string> MissingTables;
-		private string[] CommandLineArgs;
 		private List<string> _listTableNames;
 
 		public Form1(string[] cla) {
-			dcon=new DataConnection();
-			CommandLineArgs=cla;
 			InitializeComponent();
+			string version="";
+			string serverName="";
+			string database="";
+			string mysqlUser="";
+			string mysqlPass="";
+			if(cla.Length!=0) {
+				foreach(string arg in cla) {
+					if(arg.Contains("Version=")) {
+						version=arg.Substring("Version=".Length).Trim('"');
+					}
+					if(arg.Contains("ServerName=")) {
+						serverName=arg.Substring("ServerName=".Length).Trim('"');
+					}
+					if(arg.Contains("Database=")) {
+						database=arg.Substring("Database=".Length).Trim('"');
+					}
+					if(arg.Contains("MySQLUser=")) {
+						mysqlUser=arg.Substring("MySQLUser=".Length).Trim('"');
+					}
+					if(arg.Contains("MySQLPass=")) {
+						mysqlPass=arg.Substring("MySQLPass=".Length).Trim('"');
+					}
+				}
+			}
+			if(string.IsNullOrEmpty(serverName)
+				|| string.IsNullOrEmpty(database)
+				|| string.IsNullOrEmpty(mysqlUser)
+				|| string.IsNullOrEmpty(mysqlPass))
+			{
+				dcon=new DataConnection();
+			}
+			else {
+				dcon=new DataConnection(serverName,database,mysqlUser,mysqlPass);
+			}
+			_listTableNames=GetTableNames();
+			if(!string.IsNullOrEmpty(version)) {
+				textVersion.Text=version;
+				Build();
+				return;
+			}
 		}
 
 		private void Form1_Load(object sender,EventArgs e) {
-			_listTableNames=GetTableNames();
-			if(CommandLineArgs.Length!=0) {
-				string version="";
-				foreach(string cla in CommandLineArgs) {
-					if(cla.Contains("Version=")) {
-						version=cla.Substring("Version=".Length).Trim('"');
-					}
-				}
-				if(!string.IsNullOrEmpty(version)) {
-					textVersion.Text=version;
-					Build();
-					return;
-				}
-			}
 			textConnStr.Text=dcon.ConnStr;
 			string command="SELECT ValueString FROM preference WHERE PrefName='DatabaseVersion'";
 			textVersion.Text=dcon.GetCount(command);
