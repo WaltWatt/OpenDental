@@ -7000,7 +7000,7 @@ No Action Required in many cases, check your new patient Web Sched on your web s
 			}
 		}
 
-		private static void To18_1_0() {
+		private static void To18_1_1() {
 			string command;
 			DataTable table;
 			if(DataConnection.DBtype==DatabaseType.MySql) {
@@ -8129,6 +8129,6 @@ No Action Required in many cases, check your new patient Web Sched on your web s
 				command="UPDATE databasemaintenance SET IsOld = 1 WHERE MethodName = 'ProcedurelogTpAttachedToClaim'";//true by default
 			}
 			Db.NonQ(command);
-		}//End of 18_1_0() method
+		}//End of 18_1_1() method
 	}
 }

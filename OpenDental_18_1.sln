@@ -38,13 +38,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebCamOD", "WebCamOD\WebCam
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "xCentralManager", "CentralManager\xCentralManager.csproj", "{10BFA78E-E5FE-4209-8347-AD0EC8B3F064}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "xEHR", "..\..\Shared Projects Subversion\EHR\EHR_head\EHR\xEHR.csproj", "{5ABF1D9D-2B93-4217-AFA6-9EECCF6F525F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "xEHR", "..\..\Shared Projects Subversion\EHR\EHR_18_1\EHR\xEHR.csproj", "{5ABF1D9D-2B93-4217-AFA6-9EECCF6F525F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "xCrudGenerator", "xCrudGenerator\xCrudGenerator.csproj", "{76227E95-B261-4B6A-A97C-3764E7EDDF97}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenDentalHelp", "..\..\Shared Projects Subversion\OpenDentalHelp\head\OpenDentalHelp\OpenDentalHelp.csproj", "{98B2999C-8A9F-4795-B452-7F6231ED56B4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenDentalHelp", "..\..\Shared Projects Subversion\OpenDentalHelp\OpenDentalHelp_18_1\OpenDentalHelp\OpenDentalHelp.csproj", "{98B2999C-8A9F-4795-B452-7F6231ED56B4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenDentalWebCore", "..\..\Shared Projects Subversion\OpenDentalWebApps\head\OpenDentalWebCore\OpenDentalWebCore.csproj", "{E734D539-5EA7-49F3-A777-821237D1094C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenDentalWebCore", "..\..\Shared Projects Subversion\OpenDentalWebApps\OpenDentalWebApps_18_1\OpenDentalWebCore\OpenDentalWebCore.csproj", "{E734D539-5EA7-49F3-A777-821237D1094C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenDentalGraph", "OpenDentalGraph\OpenDentalGraph.csproj", "{015E240B-23FB-4D91-B20C-CE221DDCCB0F}"
 EndProject
@@ -52,7 +52,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenDentalCloud", "OpenDent
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestsCore", "UnitTestsCore\UnitTestsCore.csproj", "{7BBDDEDF-C015-43C0-A532-FED224993281}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "xCDT", "..\..\Shared Projects Subversion\CDT\CDT_head\xCDT.csproj", "{76BA82E6-D8E1-45B1-8ED6-41D97B8D67EC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "xCDT", "..\..\Shared Projects Subversion\CDT\CDT_18_1\xCDT.csproj", "{76BA82E6-D8E1-45B1-8ED6-41D97B8D67EC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
