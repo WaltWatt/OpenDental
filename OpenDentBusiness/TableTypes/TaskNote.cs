@@ -13,7 +13,7 @@ namespace OpenDentBusiness {
 		public long TaskNum;
 		///<summary>FK to userod.UserNum. The user who created this tasknote.</summary>
 		public long UserNum;
-		///<summary>Date and time the note was created (editable).</summary>
+		///<summary>Date and time the note was created or last modified (editable).</summary>
 		[CrudColumn(SpecialType=CrudSpecialColType.DateTEntryEditable)]
 		public DateTime DateTimeNote;
 		///<summary>Note. Text that the user wishes to show on the task.</summary>

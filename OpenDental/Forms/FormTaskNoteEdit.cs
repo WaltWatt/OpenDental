@@ -72,7 +72,7 @@ namespace OpenDental {
 				return;
 			}
 			try {
-				TaskNoteCur.DateTimeNote=DateTime.Parse(textDateTime.Text);
+				TaskNoteCur.DateTimeNote=DateTime.Parse(textDateTime.Text);//Will not reach database if note is not actually edited.
 			}
 			catch{
 				MsgBox.Show(this,"Please fix date.");
@@ -84,18 +84,23 @@ namespace OpenDental {
 				Tasks.TaskEditCreateLog(Permissions.TaskNoteEdit,Lan.g(this,"Added task note"),Tasks.GetOne(TaskNoteCur.TaskNum));
 				//This refreshes "new" status for the task as appropriate.
 				DataValid.SetInvalidTask(TaskNoteCur.TaskNum,true);//popup
+				DialogResult=DialogResult.OK;
+				OnEditComplete();
 			}
-			else {
-				if(TaskNoteCur.Note!=textNote.Text) {
-					//This refreshes "new" status for the task as appropriate.
-					DataValid.SetInvalidTask(TaskNoteCur.TaskNum,true);//popup
-				}
+			else if(TaskNoteCur.Note!=textNote.Text){
+				//This refreshes "new" status for the task as appropriate.
+				DataValid.SetInvalidTask(TaskNoteCur.TaskNum,true);//popup
 				TaskNoteCur.Note=textNote.Text;
 				TaskNotes.Update(TaskNoteCur);
 				Tasks.TaskEditCreateLog(Permissions.TaskNoteEdit,Lan.g(this,"Task note changed"),Tasks.GetOne(TaskNoteCur.TaskNum));
+				DialogResult=DialogResult.OK;
+				OnEditComplete();
 			}
-			DialogResult=DialogResult.OK;
-			OnEditComplete();
+			else {
+				//Intentionally blank, user opened an existing task note and did not change the note but clicked OK.
+				//This is effectively equivilent to a Cancel click
+				DialogResult=DialogResult.Cancel;
+			}
 			Close();//Needed because the window is called as a non-modal window.
 		}
 

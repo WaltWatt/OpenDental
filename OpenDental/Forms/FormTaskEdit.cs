@@ -2536,8 +2536,8 @@ namespace OpenDental {
 				taskHist.UserNumHist=Security.CurUser.UserNum;
 				taskHist.IsNoteChange=true;
 				TaskHists.Insert(taskHist);
-				//Notify users a task note change was made (sets new status)
-				DataValid.SetInvalidTask(_taskCur.TaskNum,true);//popup
+				//Task has already been invalidated in FromTaskNoteEdit when the Note was added/edited.  Other Users have already been notified the task changed.
+				//Do not send new TaskInvalid signal.
 			}
 			//If a note was added to a Done task and the user hits cancel, the task status is set to Viewed because the note is still there and the task didn't move lists.
 			if(NotesChanged && _taskOld.TaskStatus==TaskStatusEnum.Done) {//notes changed on a task marked Done when the task was opened.
