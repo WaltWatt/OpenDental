@@ -1,0 +1,891 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SheetDef xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <IsNew>false</IsNew>
+  <SheetDefNum>0</SheetDefNum>
+  <Description>Statement</Description>
+  <SheetType>Statement</SheetType>
+  <FontSize>9</FontSize>
+  <FontName>Arial</FontName>
+  <Width>850</Width>
+  <Height>1100</Height>
+  <IsLandscape>false</IsLandscape>
+  <PageCount>1</PageCount>
+  <IsMultiPage>false</IsMultiPage>
+  <SheetFieldDefs>
+    <SheetFieldDef>
+      <IsNew>false</IsNew>
+      <SheetFieldDefNum>3916</SheetFieldDefNum>
+      <SheetDefNum>82</SheetDefNum>
+      <FieldType>StaticText</FieldType>
+      <FieldName />
+      <FieldValue>EXPIRES</FieldValue>
+      <FontSize>8</FontSize>
+      <FontName>Arial</FontName>
+      <FontIsBold>false</FontIsBold>
+      <XPos>445</XPos>
+      <YPos>260</YPos>
+      <Width>59</Width>
+      <Height>14</Height>
+      <GrowthBehavior>None</GrowthBehavior>
+      <RadioButtonValue />
+      <RadioButtonGroup />
+      <IsRequired>false</IsRequired>
+      <ImageData />
+      <TabOrder>0</TabOrder>
+      <ReportableName />
+      <TextAlign>Left</TextAlign>
+      <IsPaymentOption>true</IsPaymentOption>
+      <ItemColor>-16777216</ItemColor>
+    </SheetFieldDef>
+    <SheetFieldDef>
+      <IsNew>false</IsNew>
+      <SheetFieldDefNum>3917</SheetFieldDefNum>
+      <SheetDefNum>82</SheetDefNum>
+      <FieldType>Line</FieldType>
+      <FieldName />
+      <FieldValue />
+      <FontSize>0</FontSize>
+      <FontName />
+      <FontIsBold>false</FontIsBold>
+      <XPos>505</XPos>
+      <YPos>276</YPos>
+      <Width>261</Width>
+      <Height>0</Height>
+      <GrowthBehavior>None</GrowthBehavior>
+      <RadioButtonValue />
+      <RadioButtonGroup />
+      <IsRequired>false</IsRequired>
+      <ImageData />
+      <TabOrder>0</TabOrder>
+      <ReportableName />
+      <TextAlign>Left</TextAlign>
+      <IsPaymentOption>true</IsPaymentOption>
+      <ItemColor>-16777216</ItemColor>
+    </SheetFieldDef>
+    <SheetFieldDef>
+      <IsNew>false</IsNew>
+      <SheetFieldDefNum>3918</SheetFieldDefNum>
+      <SheetDefNum>82</SheetDefNum>
+      <FieldType>StaticText</FieldType>
+      <FieldName />
+      <FieldValue>AMOUNT APPROVED</FieldValue>
+      <FontSize>8</FontSize>
+      <FontName>Arial</FontName>
+      <FontIsBold>false</FontIsBold>
+      <XPos>445</XPos>
+      <YPos>285</YPos>
+      <Width>127</Width>
+      <Height>14</Height>
+      <GrowthBehavior>None</GrowthBehavior>
+      <RadioButtonValue />
+      <RadioButtonGroup />
+      <IsRequired>false</IsRequired>
+      <ImageData />
+      <TabOrder>0</TabOrder>
+      <ReportableName />
+      <TextAlign>Left</TextAlign>
+      <IsPaymentOption>true</IsPaymentOption>
+      <ItemColor>-16777216</ItemColor>
+    </SheetFieldDef>
+    <SheetFieldDef>
+      <IsNew>false</IsNew>
+      <SheetFieldDefNum>3919</SheetFieldDefNum>
+      <SheetDefNum>82</SheetDefNum>
+      <FieldType>Line</FieldType>
+      <FieldName />
+      <FieldValue />
+      <FontSize>0</FontSize>
+      <FontName />
+      <FontIsBold>false</FontIsBold>
+      <XPos>458</XPos>
+      <YPos>226</YPos>
+      <Width>308</Width>
+      <Height>0</Height>
+      <GrowthBehavior>None</GrowthBehavior>
+      <RadioButtonValue />
+      <RadioButtonGroup />
+      <IsRequired>false</IsRequired>
+      <ImageData />
+      <TabOrder>0</TabOrder>
+      <ReportableName />
+      <TextAlign>Left</TextAlign>
+      <IsPaymentOption>true</IsPaymentOption>
+      <ItemColor>-16777216</ItemColor>
+    </SheetFieldDef>
+    <SheetFieldDef>
+      <IsNew>false</IsNew>
+      <SheetFieldDefNum>3920</SheetFieldDefNum>
+      <SheetDefNum>82</SheetDefNum>
+      <FieldType>OutputText</FieldType>
+      <FieldName>statement.NoteBold</FieldName>
+      <FieldValue />
+      <FontSize>10</FontSize>
+      <FontName>Arial</FontName>
+      <FontIsBold>true</FontIsBold>
+      <XPos>50</XPos>
+      <YPos>643</YPos>
+      <Width>725</Width>
+      <Height>14</Height>
+      <GrowthBehavior>DownGlobal</GrowthBehavior>
+      <RadioButtonValue />
+      <RadioButtonGroup />
+      <IsRequired>false</IsRequired>
+      <ImageData />
+      <TabOrder>0</TabOrder>
+      <ReportableName />
+      <TextAlign>Left</TextAlign>
+      <IsPaymentOption>false</IsPaymentOption>
+      <ItemColor>-16777216</ItemColor>
+    </SheetFieldDef>
+    <SheetFieldDef>
+      <IsNew>false</IsNew>
+      <SheetFieldDefNum>3915</SheetFieldDefNum>
+      <SheetDefNum>82</SheetDefNum>
+      <FieldType>Line</FieldType>
+      <FieldName />
+      <FieldValue />
+      <FontSize>0</FontSize>
+      <FontName />
+      <FontIsBold>false</FontIsBold>
+      <XPos>521</XPos>
+      <YPos>251</YPos>
+      <Width>245</Width>
+      <Height>0</Height>
+      <GrowthBehavior>None</GrowthBehavior>
+      <RadioButtonValue />
+      <RadioButtonGroup />
+      <IsRequired>false</IsRequired>
+      <ImageData />
+      <TabOrder>0</TabOrder>
+      <ReportableName />
+      <TextAlign>Left</TextAlign>
+      <IsPaymentOption>true</IsPaymentOption>
+      <ItemColor>-16777216</ItemColor>
+    </SheetFieldDef>
+    <SheetFieldDef>
+      <IsNew>false</IsNew>
+      <SheetFieldDefNum>3914</SheetFieldDefNum>
+      <SheetDefNum>82</SheetDefNum>
+      <FieldType>OutputText</FieldType>
+      <FieldName>billingAddress</FieldName>
+      <FieldValue />
+      <FontSize>10</FontSize>
+      <FontName>Arial</FontName>
+      <FontIsBold>false</FontIsBold>
+      <XPos>85</XPos>
+      <YPos>240</YPos>
+      <Width>250</Width>
+      <Height>60</Height>
+      <GrowthBehavior>None</GrowthBehavior>
+      <RadioButtonValue />
+      <RadioButtonGroup />
+      <IsRequired>false</IsRequired>
+      <ImageData />
+      <TabOrder>0</TabOrder>
+      <ReportableName />
+      <TextAlign>Left</TextAlign>
+      <IsPaymentOption>false</IsPaymentOption>
+      <ItemColor>-16777216</ItemColor>
+    </SheetFieldDef>
+    <SheetFieldDef>
+      <IsNew>false</IsNew>
+      <SheetFieldDefNum>3911</SheetFieldDefNum>
+      <SheetDefNum>82</SheetDefNum>
+      <FieldType>StaticText</FieldType>
+      <FieldName />
+      <FieldValue>NAME</FieldValue>
+      <FontSize>8</FontSize>
+      <FontName>Arial</FontName>
+      <FontIsBold>false</FontIsBold>
+      <XPos>445</XPos>
+      <YPos>310</YPos>
+      <Width>42</Width>
+      <Height>14</Height>
+      <GrowthBehavior>None</GrowthBehavior>
+      <RadioButtonValue />
+      <RadioButtonGroup />
+      <IsRequired>false</IsRequired>
+      <ImageData />
+      <TabOrder>0</TabOrder>
+      <ReportableName />
+      <TextAlign>Left</TextAlign>
+      <IsPaymentOption>true</IsPaymentOption>
+      <ItemColor>-16777216</ItemColor>
+    </SheetFieldDef>
+    <SheetFieldDef>
+      <IsNew>false</IsNew>
+      <SheetFieldDefNum>3912</SheetFieldDefNum>
+      <SheetDefNum>82</SheetDefNum>
+      <FieldType>StaticText</FieldType>
+      <FieldName />
+      <FieldValue>#</FieldValue>
+      <FontSize>8</FontSize>
+      <FontName>Arial</FontName>
+      <FontIsBold>false</FontIsBold>
+      <XPos>445</XPos>
+      <YPos>210</YPos>
+      <Width>12</Width>
+      <Height>14</Height>
+      <GrowthBehavior>None</GrowthBehavior>
+      <RadioButtonValue />
+      <RadioButtonGroup />
+      <IsRequired>false</IsRequired>
+      <ImageData />
+      <TabOrder>0</TabOrder>
+      <ReportableName />
+      <TextAlign>Left</TextAlign>
+      <IsPaymentOption>true</IsPaymentOption>
+      <ItemColor>-16777216</ItemColor>
+    </SheetFieldDef>
+    <SheetFieldDef>
+      <IsNew>false</IsNew>
+      <SheetFieldDefNum>3913</SheetFieldDefNum>
+      <SheetDefNum>82</SheetDefNum>
+      <FieldType>StaticText</FieldType>
+      <FieldName />
+      <FieldValue>3 DIGIT CSV</FieldValue>
+      <FontSize>8</FontSize>
+      <FontName>Arial</FontName>
+      <FontIsBold>false</FontIsBold>
+      <XPos>445</XPos>
+      <YPos>235</YPos>
+      <Width>75</Width>
+      <Height>14</Height>
+      <GrowthBehavior>None</GrowthBehavior>
+      <RadioButtonValue />
+      <RadioButtonGroup />
+      <IsRequired>false</IsRequired>
+      <ImageData />
+      <TabOrder>0</TabOrder>
+      <ReportableName />
+      <TextAlign>Left</TextAlign>
+      <IsPaymentOption>true</IsPaymentOption>
+      <ItemColor>-16777216</ItemColor>
+    </SheetFieldDef>
+    <SheetFieldDef>
+      <IsNew>false</IsNew>
+      <SheetFieldDefNum>3909</SheetFieldDefNum>
+      <SheetDefNum>82</SheetDefNum>
+      <FieldType>StaticText</FieldType>
+      <FieldName />
+      <FieldValue>CREDIT CARD TYPE</FieldValue>
+      <FontSize>8</FontSize>
+      <FontName>Arial</FontName>
+      <FontIsBold>false</FontIsBold>
+      <XPos>445</XPos>
+      <YPos>185</YPos>
+      <Width>125</Width>
+      <Height>14</Height>
+      <GrowthBehavior>None</GrowthBehavior>
+      <RadioButtonValue />
+      <RadioButtonGroup />
+      <IsRequired>false</IsRequired>
+      <ImageData />
+      <TabOrder>0</TabOrder>
+      <ReportableName />
+      <TextAlign>Left</TextAlign>
+      <IsPaymentOption>true</IsPaymentOption>
+      <ItemColor>-16777216</ItemColor>
+    </SheetFieldDef>
+    <SheetFieldDef>
+      <IsNew>false</IsNew>
+      <SheetFieldDefNum>3910</SheetFieldDefNum>
+      <SheetDefNum>82</SheetDefNum>
+      <FieldType>Line</FieldType>
+      <FieldName />
+      <FieldValue />
+      <FontSize>0</FontSize>
+      <FontName />
+      <FontIsBold>false</FontIsBold>
+      <XPos>566</XPos>
+      <YPos>201</YPos>
+      <Width>200</Width>
+      <Height>0</Height>
+      <GrowthBehavior>None</GrowthBehavior>
+      <RadioButtonValue />
+      <RadioButtonGroup />
+      <IsRequired>false</IsRequired>
+      <ImageData />
+      <TabOrder>0</TabOrder>
+      <ReportableName />
+      <TextAlign>Left</TextAlign>
+      <IsPaymentOption>true</IsPaymentOption>
+      <ItemColor>-16777216</ItemColor>
+    </SheetFieldDef>
+    <SheetFieldDef>
+      <IsNew>false</IsNew>
+      <SheetFieldDefNum>3905</SheetFieldDefNum>
+      <SheetDefNum>82</SheetDefNum>
+      <FieldType>OutputText</FieldType>
+      <FieldName>returnAddress</FieldName>
+      <FieldValue />
+      <FontSize>10</FontSize>
+      <FontName>Arial</FontName>
+      <FontIsBold>false</FontIsBold>
+      <XPos>40</XPos>
+      <YPos>70</YPos>
+      <Width>250</Width>
+      <Height>80</Height>
+      <GrowthBehavior>DownLocal</GrowthBehavior>
+      <RadioButtonValue />
+      <RadioButtonGroup />
+      <IsRequired>false</IsRequired>
+      <ImageData />
+      <TabOrder>0</TabOrder>
+      <ReportableName />
+      <TextAlign>Left</TextAlign>
+      <IsPaymentOption>false</IsPaymentOption>
+      <ItemColor>-16777216</ItemColor>
+    </SheetFieldDef>
+    <SheetFieldDef>
+      <IsNew>false</IsNew>
+      <SheetFieldDefNum>3906</SheetFieldDefNum>
+      <SheetDefNum>82</SheetDefNum>
+      <FieldType>OutputText</FieldType>
+      <FieldName>statement.DateSent</FieldName>
+      <FieldValue />
+      <FontSize>9</FontSize>
+      <FontName>Arial</FontName>
+      <FontIsBold>false</FontIsBold>
+      <XPos>310</XPos>
+      <YPos>83</YPos>
+      <Width>230</Width>
+      <Height>13</Height>
+      <GrowthBehavior>None</GrowthBehavior>
+      <RadioButtonValue />
+      <RadioButtonGroup />
+      <IsRequired>false</IsRequired>
+      <ImageData />
+      <TabOrder>0</TabOrder>
+      <ReportableName />
+      <TextAlign>Center</TextAlign>
+      <IsPaymentOption>false</IsPaymentOption>
+      <ItemColor>-16777216</ItemColor>
+    </SheetFieldDef>
+    <SheetFieldDef>
+      <IsNew>false</IsNew>
+      <SheetFieldDefNum>3907</SheetFieldDefNum>
+      <SheetDefNum>82</SheetDefNum>
+      <FieldType>OutputText</FieldType>
+      <FieldName>accountNumber</FieldName>
+      <FieldValue />
+      <FontSize>9</FontSize>
+      <FontName>Arial</FontName>
+      <FontIsBold>false</FontIsBold>
+      <XPos>310</XPos>
+      <YPos>97</YPos>
+      <Width>230</Width>
+      <Height>13</Height>
+      <GrowthBehavior>None</GrowthBehavior>
+      <RadioButtonValue />
+      <RadioButtonGroup />
+      <IsRequired>false</IsRequired>
+      <ImageData />
+      <TabOrder>0</TabOrder>
+      <ReportableName />
+      <TextAlign>Center</TextAlign>
+      <IsPaymentOption>false</IsPaymentOption>
+      <ItemColor>-16777216</ItemColor>
+    </SheetFieldDef>
+    <SheetFieldDef>
+      <IsNew>false</IsNew>
+      <SheetFieldDefNum>3908</SheetFieldDefNum>
+      <SheetDefNum>82</SheetDefNum>
+      <FieldType>Grid</FieldType>
+      <FieldName>StatementEnclosed</FieldName>
+      <FieldValue />
+      <FontSize>8.5</FontSize>
+      <FontName />
+      <FontIsBold>false</FontIsBold>
+      <XPos>445</XPos>
+      <YPos>120</YPos>
+      <Width>321</Width>
+      <Height>31</Height>
+      <GrowthBehavior>DownGlobal</GrowthBehavior>
+      <RadioButtonValue />
+      <RadioButtonGroup />
+      <IsRequired>false</IsRequired>
+      <ImageData />
+      <TabOrder>0</TabOrder>
+      <ReportableName />
+      <TextAlign>Left</TextAlign>
+      <IsPaymentOption>false</IsPaymentOption>
+      <ItemColor>-16777216</ItemColor>
+    </SheetFieldDef>
+    <SheetFieldDef>
+      <IsNew>false</IsNew>
+      <SheetFieldDefNum>3903</SheetFieldDefNum>
+      <SheetDefNum>82</SheetDefNum>
+      <FieldType>Line</FieldType>
+      <FieldName />
+      <FieldValue />
+      <FontSize>0</FontSize>
+      <FontName />
+      <FontIsBold>false</FontIsBold>
+      <XPos>488</XPos>
+      <YPos>326</YPos>
+      <Width>278</Width>
+      <Height>0</Height>
+      <GrowthBehavior>None</GrowthBehavior>
+      <RadioButtonValue />
+      <RadioButtonGroup />
+      <IsRequired>false</IsRequired>
+      <ImageData />
+      <TabOrder>0</TabOrder>
+      <ReportableName />
+      <TextAlign>Left</TextAlign>
+      <IsPaymentOption>true</IsPaymentOption>
+      <ItemColor>-16777216</ItemColor>
+    </SheetFieldDef>
+    <SheetFieldDef>
+      <IsNew>false</IsNew>
+      <SheetFieldDefNum>3904</SheetFieldDefNum>
+      <SheetDefNum>82</SheetDefNum>
+      <FieldType>Line</FieldType>
+      <FieldName />
+      <FieldValue />
+      <FontSize>0</FontSize>
+      <FontName />
+      <FontIsBold>false</FontIsBold>
+      <XPos>573</XPos>
+      <YPos>301</YPos>
+      <Width>193</Width>
+      <Height>0</Height>
+      <GrowthBehavior>None</GrowthBehavior>
+      <RadioButtonValue />
+      <RadioButtonGroup />
+      <IsRequired>false</IsRequired>
+      <ImageData />
+      <TabOrder>0</TabOrder>
+      <ReportableName />
+      <TextAlign>Left</TextAlign>
+      <IsPaymentOption>true</IsPaymentOption>
+      <ItemColor>-16777216</ItemColor>
+    </SheetFieldDef>
+    <SheetFieldDef>
+      <IsNew>false</IsNew>
+      <SheetFieldDefNum>3902</SheetFieldDefNum>
+      <SheetDefNum>82</SheetDefNum>
+      <FieldType>OutputText</FieldType>
+      <FieldName>statement.Note</FieldName>
+      <FieldValue />
+      <FontSize>9</FontSize>
+      <FontName>Arial</FontName>
+      <FontIsBold>false</FontIsBold>
+      <XPos>50</XPos>
+      <YPos>628</YPos>
+      <Width>725</Width>
+      <Height>14</Height>
+      <GrowthBehavior>DownGlobal</GrowthBehavior>
+      <RadioButtonValue />
+      <RadioButtonGroup />
+      <IsRequired>false</IsRequired>
+      <ImageData />
+      <TabOrder>0</TabOrder>
+      <ReportableName />
+      <TextAlign>Left</TextAlign>
+      <IsPaymentOption>false</IsPaymentOption>
+      <ItemColor>-16777216</ItemColor>
+    </SheetFieldDef>
+    <SheetFieldDef>
+      <IsNew>false</IsNew>
+      <SheetFieldDefNum>3899</SheetFieldDefNum>
+      <SheetDefNum>82</SheetDefNum>
+      <FieldType>Grid</FieldType>
+      <FieldName>StatementMain</FieldName>
+      <FieldValue />
+      <FontSize>8.5</FontSize>
+      <FontName />
+      <FontIsBold>false</FontIsBold>
+      <XPos>65</XPos>
+      <YPos>576</YPos>
+      <Width>720</Width>
+      <Height>31</Height>
+      <GrowthBehavior>DownGlobal</GrowthBehavior>
+      <RadioButtonValue />
+      <RadioButtonGroup />
+      <IsRequired>false</IsRequired>
+      <ImageData />
+      <TabOrder>0</TabOrder>
+      <ReportableName />
+      <TextAlign>Left</TextAlign>
+      <IsPaymentOption>false</IsPaymentOption>
+      <ItemColor>-16777216</ItemColor>
+    </SheetFieldDef>
+    <SheetFieldDef>
+      <IsNew>false</IsNew>
+      <SheetFieldDefNum>3900</SheetFieldDefNum>
+      <SheetDefNum>82</SheetDefNum>
+      <FieldType>OutputText</FieldType>
+      <FieldName>futureAppointments</FieldName>
+      <FieldValue />
+      <FontSize>9</FontSize>
+      <FontName>Arial</FontName>
+      <FontIsBold>false</FontIsBold>
+      <XPos>50</XPos>
+      <YPos>613</YPos>
+      <Width>725</Width>
+      <Height>14</Height>
+      <GrowthBehavior>DownGlobal</GrowthBehavior>
+      <RadioButtonValue />
+      <RadioButtonGroup />
+      <IsRequired>false</IsRequired>
+      <ImageData />
+      <TabOrder>0</TabOrder>
+      <ReportableName />
+      <TextAlign>Left</TextAlign>
+      <IsPaymentOption>false</IsPaymentOption>
+      <ItemColor>-16777216</ItemColor>
+    </SheetFieldDef>
+    <SheetFieldDef>
+      <IsNew>false</IsNew>
+      <SheetFieldDefNum>3901</SheetFieldDefNum>
+      <SheetDefNum>82</SheetDefNum>
+      <FieldType>OutputText</FieldType>
+      <FieldName>insEstValue</FieldName>
+      <FieldValue />
+      <FontSize>9</FontSize>
+      <FontName>Arial</FontName>
+      <FontIsBold>false</FontIsBold>
+      <XPos>705</XPos>
+      <YPos>400</YPos>
+      <Width>80</Width>
+      <Height>14</Height>
+      <GrowthBehavior>None</GrowthBehavior>
+      <RadioButtonValue />
+      <RadioButtonGroup />
+      <IsRequired>false</IsRequired>
+      <ImageData />
+      <TabOrder>0</TabOrder>
+      <ReportableName />
+      <TextAlign>Right</TextAlign>
+      <IsPaymentOption>false</IsPaymentOption>
+      <ItemColor>-16777216</ItemColor>
+    </SheetFieldDef>
+    <SheetFieldDef>
+      <IsNew>false</IsNew>
+      <SheetFieldDefNum>3898</SheetFieldDefNum>
+      <SheetDefNum>82</SheetDefNum>
+      <FieldType>Grid</FieldType>
+      <FieldName>StatementPayPlan</FieldName>
+      <FieldValue />
+      <FontSize>8.5</FontSize>
+      <FontName />
+      <FontIsBold>false</FontIsBold>
+      <XPos>170</XPos>
+      <YPos>506</YPos>
+      <Width>510</Width>
+      <Height>49</Height>
+      <GrowthBehavior>DownGlobal</GrowthBehavior>
+      <RadioButtonValue />
+      <RadioButtonGroup />
+      <IsRequired>false</IsRequired>
+      <ImageData />
+      <TabOrder>0</TabOrder>
+      <ReportableName />
+      <TextAlign>Left</TextAlign>
+      <IsPaymentOption>false</IsPaymentOption>
+      <ItemColor>-16777216</ItemColor>
+    </SheetFieldDef>
+    <SheetFieldDef>
+      <IsNew>false</IsNew>
+      <SheetFieldDefNum>3896</SheetFieldDefNum>
+      <SheetDefNum>82</SheetDefNum>
+      <FieldType>OutputText</FieldType>
+      <FieldName>balanceValue</FieldName>
+      <FieldValue />
+      <FontSize>9</FontSize>
+      <FontName>Arial</FontName>
+      <FontIsBold>true</FontIsBold>
+      <XPos>705</XPos>
+      <YPos>415</YPos>
+      <Width>80</Width>
+      <Height>14</Height>
+      <GrowthBehavior>None</GrowthBehavior>
+      <RadioButtonValue />
+      <RadioButtonGroup />
+      <IsRequired>false</IsRequired>
+      <ImageData />
+      <TabOrder>0</TabOrder>
+      <ReportableName />
+      <TextAlign>Right</TextAlign>
+      <IsPaymentOption>false</IsPaymentOption>
+      <ItemColor>-16777216</ItemColor>
+    </SheetFieldDef>
+    <SheetFieldDef>
+      <IsNew>false</IsNew>
+      <SheetFieldDefNum>3897</SheetFieldDefNum>
+      <SheetDefNum>82</SheetDefNum>
+      <FieldType>OutputText</FieldType>
+      <FieldName>statement.NoteBold</FieldName>
+      <FieldValue />
+      <FontSize>10</FontSize>
+      <FontName>Arial</FontName>
+      <FontIsBold>true</FontIsBold>
+      <XPos>50</XPos>
+      <YPos>490</YPos>
+      <Width>725</Width>
+      <Height>14</Height>
+      <GrowthBehavior>DownGlobal</GrowthBehavior>
+      <RadioButtonValue />
+      <RadioButtonGroup />
+      <IsRequired>false</IsRequired>
+      <ImageData />
+      <TabOrder>0</TabOrder>
+      <ReportableName />
+      <TextAlign>Left</TextAlign>
+      <IsPaymentOption>false</IsPaymentOption>
+      <ItemColor>-16777216</ItemColor>
+    </SheetFieldDef>
+    <SheetFieldDef>
+      <IsNew>false</IsNew>
+      <SheetFieldDefNum>3894</SheetFieldDefNum>
+      <SheetDefNum>82</SheetDefNum>
+      <FieldType>OutputText</FieldType>
+      <FieldName>insEstLabel</FieldName>
+      <FieldValue />
+      <FontSize>9</FontSize>
+      <FontName>Arial</FontName>
+      <FontIsBold>false</FontIsBold>
+      <XPos>554</XPos>
+      <YPos>400</YPos>
+      <Width>150</Width>
+      <Height>14</Height>
+      <GrowthBehavior>None</GrowthBehavior>
+      <RadioButtonValue />
+      <RadioButtonGroup />
+      <IsRequired>false</IsRequired>
+      <ImageData />
+      <TabOrder>0</TabOrder>
+      <ReportableName />
+      <TextAlign>Right</TextAlign>
+      <IsPaymentOption>false</IsPaymentOption>
+      <ItemColor>-16777216</ItemColor>
+    </SheetFieldDef>
+    <SheetFieldDef>
+      <IsNew>false</IsNew>
+      <SheetFieldDefNum>3895</SheetFieldDefNum>
+      <SheetDefNum>82</SheetDefNum>
+      <FieldType>OutputText</FieldType>
+      <FieldName>balanceLabel</FieldName>
+      <FieldValue />
+      <FontSize>9</FontSize>
+      <FontName>Arial</FontName>
+      <FontIsBold>true</FontIsBold>
+      <XPos>554</XPos>
+      <YPos>415</YPos>
+      <Width>150</Width>
+      <Height>14</Height>
+      <GrowthBehavior>None</GrowthBehavior>
+      <RadioButtonValue />
+      <RadioButtonGroup />
+      <IsRequired>false</IsRequired>
+      <ImageData />
+      <TabOrder>0</TabOrder>
+      <ReportableName />
+      <TextAlign>Right</TextAlign>
+      <IsPaymentOption>false</IsPaymentOption>
+      <ItemColor>-16777216</ItemColor>
+    </SheetFieldDef>
+    <SheetFieldDef>
+      <IsNew>false</IsNew>
+      <SheetFieldDefNum>3892</SheetFieldDefNum>
+      <SheetDefNum>82</SheetDefNum>
+      <FieldType>Grid</FieldType>
+      <FieldName>StatementAging</FieldName>
+      <FieldValue />
+      <FontSize>8.5</FontSize>
+      <FontName />
+      <FontIsBold>false</FontIsBold>
+      <XPos>60</XPos>
+      <YPos>444</YPos>
+      <Width>650</Width>
+      <Height>31</Height>
+      <GrowthBehavior>DownGlobal</GrowthBehavior>
+      <RadioButtonValue />
+      <RadioButtonGroup />
+      <IsRequired>false</IsRequired>
+      <ImageData />
+      <TabOrder>0</TabOrder>
+      <ReportableName />
+      <TextAlign>Left</TextAlign>
+      <IsPaymentOption>false</IsPaymentOption>
+      <ItemColor>-16777216</ItemColor>
+    </SheetFieldDef>
+    <SheetFieldDef>
+      <IsNew>false</IsNew>
+      <SheetFieldDefNum>3893</SheetFieldDefNum>
+      <SheetDefNum>82</SheetDefNum>
+      <FieldType>StaticText</FieldType>
+      <FieldName />
+      <FieldValue>SIGNATURE</FieldValue>
+      <FontSize>8</FontSize>
+      <FontName>Arial</FontName>
+      <FontIsBold>false</FontIsBold>
+      <XPos>445</XPos>
+      <YPos>335</YPos>
+      <Width>80</Width>
+      <Height>14</Height>
+      <GrowthBehavior>None</GrowthBehavior>
+      <RadioButtonValue />
+      <RadioButtonGroup />
+      <IsRequired>false</IsRequired>
+      <ImageData />
+      <TabOrder>0</TabOrder>
+      <ReportableName />
+      <TextAlign>Left</TextAlign>
+      <IsPaymentOption>true</IsPaymentOption>
+      <ItemColor>-16777216</ItemColor>
+    </SheetFieldDef>
+    <SheetFieldDef>
+      <IsNew>false</IsNew>
+      <SheetFieldDefNum>3890</SheetFieldDefNum>
+      <SheetDefNum>82</SheetDefNum>
+      <FieldType>OutputText</FieldType>
+      <FieldName>totalLabel</FieldName>
+      <FieldValue />
+      <FontSize>9</FontSize>
+      <FontName>Arial</FontName>
+      <FontIsBold>false</FontIsBold>
+      <XPos>554</XPos>
+      <YPos>385</YPos>
+      <Width>150</Width>
+      <Height>14</Height>
+      <GrowthBehavior>None</GrowthBehavior>
+      <RadioButtonValue />
+      <RadioButtonGroup />
+      <IsRequired>false</IsRequired>
+      <ImageData />
+      <TabOrder>0</TabOrder>
+      <ReportableName />
+      <TextAlign>Right</TextAlign>
+      <IsPaymentOption>false</IsPaymentOption>
+      <ItemColor>-16777216</ItemColor>
+    </SheetFieldDef>
+    <SheetFieldDef>
+      <IsNew>false</IsNew>
+      <SheetFieldDefNum>3891</SheetFieldDefNum>
+      <SheetDefNum>82</SheetDefNum>
+      <FieldType>OutputText</FieldType>
+      <FieldName>totalValue</FieldName>
+      <FieldValue />
+      <FontSize>9</FontSize>
+      <FontName>Arial</FontName>
+      <FontIsBold>false</FontIsBold>
+      <XPos>705</XPos>
+      <YPos>385</YPos>
+      <Width>80</Width>
+      <Height>14</Height>
+      <GrowthBehavior>None</GrowthBehavior>
+      <RadioButtonValue />
+      <RadioButtonGroup />
+      <IsRequired>false</IsRequired>
+      <ImageData />
+      <TabOrder>0</TabOrder>
+      <ReportableName />
+      <TextAlign>Right</TextAlign>
+      <IsPaymentOption>false</IsPaymentOption>
+      <ItemColor>-16777216</ItemColor>
+    </SheetFieldDef>
+    <SheetFieldDef>
+      <IsNew>false</IsNew>
+      <SheetFieldDefNum>3889</SheetFieldDefNum>
+      <SheetDefNum>82</SheetDefNum>
+      <FieldType>StaticText</FieldType>
+      <FieldName />
+      <FieldValue>PLEASE DETACH AND RETURN THE UPPER PORTION WITH YOUR PAYMENT</FieldValue>
+      <FontSize>6</FontSize>
+      <FontName>Arial</FontName>
+      <FontIsBold>false</FontIsBold>
+      <XPos>225</XPos>
+      <YPos>360</YPos>
+      <Width>400</Width>
+      <Height>10</Height>
+      <GrowthBehavior>None</GrowthBehavior>
+      <RadioButtonValue />
+      <RadioButtonGroup />
+      <IsRequired>false</IsRequired>
+      <ImageData />
+      <TabOrder>0</TabOrder>
+      <ReportableName />
+      <TextAlign>Left</TextAlign>
+      <IsPaymentOption>true</IsPaymentOption>
+      <ItemColor>-16777216</ItemColor>
+    </SheetFieldDef>
+    <SheetFieldDef>
+      <IsNew>false</IsNew>
+      <SheetFieldDefNum>3886</SheetFieldDefNum>
+      <SheetDefNum>82</SheetDefNum>
+      <FieldType>OutputText</FieldType>
+      <FieldName>statementReceiptInvoice</FieldName>
+      <FieldValue />
+      <FontSize>15</FontSize>
+      <FontName>Arial</FontName>
+      <FontIsBold>true</FontIsBold>
+      <XPos>310</XPos>
+      <YPos>60</YPos>
+      <Width>230</Width>
+      <Height>22</Height>
+      <GrowthBehavior>None</GrowthBehavior>
+      <RadioButtonValue />
+      <RadioButtonGroup />
+      <IsRequired>false</IsRequired>
+      <ImageData />
+      <TabOrder>0</TabOrder>
+      <ReportableName />
+      <TextAlign>Center</TextAlign>
+      <IsPaymentOption>false</IsPaymentOption>
+      <ItemColor>-16777216</ItemColor>
+    </SheetFieldDef>
+    <SheetFieldDef>
+      <IsNew>false</IsNew>
+      <SheetFieldDefNum>3887</SheetFieldDefNum>
+      <SheetDefNum>82</SheetDefNum>
+      <FieldType>Line</FieldType>
+      <FieldName />
+      <FieldValue />
+      <FontSize>0</FontSize>
+      <FontName />
+      <FontIsBold>false</FontIsBold>
+      <XPos>521</XPos>
+      <YPos>351</YPos>
+      <Width>245</Width>
+      <Height>0</Height>
+      <GrowthBehavior>None</GrowthBehavior>
+      <RadioButtonValue />
+      <RadioButtonGroup />
+      <IsRequired>false</IsRequired>
+      <ImageData />
+      <TabOrder>0</TabOrder>
+      <ReportableName />
+      <TextAlign>Left</TextAlign>
+      <IsPaymentOption>true</IsPaymentOption>
+      <ItemColor>-16777216</ItemColor>
+    </SheetFieldDef>
+    <SheetFieldDef>
+      <IsNew>false</IsNew>
+      <SheetFieldDefNum>3888</SheetFieldDefNum>
+      <SheetDefNum>82</SheetDefNum>
+      <FieldType>Line</FieldType>
+      <FieldName />
+      <FieldValue />
+      <FontSize>0</FontSize>
+      <FontName />
+      <FontIsBold>false</FontIsBold>
+      <XPos>0</XPos>
+      <YPos>359</YPos>
+      <Width>850</Width>
+      <Height>0</Height>
+      <GrowthBehavior>None</GrowthBehavior>
+      <RadioButtonValue />
+      <RadioButtonGroup />
+      <IsRequired>false</IsRequired>
+      <ImageData />
+      <TabOrder>0</TabOrder>
+      <ReportableName />
+      <TextAlign>Left</TextAlign>
+      <IsPaymentOption>true</IsPaymentOption>
+      <ItemColor>-16777216</ItemColor>
+    </SheetFieldDef>
+  </SheetFieldDefs>
+</SheetDef>

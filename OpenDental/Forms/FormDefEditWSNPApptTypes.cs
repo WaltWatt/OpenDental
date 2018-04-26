@@ -1,0 +1,107 @@
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Drawing;
+using System.Text;
+using System.Windows.Forms;
+using OpenDentBusiness;
+using System.Linq;
+
+namespace OpenDental {
+	public partial class FormDefEditWSNPApptTypes:ODForm {
+		private Def _defCur;
+		private AppointmentType _apptTypeCur;
+		private bool _isDeleted;
+
+		public bool IsDeleted {
+			get {
+				return _isDeleted;
+			}
+		}
+
+		public FormDefEditWSNPApptTypes(Def defCur) {
+			InitializeComponent();
+			Lan.F(this);
+			_defCur=defCur;
+			if(_defCur!=null) {
+				checkHidden.Checked=_defCur.IsHidden;
+				textName.Text=_defCur.ItemName;
+				//Look for an associated appointment type.
+				List<DefLink> listDefLinks=DefLinks.GetDefLinksByType(DefLinkType.AppointmentType);
+				DefLink defLink=listDefLinks.FirstOrDefault(x => x.DefNum==_defCur.DefNum);
+				if(defLink!=null) {
+					_apptTypeCur=AppointmentTypes.GetFirstOrDefault(x => x.AppointmentTypeNum==defLink.FKey);
+				}
+				FillTextValue();
+			}
+		}
+
+		private void FillTextValue() {
+			textValue.Clear();
+			if(_apptTypeCur!=null) {
+				textValue.Text=_apptTypeCur.AppointmentTypeName;
+			}
+		}
+
+		private void butSelect_Click(object sender,EventArgs e) {
+			FormApptTypes FormAT=new FormApptTypes();
+			FormAT.SelectionMode=true;
+			//TODO: enhance FormApptTypes to pre-select the current appointment type that is associated to this def.
+			if(FormAT.ShowDialog()!=DialogResult.OK) {
+				return;
+			}
+			_apptTypeCur=FormAT.SelectedAptType;
+			FillTextValue();
+		}
+
+		private void butClearValue_Click(object sender,EventArgs e) {
+			_apptTypeCur=null;
+			textValue.Clear();
+		}
+
+		private void butColor_Click(object sender,EventArgs e) {
+			colorDialog1.Color=butColor.BackColor;
+			colorDialog1.ShowDialog();
+			butColor.BackColor=colorDialog1.Color;
+		}
+
+		private void butOK_Click(object sender,EventArgs e) {
+			if(string.IsNullOrEmpty(textName.Text.Trim())) {
+				MsgBox.Show(this,"Name required.");
+				return;
+			}
+			_defCur.ItemName=PIn.String(textName.Text);
+			//Set the ItemValue for display purposes only.  This can change in the future if it is needed for something more meaningful.
+			_defCur.ItemValue=(_apptTypeCur==null ? "" : _apptTypeCur.AppointmentTypeName);
+			if(_defCur.IsNew) {
+				Defs.Insert(_defCur);
+			}
+			else {
+				Defs.Update(_defCur);
+			}
+			if(_apptTypeCur==null) {
+				DefLinks.DeleteAllForDef(_defCur.DefNum,DefLinkType.AppointmentType);
+			}
+			else {
+				DefLinks.SetFKeyForDef(_defCur.DefNum,_apptTypeCur.AppointmentTypeNum,DefLinkType.AppointmentType);
+			}
+			DialogResult=DialogResult.OK;
+		}
+
+		private void butCancel_Click(object sender,EventArgs e) {
+			DialogResult=DialogResult.Cancel;
+		}
+
+		private void butDelete_Click(object sender,EventArgs e) {
+			try {
+				Defs.Delete(_defCur);
+				DefLinks.DeleteAllForDef(_defCur.DefNum,DefLinkType.AppointmentType);
+				_isDeleted=true;
+				DialogResult=DialogResult.OK;
+			}
+			catch(ApplicationException ex) {
+				MessageBox.Show(ex.Message);
+			}
+		}
+	}
+}
