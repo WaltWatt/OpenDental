@@ -41,6 +41,7 @@ namespace OpenDentBusiness{
 
 	///<summary>These FKey Types are to be used as an identifier for what table the Fkey column is associated to</summary>
 	public enum EntryLogFKeyType {
+		///<summary>0</summary>
 		Appointment,
 	}
 }
