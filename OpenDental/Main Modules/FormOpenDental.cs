@@ -2624,20 +2624,20 @@ namespace OpenDental{
 				return;
 			}
 			ChooseDatabaseModel chooseDatabaseModel=new ChooseDatabaseModel();
-			//Even if we are passed a URI as a command line argument we still need to check the FreeDentalConfig file. 
-			//The only time we do not need to do that is if a direct DB has been passed in.
-			if(databaseName=="")//direct db was not specified
-			{
-				//Try and load up a choose database model from our FreeDentalConfig file.
-				try {
-					chooseDatabaseModel=ChooseDatabaseModel.GetChooseDatabaseModelFromConfig(webServiceUri,webServiceIsEcw,odUser,serverName,databaseName
-						,mySqlUser,mySqlPassword,mySqlPassHash,noShow);
+			try {
+				chooseDatabaseModel=ChooseDatabaseModel.GetChooseDatabaseModelFromConfig(webServiceUri,webServiceIsEcw,odUser,serverName,databaseName
+					,mySqlUser,mySqlPassword,mySqlPassHash,noShow);
+			}
+			catch(ODException ode) {
+				if(isSilentUpdate) {
+					//Technically the only way GetChooseDatabaseModelFromConfig() can throw an exception when silent updating is if DatabaseName wasn't set.
+					ExitCode=104;//Required command line arguments have not been set for silent updating
 				}
-				catch(ODException ode) {
+				else {
 					MessageBox.Show(ode.Message);
-					S_ProcessKillCommand();
-					return;
 				}
+				Environment.Exit(ExitCode);
+				return;
 			}
 			FormChooseDatabase FormCD=new FormChooseDatabase();
 			ChooseDatabaseController chooseDatabaseController=new ChooseDatabaseController(FormCD);

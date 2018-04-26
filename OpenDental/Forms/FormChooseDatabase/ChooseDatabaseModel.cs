@@ -46,7 +46,8 @@ namespace OpenDental {
 			,string serverName="",string databaseName="",string mySqlUser="",string mySqlPassword="",string mySqlPassHash="",YN noShow=YN.Unknown) 
 		{
 			ChooseDatabaseModel chooseDatabaseModel=new ChooseDatabaseModel();
-			//If a direct DB is not specified, we need to check the FreeDentalConfig file for middle tier automatic log in.
+			//Even if we are passed a URI as a command line argument we still need to check the FreeDentalConfig file for middle tier automatic log in.
+			//The only time we do not need to do that is if a direct DB has been passed in.
 			if(string.IsNullOrEmpty(databaseName)) {
 				#region Config File
 				//command-line support for the upper portion of this window will be added later.
