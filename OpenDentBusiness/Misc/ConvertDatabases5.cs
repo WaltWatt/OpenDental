@@ -8019,7 +8019,6 @@ No Action Required in many cases, check your new patient Web Sched on your web s
 			}
 			//Insert PaySimple bridge-----------------------------------------------------------------
 			if(DataConnection.DBtype==DatabaseType.MySql) {
-				command="INSERT INTO preference (PrefName,ValueString) VALUES('WebSchedNewPatDoAuthText','0')";//off by default
 				command="INSERT INTO program (ProgName,ProgDesc,Enabled,Path,CommandLine,Note"
 					+") VALUES("
 					+"'PaySimple', "
