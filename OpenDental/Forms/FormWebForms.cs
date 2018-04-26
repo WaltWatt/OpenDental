@@ -65,7 +65,7 @@ namespace OpenDental {
 			col=new ODGridColumn(Lan.g(this,"Deleted"),0,HorizontalAlignment.Center);
 			gridMain.Columns.Add(col);
 			gridMain.Rows.Clear();
-			DataTable table=Sheets.GetWebFormSheetsTable(dateFrom,dateTo);
+			DataTable table=Sheets.GetWebFormSheetsTable(dateFrom,dateTo,Clinics.ClinicNum);
 			for(int i=0;i<table.Rows.Count;i++) {
 				long patNum=PIn.Long(table.Rows[i]["PatNum"].ToString());
 				long sheetNum=PIn.Long(table.Rows[i]["SheetNum"].ToString());
@@ -102,7 +102,9 @@ namespace OpenDental {
 				List<long> listSkippedSheets=new List<long>();
 				int iterations=0;
 				do {//Because WebSheets are only downloaded 20 at a time, we need to get the sheets within a loop to download them all.
-					listSheets=wh.GetSheets(RegistrationKey).ToList();//Only gets the first 20 sheets.
+					listSheets=wh.GetSheets(RegistrationKey) //Only gets the first 20 sheets.
+						//if we are not in HQ, filter out non-HQ sheets that don't match our current clinic
+						.Where(x => x.web_sheet.ClinicNum==0 || Clinics.ClinicNum==0 || x.web_sheet.ClinicNum==Clinics.ClinicNum).ToList();
 					iterations++;
 					List<long> SheetsForDeletion=new List<long>();
 					listSheets.RemoveAll(x => listSkippedSheets.Contains(x.web_sheet.SheetID));//Remove all sheets that the user has already skipped.

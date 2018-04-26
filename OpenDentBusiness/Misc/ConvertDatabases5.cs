@@ -8128,6 +8128,23 @@ No Action Required in many cases, check your new patient Web Sched on your web s
 				command="UPDATE databasemaintenance SET IsOld = 1 WHERE MethodName = 'ProcedurelogTpAttachedToClaim'";//true by default
 			}
 			Db.NonQ(command);
+			//Add clinic num to sheets
+			if(DataConnection.DBtype==DatabaseType.MySql) {
+					command="ALTER TABLE sheet ADD ClinicNum bigint NOT NULL";
+					Db.NonQ(command);
+					command="ALTER TABLE sheet ADD INDEX (ClinicNum)";
+					Db.NonQ(command);
+				}
+				else {//oracle
+					command="ALTER TABLE sheet ADD ClinicNum number(20)";
+					Db.NonQ(command);
+					command="UPDATE sheet SET ClinicNum = 0 WHERE ClinicNum IS NULL";
+					Db.NonQ(command);
+					command="ALTER TABLE sheet MODIFY ClinicNum NOT NULL";
+					Db.NonQ(command);
+					command=@"CREATE INDEX sheet_ClinicNum ON sheet (ClinicNum)";
+					Db.NonQ(command);
+				}
 		}//End of 18_1_1() method
 	}
 }

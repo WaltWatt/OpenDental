@@ -476,6 +476,7 @@ namespace OpenDental{
 			newSheet.IsLandscape=sAnds.web_sheet.IsLandscape==1 ? true : false;
 			newSheet.InternalNote="";
 			newSheet.IsWebForm=true;
+			newSheet.ClinicNum=sAnds.web_sheet.ClinicNum;
 			//loop through each variable in a single sheetfield
 			for(int i=0;i<sAnds.web_sheetfieldlist.Count();i++) {
 				SheetField sheetfield=new SheetField();

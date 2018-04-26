@@ -63,6 +63,7 @@ namespace OpenDentBusiness.Crud{
 				sheet.IsDeleted     = PIn.Bool  (row["IsDeleted"].ToString());
 				sheet.SheetDefNum   = PIn.Long  (row["SheetDefNum"].ToString());
 				sheet.DocNum        = PIn.Long  (row["DocNum"].ToString());
+				sheet.ClinicNum     = PIn.Long  (row["ClinicNum"].ToString());
 				retVal.Add(sheet);
 			}
 			return retVal;
@@ -91,6 +92,7 @@ namespace OpenDentBusiness.Crud{
 			table.Columns.Add("IsDeleted");
 			table.Columns.Add("SheetDefNum");
 			table.Columns.Add("DocNum");
+			table.Columns.Add("ClinicNum");
 			foreach(Sheet sheet in listSheets) {
 				table.Rows.Add(new object[] {
 					POut.Long  (sheet.SheetNum),
@@ -110,6 +112,7 @@ namespace OpenDentBusiness.Crud{
 					POut.Bool  (sheet.IsDeleted),
 					POut.Long  (sheet.SheetDefNum),
 					POut.Long  (sheet.DocNum),
+					POut.Long  (sheet.ClinicNum),
 				});
 			}
 			return table;
@@ -150,7 +153,7 @@ namespace OpenDentBusiness.Crud{
 			if(useExistingPK || PrefC.RandomKeys) {
 				command+="SheetNum,";
 			}
-			command+="SheetType,PatNum,DateTimeSheet,FontSize,FontName,Width,Height,IsLandscape,InternalNote,Description,ShowInTerminal,IsWebForm,IsMultiPage,IsDeleted,SheetDefNum,DocNum) VALUES(";
+			command+="SheetType,PatNum,DateTimeSheet,FontSize,FontName,Width,Height,IsLandscape,InternalNote,Description,ShowInTerminal,IsWebForm,IsMultiPage,IsDeleted,SheetDefNum,DocNum,ClinicNum) VALUES(";
 			if(useExistingPK || PrefC.RandomKeys) {
 				command+=POut.Long(sheet.SheetNum)+",";
 			}
@@ -170,7 +173,8 @@ namespace OpenDentBusiness.Crud{
 				+    POut.Bool  (sheet.IsMultiPage)+","
 				+    POut.Bool  (sheet.IsDeleted)+","
 				+    POut.Long  (sheet.SheetDefNum)+","
-				+    POut.Long  (sheet.DocNum)+")";
+				+    POut.Long  (sheet.DocNum)+","
+				+    POut.Long  (sheet.ClinicNum)+")";
 			if(sheet.InternalNote==null) {
 				sheet.InternalNote="";
 			}
@@ -207,7 +211,7 @@ namespace OpenDentBusiness.Crud{
 			if(isRandomKeys || useExistingPK) {
 				command+="SheetNum,";
 			}
-			command+="SheetType,PatNum,DateTimeSheet,FontSize,FontName,Width,Height,IsLandscape,InternalNote,Description,ShowInTerminal,IsWebForm,IsMultiPage,IsDeleted,SheetDefNum,DocNum) VALUES(";
+			command+="SheetType,PatNum,DateTimeSheet,FontSize,FontName,Width,Height,IsLandscape,InternalNote,Description,ShowInTerminal,IsWebForm,IsMultiPage,IsDeleted,SheetDefNum,DocNum,ClinicNum) VALUES(";
 			if(isRandomKeys || useExistingPK) {
 				command+=POut.Long(sheet.SheetNum)+",";
 			}
@@ -227,7 +231,8 @@ namespace OpenDentBusiness.Crud{
 				+    POut.Bool  (sheet.IsMultiPage)+","
 				+    POut.Bool  (sheet.IsDeleted)+","
 				+    POut.Long  (sheet.SheetDefNum)+","
-				+    POut.Long  (sheet.DocNum)+")";
+				+    POut.Long  (sheet.DocNum)+","
+				+    POut.Long  (sheet.ClinicNum)+")";
 			if(sheet.InternalNote==null) {
 				sheet.InternalNote="";
 			}
@@ -259,7 +264,8 @@ namespace OpenDentBusiness.Crud{
 				+"IsMultiPage   =  "+POut.Bool  (sheet.IsMultiPage)+", "
 				+"IsDeleted     =  "+POut.Bool  (sheet.IsDeleted)+", "
 				+"SheetDefNum   =  "+POut.Long  (sheet.SheetDefNum)+", "
-				+"DocNum        =  "+POut.Long  (sheet.DocNum)+" "
+				+"DocNum        =  "+POut.Long  (sheet.DocNum)+", "
+				+"ClinicNum     =  "+POut.Long  (sheet.ClinicNum)+" "
 				+"WHERE SheetNum = "+POut.Long(sheet.SheetNum);
 			if(sheet.InternalNote==null) {
 				sheet.InternalNote="";
@@ -335,6 +341,10 @@ namespace OpenDentBusiness.Crud{
 				if(command!=""){ command+=",";}
 				command+="DocNum = "+POut.Long(sheet.DocNum)+"";
 			}
+			if(sheet.ClinicNum != oldSheet.ClinicNum) {
+				if(command!=""){ command+=",";}
+				command+="ClinicNum = "+POut.Long(sheet.ClinicNum)+"";
+			}
 			if(command==""){
 				return false;
 			}
@@ -397,6 +407,9 @@ namespace OpenDentBusiness.Crud{
 				return true;
 			}
 			if(sheet.DocNum != oldSheet.DocNum) {
+				return true;
+			}
+			if(sheet.ClinicNum != oldSheet.ClinicNum) {
 				return true;
 			}
 			return false;

@@ -49,6 +49,10 @@ namespace OpenDental {
 			gridMain.Columns.Add(col);
 			col=new ODGridColumn(Lan.g(this,"Birthdate"),110);
 			gridMain.Columns.Add(col);
+			if(PrefC.HasClinicsEnabled) {
+				col=new ODGridColumn(Lan.g(this,"Clinic Name"),110);
+				gridMain.Columns.Add(col);
+			}
 			listPats=Patients.GetSimilarList(LnameEntered,FnameEntered,BdateEntered);
 			gridMain.Rows.Clear();
 			ODGridRow row;
@@ -57,6 +61,10 @@ namespace OpenDental {
 				row.Cells.Add(listPats[i].LName);
 				row.Cells.Add(listPats[i].FName);
 				row.Cells.Add(listPats[i].Birthdate.ToShortDateString());
+				if(PrefC.HasClinicsEnabled) {
+					string clinicName=Clinics.GetDesc(listPats[i].ClinicNum);
+					row.Cells.Add(!string.IsNullOrWhiteSpace(clinicName) ? clinicName : "N/A");
+				}
 				gridMain.Rows.Add(row);
 			}
 			gridMain.EndUpdate();

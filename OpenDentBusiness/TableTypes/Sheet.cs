@@ -68,6 +68,8 @@ namespace OpenDentBusiness{
 		public long SheetDefNum;
 		/// <summary>FK to document.DocNum.  Referrel letters are stored as PDF in the A to Z folder.</summary>
 		public long DocNum;
+		/// <summary>FK to clinic.ClinicNum. Used by webforms to limit the sheets displayed based on the currently selected clinic.</summary>
+		public long ClinicNum;
 		
 		public Sheet Copy(){
 			Sheet retVal=(Sheet)this.MemberwiseClone();

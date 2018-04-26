@@ -454,7 +454,7 @@ namespace OpenDentBusiness{
 		}
 
 		///<summary>Used to get sheets filled via the web.</summary>
-		public static DataTable GetWebFormSheetsTable(DateTime dateFrom,DateTime dateTo) {
+		public static DataTable GetWebFormSheetsTable(DateTime dateFrom,DateTime dateTo,long clinicNum=0) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
 				return Meth.GetTable(MethodBase.GetCurrentMethod(),dateFrom,dateTo);
 			}
@@ -470,12 +470,16 @@ namespace OpenDentBusiness{
 			table.Columns.Add("PatNum");
 			table.Columns.Add("SheetNum");
 			table.Columns.Add("IsDeleted");
+			table.Columns.Add("ClinicNum");
 			List<DataRow> rows=new List<DataRow>();
-			string command="SELECT DateTimeSheet,Description,PatNum,SheetNum,IsDeleted "
+			string command="SELECT DateTimeSheet,Description,PatNum,SheetNum,IsDeleted,ClinicNum "
 				+"FROM sheet WHERE " 
 				+"DateTimeSheet >= "+POut.Date(dateFrom)+" AND DateTimeSheet <= "+POut.Date(dateTo.AddDays(1))+ " "
 				+"AND IsWebForm = "+POut.Bool(true)+ " "
 				+"AND (SheetType="+POut.Long((int)SheetTypeEnum.PatientForm)+" OR SheetType="+POut.Long((int)SheetTypeEnum.MedicalHistory)+") ";
+			if(clinicNum!=0) { //Only filter if we are not in HQ clinic
+				command+="AND (ClinicNum=0 OR ClinicNum="+POut.Long(clinicNum)+") ";
+			}
 			DataTable rawSheet=Db.GetTable(command);
 			DateTime dateT;
 			for(int i=0;i<rawSheet.Rows.Count;i++) {
@@ -492,6 +496,7 @@ namespace OpenDentBusiness{
 				}
 				row["timeOnly"]=dateT.TimeOfDay;
 				row["IsDeleted"]=rawSheet.Rows[i]["IsDeleted"].ToString();
+				row["ClinicNum"]=PIn.Long(rawSheet.Rows[i]["ClinicNum"].ToString());
 				rows.Add(row);
 			}
 			for(int i=0;i<rows.Count;i++) {
