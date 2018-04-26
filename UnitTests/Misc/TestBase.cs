@@ -48,6 +48,9 @@ namespace UnitTests {
 				//2- if a test fails, we may want to look at the data in the db to see why it failed.
 				UnitTestsCore.DatabaseTools.ClearDb();
 			}
+#if !DEBUG
+			throw new Exception("You're running tests in release. BAD!!!");
+#endif
 			CreateUnitTestUser();
 			//Get the Admin user, should always exist
 			Security.CurUser=Userods.GetUserByName(UnitTestUserName,false);

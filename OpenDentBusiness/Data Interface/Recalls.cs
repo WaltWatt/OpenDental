@@ -40,11 +40,16 @@ namespace OpenDentBusiness {
 		private static ODThread _odThreadQueueData;
 		#endregion Recall Sync All Patient Variables
 
+		#region Test Variables
+		///<summary>Should only be used for testing. Set to true to run all the actions of Web Sched Recall synchronously.</summary>
+		public static bool RunWebSchedSynchronously;
+		#endregion
+
 		#region Get Methods
 		#endregion
 
 		#region Modification Methods
-		
+
 		#region Insert
 		#endregion
 
@@ -1719,7 +1724,7 @@ namespace OpenDentBusiness {
 		///<para>Returns the list of procedures that were scheduled and the appointment created.</para></summary>
 		///<param name="isASAP">If true, then the appointment created will have a priority of ASAP.</param>
 		public static Tuple<Appointment,List<Procedure>> CreateRecallApptForWebSched(long recallNum,DateTime dateStart,DateTime dateEnd
-			,List<TimeSlot> listAvailableTimeSlots,LogSources source,bool isASAP=false,bool sendVerification=false,Action onThreadDone=null) 
+			,List<TimeSlot> listAvailableTimeSlots,LogSources source,bool isASAP=false,bool sendVerification=false) 
 		{
 			//No need to check RemotingRole; no call to db.
 			foreach(TimeSlot timeSlot in listAvailableTimeSlots) {
@@ -1808,10 +1813,10 @@ namespace OpenDentBusiness {
 				});
 				thread.Name="FinishWebSchedRecallAppt";
 				thread.AddExceptionHandler(e => e.DoNothing());
-				if(onThreadDone!=null) {
-					thread.AddExitHandler(o => onThreadDone());
-				}
 				thread.Start(true);
+				if(RunWebSchedSynchronously) {
+					thread.Join(Timeout.Infinite);
+				}
 				return new Tuple<Appointment,List<Procedure>>(aptCur,listProcedures);
 			}
 			//It is very possible that from the time the patient loaded the Web Sched app and now that the available time slot has been removed or filled.

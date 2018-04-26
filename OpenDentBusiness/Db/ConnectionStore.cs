@@ -201,6 +201,18 @@ namespace OpenDentBusiness {
 		}
 
 		///<summary>Sets the connection of the current thread to the ConnectionName indicated. Connection details will be retrieved from ConnectionStore.xml.</summary>
+		public static OpenDentBusiness.CentralConnection SetDb(ConnectionNames dbName) {
+			CentralConnection conn=GetConnection(dbName);
+			if(!string.IsNullOrEmpty(conn.ServiceURI)) {
+				RemotingClient.ServerURI=conn.ServiceURI;
+			}
+			else {
+				new DataConnection().SetDb(conn.ServerName,conn.DatabaseName,conn.MySqlUser,conn.MySqlPassword,"","",DatabaseType.MySql);
+			}
+			return conn;
+		}
+
+		///<summary>Sets the connection of the current thread to the ConnectionName indicated. Connection details will be retrieved from ConnectionStore.xml.</summary>
 		public static OpenDentBusiness.CentralConnection SetDbT(ConnectionNames dbName) {
 			OpenDentBusiness.CentralConnection conn=GetConnection(dbName);
 			if(!string.IsNullOrEmpty(conn.ServiceURI)) {
