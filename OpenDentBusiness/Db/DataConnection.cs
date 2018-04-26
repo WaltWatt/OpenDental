@@ -359,12 +359,12 @@ namespace OpenDentBusiness {
 			//SetDb will be run immediately, so no need to do anything here.
 		}
 
-		///<summary></summary>
+		///<summary>Instantiates a new database connection utilizing the current static connection variables except for the database.
+		///The database that is passed in will always be used.  Use a different constructor if you don't intend on overriding the database.
+		///Used when making a backup and when updating multiple databases via the "Simultaneously update other databases" setting.
+		///A safer and better paradigm for switching database context would be to spawn a new thread and utilize SetDbT().</summary>
 		public DataConnection(string database) {
-			string connectStr=ConnectionString;//this doesn't really set it to the new db as intended. Deal with later.
-			if(connectStr.Length<1) {
-				connectStr=BuildSimpleConnectionString(ServerName,database,MysqlUser,MysqlPass);
-			}
+			string connectStr=BuildSimpleConnectionString(ServerName,database,MysqlUser,MysqlPass);
 			if(DBtype==DatabaseType.Oracle) {
 				conOr=new OracleConnection(connectStr);
 				//drOr=null;
