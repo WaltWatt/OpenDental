@@ -96,8 +96,7 @@ namespace OpenDentBusiness {
 			long collectionBillType=Defs.GetDefsForCategory(DefCat.BillingTypes,true).FirstOrDefault(x => x.ItemValue.ToLower()=="c")?.DefNum??0;
 			string command="SELECT guar.PatNum,guar.Guarantor,guar.Bal_0_30,guar.Bal_31_60,guar.Bal_61_90,guar.BalOver90,guar.BalTotal,guar.InsEst,"
 				+"guar.BalTotal-guar.InsEst AS $pat,guar.PayPlanDue,guar.LName,guar.FName,guar.Preferred,guar.MiddleI,guar.PriProv,guar.BillingType,"
-				+"guar.ClinicNum,guar.Address,guar.City,guar.State,guar.Zip,guar.HmPhone,guar.WirelessPhone,guar.Birthdate,"
-				+"COALESCE(guarPay.DateLastPay,'0001-01-01') DateLastPay "
+				+"guar.ClinicNum,guar.Address,guar.City,guar.State,guar.Zip,guar.Birthdate,COALESCE(guarPay.DateLastPay,'0001-01-01') DateLastPay "
 				+"FROM patient guar "
 				+"LEFT JOIN ("
 					+"SELECT p.Guarantor,MAX(ps.DatePay) DateLastPay "
@@ -168,8 +167,6 @@ namespace OpenDentBusiness {
 				patage.City=PIn.String(rowCur["City"].ToString());
 				patage.State=PIn.String(rowCur["State"].ToString());
 				patage.Zip=PIn.String(rowCur["Zip"].ToString());
-				patage.HmPhone=PIn.String(rowCur["HmPhone"].ToString());
-				patage.WirelessPhone=PIn.String(rowCur["WirelessPhone"].ToString());
 				patage.Birthdate=PIn.Date(rowCur["Birthdate"].ToString());
 				patage.DateLastPay=PIn.Date(rowCur["DateLastPay"].ToString());
 				patage.HasInsPending=listGuarNumsInsPending.Contains(patage.PatNum);
@@ -4233,10 +4230,6 @@ namespace OpenDentBusiness {
 		public string State;
 		///<summary>Only used for Transworld AR Manager.  Used to exclude bad addresses from the list.</summary>
 		public string Zip;
-		///<summary>Only used for Transworld AR Manager.</summary>
-		public string HmPhone;
-		///<summary>Only used for Transworld AR Manager.</summary>
-		public string WirelessPhone;
 		///<summary>Only used for Transworld AR Manager.</summary>
 		public DateTime Birthdate;
 		///<summary>Only used for Transworld AR Manager.</summary>

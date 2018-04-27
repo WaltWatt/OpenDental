@@ -549,8 +549,7 @@ namespace OpenDental {
 				row.Cells.Add(suspendLog!=null?suspendLog.TransDateTime.ToString():"");
 				if(patAgeCur.Birthdate.Year<1880//invalid bday
 					|| patAgeCur.Birthdate>DateTime.Today.AddYears(-18)//under 18 years old
-					|| new[] { patAgeCur.Address,patAgeCur.City,patAgeCur.State,patAgeCur.Zip }.Any(x => string.IsNullOrWhiteSpace(x))//missing address information
-					|| (string.IsNullOrWhiteSpace(patAgeCur.HmPhone) && string.IsNullOrWhiteSpace(patAgeCur.WirelessPhone)))//no home or wireless phone
+					|| new[] { patAgeCur.Address,patAgeCur.City,patAgeCur.State,patAgeCur.Zip }.Any(x => string.IsNullOrWhiteSpace(x)))//missing address information
 				{
 					//color row light red/pink, using cell color so selecting row still shows color
 					row.Cells.OfType<ODGridCell>().ToList().ForEach(x => x.CellColor=Color.FromArgb(255,255,230,234));
@@ -701,27 +700,11 @@ namespace OpenDental {
 				if(new[] { pAgeCur.Address,pAgeCur.City,pAgeCur.State,pAgeCur.Zip }.Any(x => string.IsNullOrWhiteSpace(x))) {
 					listErrors.Add("Address");
 				}
-				if(string.IsNullOrWhiteSpace(pAgeCur.HmPhone) && string.IsNullOrWhiteSpace(pAgeCur.WirelessPhone)) {
-					listErrors.Add("Phone");
-				}
 				if(listErrors.Count==0) {
 					_toolTipUnsentErrors.RemoveAll();
 					return;
 				}
-				string noteTxt="";
-				for(int i=0;i<listErrors.Count;i++) {
-					if(i==0) {
-						noteTxt+=Lan.g(this,"Invalid");
-					}
-					else if(i==listErrors.Count-1) {
-						noteTxt+=" "+Lan.g(this,"and");
-					}
-					else {
-						noteTxt+=",";
-					}
-					noteTxt+=" "+Lan.g(this,listErrors[i]);
-				}
-				_toolTipUnsentErrors.SetToolTip(gridUnsent,noteTxt);
+				_toolTipUnsentErrors.SetToolTip(gridUnsent,Lan.g(this,"Invalid")+" "+string.Join(" and ",listErrors));
 			}
 			catch(Exception ex) {
 				_toolTipUnsentErrors.RemoveAll();
@@ -975,7 +958,7 @@ namespace OpenDental {
 				}
 			}
 			#endregion Validate Selected Pats and Demand Type
-			#region Validate Birthdate, Address, and Phone
+			#region Validate Birthdate and Address
 			List<string> listErrorMsgs=new List<string>();
 			List<long> listPatNumsBadBday=listPatAging
 				.FindAll(x => !listPatNumsToReselect.Contains(x.PatNum) && (x.Birthdate.Year<1880 || x.Birthdate>DateTime.Today.AddYears(-18)))
@@ -992,20 +975,13 @@ namespace OpenDental {
 				listErrorMsgs.Add(Lan.g(this,"Bad address"));
 				listPatNumsToReselect.AddRange(listPatNumsBadAddress);
 			}
-			List<long> listPatNumsNoPhone=listPatAging
-				.FindAll(x => !listPatNumsToReselect.Contains(x.PatNum) && string.IsNullOrEmpty(x.HmPhone) && string.IsNullOrEmpty(x.WirelessPhone))
-				.Select(x => x.PatNum).ToList();
-			if(listPatNumsNoPhone.Count>0) {
-				listErrorMsgs.Add(Lan.g(this,"No home or wireless phone number"));
-				listPatNumsToReselect.AddRange(listPatNumsNoPhone);
-			}
 			if(listErrorMsgs.Count>0) {
 				Cursor=Cursors.Default;
 				msgTxt=Lan.g(this,"One or more of the selected guarantors has the following error(s) and will not be sent to TSI")+":\r\n\r\n"
 					+string.Join("\r\n",listErrorMsgs);
 				MessageBox.Show(msgTxt);
 			}
-			#endregion Validate Birthdate, Address, and Phone
+			#endregion Validate Birthdate and Address
 			Cursor=Cursors.WaitCursor;
 			listPatAging.RemoveAll(x => listPatNumsToReselect.Contains(x.PatNum));
 			listPatNumsToReselect.ForEach(x => dictPatNumDateBalBegan.Remove(x));
