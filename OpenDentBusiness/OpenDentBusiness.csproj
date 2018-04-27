@@ -279,6 +279,7 @@
     <Compile Include="Data Interface\Etrans835Attaches.cs" />
     <Compile Include="Data Interface\ProviderClinics.cs" />
     <Compile Include="Data Interface\TaskTakens.cs" />
+    <Compile Include="Remoting\DtoProcessor.cs" />
     <Compile Include="TableTypes\ProviderClinic.cs" />
     <Compile Include="Db\LargeTableHelper.cs" />
     <Compile Include="Misc\CreditCardUtils\CreditCardUtils.cs" />
@@ -1483,8 +1484,10 @@
     <Compile Include="WebBridges\PaySimple.cs" />
     <Compile Include="WebBridges\Podium.cs" />
     <Compile Include="WebBridges\Sftp.cs" />
+    <Compile Include="WebServices\IOpenDentalServer.cs" />
     <Compile Include="WebServices\IWebServiceMainHQ.cs" />
     <Compile Include="WebServices\OpenDentalServerMockIIS.cs" />
+    <Compile Include="WebServices\OpenDentalServerReal.cs" />
     <Compile Include="WebServices\WebServiceMainHQMockDemo.cs" />
     <Compile Include="WebServices\OpenDentalServerProxy.cs" />
     <Compile Include="WebServices\WebServiceMainHQReal.cs" />

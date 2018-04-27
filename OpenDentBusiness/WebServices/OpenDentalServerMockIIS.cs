@@ -6,10 +6,10 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace OpenDentBusiness.WebServices {
-	public class OpenDentalServerMockIIS:OpenDentBusiness.OpenDentalServer.ServiceMain {
+	public class OpenDentalServerMockIIS : IOpenDentalServer {
 
 		public new string ProcessRequest(string dtoString) {
-			return RunWebMethod(() => base.ProcessRequest(dtoString));
+			return RunWebMethod(() => DtoProcessor.ProcessDto(dtoString));
 		}
 
 		///<summary></summary>

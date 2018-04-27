@@ -7,17 +7,17 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace OpenDentBusiness.WebServices {
-	public class OpenDentalServerProxy:OpenDentBusiness.OpenDentalServer.ServiceMain {
+	public class OpenDentalServerProxy {
 		public static OpenDentalServerMockIIS MockOpenDentalServerCur {
 			private get;//Use GetOpenDentalServerInstance() instead.
 			set;
 		}
 
-		public static OpenDentBusiness.OpenDentalServer.ServiceMain GetOpenDentalServerInstance() {
+		public static IOpenDentalServer GetOpenDentalServerInstance() {
 			if(MockOpenDentalServerCur!=null) {
 				return MockOpenDentalServerCur;
 			}
-			OpenDentalServer.ServiceMain service=new OpenDentBusiness.OpenDentalServer.ServiceMain();
+			OpenDentalServerReal service=new OpenDentalServerReal();
 			service.Url=RemotingClient.ServerURI;
 			if(RemotingClient.MidTierProxyAddress!=null && RemotingClient.MidTierProxyAddress!="") {
 				IWebProxy proxy=new WebProxy(RemotingClient.MidTierProxyAddress);

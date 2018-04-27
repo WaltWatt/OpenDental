@@ -28,6 +28,9 @@ namespace OpenDentBusiness {
 		///<summary>Thread static version of RemotingRole</summary>
 		[ThreadStatic]
 		public static RemotingRole _remotingRoleT;
+		///<summary>Thread static string version of RemotingRole because enums cannot be null thus we never know what value to trust.</summary>
+		[ThreadStatic]
+		public static string _remotingRoleTStr;
 		///<summary>Thread static version of ServerURI</summary>
 		[ThreadStatic]
 		public static string _serverUriT;
@@ -79,7 +82,7 @@ namespace OpenDentBusiness {
 		///<summary>Returns either the thread specific RemotingRole or the globally set RemotingRole.</summary>
 		public static RemotingRole RemotingRole {
 			get {
-				if(String.IsNullOrEmpty(_serverUriT)) {
+				if(String.IsNullOrEmpty(_remotingRoleTStr)) {
 					return _remotingRole;
 				}
 				return _remotingRoleT;
@@ -87,6 +90,7 @@ namespace OpenDentBusiness {
 			set {
 				_remotingRole=value;
 				_remotingRoleT=value;
+				_remotingRoleTStr=value.ToString();//Simply used as an indicator that _remotingRoleT has been set.
 			}
 		}
 
@@ -107,11 +111,13 @@ namespace OpenDentBusiness {
 		public static void SetRemotingT(string serverURI,RemotingRole remotingRole,bool isReportServer) {
 			IsReportServer=isReportServer;
 			_remotingRoleT=remotingRole;
+			_remotingRoleTStr=_remotingRoleT.ToString();//Simply used as an indicator that _remotingRoleT has been set.
 			_serverUriT=serverURI;
 		}
 
 		public static void SetRemotingRoleT(RemotingRole remotingRole) {
 			_remotingRoleT=remotingRole;
+			_remotingRoleTStr=_remotingRoleT.ToString();//Simply used as an indicator that _remotingRoleT has been set.
 		}
 
 		public static void SetServerURIT(string serverURI) {
@@ -266,7 +272,7 @@ namespace OpenDentBusiness {
 				throw new ODException("Invalid username or password.",ODException.ErrorCodes.CheckUserAndPasswordFailed);
 			}
 			string dtoString=dto.Serialize();
-			OpenDentalServer.ServiceMain service=OpenDentBusiness.WebServices.OpenDentalServerProxy.GetOpenDentalServerInstance();
+			IOpenDentalServer service=OpenDentBusiness.WebServices.OpenDentalServerProxy.GetOpenDentalServerInstance();
 			return service.ProcessRequest(dtoString);
 		}
 
