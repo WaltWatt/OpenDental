@@ -394,8 +394,27 @@ namespace OpenDental {
 			return Print(sheet,_dataSet,copies,isRxControlled,stmt,medLab,isPrintDocument,isPreviewMode);
 		}
 
-		///<Summary>DataSet should be prefilled with AccountModules.GetAccount() before calling this method if printing a statement.</Summary>
-		public static PrintDocument Print(Sheet sheet,DataSet dataSet,int copies=1,bool isRxControlled=false,Statement stmt=null,MedLab medLab=null,bool isPrintDocument=true,bool isPreviewMode=false) {
+		///<Summary>DataSet should be prefilled with AccountModules.GetAccount() before calling this method if printing a statement.  
+		///Returns null if document failed to print.</Summary>
+		public static PrintDocument Print(Sheet sheet,DataSet dataSet,int copies=1,bool isRxControlled=false,Statement stmt=null,MedLab medLab=null,
+			bool isPrintDocument=true,bool isPreviewMode=false)
+		{
+			PrintDocument retVal=null;
+			try {
+				//If we were unable to create the printdocument this will throw an exception.
+				retVal=TryPrint(sheet,dataSet,copies,isRxControlled,stmt,medLab,isPrintDocument,isPreviewMode);
+			}
+			catch(InvalidPrinterException ex) {//Dont catch other exceptions so that customer calls and we can be aware.
+				ex.DoNothing();
+				MsgBox.Show("Sheets","Error: No Printers Installed\r\n"+
+									"If you do have a printer installed, restarting the workstation may solve the problem."
+				);
+			}
+			return retVal;
+		}
+
+		///<summary>Throws exception.</summary>
+		public static PrintDocument TryPrint(Sheet sheet, DataSet dataSet, int copies=1, bool isRxControlled=false,Statement stmt=null,MedLab medLab=null,bool isPrintDocument=true,bool isPreviewMode = false) { 
 			_dataSet=dataSet;
 			//parameter null check moved to SheetFiller.
 			//could validate field names here later.
@@ -407,12 +426,6 @@ namespace OpenDental {
 			PrintDocument pd=new PrintDocument();
 			pd.OriginAtMargins=true;
 			pd.PrintPage+=new PrintPageEventHandler(pd_PrintPage);
-			if(PrinterSettings.InstalledPrinters.Count==0) {
-				MsgBox.Show("Sheets","Error: No Printers Installed\r\n"+
-									"If you do have a printer installed, restarting the workstation may solve the problem."
-				);
-				return null;
-			}
 			if(pd.DefaultPageSettings.PrintableArea.Width==0) {
 				//prevents bug in some printers that do not specify paper size
 				pd.DefaultPageSettings.PaperSize=new PaperSize("paper",850,1100);
