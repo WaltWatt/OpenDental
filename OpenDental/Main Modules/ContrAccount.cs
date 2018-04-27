@@ -3693,10 +3693,10 @@ namespace OpenDental {
 					case "Payment":
 						bool isTsiPayment=(TsiTransLogs.IsTransworldEnabled(PatCur.ClinicNum)
 							&& Patients.IsGuarCollections(PatCur.Guarantor)
-							&& !MsgBox.Show(this,MsgBoxButtons.YesNo,"The guarantor of this family has been sent to Transworld for a past due balance.  "
+							&& !MsgBox.Show(this,MsgBoxButtons.YesNo,"The guarantor of this family has been sent to TSI for a past due balance.  "
 								+"Is the payment you are applying directly from the debtor or guarantor?\r\n\r\n"
 								+"Yes - this payment is directly from the debtor/guarantor\r\n\r\n"
-								+"No - this payment is from Transworld"));
+								+"No - this payment is from TSI"));
 						InputBox inputBox=new InputBox(new List<InputBoxParam>() { new InputBoxParam(InputBoxType.ValidDouble,Lan.g(this,"Please enter an amount: ")),
 							FamCur.ListPats.Length>1 ? (new InputBoxParam(InputBoxType.CheckBox,"",Lan.g(this," - Prefer this patient"),new Size(120,20))) : null }
 							,new Func<string, bool>((text) => {
@@ -3867,10 +3867,10 @@ namespace OpenDental {
 		private void AddAdjustmentToSelectedProcsHelper() {
 			bool isTsiAdj=(TsiTransLogs.IsTransworldEnabled(PatCur.ClinicNum)
 				&& Patients.IsGuarCollections(PatCur.Guarantor)
-				&& !MsgBox.Show(this,MsgBoxButtons.YesNo,"The guarantor of this family has been sent to Transworld for a past due balance.  "
+				&& !MsgBox.Show(this,MsgBoxButtons.YesNo,"The guarantor of this family has been sent to TSI for a past due balance.  "
 					+"Is this an adjustment applied by the office?\r\n\r\n"
 					+"Yes - this is an adjustment applied by the office\r\n\r\n"
-					+"No - this adjustment is the result of a payment received from Transworld"));
+					+"No - this adjustment is the result of a payment received from TSI"));
 			DataTable tableAcct=DataSetMain.Tables["account"];
 			List<Procedure> listSelectedProcs=new List<Procedure>();
 			//If the user selects multiple adjustments, open FormMultiAdj with the selected procedures
