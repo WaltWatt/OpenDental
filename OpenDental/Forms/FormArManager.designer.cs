@@ -91,7 +91,8 @@ namespace OpenDental{
 			this.comboNewStatus = new System.Windows.Forms.ComboBox();
 			this.gridSent = new OpenDental.UI.ODGrid();
 			this.errorProvider1 = new System.Windows.Forms.ErrorProvider(this.components);
-			this.labelClientPortalLink = new System.Windows.Forms.LinkLabel();
+			this.butTsiOcp = new OpenDental.UI.Button();
+			this.labelTsiOcp = new System.Windows.Forms.Label();
 			this.textUnsentTotalNumAccts = new OpenDental.ValidNumber();
 			this.textUnsent61to90 = new OpenDental.ValidDouble();
 			this.textUnsent0to30 = new OpenDental.ValidDouble();
@@ -428,6 +429,7 @@ namespace OpenDental{
 			this.gridUnsent.TranslationName = "TableNotSent";
 			this.gridUnsent.OnSortByColumn += new System.EventHandler(this.gridUnsentMain_OnSortByColumn);
 			this.gridUnsent.MouseDown += new System.Windows.Forms.MouseEventHandler(this.gridUnsentMain_MouseDown);
+			this.gridUnsent.MouseMove += new System.Windows.Forms.MouseEventHandler(this.gridUnsent_MouseMove);
 			// 
 			// groupUnsentFilters
 			// 
@@ -499,7 +501,7 @@ namespace OpenDental{
 			this.checkExcludeBadAddress.Name = "checkExcludeBadAddress";
 			this.checkExcludeBadAddress.Size = new System.Drawing.Size(218, 16);
 			this.checkExcludeBadAddress.TabIndex = 9;
-			this.checkExcludeBadAddress.Text = "Exclude bad addresses (no zipcode)";
+			this.checkExcludeBadAddress.Text = "Exclude bad addresses (missing data)";
 			this.checkExcludeBadAddress.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			this.checkExcludeBadAddress.CheckedChanged += new System.EventHandler(this.checkExcludeBadAddress_CheckedChanged);
 			// 
@@ -969,20 +971,32 @@ namespace OpenDental{
 			// 
 			this.errorProvider1.ContainerControl = this;
 			// 
-			// labelClientPortalLink
+			// butTsiOcp
 			// 
-			this.labelClientPortalLink.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.labelClientPortalLink.LinkArea = new System.Windows.Forms.LinkArea(44, 69);
-			this.labelClientPortalLink.Location = new System.Drawing.Point(12, 666);
-			this.labelClientPortalLink.Name = "labelClientPortalLink";
-			this.labelClientPortalLink.Size = new System.Drawing.Size(677, 18);
-			this.labelClientPortalLink.TabIndex = 2;
-			this.labelClientPortalLink.TabStop = true;
-			this.labelClientPortalLink.Text = "The TSI Online Client Portal web address is https://service.transworldsystems.com" +
-    "/FormsLogin.asp?/rep/repview.asp";
-			this.labelClientPortalLink.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.labelClientPortalLink.UseCompatibleTextRendering = true;
-			this.labelClientPortalLink.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.labelClientPortalLink_LinkClicked);
+			this.butTsiOcp.AdjustImageLocation = new System.Drawing.Point(0, 0);
+			this.butTsiOcp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.butTsiOcp.Autosize = true;
+			this.butTsiOcp.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
+			this.butTsiOcp.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
+			this.butTsiOcp.CornerRadius = 4F;
+			this.butTsiOcp.Image = global::OpenDental.Properties.Resources.TSI_Icon;
+			this.butTsiOcp.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			this.butTsiOcp.Location = new System.Drawing.Point(12, 660);
+			this.butTsiOcp.Name = "butTsiOcp";
+			this.butTsiOcp.Size = new System.Drawing.Size(75, 26);
+			this.butTsiOcp.TabIndex = 32;
+			this.butTsiOcp.Text = "OCP";
+			this.butTsiOcp.Click += new System.EventHandler(this.butTsiOcp_Click);
+			// 
+			// labelTsiOcp
+			// 
+			this.labelTsiOcp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.labelTsiOcp.Location = new System.Drawing.Point(93, 664);
+			this.labelTsiOcp.Name = "labelTsiOcp";
+			this.labelTsiOcp.Size = new System.Drawing.Size(230, 17);
+			this.labelTsiOcp.TabIndex = 3;
+			this.labelTsiOcp.Text = "Launch the TSI Online Client Portal";
+			this.labelTsiOcp.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
 			// textUnsentTotalNumAccts
 			// 
@@ -1167,7 +1181,8 @@ namespace OpenDental{
 			// FormArManager
 			// 
 			this.ClientSize = new System.Drawing.Size(1230, 696);
-			this.Controls.Add(this.labelClientPortalLink);
+			this.Controls.Add(this.labelTsiOcp);
+			this.Controls.Add(this.butTsiOcp);
 			this.Controls.Add(this.butClose);
 			this.Controls.Add(this.tabControlMain);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -1256,7 +1271,8 @@ namespace OpenDental{
 		private UI.ComboBoxMulti comboBoxMultiSentClinics;
 		private System.Windows.Forms.ErrorProvider errorProvider1;
 		private UI.Button butSentSaveDefaults;
-		private System.Windows.Forms.LinkLabel labelClientPortalLink;
+		private System.Windows.Forms.Label labelTsiOcp;
+		private UI.Button butTsiOcp;
 		private ValidDouble textUnsentTotal;
 		private ValidDouble textUnsentOver90;
 		private ValidDouble textUnsent31to60;

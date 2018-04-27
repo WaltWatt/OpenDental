@@ -28,6 +28,8 @@ namespace OpenDental {
 		private List<long> _listSelectedPatNums;
 		private Program _tsiProg;
 		private Dictionary<long,List<ProgramProperty>> _dictClinicProgProps;
+		private ToolTip _toolTipUnsentErrors;
+		private Point _lastCursorPos;
 
 		public FormArManager() {
 			InitializeComponent();
@@ -39,17 +41,23 @@ namespace OpenDental {
 			List<Def> billTypeDefs=Defs.GetDefsForCategory(DefCat.BillingTypes,true);
 			_collectionBillType=billTypeDefs.FirstOrDefault(x => x.ItemValue.ToLower()=="c")?.Copy();
 			_listBillTypesNoColl=billTypeDefs.Where(x => x.ItemValue.ToLower()!="c").Select(x => x.Copy()).ToList();
-			_listClinics=Clinics.GetForUserod(Security.CurUser,true,Lan.g(this,"Unassigned")).OrderBy(x => x.ClinicNum!=0).ThenBy(x => x.ItemOrder).ToList();
+			_listClinics=new List<Clinic>();
+			if(PrefC.HasClinicsEnabled) {
+				_listClinics.AddRange(Clinics.GetForUserod(Security.CurUser,true,Lan.g(this,"Unassigned")).OrderBy(x => x.ClinicNum!=0).ThenBy(x => x.ItemOrder));
+			}
+			else {//clinics disabled
+				_listClinics.Add(Clinics.GetPracticeAsClinicZero(Lan.g(this,"Unassigned")));
+			}
 			_listProviders=Providers.GetDeepCopy(true);
 			_tsiProg=Programs.GetCur(ProgramName.Transworld);
 			_dictClinicProgProps=new Dictionary<long,List<ProgramProperty>>();
 			if(_tsiProg!=null && _tsiProg.Enabled) {
 				_dictClinicProgProps=ProgramProperties.GetForProgram(_tsiProg.ProgramNum)
-					.FindAll(x => !PrefC.HasClinicsEnabled //if clinics not enabled, get all
-						|| !Security.CurUser.ClinicIsRestricted //if clinics enabled and user not restricted, get all
-						|| _listClinics.Any(y => y.ClinicNum==x.ClinicNum))//if clinics enabled and user restricted, get for allowed clinics
+					.FindAll(x => _listClinics.Any(y => y.ClinicNum==x.ClinicNum))//will contain the HQ "clinic" if clinics are disabled or user unrestricted
 					.GroupBy(x => x.ClinicNum).ToDictionary(x => x.Key,x => x.ToList());
 			}
+			_toolTipUnsentErrors=new ToolTip() { InitialDelay=1000,ReshowDelay=1000,ShowAlways=true };
+			_lastCursorPos=gridUnsent.PointToClient(Cursor.Position);
 			#endregion Get Variables for Both Tabs
 			#region Fill Unsent Tab Filter ComboBoxes, CheckBoxes, and Fields
 			#region Unsent Tab Clinic Combo
@@ -446,7 +454,7 @@ namespace OpenDental {
 			}
 		}
 
-		private void labelClientPortalLink_LinkClicked(object sender,LinkLabelLinkClickedEventArgs e) {
+		private void butTsiOcp_Click(object sender,EventArgs e) {
 			Process.Start("https://service.transworldsystems.com/FormsLogin.asp?/rep/repview.asp");
 		}
 
@@ -539,6 +547,14 @@ namespace OpenDental {
 				row.Cells.Add(patAgeCur.DateLastPay.Year>1880?patAgeCur.DateLastPay.ToString("d"):"");
 				TsiTransLog suspendLog=patAgeCur.ListTsiLogs.Find(x => x.TransType==TsiTransType.SS);
 				row.Cells.Add(suspendLog!=null?suspendLog.TransDateTime.ToString():"");
+				if(patAgeCur.Birthdate.Year<1880//invalid bday
+					|| patAgeCur.Birthdate>DateTime.Today.AddYears(-18)//under 18 years old
+					|| new[] { patAgeCur.Address,patAgeCur.City,patAgeCur.State,patAgeCur.Zip }.Any(x => string.IsNullOrWhiteSpace(x))//missing address information
+					|| (string.IsNullOrWhiteSpace(patAgeCur.HmPhone) && string.IsNullOrWhiteSpace(patAgeCur.WirelessPhone)))//no home or wireless phone
+				{
+					//color row light red/pink, using cell color so selecting row still shows color
+					row.Cells.OfType<ODGridCell>().ToList().ForEach(x => x.CellColor=Color.FromArgb(255,255,230,234));
+				}
 				row.Tag=patAgeCur;
 				gridUnsent.Rows.Add(row);
 				if(listSelectedPatNums.Contains(patAgeCur.PatNum)) {
@@ -622,7 +638,7 @@ namespace OpenDental {
 				&& (listBillTypes.Count==0 || listBillTypes.Contains(x.BillingType))
 				&& (listProvNums.Count==0 || listProvNums.Contains(x.PriProv))
 				&& (listClinicNums.Count==0 || listClinicNums.Contains(x.ClinicNum))
-				&& (!checkExcludeBadAddress.Checked || !string.IsNullOrWhiteSpace(x.Zip))
+				&& (!checkExcludeBadAddress.Checked || new[] { x.Address,x.City,x.State,x.Zip }.All(y => !string.IsNullOrWhiteSpace(y)))
 				&& (!checkExcludeIfProcs.Checked || !x.HasUnsentProcs)
 				&& (!checkExcludeInsPending.Checked || !x.HasInsPending)
 				&& ( ((int)accountAge < 4 && x.BalOver90 > 0.005)//if Any, Over30, Over60 or Over90 are selected, check BalOver90
@@ -649,6 +665,70 @@ namespace OpenDental {
 						.Where(x => x > -1)//Ignore any entries within _listSelectedPatNums that were not found in our grid.
 						.ToArray()
 					,true);
+			}
+		}
+
+		private void gridUnsent_MouseMove(object sender,MouseEventArgs e) {
+			try {
+				if(_lastCursorPos==e.Location) {
+					return;
+				}
+				if(e.Button!=MouseButtons.None) {
+					_toolTipUnsentErrors.RemoveAll();
+					return;
+				}
+				int colIndex=gridUnsent.PointToCol(e.X);
+				if(colIndex<0) {
+					return;
+				}
+				int rowIndex=gridUnsent.PointToRow(e.Y);
+				if(rowIndex<0) {
+					return;
+				}
+				int lastRowIndex=gridUnsent.PointToRow(_lastCursorPos.Y);
+				if(rowIndex==lastRowIndex) {
+					return;
+				}
+				PatAging pAgeCur=(PatAging)gridUnsent.Rows[rowIndex].Tag;
+				if(pAgeCur==null) {
+					_toolTipUnsentErrors.RemoveAll();
+					return;
+				}
+				List<string> listErrors=new List<string>();
+				if(pAgeCur.Birthdate.Year<1880 || pAgeCur.Birthdate>DateTime.Today.AddYears(-18)) {
+					listErrors.Add("Birthdate");
+				}
+				if(new[] { pAgeCur.Address,pAgeCur.City,pAgeCur.State,pAgeCur.Zip }.Any(x => string.IsNullOrWhiteSpace(x))) {
+					listErrors.Add("Address");
+				}
+				if(string.IsNullOrWhiteSpace(pAgeCur.HmPhone) && string.IsNullOrWhiteSpace(pAgeCur.WirelessPhone)) {
+					listErrors.Add("Phone");
+				}
+				if(listErrors.Count==0) {
+					_toolTipUnsentErrors.RemoveAll();
+					return;
+				}
+				string noteTxt="";
+				for(int i=0;i<listErrors.Count;i++) {
+					if(i==0) {
+						noteTxt+=Lan.g(this,"Invalid");
+					}
+					else if(i==listErrors.Count-1) {
+						noteTxt+=" "+Lan.g(this,"and");
+					}
+					else {
+						noteTxt+=",";
+					}
+					noteTxt+=" "+Lan.g(this,listErrors[i]);
+				}
+				_toolTipUnsentErrors.SetToolTip(gridUnsent,noteTxt);
+			}
+			catch(Exception ex) {
+				_toolTipUnsentErrors.RemoveAll();
+				ex.DoNothing();
+			}
+			finally {
+				_lastCursorPos=e.Location;
 			}
 		}
 
@@ -683,7 +763,7 @@ namespace OpenDental {
 			TsiDemandType selectedType=comboDemandType.SelectedTag<TsiDemandType>();//If they have nothing selected, this will default to 'Accelerator'.
 			List<long> listClinicNums=new List<long>();
 			if(!PrefC.HasClinicsEnabled || comboBoxMultiUnsentClinics.ListSelectedIndices.Contains(0)) {
-				listClinicNums=_listClinics.Select(x => x.ClinicNum).ToList();
+				listClinicNums=_listClinics.Select(x => x.ClinicNum).ToList();//if clinics are disabled, this will only contain the HQ "clinic"
 			}
 			else {
 				//x-1 works because we know index 0 isn't selected(from above contains(0)) and we -1 due to the "All"" clinic
@@ -816,17 +896,22 @@ namespace OpenDental {
 			List<PatAging> listPatAging=gridUnsent.SelectedGridRows.Select(x => x.Tag as PatAging).ToList();
 			List<long> listClinicsSkipped=new List<long>();
 			foreach(long clinicNum in listPatAging.Select(x => x.ClinicNum).Distinct()) {
+				if(!PrefC.HasClinicsEnabled && clinicNum>0) {
+					continue;//Only test the HQ clinic (ClinicNum=0) if clinics are not enabled
+				}
 				List<ProgramProperty> listProgProps;
 				if(!_dictClinicProgProps.TryGetValue(clinicNum,out listProgProps) || !TsiTransLogs.ValidateClinicSftpDetails(listProgProps)) {
 					listClinicsSkipped.Add(clinicNum);
 				}
 			}
-			if(listClinicsSkipped.Contains(0)) {
-				listClinicsSkipped.AddRange(_listClinics.FindAll(x => !_dictClinicProgProps.ContainsKey(x.ClinicNum)).Select(x => x.ClinicNum));
-			}
-			else if(PrefC.HasClinicsEnabled && !Security.CurUser.ClinicIsRestricted && _dictClinicProgProps.ContainsKey(0)) {
-				//if clinics are enabled and the user is not restricted, any clinic without prog props will use the HQ prog props for the sftp connection
-				_listClinics.FindAll(x => !_dictClinicProgProps.ContainsKey(x.ClinicNum)).ForEach(x => _dictClinicProgProps[x.ClinicNum]=_dictClinicProgProps[0]);
+			if(PrefC.HasClinicsEnabled) {
+				if(listClinicsSkipped.Contains(0)) {
+					listClinicsSkipped.AddRange(_listClinics.FindAll(x => !_dictClinicProgProps.ContainsKey(x.ClinicNum)).Select(x => x.ClinicNum));
+				}
+				else if(!Security.CurUser.ClinicIsRestricted && _dictClinicProgProps.ContainsKey(0)) {
+					//if clinics are enabled and the user is not restricted, any clinic without prog props will use the HQ prog props for the sftp connection
+					_listClinics.FindAll(x => !_dictClinicProgProps.ContainsKey(x.ClinicNum)).ForEach(x => _dictClinicProgProps[x.ClinicNum]=_dictClinicProgProps[0]);
+				}
 			}
 			if(_dictClinicProgProps.All(x => listClinicsSkipped.Contains(x.Key))) {
 				Cursor=Cursors.Default;
@@ -849,13 +934,13 @@ namespace OpenDental {
 				.Where(x => x.Value.Any(y => y.PropertyDesc=="SelectedServices" && !string.IsNullOrEmpty(y.PropertyValue)))
 				.ToDictionary(x => x.Key,x => x.Value.Find(y => y.PropertyDesc=="SelectedServices").PropertyValue.Split(','));
 			TsiDemandType demandType=comboDemandType.SelectedTag<TsiDemandType>();
-			List<long> listPatNumsToReselect=listPatAging.FindAll(x => !dictClinicSelectedServices.ContainsKey(x.ClinicNum)
-						|| !dictClinicSelectedServices[x.ClinicNum].Contains(((int)demandType).ToString())).Select(x => x.PatNum).ToList();
+			List<long> listPatNumsToReselect=listPatAging.FindAll(x => !dictClinicSelectedServices.ContainsKey(PrefC.HasClinicsEnabled?x.ClinicNum:0)
+						|| !dictClinicSelectedServices[PrefC.HasClinicsEnabled?x.ClinicNum:0].Contains(((int)demandType).ToString())).Select(x => x.PatNum).ToList();
 			string msgTxt="";
 			if(listPatNumsToReselect.Count > 0)	{
 				Cursor=Cursors.Default;
-				msgTxt=Lan.g(this,"At least one of the selected patients is assigned to a clinic that does not have the")+" "+demandType.GetDescription()
-					+" "+Lan.g(this,"service enabled.  Those account(s) will not be sent to Transworld and will remain in the unsent grid.");
+				msgTxt=Lan.g(this,"At least one of the selected guarantors is assigned to a clinic that does not have the")+" "+demandType.GetDescription()
+					+" "+Lan.g(this,"service enabled.  Those account(s) will not be sent to TSI and will remain in the unsent grid.");
 				MessageBox.Show(msgTxt);
 			}
 			List<long> listPatNumsWrongService=new List<long>();
@@ -889,10 +974,47 @@ namespace OpenDental {
 						break;
 				}
 			}
+			#endregion Validate Selected Pats and Demand Type
+			#region Validate Birthdate, Address, and Phone
+			List<string> listErrorMsgs=new List<string>();
+			List<long> listPatNumsBadBday=listPatAging
+				.FindAll(x => !listPatNumsToReselect.Contains(x.PatNum) && (x.Birthdate.Year<1880 || x.Birthdate>DateTime.Today.AddYears(-18)))
+				.Select(x => x.PatNum).ToList();
+			if(listPatNumsBadBday.Count>0) {
+				listErrorMsgs.Add(Lan.g(this,"Invalid birthdate or under the age of 18"));
+				listPatNumsToReselect.AddRange(listPatNumsBadBday);
+			}
+			List<long> listPatNumsBadAddress=listPatAging
+				.FindAll(x => !listPatNumsToReselect.Contains(x.PatNum)
+					&& new[] { x.Address,x.City,x.State,x.Zip }.Any(y => string.IsNullOrEmpty(y)))
+				.Select(x => x.PatNum).ToList();
+			if(listPatNumsBadAddress.Count>0) {
+				listErrorMsgs.Add(Lan.g(this,"Bad address"));
+				listPatNumsToReselect.AddRange(listPatNumsBadAddress);
+			}
+			List<long> listPatNumsNoPhone=listPatAging
+				.FindAll(x => !listPatNumsToReselect.Contains(x.PatNum) && string.IsNullOrEmpty(x.HmPhone) && string.IsNullOrEmpty(x.WirelessPhone))
+				.Select(x => x.PatNum).ToList();
+			if(listPatNumsNoPhone.Count>0) {
+				listErrorMsgs.Add(Lan.g(this,"No home or wireless phone number"));
+				listPatNumsToReselect.AddRange(listPatNumsNoPhone);
+			}
+			if(listErrorMsgs.Count>0) {
+				Cursor=Cursors.Default;
+				msgTxt=Lan.g(this,"One or more of the selected guarantors has the following error(s) and will not be sent to TSI")+":\r\n\r\n"
+					+string.Join("\r\n",listErrorMsgs);
+				MessageBox.Show(msgTxt);
+			}
+			#endregion Validate Birthdate, Address, and Phone
 			Cursor=Cursors.WaitCursor;
 			listPatAging.RemoveAll(x => listPatNumsToReselect.Contains(x.PatNum));
 			listPatNumsToReselect.ForEach(x => dictPatNumDateBalBegan.Remove(x));
-			#endregion Validate Selected Pats and Demand Type
+			if(listPatAging.Count==0) {
+				int[] selectedRows=listPatNumsToReselect.Select(x => gridUnsent.Rows.ToList().FindIndex(y => x==((PatAging)y.Tag).PatNum)).Where(x => x>-1).ToArray();
+				gridUnsent.SetSelected(selectedRows,true);
+				Cursor=Cursors.Default;
+				return;
+			}
 			//dictionary key=PatNum, value=dictionary key=Tuple<TsiFKeyType,long>, value=TsiTrans with that type and key for that pat.  Used for placement
 			//msgs to keep all trans for a fam associated with the placement msg to determine later if the past account details were changed after being
 			//placed for collection with Transworld.
@@ -912,11 +1034,17 @@ namespace OpenDental {
 				DateTime dateBalBegan=DateTime.MinValue;
 				dictPatNumDateBalBegan.TryGetValue(pAgingCur.PatNum,out dateBalBegan);
 				string clientID="";
+				List<ProgramProperty> listProgProps;
+				if(!_dictClinicProgProps.TryGetValue(clinicNum,out listProgProps) && !_dictClinicProgProps.TryGetValue(0,out listProgProps)) {
+					listClinicsSkipped.Add(clinicNum);
+					listFailedPatNums.Add(pAgingCur.PatNum);
+					continue;
+				}
 				if(demandType==TsiDemandType.Accelerator) {
-					clientID=_dictClinicProgProps[clinicNum].Find(x => x.PropertyDesc=="ClientIdAccelerator")?.PropertyValue??"";
+					clientID=listProgProps.Find(x => x.PropertyDesc=="ClientIdAccelerator")?.PropertyValue??"";
 				}
 				else {
-					clientID=_dictClinicProgProps[clinicNum].Find(x => x.PropertyDesc=="ClientIdCollection")?.PropertyValue??"";
+					clientID=listProgProps.Find(x => x.PropertyDesc=="ClientIdCollection")?.PropertyValue??"";
 				}
 				try {
 					//find most recent account change log less than 50 days ago and if it was a suspend trans send reinstate update msg instead of placement msg
@@ -1013,9 +1141,10 @@ namespace OpenDental {
 					continue;
 				}
 				List<ProgramProperty> listProps=new List<ProgramProperty>();
-				if(!_dictClinicProgProps.TryGetValue(kvp.Key,out listProps)) {
+				if(!_dictClinicProgProps.TryGetValue(kvp.Key,out listProps) && !_dictClinicProgProps.TryGetValue(0,out listProps)) {
 					//should never happen, dictClinicProps should contain all clinicNums the user has access to, including clinicnum 0
-					_dictClinicProgProps.TryGetValue(0,out listProps);
+					listFailedPatNums.AddRange(kvp.Value.Keys);
+					continue;
 				}
 				string sftpAddress=listProps.Find(x => x.PropertyDesc=="SftpServerAddress")?.PropertyValue??"";
 				int sftpPort;
@@ -1055,9 +1184,10 @@ namespace OpenDental {
 					continue;
 				}
 				List<ProgramProperty> listProps=new List<ProgramProperty>();
-				if(!_dictClinicProgProps.TryGetValue(kvp.Key,out listProps)) {
+				if(!_dictClinicProgProps.TryGetValue(kvp.Key,out listProps) && !_dictClinicProgProps.TryGetValue(0,out listProps)) {
 					//should never happen, dictClinicProps should contain all clinicNums the user has access to, including clinicnum 0
-					_dictClinicProgProps.TryGetValue(0,out listProps);
+					listFailedPatNums.AddRange(kvp.Value.Keys);
+					continue;
 				}
 				string sftpAddress=listProps.Find(x => x.PropertyDesc=="SftpServerAddress")?.PropertyValue??"";
 				int sftpPort;
@@ -1104,7 +1234,7 @@ namespace OpenDental {
 			Cursor=Cursors.Default;
 			if(listFailedPatNums.Count>0) {
 				MessageBox.Show(listFailedPatNums.Count+" "+Lan.g(this,"accounts did not upload successfully.  They have not been marked as sent to "
-					+"Transworld and will have to be resent."));
+					+"TSI and will have to be resent."));
 			}
 		}
 
@@ -1388,7 +1518,7 @@ namespace OpenDental {
 				MsgBox.Show(this,"The Transworld program link is not enabled.");
 				return;
 			}
-			if(this._dictClinicProgProps.Count==0) {
+			if(_dictClinicProgProps.Count==0) {
 				MsgBox.Show(this,"The Transworld program link is not setup.  Try again after entering the program link properties.");
 				return;
 			}
@@ -1396,17 +1526,22 @@ namespace OpenDental {
 			List<PatAging> listPatAging=gridSent.SelectedGridRows.Select(x => x.Tag as PatAging).ToList();
 			List<long> listClinicsSkipped=new List<long>();
 			foreach(long clinicNum in listPatAging.Select(x => x.ClinicNum).Distinct()) {
+				if(!PrefC.HasClinicsEnabled && clinicNum>0) {
+					continue;//Only test the HQ clinic (ClinicNum=0) if clinics are not enabled
+				}
 				List<ProgramProperty> listPropsCur;
 				if(!_dictClinicProgProps.TryGetValue(clinicNum,out listPropsCur) || !TsiTransLogs.ValidateClinicSftpDetails(listPropsCur)) {
 					listClinicsSkipped.Add(clinicNum);
 				}
 			}
-			if(listClinicsSkipped.Contains(0)) {
-				listClinicsSkipped.AddRange(_listClinics.FindAll(x => !_dictClinicProgProps.ContainsKey(x.ClinicNum)).Select(x => x.ClinicNum));
-			}
-			else if(PrefC.HasClinicsEnabled && !Security.CurUser.ClinicIsRestricted && _dictClinicProgProps.ContainsKey(0)) {
-				//if clinics are enabled and the user is not restricted, any clinic without prog props will use the HQ prog props for the sftp connection
-				_listClinics.FindAll(x => !_dictClinicProgProps.ContainsKey(x.ClinicNum)).ForEach(x => _dictClinicProgProps[x.ClinicNum]=_dictClinicProgProps[0]);
+			if(PrefC.HasClinicsEnabled) {
+				if(listClinicsSkipped.Contains(0)) {
+					listClinicsSkipped.AddRange(_listClinics.FindAll(x => !_dictClinicProgProps.ContainsKey(x.ClinicNum)).Select(x => x.ClinicNum));
+				}
+				else if(!Security.CurUser.ClinicIsRestricted && _dictClinicProgProps.ContainsKey(0)) {
+					//if clinics are enabled and the user is not restricted, any clinic without prog props will use the HQ prog props for the sftp connection
+					_listClinics.FindAll(x => !_dictClinicProgProps.ContainsKey(x.ClinicNum)).ForEach(x => _dictClinicProgProps[x.ClinicNum]=_dictClinicProgProps[0]);
+				}
 			}
 			if(_dictClinicProgProps.All(x => listClinicsSkipped.Contains(x.Key))) {
 				Cursor=Cursors.Default;
@@ -1444,15 +1579,21 @@ namespace OpenDental {
 					listFailedPatNums.Add(pAgingCur.PatNum);
 					continue;
 				}
+				List<ProgramProperty> listProgProps;
+				if(!_dictClinicProgProps.TryGetValue(clinicNum,out listProgProps) && !_dictClinicProgProps.TryGetValue(0,out listProgProps)) {
+					listFailedPatNums.Add(pAgingCur.PatNum);
+					listClinicsSkipped.Add(clinicNum);
+					continue;
+				}
 				string clientId="";
 				if(pAgingCur.ListTsiLogs.Count>0) {
 					clientId=pAgingCur.ListTsiLogs[0].ClientId;
 				}
 				if(string.IsNullOrEmpty(clientId)) {
-					clientId=_dictClinicProgProps[clinicNum].Find(x => x.PropertyDesc=="ClientIdAccelerator")?.PropertyValue;
+					clientId=listProgProps.Find(x => x.PropertyDesc=="ClientIdAccelerator")?.PropertyValue;
 				}
 				if(string.IsNullOrEmpty(clientId)) {
-					clientId=_dictClinicProgProps[clinicNum].Find(x => x.PropertyDesc=="ClientIdCollection")?.PropertyValue;
+					clientId=listProgProps.Find(x => x.PropertyDesc=="ClientIdCollection")?.PropertyValue;
 				}
 				if(string.IsNullOrEmpty(clientId)) {
 					listFailedPatNums.Add(pAgingCur.PatNum);
@@ -1509,9 +1650,10 @@ namespace OpenDental {
 					continue;
 				}
 				List<ProgramProperty> listProps=new List<ProgramProperty>();
-				if(!_dictClinicProgProps.TryGetValue(kvp.Key,out listProps)) {
+				if(!_dictClinicProgProps.TryGetValue(kvp.Key,out listProps) && !_dictClinicProgProps.TryGetValue(0,out listProps)) {
 					//should never happen, dictClinicProps should contain all clinicNums the user has access to, including clinicnum 0
-					_dictClinicProgProps.TryGetValue(0,out listProps);
+					listFailedPatNums.AddRange(kvp.Value.Keys);
+					continue;
 				}
 				string sftpAddress=listProps.Find(x => x.PropertyDesc=="SftpServerAddress")?.PropertyValue??"";
 				int sftpPort;
