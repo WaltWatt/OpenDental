@@ -231,6 +231,7 @@ namespace OpenDental.InternalTools.Job_Manager {
 			catch {
 				textEditorDocumentation.MainText=_jobCur.Documentation;
 			}
+			UpdateLogColor();
 			FillAllGrids();
 			IsChanged=false;
 			CheckPermissions();
@@ -253,7 +254,7 @@ namespace OpenDental.InternalTools.Job_Manager {
 			FillGridFiles();
 			FillGridNote();
 			FillGridReviews();
-			FillGridHistory();
+			FillGridLog();
 		}
 
 		private void FillGridRoles() {
@@ -614,20 +615,20 @@ namespace OpenDental.InternalTools.Job_Manager {
 			}
 		}
 
-		private void FillGridHistory() {
-			gridHistory.BeginUpdate();
-			gridHistory.Columns.Clear();
-			gridHistory.Columns.Add(new ODGridColumn("Date",140));
-			gridHistory.Columns.Add(new ODGridColumn("User Change",90) { TextAlign=HorizontalAlignment.Center });
-			gridHistory.Columns.Add(new ODGridColumn("Expert",90) { TextAlign=HorizontalAlignment.Center });
-			gridHistory.Columns.Add(new ODGridColumn("Engineer",90) { TextAlign=HorizontalAlignment.Center });
-			gridHistory.Columns.Add(new ODGridColumn("Conc",35) { TextAlign=HorizontalAlignment.Center });//shows X if this row has a copy of job description text.
-			gridHistory.Columns.Add(new ODGridColumn("W/U",35) { TextAlign=HorizontalAlignment.Center });//shows X if this row has a copy of job description text.
-			gridHistory.Columns.Add(new ODGridColumn("Title",300));
-			gridHistory.Columns.Add(new ODGridColumn("Description",180));
-			gridHistory.Rows.Clear();
-			gridHistory.NoteSpanStart=1;
-			gridHistory.NoteSpanStop=7;
+		private void FillGridLog() {
+			gridLog.BeginUpdate();
+			gridLog.Columns.Clear();
+			gridLog.Columns.Add(new ODGridColumn("Date",140));
+			gridLog.Columns.Add(new ODGridColumn("User Change",90) { TextAlign=HorizontalAlignment.Center });
+			gridLog.Columns.Add(new ODGridColumn("Expert",90) { TextAlign=HorizontalAlignment.Center });
+			gridLog.Columns.Add(new ODGridColumn("Engineer",90) { TextAlign=HorizontalAlignment.Center });
+			gridLog.Columns.Add(new ODGridColumn("Conc",35) { TextAlign=HorizontalAlignment.Center });//shows X if this row has a copy of job description text.
+			gridLog.Columns.Add(new ODGridColumn("W/U",35) { TextAlign=HorizontalAlignment.Center });//shows X if this row has a copy of job description text.
+			gridLog.Columns.Add(new ODGridColumn("Title",300));
+			gridLog.Columns.Add(new ODGridColumn("Description",180));
+			gridLog.Rows.Clear();
+			gridLog.NoteSpanStart=1;
+			gridLog.NoteSpanStop=7;
 			ODGridRow row;
 			RichTextBox textRequirements = new RichTextBox();
 			RichTextBox textImplementation = new RichTextBox();
@@ -658,15 +659,15 @@ namespace OpenDental.InternalTools.Job_Manager {
 				row.Cells.Add(string.IsNullOrWhiteSpace(textImplementation.Text) ? "" : "X");
 				row.Cells.Add(String.IsNullOrEmpty(jobLog.Title)?"No Title Stored":jobLog.Title);
 				row.Cells.Add(jobLog.Description);
-				if(checkShowHistoryText.Checked && gridHistory.Rows.Count%2==1) {
+				if(checkShowHistoryText.Checked && gridLog.Rows.Count%2==1) {
 					row.ColorBackG=Color.FromArgb(245,251,255);//light blue every other row.
 				}
 				row.Tag=jobLog;
-				gridHistory.Rows.Add(row);
+				gridLog.Rows.Add(row);
 			}
 			textRequirements.Dispose();
 			textImplementation.Dispose();
-			gridHistory.EndUpdate();
+			gridLog.EndUpdate();
 		}
 
 		///<summary>Based on job status, category, and user role, this will enable or disable various controls.</summary>
@@ -712,7 +713,7 @@ namespace OpenDental.InternalTools.Job_Manager {
 					butParentRemove.Visible=true;
 					//gridCustomerQuotes.HasAddButton=true;//Quote permission only
 					textJobEditor.ReadOnlyRequirements=false;
-					textJobEditor.ReadOnlyImplementation=true;
+					textJobEditor.ReadOnlyImplementation=false;
 					break;
 				case JobPhase.Quote:
 					if(_jobCur.IsApprovalNeeded && !JobPermissions.IsAuthorized(JobPerm.Approval,true)) {
@@ -729,7 +730,7 @@ namespace OpenDental.InternalTools.Job_Manager {
 					//2) quote needs approval and you have approval permission
 					textEstHours.Enabled=true;
 					textJobEditor.ReadOnlyRequirements=false;
-					textJobEditor.ReadOnlyImplementation=true;
+					textJobEditor.ReadOnlyImplementation=false;
 					gridQuotes.HasAddButton=true;//Quote permission only
 					break;
 				case JobPhase.Definition:
@@ -1822,7 +1823,7 @@ namespace OpenDental.InternalTools.Job_Manager {
 					}
 				}
 				else {
-					MessageBox.Show("Job Requirements has been changed.");
+					MessageBox.Show("Job Concept has been changed.");
 				}
 			}
 			//IMPLEMENTATION
@@ -1838,7 +1839,7 @@ namespace OpenDental.InternalTools.Job_Manager {
 					}
 				}
 				else {
-					MessageBox.Show("Job Implementation has been changed.");
+					MessageBox.Show("Job Writeup has been changed.");
 				}
 			}
 			//DOCUMENTATION
@@ -2732,12 +2733,12 @@ namespace OpenDental.InternalTools.Job_Manager {
 			if(_isLoading) {
 				return;
 			}
-			if((string.IsNullOrWhiteSpace(gridHistory.Rows[e.Row].Cells[4].Text) && string.IsNullOrWhiteSpace(gridHistory.Rows[e.Row].Cells[5].Text)) //because JobLog.MainRTF is not an empty string when it is blank.
-				|| !(gridHistory.Rows[e.Row].Tag is JobLog)) 
+			if((string.IsNullOrWhiteSpace(gridLog.Rows[e.Row].Cells[4].Text) && string.IsNullOrWhiteSpace(gridLog.Rows[e.Row].Cells[5].Text)) //because JobLog.MainRTF is not an empty string when it is blank.
+				|| !(gridLog.Rows[e.Row].Tag is JobLog)) 
 			{
 				return;
 			}
-			JobLog jobLog = (JobLog)gridHistory.Rows[e.Row].Tag;
+			JobLog jobLog = (JobLog)gridLog.Rows[e.Row].Tag;
 			RichTextBox rtfBox=new RichTextBox();
 			rtfBox.Rtf=jobLog.RequirementsRTF;
 			rtfBox.AppendText("\r\n-----------------------\r\n");
@@ -3000,7 +3001,7 @@ namespace OpenDental.InternalTools.Job_Manager {
 		}
 
 		private void checkShowHistoryText_CheckedChanged(object sender,EventArgs e) {
-			FillGridHistory();
+			FillGridLog();
 		}
 
 		///<summary>Adds error checking to the input parameters for JobLogs.MakeLogEntry also inserts joblog into the UI and _jobCur.ListJobLog if returned.</summary>
@@ -3010,11 +3011,30 @@ namespace OpenDental.InternalTools.Job_Manager {
 				return;
 			}
 			_jobCur.ListJobLogs.Add(jobLog);
-			FillGridHistory();
+			FillGridLog();
 		}
 
 		private void butUpdateLog_Click(object sender,EventArgs e) {
+			if(butUpdateLog.BackColor==Color.LightGreen) {
+				return;
+			}
 			MakeLogEntry(_jobCur,_jobOld,true);
+			UpdateLogColor();
+			if(!IsNew) {
+				Signalods.SetInvalid(InvalidType.Jobs,KeyType.Job,_jobCur.JobNum);
+			}
+			else {
+				IsChanged=true;
+			}
+		}
+
+		private void UpdateLogColor() {
+			if(_jobCur.ListJobLogs.Exists(x => x.DateTimeEntry>=DateTime.Today)) {
+				butUpdateLog.BackColor=Color.LightGreen;
+			}
+			else {
+				butUpdateLog.BackColor=Color.LightCoral;
+			}
 		}
 
 		private void textApprove_MouseDoubleClick(object sender,MouseEventArgs e) {

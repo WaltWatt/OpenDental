@@ -57,7 +57,7 @@
 			this.butVersionPrompt = new OpenDental.UI.Button();
 			this.splitContainer2 = new System.Windows.Forms.SplitContainer();
 			this.splitContainerNoFlicker1 = new OpenDental.SplitContainerNoFlicker();
-			this.butUpdateLog = new OpenDental.UI.Button();
+			this.butUpdateLog = new System.Windows.Forms.Button();
 			this.gridRoles = new OpenDental.UI.ODGrid();
 			this.labelRelatedJobs = new System.Windows.Forms.Label();
 			this.treeRelatedJobs = new System.Windows.Forms.TreeView();
@@ -80,7 +80,7 @@
 			this.textEditorDocumentation = new OpenDental.OdtextEditor();
 			this.tabHistory = new System.Windows.Forms.TabPage();
 			this.panel2 = new System.Windows.Forms.Panel();
-			this.gridHistory = new OpenDental.UI.ODGrid();
+			this.gridLog = new OpenDental.UI.ODGrid();
 			this.panel1 = new System.Windows.Forms.Panel();
 			this.checkShowHistoryText = new System.Windows.Forms.CheckBox();
 			this.groupLinks.SuspendLayout();
@@ -611,17 +611,16 @@
 			// 
 			// butUpdateLog
 			// 
-			this.butUpdateLog.AdjustImageLocation = new System.Drawing.Point(0, 0);
-			this.butUpdateLog.Autosize = true;
-			this.butUpdateLog.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
-			this.butUpdateLog.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
-			this.butUpdateLog.CornerRadius = 4F;
-			this.butUpdateLog.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
-			this.butUpdateLog.Location = new System.Drawing.Point(101, 1);
+			this.butUpdateLog.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.butUpdateLog.BackColor = System.Drawing.Color.LightCoral;
+			this.butUpdateLog.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+			this.butUpdateLog.ForeColor = System.Drawing.SystemColors.ControlText;
+			this.butUpdateLog.Location = new System.Drawing.Point(101, 3);
 			this.butUpdateLog.Name = "butUpdateLog";
-			this.butUpdateLog.Size = new System.Drawing.Size(75, 24);
-			this.butUpdateLog.TabIndex = 310;
+			this.butUpdateLog.Size = new System.Drawing.Size(75, 23);
+			this.butUpdateLog.TabIndex = 308;
 			this.butUpdateLog.Text = "Update Log";
+			this.butUpdateLog.UseVisualStyleBackColor = false;
 			this.butUpdateLog.Click += new System.EventHandler(this.butUpdateLog_Click);
 			// 
 			// gridRoles
@@ -679,7 +678,7 @@
 			this.butActions.CornerRadius = 4F;
 			this.butActions.Image = global::OpenDental.Properties.Resources.arrowDownTriangle;
 			this.butActions.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
-			this.butActions.Location = new System.Drawing.Point(0, 1);
+			this.butActions.Location = new System.Drawing.Point(0, 3);
 			this.butActions.Name = "butActions";
 			this.butActions.Size = new System.Drawing.Size(95, 24);
 			this.butActions.TabIndex = 303;
@@ -927,35 +926,35 @@
 			// panel2
 			// 
 			this.panel2.AutoSize = true;
-			this.panel2.Controls.Add(this.gridHistory);
+			this.panel2.Controls.Add(this.gridLog);
 			this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.panel2.Location = new System.Drawing.Point(3, 20);
 			this.panel2.Name = "panel2";
 			this.panel2.Size = new System.Drawing.Size(733, 232);
 			this.panel2.TabIndex = 247;
 			// 
-			// gridHistory
+			// gridLog
 			// 
-			this.gridHistory.AutoSize = true;
-			this.gridHistory.CellFont = new System.Drawing.Font("Microsoft Sans Serif", 8.5F);
-			this.gridHistory.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.gridHistory.HasAddButton = false;
-			this.gridHistory.HasDropDowns = false;
-			this.gridHistory.HasMultilineHeaders = false;
-			this.gridHistory.HeaderFont = new System.Drawing.Font("Microsoft Sans Serif", 8.5F, System.Drawing.FontStyle.Bold);
-			this.gridHistory.HeaderHeight = 15;
-			this.gridHistory.HScrollVisible = false;
-			this.gridHistory.Location = new System.Drawing.Point(0, 0);
-			this.gridHistory.Name = "gridHistory";
-			this.gridHistory.ScrollValue = 0;
-			this.gridHistory.Size = new System.Drawing.Size(733, 232);
-			this.gridHistory.TabIndex = 19;
-			this.gridHistory.TabStop = false;
-			this.gridHistory.Title = "Log Events";
-			this.gridHistory.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
-			this.gridHistory.TitleHeight = 18;
-			this.gridHistory.TranslationName = "TableHistoryEvents";
-			this.gridHistory.CellDoubleClick += new OpenDental.UI.ODGridClickEventHandler(this.gridHistory_CellDoubleClick);
+			this.gridLog.AutoSize = true;
+			this.gridLog.CellFont = new System.Drawing.Font("Microsoft Sans Serif", 8.5F);
+			this.gridLog.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.gridLog.HasAddButton = false;
+			this.gridLog.HasDropDowns = false;
+			this.gridLog.HasMultilineHeaders = false;
+			this.gridLog.HeaderFont = new System.Drawing.Font("Microsoft Sans Serif", 8.5F, System.Drawing.FontStyle.Bold);
+			this.gridLog.HeaderHeight = 15;
+			this.gridLog.HScrollVisible = false;
+			this.gridLog.Location = new System.Drawing.Point(0, 0);
+			this.gridLog.Name = "gridLog";
+			this.gridLog.ScrollValue = 0;
+			this.gridLog.Size = new System.Drawing.Size(733, 232);
+			this.gridLog.TabIndex = 19;
+			this.gridLog.TabStop = false;
+			this.gridLog.Title = "Log Events";
+			this.gridLog.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
+			this.gridLog.TitleHeight = 18;
+			this.gridLog.TranslationName = "TableHistoryEvents";
+			this.gridLog.CellDoubleClick += new OpenDental.UI.ODGridClickEventHandler(this.gridHistory_CellDoubleClick);
 			// 
 			// panel1
 			// 
@@ -1070,9 +1069,9 @@
 		private OdtextEditor textEditorDocumentation;
 		private System.Windows.Forms.TabPage tabHistory;
 		private System.Windows.Forms.Panel panel2;
-		private UI.ODGrid gridHistory;
+		private UI.ODGrid gridLog;
 		private System.Windows.Forms.Panel panel1;
 		private System.Windows.Forms.CheckBox checkShowHistoryText;
-		private UI.Button butUpdateLog;
+		private System.Windows.Forms.Button butUpdateLog;
 	}
 }
