@@ -1332,11 +1332,11 @@ namespace OpenDental {
 			if(dateFrom>dateTo) {
 				dateFrom=dateTo.Date;//dateFrom cannot be after dateTo
 			}
-			if(dateFrom>new DateTime(1880,1,1)) {//Not using DateTime.MinValue because of visual reasons.
+			if(dateFrom>DateTime.MinValue) {
 				daysOldMax=POut.Int((int)Math.Round((DateTime.Today-dateFrom.Date).TotalDays,0));//Calculate max days old from dateFrom.
 			}
 			else {
-				dateFrom=new DateTime(1880,1,1);//Not using DateTime.MinValue because of visual reasons.
+				dateFrom=DateTime.MinValue;//MinValue, but show a blank in the date text box.
 				daysOldMax="";//DaysOld max field should be blank.
 			}
 			textDaysOldMax.Text=daysOldMax;//DateFrom

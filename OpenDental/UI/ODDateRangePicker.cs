@@ -90,18 +90,28 @@ namespace OpenDental.UI {
 		}
 
 		public void SetDateTimeFrom(DateTime dateTime) {
-			textDateFrom.Text=dateTime.ToShortDateString();
-			if(dateTime>GetDateTimeTo()){
-				textDateTo.Text=dateTime.ToShortDateString();//Setting 'From' in the future of 'To' auto updates 'To' to same date.
-				calendarTo.SetDate(dateTime);
+			if(dateTime==DateTime.MinValue) {
+				textDateFrom.Text="";
+			}
+			else {
+				textDateFrom.Text=dateTime.ToShortDateString();
+				if(dateTime>GetDateTimeTo()){
+					textDateTo.Text=dateTime.ToShortDateString();//Setting 'From' in the future of 'To' auto updates 'To' to same date.
+					calendarTo.SetDate(dateTime);
+				}
 			}
 		}
 
 		public void SetDateTimeTo(DateTime dateTime) {
-			textDateTo.Text=dateTime.ToShortDateString();
-			if(dateTime<GetDateTimeFrom()){
-				textDateFrom.Text=dateTime.ToShortDateString();//Setting 'To' in the past of 'From' auto updates 'From' to same date.
-				calendarFrom.SetDate(dateTime);
+			if(dateTime==DateTime.MinValue) {
+				textDateTo.Text="";
+			}
+			else {
+				textDateTo.Text=dateTime.ToShortDateString();
+				if(dateTime<GetDateTimeFrom()){
+					textDateFrom.Text=dateTime.ToShortDateString();//Setting 'To' in the past of 'From' auto updates 'From' to same date.
+					calendarFrom.SetDate(dateTime);
+				}
 			}
 		}
 		
