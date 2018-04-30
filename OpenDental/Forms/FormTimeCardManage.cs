@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using CodeBase;
 using OpenDental.UI;
 using OpenDentBusiness;
+using System.Linq;
 
 namespace OpenDental {
 	public partial class FormTimeCardManage:ODForm {
@@ -182,7 +183,9 @@ namespace OpenDental {
 		}
 
 		private void gridMain_CellDoubleClick(object sender,UI.ODGridClickEventArgs e) {
-			FormTimeCard FormTC=new FormTimeCard(_listEmployees);
+			//FormTimeCard does some list sorting so we need to break the pass by reference chain.
+			List<Employee> listEmployeesCopy=_listEmployees.Select(x => x.Copy()).ToList();
+			FormTimeCard FormTC=new FormTimeCard(listEmployeesCopy);
 			FormTC.IsByLastName=true;
 			FormTC.EmployeeCur=Employees.GetEmp(PIn.Long(MainTable.Rows[e.Row]["EmployeeNum"].ToString()));
 			FormTC.SelectedPayPeriod=SelectedPayPeriod;
