@@ -314,17 +314,6 @@ namespace OpenDental {
 			FillGrid();
 		}
 
-		private void gridMain_CellTextChanged(object sender,EventArgs e) {
-			DateTime orthoDate=GetOrthoDate(gridMain.SelectedCell.Y);
-			if(!CanEditRow(orthoDate)) {
-				return;
-			}
-			_hasChanged=true;
-			if(_showSigBox) {
-				signatureBoxWrapper.ClearSignature();
-			}
-		}
-
 		private void signatureBoxWrapper_ClearSignatureClicked(object sender,EventArgs e) {
 			if(gridMain.SelectedCell.Y==-1) {
 				return;
@@ -393,6 +382,11 @@ namespace OpenDental {
 			if(CanEditRow(orthoDate)) {
 				if(newText != oldText) {
 					SetValueInDict(newText,orthoDate,(string)gridMain.Columns[e.Col].Tag);
+					//Cannot be placed in if statement below as we only want to clear the signature when the grid text has changed.
+					//We cannot use a textchanged event to call the .dll as this causes massive slowness for certain customers.
+					if(_showSigBox) {
+						signatureBoxWrapper.ClearSignature();
+					}
 					_hasChanged=true;//They had permission and they made a change.
 				}
 				if(_showSigBox) {

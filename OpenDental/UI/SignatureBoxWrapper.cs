@@ -427,6 +427,11 @@ namespace OpenDental.UI {
 			OnSignatureChanged();
 		}
 
+		///<summary>Explicitly set focus on this control.</summary>
+		private void sigBox_MouseDown(object sender,MouseEventArgs e) {
+			Focus();
+		}
+
 		private void sigBox_MouseUp(object sender,MouseEventArgs e) {
 			//this is done on mouse up so that the initial pen capture won't be delayed.
 			if(sigBox.GetTabletState()==1//if accepting input.
