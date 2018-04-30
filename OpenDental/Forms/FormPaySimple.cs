@@ -241,14 +241,14 @@ namespace OpenDental {
 				}
 				switch(_trantype) {
 					case PaySimple.TransType.SALE:
-						PaySimple.MakePayment(_patCur.PatNum,_creditCardCur,PIn.Decimal(textAmount.Text),textCardNumber.Text,new DateTime(expYear,expMonth,1),false,checkSaveToken.Checked);
+						//PaySimple.MakePayment(_patCur.PatNum,_creditCardCur,PIn.Decimal(textAmount.Text),textCardNumber.Text,new DateTime(expYear,expMonth,1),false,checkSaveToken.Checked);
 						break;
 					case PaySimple.TransType.AUTH:
-						long customerId=PaySimple.GetCustomerIdForPat(_patCur.PatNum,_patCur.FName,_patCur.LName,true);//Will retreive a new customer id from PaySimple if the patient doesn't exist already.
-						if(customerId==0) {
-							throw new ODException(Lan.g(this,"Invalid PaySimple Customer Id found."));
-						}
-						PaySimple.AddCreditCard(customerId,textCardNumber.Text,new DateTime(expYear,expMonth,1),false,textZipCode.Text);
+						//long customerId=PaySimple.GetCustomerIdForPat(_patCur.PatNum,_patCur.FName,_patCur.LName,true);//Will retreive a new customer id from PaySimple if the patient doesn't exist already.
+						//if(customerId==0) {
+						//	throw new ODException(Lan.g(this,"Invalid PaySimple Customer Id found."));
+						//}
+						//PaySimple.AddCreditCard(customerId,textCardNumber.Text,new DateTime(expYear,expMonth,1),false,textZipCode.Text);
 						break;
 					case PaySimple.TransType.RETURN:
 						if(string.IsNullOrWhiteSpace(textRefNumber.Text)) {
