@@ -424,6 +424,9 @@ namespace OpenDentBusiness{
 			double adjAmt=0;
 			for(int i=0;i<listClaimProcsForProc.Count;i++) {
 				ClaimProc claimProc=listClaimProcsForProc[i];
+				if(claimProc.Status==ClaimProcStatus.Preauth) {
+					continue;
+				}
 				if(claimProc.Status==ClaimProcStatus.CapComplete) {
 					capWriteoff+=claimProc.WriteOff;
 				}
