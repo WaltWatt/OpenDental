@@ -3216,6 +3216,7 @@ namespace OpenDental{
 			//msgb.ShowDialog();
 			if(_isQuickAdd) {
 				textDate.Enabled=false;
+				ProcNoteUiHelper();//Add any default notes.
 				butOK_Click(this,new EventArgs());
 				if(this.DialogResult!=DialogResult.OK) {
 					this.WindowState=FormWindowState.Normal;
@@ -4598,7 +4599,11 @@ namespace OpenDental{
 		///<summary>Sets the UI textNotes.Text to the default proc note if any.
 		///Also checks PrefName.ProcPromptForAutoNote and remots auto notes if needed.</summary>
 		private void ProcNoteUiHelper() {
-			string procNoteDefault=ProcCodeNotes.GetNote(_selectedProvNum,ProcCur.CodeNum,ProcStat.C);
+			string procNoteDefault="";
+			if(_isQuickAdd) {//Quick Procs should insert both TP Default Note and C Default Note.
+				procNoteDefault=ProcCodeNotes.GetNote(_selectedProvNum,ProcCur.CodeNum,ProcStat.TP)+"\r\n";
+			}
+			procNoteDefault+=ProcCodeNotes.GetNote(_selectedProvNum,ProcCur.CodeNum,ProcStat.C);
 			if(textNotes.Text!="" && procNoteDefault!="") { //check to see if a default note is defined.
 				textNotes.Text+="\r\n"; //add a new line if there was already a ProcNote on the procedure.
 			}
