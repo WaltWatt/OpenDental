@@ -202,9 +202,10 @@ namespace OpenDental {
 
 		private void butOK_Click(object sender,EventArgs e) {
 			ErxOptionPP.PropertyValue=POut.Int((int)_eRxOption);
-			if(ProgramProperties.Sync(_listProgramProperties,_progCur.ProgramNum)) {
-				DataValid.SetInvalid(InvalidType.Programs);
-			}
+			_progCur.Enabled=checkEnabled.Checked;
+			Programs.Update(_progCur);
+			ProgramProperties.Sync(_listProgramProperties,_progCur.ProgramNum);
+			DataValid.SetInvalid(InvalidType.Programs);
 			DialogResult=DialogResult.OK;
 		}
 
