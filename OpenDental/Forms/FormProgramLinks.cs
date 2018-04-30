@@ -99,6 +99,9 @@ namespace OpenDental{
 			// 
 			// gridProgram
 			// 
+			this.gridProgram.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.gridProgram.CellFont = new System.Drawing.Font("Microsoft Sans Serif", 8.5F);
 			this.gridProgram.HasAddButton = false;
 			this.gridProgram.HasDropDowns = false;
