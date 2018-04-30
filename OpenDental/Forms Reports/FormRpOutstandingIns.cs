@@ -1522,7 +1522,7 @@ namespace OpenDental {
 			else {
 				e.HasMorePages=false;
 				text="Total: $"+total.ToString("F");
-				g.DrawString(text,subHeadingFont,Brushes.Black,center+gridMain.Width/2-g.MeasureString(text,subHeadingFont).Width-10,yPos);
+				g.DrawString(text,subHeadingFont,Brushes.Black,center+bounds.Width/2-g.MeasureString(text,subHeadingFont).Width,yPos);
 			}
 			g.Dispose();
 		}
