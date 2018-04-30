@@ -138,12 +138,19 @@ namespace OpenDental {
 			if(!Security.IsAuthorized(Permissions.InsPayCreate)) {
 				return;
 			}
-			FormClaimPayBatch FormCPB=new FormClaimPayBatch(ListClaimPay[gridMain.GetSelectedIndex()]);
-			//FormCPB.IsFromClaim=IsFromClaim;
-			FormCPB.ShowDialog();
-			if(FormCPB.GotoClaimNum!=0){
-				GotoClaimNum=FormCPB.GotoClaimNum;
-				GotoPatNum=FormCPB.GotoPatNum;
+			FormClaimPayBatch FormCPBEdit=new FormClaimPayBatch(ListClaimPay[gridMain.GetSelectedIndex()]);
+			FormCPBEdit.Show();
+			FormCPBEdit.FormClosed+=FormCPBEdit_FormClosed;
+		}
+
+		private void FormCPBEdit_FormClosed(object sender,FormClosedEventArgs e) {
+			if(IsDisposed) {//Auto-Logoff was causing an unhandled exception below.  Can't use dialogue result check here because we want to referesh the grid below even if user clicked cancel.
+				return; //Don't refresh the grid, as the form is already disposed.
+			}
+			FormClaimPayBatch FormCPBEdit=(FormClaimPayBatch)sender;
+			if(FormCPBEdit.GotoClaimNum!=0){
+				GotoClaimNum=FormCPBEdit.GotoClaimNum;
+				GotoPatNum=FormCPBEdit.GotoPatNum;
 				Close();
 			}
 			else{
