@@ -1085,7 +1085,7 @@ namespace OpenDental {
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
-			this.MinimumSize = new System.Drawing.Size(666, 496);
+			this.MinimumSize = new System.Drawing.Size(666, 719);
 			this.Name = "FormClinicEdit";
 			this.ShowInTaskbar = false;
 			this.Text = "Edit Clinic";
