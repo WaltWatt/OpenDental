@@ -146,7 +146,7 @@ namespace OpenDental {
 			List<DefLink> listDefLinks=DefLinks.GetDefLinksByType(DefLinkType.AppointmentType);
 			List<AppointmentType> listApptTypes=AppointmentTypes.GetWhere(x => listDefLinks.Any(y => y.FKey==x.AppointmentTypeNum),true);
 			//Artificially insert a dummy def into the begininning of the list to represent the Default option.
-			listDefs.Insert(0,new Def() { DefNum=0,ItemName=Lan.g(this,"Default") });
+			listDefs.Insert(0,new Def() { DefNum=0,ItemName=Lan.g(this,"None") });
 			//The combo box within the available times group box should always reflect the grid.
 			comboWSNPADefApptType.Items.Clear();
 			gridWSNPAReasons.BeginUpdate();
@@ -374,6 +374,11 @@ namespace OpenDental {
 			FormProcCodes FormPC=new FormProcCodes();
 			FormPC.IsSelectionMode=true;
 			FormPC.AllowMultipleSelections=true;
+			//Indicate which procedure codes should be preselected.
+			List<string> listProcCodeStrings=PrefC.GetString(PrefName.WebSchedNewPatApptProcs)
+				.Split(new char[] { ',' },StringSplitOptions.RemoveEmptyEntries)
+				.ToList();
+			FormPC.ListSelectedProcCodes=ProcedureCodes.GetProcCodes(listProcCodeStrings);
 			FormPC.ShowDialog();
 			if(FormPC.DialogResult!=DialogResult.OK) {
 				return;
@@ -383,6 +388,12 @@ namespace OpenDental {
 				prefProcs=string.Join(",",FormPC.ListSelectedProcCodes.Select(x => x.ProcCode));
 			}
 			if(Prefs.UpdateString(PrefName.WebSchedNewPatApptProcs,prefProcs)) {
+				FillTextWSNPAProcedures();
+			}
+		}
+
+		private void butWSNPAProceduresClear_Click(object sender,EventArgs e) {
+			if(Prefs.UpdateString(PrefName.WebSchedNewPatApptProcs,"")) {
 				FillTextWSNPAProcedures();
 			}
 		}
@@ -414,7 +425,7 @@ namespace OpenDental {
 				textWebSchedNewPatApptLength.Select(selectionStart-1,0);
 			}
 			if(Prefs.UpdateString(PrefName.WebSchedNewPatApptTimePattern,newPatApptLength)) {
-				FillGridWebSchedNewPatApptTimeSlotsThreaded();//Force refresh of the grid in because this setting changed.
+				_indexLastNewPatURL=-1;//Force refresh of the grid in because this setting changed.
 			}
 		}
 

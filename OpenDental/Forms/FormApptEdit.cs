@@ -1355,7 +1355,7 @@ namespace OpenDental{
 				&& !AptCur.AptStatus.In(ApptStatus.PtNote,ApptStatus.PtNoteCompleted))
 			{
 				FormApptTypes FormAT=new FormApptTypes();
-				FormAT.SelectionMode=true;
+				FormAT.IsSelectionMode=true;
 				FormAT.ShowDialog();
 				if(FormAT.DialogResult==DialogResult.OK) {
 					_selectedAptType=FormAT.SelectedAptType;

@@ -106,6 +106,10 @@ namespace OpenDental{
 		/// <summary> List should contain two logs per fee because we are inserting two security logs everytime we update a fee.</summary>
 		private Dictionary<long,List<SecurityLog>> _dictFeeLogs;
 		private bool _canShowHidden;
+		///<summary>Contains all of the procedure codes that were selected if IsSelectionMode is true.
+		///If IsSelectionMode is true and this list is prefilled with procedure codes then the grid will preselect as many codes as possible.
+		///It is not guaranteed that all procedure codes will be selected due to filters.
+		///This list should only be read from externally after DialogResult.OK has been returned.</summary>
 		public List<ProcedureCode> ListSelectedProcCodes=new List<ProcedureCode>();
 		///<summary>Set to true when IsSelectionMode is true and the user should be able to select multiple procedure codes instead of just one.
 		///ListSelectedProcCodes will contain all of the procedure codes that the user selected.</summary>
@@ -1090,6 +1094,14 @@ namespace OpenDental{
 			}
 			comboSort.SelectedIndex=(int)ProcCodeSort;
 			FillGrid();
+			//Preselect corresponding procedure codes once on load.  Do not do it within FillGrid().
+			if(ListSelectedProcCodes.Count > 0) {
+				for(int i=0;i<gridMain.Rows.Count;i++) {
+					if(ListSelectedProcCodes.Any(x => x.CodeNum==((ProcedureCode)gridMain.Rows[i].Tag).CodeNum)) {
+						gridMain.SetSelected(i,true);
+					}
+				}
+			}
 		}
 
 		private void FillComboBoxes() {

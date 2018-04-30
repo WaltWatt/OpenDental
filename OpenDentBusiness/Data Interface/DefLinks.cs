@@ -104,7 +104,7 @@ namespace OpenDentBusiness{
 			Crud.DefLinkCrud.Update(defLink);
 		}
 
-		///<summary></summary>
+		///<summary>Updates the FKey column on all deflink rows for the corresponding definition and type.</summary>
 		public static void UpdateDefWithFKey(long defNum,long fKey,DefLinkType defType) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
 				Meth.GetVoid(MethodBase.GetCurrentMethod(),defNum,fKey,defType);

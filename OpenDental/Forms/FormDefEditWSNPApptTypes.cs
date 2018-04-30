@@ -11,29 +11,25 @@ namespace OpenDental {
 	public partial class FormDefEditWSNPApptTypes:ODForm {
 		private Def _defCur;
 		private AppointmentType _apptTypeCur;
-		private bool _isDeleted;
 
 		public bool IsDeleted {
-			get {
-				return _isDeleted;
-			}
+			get;
+			private set;
 		}
 
 		public FormDefEditWSNPApptTypes(Def defCur) {
 			InitializeComponent();
 			Lan.F(this);
 			_defCur=defCur;
-			if(_defCur!=null) {
-				checkHidden.Checked=_defCur.IsHidden;
-				textName.Text=_defCur.ItemName;
-				//Look for an associated appointment type.
-				List<DefLink> listDefLinks=DefLinks.GetDefLinksByType(DefLinkType.AppointmentType);
-				DefLink defLink=listDefLinks.FirstOrDefault(x => x.DefNum==_defCur.DefNum);
-				if(defLink!=null) {
-					_apptTypeCur=AppointmentTypes.GetFirstOrDefault(x => x.AppointmentTypeNum==defLink.FKey);
-				}
-				FillTextValue();
+			checkHidden.Checked=_defCur.IsHidden;
+			textName.Text=_defCur.ItemName;
+			//Look for an associated appointment type.
+			List<DefLink> listDefLinks=DefLinks.GetDefLinksByType(DefLinkType.AppointmentType);
+			DefLink defLink=listDefLinks.FirstOrDefault(x => x.DefNum==_defCur.DefNum);
+			if(defLink!=null) {
+				_apptTypeCur=AppointmentTypes.GetFirstOrDefault(x => x.AppointmentTypeNum==defLink.FKey);
 			}
+			FillTextValue();
 		}
 
 		private void FillTextValue() {
@@ -45,8 +41,8 @@ namespace OpenDental {
 
 		private void butSelect_Click(object sender,EventArgs e) {
 			FormApptTypes FormAT=new FormApptTypes();
-			FormAT.SelectionMode=true;
-			//TODO: enhance FormApptTypes to pre-select the current appointment type that is associated to this def.
+			FormAT.IsSelectionMode=true;
+			FormAT.SelectedAptType=_apptTypeCur;
 			if(FormAT.ShowDialog()!=DialogResult.OK) {
 				return;
 			}
@@ -71,8 +67,6 @@ namespace OpenDental {
 				return;
 			}
 			_defCur.ItemName=PIn.String(textName.Text);
-			//Set the ItemValue for display purposes only.  This can change in the future if it is needed for something more meaningful.
-			_defCur.ItemValue=(_apptTypeCur==null ? "" : _apptTypeCur.AppointmentTypeName);
 			if(_defCur.IsNew) {
 				Defs.Insert(_defCur);
 			}
@@ -96,7 +90,7 @@ namespace OpenDental {
 			try {
 				Defs.Delete(_defCur);
 				DefLinks.DeleteAllForDef(_defCur.DefNum,DefLinkType.AppointmentType);
-				_isDeleted=true;
+				IsDeleted=true;
 				DialogResult=DialogResult.OK;
 			}
 			catch(ApplicationException ex) {

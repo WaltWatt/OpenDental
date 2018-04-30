@@ -149,12 +149,13 @@ namespace OpenDental{
 			this.gridWebSchedRecallTypes = new OpenDental.UI.ODGrid();
 			this.label20 = new System.Windows.Forms.Label();
 			this.tabWebSchedNewPatAppts = new System.Windows.Forms.TabPage();
-			this.butWSNPAProcedures = new OpenDental.UI.Button();
-			this.label39 = new System.Windows.Forms.Label();
-			this.textWSNPAProcedures = new System.Windows.Forms.TextBox();
-			this.label44 = new System.Windows.Forms.Label();
+			this.groupBox4 = new System.Windows.Forms.GroupBox();
 			this.label43 = new System.Windows.Forms.Label();
+			this.butWSNPAProcedures = new OpenDental.UI.Button();
 			this.textWebSchedNewPatApptLength = new System.Windows.Forms.TextBox();
+			this.label39 = new System.Windows.Forms.Label();
+			this.label44 = new System.Windows.Forms.Label();
+			this.textWSNPAProcedures = new System.Windows.Forms.TextBox();
 			this.label38 = new System.Windows.Forms.Label();
 			this.groupBoxWSNPHostedURLs = new System.Windows.Forms.GroupBox();
 			this.panelHostedURLs = new System.Windows.Forms.FlowLayoutPanel();
@@ -282,7 +283,7 @@ namespace OpenDental{
 			this.dateRunStart = new System.Windows.Forms.DateTimePicker();
 			this.label47 = new System.Windows.Forms.Label();
 			this.label48 = new System.Windows.Forms.Label();
-			this.groupBox4 = new System.Windows.Forms.GroupBox();
+			this.butWSNPAProceduresClear = new OpenDental.UI.Button();
 			this.tabControl.SuspendLayout();
 			this.tabSignup.SuspendLayout();
 			this.tabEConnector.SuspendLayout();
@@ -304,6 +305,7 @@ namespace OpenDental{
 			this.groupBoxWebSchedAutomation.SuspendLayout();
 			this.groupWebSchedPreview.SuspendLayout();
 			this.tabWebSchedNewPatAppts.SuspendLayout();
+			this.groupBox4.SuspendLayout();
 			this.groupBoxWSNPHostedURLs.SuspendLayout();
 			this.groupBox13.SuspendLayout();
 			this.groupBox11.SuspendLayout();
@@ -329,7 +331,6 @@ namespace OpenDental{
 			this.groupDateFormat.SuspendLayout();
 			this.groupNotUsed.SuspendLayout();
 			this.groupBox8.SuspendLayout();
-			this.groupBox4.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// label37
@@ -1818,45 +1819,21 @@ namespace OpenDental{
 			this.tabWebSchedNewPatAppts.Text = "New Patient Appts";
 			this.tabWebSchedNewPatAppts.UseVisualStyleBackColor = true;
 			// 
-			// butWSNPAProcedures
+			// groupBox4
 			// 
-			this.butWSNPAProcedures.AdjustImageLocation = new System.Drawing.Point(0, 0);
-			this.butWSNPAProcedures.Autosize = false;
-			this.butWSNPAProcedures.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
-			this.butWSNPAProcedures.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
-			this.butWSNPAProcedures.CornerRadius = 2F;
-			this.butWSNPAProcedures.Location = new System.Drawing.Point(368, 44);
-			this.butWSNPAProcedures.Name = "butWSNPAProcedures";
-			this.butWSNPAProcedures.Size = new System.Drawing.Size(18, 20);
-			this.butWSNPAProcedures.TabIndex = 337;
-			this.butWSNPAProcedures.Text = "...";
-			this.butWSNPAProcedures.Click += new System.EventHandler(this.butWSNPAProcedures_Click);
-			// 
-			// label39
-			// 
-			this.label39.Location = new System.Drawing.Point(29, 45);
-			this.label39.Name = "label39";
-			this.label39.Size = new System.Drawing.Size(104, 17);
-			this.label39.TabIndex = 336;
-			this.label39.Text = "Procedures";
-			this.label39.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-			// 
-			// textWSNPAProcedures
-			// 
-			this.textWSNPAProcedures.Enabled = false;
-			this.textWSNPAProcedures.Location = new System.Drawing.Point(139, 44);
-			this.textWSNPAProcedures.Multiline = true;
-			this.textWSNPAProcedures.Name = "textWSNPAProcedures";
-			this.textWSNPAProcedures.Size = new System.Drawing.Size(223, 20);
-			this.textWSNPAProcedures.TabIndex = 335;
-			// 
-			// label44
-			// 
-			this.label44.Location = new System.Drawing.Point(255, 21);
-			this.label44.Name = "label44";
-			this.label44.Size = new System.Drawing.Size(136, 19);
-			this.label44.TabIndex = 334;
-			this.label44.Text = "(only /\'s and X\'s)";
+			this.groupBox4.Controls.Add(this.butWSNPAProceduresClear);
+			this.groupBox4.Controls.Add(this.label43);
+			this.groupBox4.Controls.Add(this.butWSNPAProcedures);
+			this.groupBox4.Controls.Add(this.textWebSchedNewPatApptLength);
+			this.groupBox4.Controls.Add(this.label39);
+			this.groupBox4.Controls.Add(this.label44);
+			this.groupBox4.Controls.Add(this.textWSNPAProcedures);
+			this.groupBox4.Location = new System.Drawing.Point(81, 14);
+			this.groupBox4.Name = "groupBox4";
+			this.groupBox4.Size = new System.Drawing.Size(433, 72);
+			this.groupBox4.TabIndex = 338;
+			this.groupBox4.TabStop = false;
+			this.groupBox4.Text = "Default Appointment Settings (Appointment Types Override)";
 			// 
 			// label43
 			// 
@@ -1867,6 +1844,20 @@ namespace OpenDental{
 			this.label43.Text = "Length";
 			this.label43.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
+			// butWSNPAProcedures
+			// 
+			this.butWSNPAProcedures.AdjustImageLocation = new System.Drawing.Point(0, 0);
+			this.butWSNPAProcedures.Autosize = false;
+			this.butWSNPAProcedures.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
+			this.butWSNPAProcedures.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
+			this.butWSNPAProcedures.CornerRadius = 2F;
+			this.butWSNPAProcedures.Location = new System.Drawing.Point(368, 43);
+			this.butWSNPAProcedures.Name = "butWSNPAProcedures";
+			this.butWSNPAProcedures.Size = new System.Drawing.Size(18, 22);
+			this.butWSNPAProcedures.TabIndex = 337;
+			this.butWSNPAProcedures.Text = "...";
+			this.butWSNPAProcedures.Click += new System.EventHandler(this.butWSNPAProcedures_Click);
+			// 
 			// textWebSchedNewPatApptLength
 			// 
 			this.textWebSchedNewPatApptLength.Location = new System.Drawing.Point(139, 18);
@@ -1875,6 +1866,32 @@ namespace OpenDental{
 			this.textWebSchedNewPatApptLength.Size = new System.Drawing.Size(110, 20);
 			this.textWebSchedNewPatApptLength.TabIndex = 332;
 			this.textWebSchedNewPatApptLength.TextChanged += new System.EventHandler(this.textWebSchedNewPatApptLength_TextChanged);
+			// 
+			// label39
+			// 
+			this.label39.Location = new System.Drawing.Point(29, 45);
+			this.label39.Name = "label39";
+			this.label39.Size = new System.Drawing.Size(104, 17);
+			this.label39.TabIndex = 336;
+			this.label39.Text = "Procedures";
+			this.label39.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			// 
+			// label44
+			// 
+			this.label44.Location = new System.Drawing.Point(255, 21);
+			this.label44.Name = "label44";
+			this.label44.Size = new System.Drawing.Size(136, 19);
+			this.label44.TabIndex = 334;
+			this.label44.Text = "(only /\'s and X\'s)";
+			// 
+			// textWSNPAProcedures
+			// 
+			this.textWSNPAProcedures.Enabled = false;
+			this.textWSNPAProcedures.Location = new System.Drawing.Point(139, 44);
+			this.textWSNPAProcedures.Multiline = true;
+			this.textWSNPAProcedures.Name = "textWSNPAProcedures";
+			this.textWSNPAProcedures.Size = new System.Drawing.Size(223, 20);
+			this.textWSNPAProcedures.TabIndex = 335;
 			// 
 			// label38
 			// 
@@ -3401,20 +3418,19 @@ namespace OpenDental{
 			this.label48.Text = "Start Time";
 			this.label48.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
-			// groupBox4
+			// butWSNPAProceduresClear
 			// 
-			this.groupBox4.Controls.Add(this.label43);
-			this.groupBox4.Controls.Add(this.butWSNPAProcedures);
-			this.groupBox4.Controls.Add(this.textWebSchedNewPatApptLength);
-			this.groupBox4.Controls.Add(this.label39);
-			this.groupBox4.Controls.Add(this.label44);
-			this.groupBox4.Controls.Add(this.textWSNPAProcedures);
-			this.groupBox4.Location = new System.Drawing.Point(81, 14);
-			this.groupBox4.Name = "groupBox4";
-			this.groupBox4.Size = new System.Drawing.Size(433, 72);
-			this.groupBox4.TabIndex = 338;
-			this.groupBox4.TabStop = false;
-			this.groupBox4.Text = "Default Appointment Settings (Appointment Types Override)";
+			this.butWSNPAProceduresClear.AdjustImageLocation = new System.Drawing.Point(1, 0);
+			this.butWSNPAProceduresClear.Autosize = true;
+			this.butWSNPAProceduresClear.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
+			this.butWSNPAProceduresClear.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
+			this.butWSNPAProceduresClear.CornerRadius = 4F;
+			this.butWSNPAProceduresClear.Image = global::OpenDental.Properties.Resources.deleteX18;
+			this.butWSNPAProceduresClear.Location = new System.Drawing.Point(392, 43);
+			this.butWSNPAProceduresClear.Name = "butWSNPAProceduresClear";
+			this.butWSNPAProceduresClear.Size = new System.Drawing.Size(21, 22);
+			this.butWSNPAProceduresClear.TabIndex = 339;
+			this.butWSNPAProceduresClear.Click += new System.EventHandler(this.butWSNPAProceduresClear_Click);
 			// 
 			// FormEServicesSetup
 			// 
@@ -3460,6 +3476,8 @@ namespace OpenDental{
 			this.groupWebSchedPreview.PerformLayout();
 			this.tabWebSchedNewPatAppts.ResumeLayout(false);
 			this.tabWebSchedNewPatAppts.PerformLayout();
+			this.groupBox4.ResumeLayout(false);
+			this.groupBox4.PerformLayout();
 			this.groupBoxWSNPHostedURLs.ResumeLayout(false);
 			this.groupBox13.ResumeLayout(false);
 			this.groupBox13.PerformLayout();
@@ -3495,8 +3513,6 @@ namespace OpenDental{
 			this.groupDateFormat.PerformLayout();
 			this.groupNotUsed.ResumeLayout(false);
 			this.groupBox8.ResumeLayout(false);
-			this.groupBox4.ResumeLayout(false);
-			this.groupBox4.PerformLayout();
 			this.ResumeLayout(false);
 
 		}
@@ -3761,5 +3777,6 @@ namespace OpenDental{
 		private System.Windows.Forms.TextBox textWSNPAProcedures;
 		private UI.Button butWSNPAProcedures;
 		private System.Windows.Forms.GroupBox groupBox4;
+		private UI.Button butWSNPAProceduresClear;
 	}
 }

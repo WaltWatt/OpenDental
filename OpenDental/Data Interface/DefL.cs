@@ -311,6 +311,10 @@ namespace OpenDental {
 					string nameCur;
 					row.Cells.Add(dictAutoNoteDefs.TryGetValue(defCur.ItemValue,out nameCur) ? nameCur : defCur.ItemValue);
 				}
+				else if(selectedDefCatOpt.DefCat==DefCat.WebSchedNewPatApptTypes) {
+					AppointmentType appointmentType=AppointmentTypes.GetWebSchedNewPatApptTypeByDef(defCur.DefNum);
+					row.Cells.Add(appointmentType==null ? "" : appointmentType.AppointmentTypeName);
+				}
 				else if(selectedDefCatOpt.DoShowItemOrderInValue) {
 					row.Cells.Add(defCur.ItemOrder.ToString());
 				}

@@ -16,7 +16,11 @@ namespace OpenDental {
 		///<summary>Stale deep copy of _listApptTypes to use with sync.</summary>
 		private List<AppointmentType> _listApptTypesOld;
 		private bool _isChanged=false;
-		public bool SelectionMode;
+		public bool IsSelectionMode;
+		///<summary>The appointment type that was selected if IsSelectionMode is true.
+		///If IsSelectionMode is true and this object is prefilled with an appointment type then the grid will preselect that type if possible.
+		///It is not guaranteed that the appointment type will be selected.
+		///This object should only be read from externally after DialogResult.OK has been returned.  Can be null.</summary>
 		public AppointmentType SelectedAptType;
 
 		public FormApptTypes() {
@@ -26,7 +30,7 @@ namespace OpenDental {
 		}
 
 		private void FormApptTypes_Load(object sender,EventArgs e) {
-			if(SelectionMode) {
+			if(IsSelectionMode) {
 				butOK.Visible=true;
 				butAdd.Visible=false;
 				butDown.Visible=false;
@@ -40,9 +44,19 @@ namespace OpenDental {
 			checkPrompt.Checked=PrefC.GetBool(PrefName.AppointmentTypeShowPrompt);
 			checkWarn.Checked=PrefC.GetBool(PrefName.AppointmentTypeShowWarning);
 			//don't show hidden appointment types in selection mode
-			_listApptTypes=AppointmentTypes.GetDeepCopy(SelectionMode);
+			_listApptTypes=AppointmentTypes.GetDeepCopy(IsSelectionMode);
 			_listApptTypesOld=AppointmentTypes.GetDeepCopy();
 			FillMain();
+			//Preselect the corresponding appointment type once on load.  Do not do this within FillMain().
+			if(SelectedAptType!=null) {
+				for(int i=0;i<gridMain.Rows.Count;i++) {
+					if(((AppointmentType)gridMain.Rows[i].Tag)!=null 
+						&& SelectedAptType.AppointmentTypeNum==((AppointmentType)gridMain.Rows[i].Tag).AppointmentTypeNum) 
+					{
+						gridMain.SetSelected(i,true);
+					}
+				}
+			}
 		}
 
 		private void FillMain() {
@@ -57,18 +71,21 @@ namespace OpenDental {
 			gridMain.Rows.Clear();
 			ODGridRow row;
 			_listApptTypes.Sort(AppointmentTypes.SortItemOrder);
-			for(int i=0;i<_listApptTypes.Count;i++) {
+			foreach(AppointmentType apptType in _listApptTypes) {
 				row=new ODGridRow();
-				row.Cells.Add(_listApptTypes[i].AppointmentTypeName);
+				row.Cells.Add(apptType.AppointmentTypeName);
 				row.Cells.Add("");//color row, no text.
-				row.Cells[1].CellColor=_listApptTypes[i].AppointmentTypeColor;
-				row.Cells.Add(_listApptTypes[i].IsHidden?"X":"");
+				row.Cells[1].CellColor=apptType.AppointmentTypeColor;
+				row.Cells.Add(apptType.IsHidden ? "X" : "");
+				row.Tag=apptType;
 				gridMain.Rows.Add(row);
 			}
-			if(SelectionMode) {
+			//Always add a None option to the end of the list when in selection mode.
+			if(IsSelectionMode) {
 				row=new ODGridRow();
-				row.Cells.Add("None");
+				row.Cells.Add(Lan.g(this,"None"));
 				gridMain.Rows.Add(row);
+				row.Tag=null;
 			}
 			gridMain.EndUpdate();
 		}
@@ -110,13 +127,8 @@ namespace OpenDental {
 		}
 
 		private void gridMain_CellDoubleClick(object sender,ODGridClickEventArgs e) {
-			if(SelectionMode) {
-				if(e.Row>=_listApptTypes.Count) {
-					SelectedAptType=null;
-				}
-				else {
-					SelectedAptType=_listApptTypes[e.Row];
-				}
+			if(IsSelectionMode) {
+				SelectedAptType=gridMain.SelectedTag<AppointmentType>();
 				this.DialogResult=DialogResult.OK;
 			}
 			else {
@@ -238,24 +250,19 @@ namespace OpenDental {
 		}
 
 		private void butOK_Click(object sender,EventArgs e) {
-			if(gridMain.GetSelectedIndex()>=_listApptTypes.Count || gridMain.GetSelectedIndex()==-1) {
-				SelectedAptType=null;
-			}
-			else {
-				SelectedAptType=_listApptTypes[gridMain.GetSelectedIndex()];
-			}
+			SelectedAptType=gridMain.SelectedTag<AppointmentType>();
 			this.DialogResult=DialogResult.OK;
 		}
 
 		private void butClose_Click(object sender,EventArgs e) {
-			if(SelectionMode) {
+			if(IsSelectionMode) {
 				DialogResult=DialogResult.Cancel;
 			}
 			Close();
 		}
 
 		private void FormApptTypes_FormClosing(object sender,FormClosingEventArgs e) {
-			if(!SelectionMode) {
+			if(!IsSelectionMode) {
 				if(_isChanged) {
 					Prefs.UpdateBool(PrefName.AppointmentTypeShowPrompt,checkPrompt.Checked);
 					Prefs.UpdateBool(PrefName.AppointmentTypeShowWarning,checkWarn.Checked);
