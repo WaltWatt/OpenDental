@@ -87,6 +87,9 @@ namespace OpenDentBusiness {
 		///<summary>11. Sending an SMS to let the patient know that a statement is available.</summary>
 		[Description("Statements")]
 		Statements,
+		///<summary>11. Sending an SMS to let the patient know that a statement is available.</summary>
+		[Description("Verify WSNP")]
+		VerifyWSNP,
 	}
 
 	///<summary>None should never be used, the code should be re-written to not use it.</summary>
