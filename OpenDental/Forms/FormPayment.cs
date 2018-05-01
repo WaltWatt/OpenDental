@@ -137,6 +137,7 @@ namespace OpenDental {
 		///<summary>Set to true when X-Charge or PayConnect makes a successful transaction, except for voids.</summary>
 		private bool _wasCreditCardSuccessful;
 		private PayConnectService.creditCardRequest _payConnectRequest;
+		private PaySimple.ApiResponse _paySimpleResponse;
 		private System.Drawing.Printing.PrintDocument _pd2;
 		private Payment _paymentOld;
 		private bool _promptSignature;
@@ -180,6 +181,8 @@ namespace OpenDental {
 		private int _originalHeight;
 		private bool _preferCurrentPat;
 		private UI.Button butPaySimple;
+		private ContextMenu contextMenuPaySimple;
+		private MenuItem menuPaySimple;
 
 		///<summary>Holds most all the data needed to load the form.</summary>
 		private PaymentEdit.LoadData _loadData;
@@ -292,6 +295,7 @@ namespace OpenDental {
 			Lan.F(this);
 			panelXcharge.ContextMenu=contextMenuXcharge;
 			butPayConnect.ContextMenu=contextMenuPayConnect;
+			butPaySimple.ContextMenu=contextMenuPaySimple;
 			_paymentOld=paymentCur.Clone();
 		}
 
@@ -399,6 +403,8 @@ namespace OpenDental {
 			this.comboGroupBy = new System.Windows.Forms.ComboBox();
 			this.butCreatePartial = new OpenDental.UI.Button();
 			this.butAddManual = new OpenDental.UI.Button();
+			this.contextMenuPaySimple = new System.Windows.Forms.ContextMenu();
+			this.menuPaySimple = new System.Windows.Forms.MenuItem();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainerCharges)).BeginInit();
 			this.splitContainerCharges.Panel1.SuspendLayout();
 			this.splitContainerCharges.Panel2.SuspendLayout();
@@ -613,7 +619,6 @@ namespace OpenDental {
 			this.butPaySimple.Size = new System.Drawing.Size(75, 24);
 			this.butPaySimple.TabIndex = 140;
 			this.butPaySimple.Text = "PaySimple";
-			this.butPaySimple.Visible = false;
 			this.butPaySimple.Click += new System.EventHandler(this.butPaySimple_Click);
 			// 
 			// butShowHide
@@ -973,7 +978,7 @@ namespace OpenDental {
 			this.butPay.CornerRadius = 4F;
 			this.butPay.Image = global::OpenDental.Properties.Resources.Left;
 			this.butPay.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.butPay.Location = new System.Drawing.Point(494, 355);
+			this.butPay.Location = new System.Drawing.Point(494, 340);
 			this.butPay.Name = "butPay";
 			this.butPay.Size = new System.Drawing.Size(79, 24);
 			this.butPay.TabIndex = 146;
@@ -998,7 +1003,7 @@ namespace OpenDental {
 			this.gridCharges.Name = "gridCharges";
 			this.gridCharges.ScrollValue = 0;
 			this.gridCharges.SelectionMode = OpenDental.UI.GridSelectionMode.MultiExtended;
-			this.gridCharges.Size = new System.Drawing.Size(588, 244);
+			this.gridCharges.Size = new System.Drawing.Size(588, 229);
 			this.gridCharges.TabIndex = 143;
 			this.gridCharges.Title = "Outstanding Charges";
 			this.gridCharges.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
@@ -1037,7 +1042,7 @@ namespace OpenDental {
 			this.tabControlSplits.Location = new System.Drawing.Point(7, 79);
 			this.tabControlSplits.Name = "tabControlSplits";
 			this.tabControlSplits.SelectedIndex = 0;
-			this.tabControlSplits.Size = new System.Drawing.Size(487, 270);
+			this.tabControlSplits.Size = new System.Drawing.Size(487, 255);
 			this.tabControlSplits.TabIndex = 5;
 			// 
 			// tabPageSplits
@@ -1045,7 +1050,7 @@ namespace OpenDental {
 			this.tabPageSplits.Controls.Add(this.gridSplits);
 			this.tabPageSplits.Location = new System.Drawing.Point(4, 22);
 			this.tabPageSplits.Name = "tabPageSplits";
-			this.tabPageSplits.Size = new System.Drawing.Size(479, 244);
+			this.tabPageSplits.Size = new System.Drawing.Size(479, 229);
 			this.tabPageSplits.TabIndex = 0;
 			this.tabPageSplits.Text = "Splits";
 			this.tabPageSplits.UseVisualStyleBackColor = true;
@@ -1065,7 +1070,7 @@ namespace OpenDental {
 			this.gridSplits.Name = "gridSplits";
 			this.gridSplits.ScrollValue = 0;
 			this.gridSplits.SelectionMode = OpenDental.UI.GridSelectionMode.MultiExtended;
-			this.gridSplits.Size = new System.Drawing.Size(479, 244);
+			this.gridSplits.Size = new System.Drawing.Size(479, 229);
 			this.gridSplits.TabIndex = 0;
 			this.gridSplits.Title = "Current Payment Splits";
 			this.gridSplits.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
@@ -1079,7 +1084,7 @@ namespace OpenDental {
 			this.tabPageAllocated.Controls.Add(this.gridAllocated);
 			this.tabPageAllocated.Location = new System.Drawing.Point(4, 22);
 			this.tabPageAllocated.Name = "tabPageAllocated";
-			this.tabPageAllocated.Size = new System.Drawing.Size(479, 244);
+			this.tabPageAllocated.Size = new System.Drawing.Size(479, 229);
 			this.tabPageAllocated.TabIndex = 1;
 			this.tabPageAllocated.Text = "Allocated";
 			this.tabPageAllocated.UseVisualStyleBackColor = true;
@@ -1099,7 +1104,7 @@ namespace OpenDental {
 			this.gridAllocated.Location = new System.Drawing.Point(2, 2);
 			this.gridAllocated.Name = "gridAllocated";
 			this.gridAllocated.ScrollValue = 0;
-			this.gridAllocated.Size = new System.Drawing.Size(475, 240);
+			this.gridAllocated.Size = new System.Drawing.Size(475, 225);
 			this.gridAllocated.TabIndex = 117;
 			this.gridAllocated.Title = "Split Allocations";
 			this.gridAllocated.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
@@ -1116,7 +1121,7 @@ namespace OpenDental {
 			this.butDelete.CornerRadius = 4F;
 			this.butDelete.Image = global::OpenDental.Properties.Resources.deleteX;
 			this.butDelete.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.butDelete.Location = new System.Drawing.Point(15, 355);
+			this.butDelete.Location = new System.Drawing.Point(15, 340);
 			this.butDelete.Name = "butDelete";
 			this.butDelete.Size = new System.Drawing.Size(100, 24);
 			this.butDelete.TabIndex = 144;
@@ -1363,7 +1368,7 @@ namespace OpenDental {
 			this.butClear.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
 			this.butClear.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
 			this.butClear.CornerRadius = 4F;
-			this.butClear.Location = new System.Drawing.Point(121, 355);
+			this.butClear.Location = new System.Drawing.Point(121, 340);
 			this.butClear.Name = "butClear";
 			this.butClear.Size = new System.Drawing.Size(89, 24);
 			this.butClear.TabIndex = 145;
@@ -1373,7 +1378,7 @@ namespace OpenDental {
 			// textChargeTotal
 			// 
 			this.textChargeTotal.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.textChargeTotal.Location = new System.Drawing.Point(1014, 357);
+			this.textChargeTotal.Location = new System.Drawing.Point(1014, 342);
 			this.textChargeTotal.Name = "textChargeTotal";
 			this.textChargeTotal.ReadOnly = true;
 			this.textChargeTotal.Size = new System.Drawing.Size(51, 20);
@@ -1395,7 +1400,7 @@ namespace OpenDental {
 			// label8
 			// 
 			this.label8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.label8.Location = new System.Drawing.Point(955, 358);
+			this.label8.Location = new System.Drawing.Point(955, 343);
 			this.label8.Name = "label8";
 			this.label8.Size = new System.Drawing.Size(58, 18);
 			this.label8.TabIndex = 155;
@@ -1405,7 +1410,7 @@ namespace OpenDental {
 			// label13
 			// 
 			this.label13.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.label13.Location = new System.Drawing.Point(359, 359);
+			this.label13.Location = new System.Drawing.Point(359, 344);
 			this.label13.Name = "label13";
 			this.label13.Size = new System.Drawing.Size(58, 18);
 			this.label13.TabIndex = 148;
@@ -1415,7 +1420,7 @@ namespace OpenDental {
 			// label7
 			// 
 			this.label7.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.label7.Location = new System.Drawing.Point(701, 358);
+			this.label7.Location = new System.Drawing.Point(701, 343);
 			this.label7.Name = "label7";
 			this.label7.Size = new System.Drawing.Size(77, 18);
 			this.label7.TabIndex = 154;
@@ -1425,7 +1430,7 @@ namespace OpenDental {
 			// textSplitTotal
 			// 
 			this.textSplitTotal.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.textSplitTotal.Location = new System.Drawing.Point(418, 358);
+			this.textSplitTotal.Location = new System.Drawing.Point(418, 343);
 			this.textSplitTotal.Name = "textSplitTotal";
 			this.textSplitTotal.ReadOnly = true;
 			this.textSplitTotal.Size = new System.Drawing.Size(51, 20);
@@ -1436,7 +1441,7 @@ namespace OpenDental {
 			// 
 			this.comboGroupBy.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.comboGroupBy.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.comboGroupBy.Location = new System.Drawing.Point(779, 357);
+			this.comboGroupBy.Location = new System.Drawing.Point(779, 342);
 			this.comboGroupBy.MaxDropDownItems = 30;
 			this.comboGroupBy.Name = "comboGroupBy";
 			this.comboGroupBy.Size = new System.Drawing.Size(111, 21);
@@ -1453,7 +1458,7 @@ namespace OpenDental {
 			this.butCreatePartial.CornerRadius = 4F;
 			this.butCreatePartial.Image = global::OpenDental.Properties.Resources.Add;
 			this.butCreatePartial.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.butCreatePartial.Location = new System.Drawing.Point(579, 355);
+			this.butCreatePartial.Location = new System.Drawing.Point(579, 340);
 			this.butCreatePartial.Name = "butCreatePartial";
 			this.butCreatePartial.Size = new System.Drawing.Size(114, 24);
 			this.butCreatePartial.TabIndex = 150;
@@ -1471,13 +1476,24 @@ namespace OpenDental {
 			this.butAddManual.CornerRadius = 4F;
 			this.butAddManual.Image = global::OpenDental.Properties.Resources.Add;
 			this.butAddManual.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.butAddManual.Location = new System.Drawing.Point(216, 355);
+			this.butAddManual.Location = new System.Drawing.Point(216, 340);
 			this.butAddManual.Name = "butAddManual";
 			this.butAddManual.Size = new System.Drawing.Size(92, 24);
 			this.butAddManual.TabIndex = 151;
 			this.butAddManual.Text = "Add Split";
 			this.butAddManual.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
 			this.butAddManual.Click += new System.EventHandler(this.butAddManualSplit_Click);
+			// 
+			// contextMenuPaySimple
+			// 
+			this.contextMenuPaySimple.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.menuPaySimple});
+			// 
+			// menuPaySimple
+			// 
+			this.menuPaySimple.Index = 0;
+			this.menuPaySimple.Text = "Settings";
+			this.menuPaySimple.Click += new System.EventHandler(this.menuPaySimple_Click);
 			// 
 			// FormPayment
 			// 
@@ -1543,6 +1559,7 @@ namespace OpenDental {
 					checkRecurring.Enabled=false;
 					panelXcharge.Enabled=false;
 					butPayConnect.Enabled=false;
+					butPaySimple.Enabled=false;
 					if(Security.IsAuthorized(Permissions.SplitCreatePastLockDate,true)) {
 						//Since we are enabling the OK button, we need to make sure everything else is disabled (except for Add).
 						butOK.Enabled=true;
@@ -1860,20 +1877,24 @@ namespace OpenDental {
 			_xProg=Programs.GetCur(ProgramName.Xcharge);
 			_xPath=Programs.GetProgramPath(_xProg);
 			Program progPayConnect=Programs.GetCur(ProgramName.PayConnect);
-			if(_xProg==null || progPayConnect==null) {//Should not happen.
+			Program progPaySimple=Programs.GetCur(ProgramName.PaySimple);
+			if(_xProg==null || progPayConnect==null || progPaySimple==null) {//Should not happen.
 				panelXcharge.Visible=(_xProg!=null);
 				butPayConnect.Visible=(progPayConnect!=null);
+				butPaySimple.Visible=(progPaySimple!=null);
 				return;
 			}
 			panelXcharge.Visible=false;
 			butPayConnect.Visible=false;
-			if(!progPayConnect.Enabled && !_xProg.Enabled) {//if neither enabled
-				//show both so user can pick
+			butPaySimple.Visible=false;
+			if(!progPayConnect.Enabled && !_xProg.Enabled && !progPaySimple.Enabled) {//if none enabled
+				//show all so user can pick
 				panelXcharge.Visible=true;
 				butPayConnect.Visible=true;
+				butPaySimple.Visible=true;
 				return;
 			}
-			//show if enabled.  User could have both enabled.
+			//show if enabled.  User could have all enabled.
 			if(progPayConnect.Enabled) {
 				//if clinics are disabled, PayConnect is enabled if marked enabled
 				if(!PrefC.HasClinicsEnabled) {
@@ -1905,13 +1926,30 @@ namespace OpenDental {
 					}
 				}
 			}
-			if(panelXcharge.Visible==false && butPayConnect.Visible==false) {
+			if(progPaySimple.Enabled) {
+				//if clinics are disabled, PaySimple is enabled if marked enabled
+				if(!PrefC.HasClinicsEnabled) {
+					butPaySimple.Visible=true;
+				}
+				else {//if clinics are enabled, PaySimple is enabled if the PaymentType is valid and the Username and Key are not blank
+					string paymentType=ProgramProperties.GetPropVal(progPaySimple.ProgramNum,PaySimple.PropertyDescs.PaySimplePayType,_paymentCur.ClinicNum);
+					if(!string.IsNullOrEmpty(ProgramProperties.GetPropVal(progPaySimple.ProgramNum,PaySimple.PropertyDescs.PaySimpleApiUserName,_paymentCur.ClinicNum))
+						&& !string.IsNullOrEmpty(ProgramProperties.GetPropVal(progPaySimple.ProgramNum,PaySimple.PropertyDescs.PaySimpleApiKey,_paymentCur.ClinicNum))
+						&& _listPaymentTypeDefs.Any(x => x.DefNum.ToString()==paymentType)) {
+						butPaySimple.Visible=true;
+					}
+				}
+			}
+			if(panelXcharge.Visible==false && butPayConnect.Visible==false && butPaySimple.Visible==false) {
 				//This is an office with clinics and one of the payment processing bridges is enabled but this particular clinic doesn't have one set up.
 				if(_xProg.Enabled) {
 					panelXcharge.Visible=true;
 				}
 				if(progPayConnect.Enabled) {
 					butPayConnect.Visible=true;
+				}
+				if(progPaySimple.Enabled) {
+					butPaySimple.Visible=true;
 				}
 			}
 		}
@@ -3481,7 +3519,7 @@ namespace OpenDental {
 			MakePaySimpleTransaction();
 		}
 
-		private string MakePaySimpleTransaction(double prepaidAmt=0) {
+		public string MakePaySimpleTransaction(double prepaidAmt=0) {
 			if(!HasPaySimple()) {
 				return null;
 			}
@@ -3497,9 +3535,129 @@ namespace OpenDental {
 			else {//Prepaid card
 				amount=(decimal)prepaidAmt;
 			}
-			FormPaySimple form=new FormPaySimple(_paymentCur.ClinicNum,_patCur,textAmount.Value,cc);
+			FormPaySimple form=new FormPaySimple(_paymentCur.ClinicNum,_patCur,prepaidAmt,cc);
 			form.ShowDialog();
-			return "";
+			if(prepaidAmt==0) {//Regular credit cards (not prepaid cards).
+				//If PayConnect response is not null, refresh comboCreditCards and select the index of the card used for this payment if the token was saved
+				creditCards=CreditCards.Refresh(_patCur.PatNum);
+				comboCreditCards.Items.Clear();
+				comboCreditCards.SelectedIndex=-1;
+				string paySimpleToken=cc==null ? "" : cc.PaySimpleToken;
+				if(form.ApiResponseOut!=null) {
+					paySimpleToken=form.ApiResponseOut.PaySimpleToken;
+				}
+				for(int i=0;i<creditCards.Count;i++) {
+					comboCreditCards.Items.Add(creditCards[i].CCNumberMasked);
+					if(string.IsNullOrEmpty(paySimpleToken)) {
+						continue;
+					}
+					if(creditCards[i].PaySimpleToken==paySimpleToken) {
+						comboCreditCards.SelectedIndex=i;
+					}
+				}
+				comboCreditCards.Items.Add(Lan.g(this,"New card"));
+				if(comboCreditCards.SelectedIndex==-1) {
+					comboCreditCards.SelectedIndex=comboCreditCards.Items.Count-1;
+				}
+				Program prog=Programs.GetCur(ProgramName.PaySimple);
+				//still need to add functionality for accountingAutoPay
+				string paytype=ProgramProperties.GetPropVal(prog.ProgramNum,PaySimple.PropertyDescs.PaySimplePayType,_paymentCur.ClinicNum);//paytype could be an empty string
+				listPayType.SelectedIndex=Defs.GetOrder(DefCat.PaymentTypes,PIn.Long(paytype));
+				SetComboDepositAccounts();
+			}
+			if(prepaidAmt!=0) {
+				if(form.ApiResponseOut!=null) { //The transaction succeeded.
+					return form.ApiResponseOut.ToNoteString();
+				}
+				return null;
+			}
+			string resultNote=null;
+			if(form.ApiResponseOut!=null) { //The transaction succeeded.
+				_isCCDeclined=false;
+				resultNote=form.ApiResponseOut.ToNoteString();
+				if(form.ApiResponseOut.TransType==PaySimple.TransType.RETURN) {
+					textAmount.Text="-"+form.ApiResponseOut.Amount.ToString("F");
+					_paymentCur.Receipt=form.ApiResponseOut.TransactionReceipt;
+				}
+				else if(form.ApiResponseOut.TransType==PaySimple.TransType.AUTH) {
+					textAmount.Text=form.ApiResponseOut.Amount.ToString("F");
+				}
+				else if(form.ApiResponseOut.TransType==PaySimple.TransType.SALE) {
+					textAmount.Text=form.ApiResponseOut.Amount.ToString("F");
+					_paymentCur.Receipt=form.ApiResponseOut.TransactionReceipt;
+				}
+				if(form.ApiResponseOut.TransType==PaySimple.TransType.VOID) {//Close FormPayment window now so the user will not have the option to hit Cancel
+					if(IsNew) {
+						if(!_wasCreditCardSuccessful) {
+							textAmount.Text="-"+form.ApiResponseOut.Amount.ToString("F");
+							textNote.Text+=((textNote.Text=="") ? "" : Environment.NewLine)+resultNote;
+						}
+						_paymentCur.Receipt=form.ApiResponseOut.TransactionReceipt;
+						if(SavePaymentToDb()) {
+							MsgBox.Show(this,"Void successful.");
+							DialogResult=DialogResult.OK;//Close FormPayment window now so the user will not have the option to hit Cancel
+						}
+						return resultNote;
+					}
+					if(!IsNew || _wasCreditCardSuccessful) {//Create a new negative payment if the void is being run from an existing payment
+						if(_listSplitsCur.Count==0) {
+							AddOneSplit();
+							FillGridSplits();
+						}
+						else if(_listSplitsCur.Count==1//if one split
+							&& _listSplitsCur[0].PayPlanNum!=0//and split is on a payment plan
+							&& _listSplitsCur[0].SplitAmt!=_paymentCur.PayAmt)//and amount doesn't match payment
+						{
+							_listSplitsCur[0].SplitAmt=_paymentCur.PayAmt;//make amounts match automatically
+							textSplitTotal.Text=textAmount.Text;
+						}
+						_paymentCur.IsSplit=_listSplitsCur.Count>1;
+						Payment voidPayment=_paymentCur.Clone();
+						voidPayment.PayAmt*=-1;//the negation of the original amount
+						voidPayment.PayNote=resultNote;
+						voidPayment.Receipt=form.ApiResponseOut.TransactionReceipt;
+						voidPayment.PaymentSource=CreditCardSource.PayConnect;
+						voidPayment.ProcessStatus=ProcessStat.OfficeProcessed;
+						voidPayment.PayNum=Payments.Insert(voidPayment);
+						foreach(PaySplit splitCur in _listSplitsCur) {//Modify the paysplits for the original transaction to work for the void transaction
+							PaySplit split=splitCur.Copy();
+							split.SplitAmt*=-1;
+							split.PayNum=voidPayment.PayNum;
+							PaySplits.Insert(split);
+						}
+					}
+					MsgBox.Show(this,"Void successful.");
+					DialogResult=DialogResult.OK;//Close FormPayment window now so the user will not have the option to hit Cancel
+					return resultNote;
+				}
+				else {//Not Void
+					_wasCreditCardSuccessful=true; //Will void the transaction if user cancels out of window.
+				}
+				_paySimpleResponse=form.ApiResponseOut;
+			}
+			if(!string.IsNullOrWhiteSpace(resultNote)) {
+				textNote.Text+=((textNote.Text=="") ? "" : Environment.NewLine)+resultNote;
+			}
+			textNote.Select(Math.Max(textNote.Text.Length-1,textNote.Text.Length),0);
+			textNote.ScrollToCaret();//Scroll to the end of the text box to see the newest notes.
+			_paymentOld.PayNote=textNote.Text;
+			_paymentOld.PaymentSource=CreditCardSource.PaySimple;
+			_paymentOld.ProcessStatus=ProcessStat.OfficeProcessed;
+			Payments.Update(_paymentOld,true);
+			if(!string.IsNullOrEmpty(_paymentCur.Receipt)) {
+				butPrintReceipt.Visible=true;
+				if(PrefC.GetBool(PrefName.AllowEmailCCReceipt)) {
+					butEmailReceipt.Visible=true;
+				}
+			}
+			if(form.ApiResponseOut==null) { //The transaction failed.
+				//PayConnect checks the transaction type here and sets the amount the user chose to the textAmount textbox. 
+				//We don't have that information here so do nothing.
+				_isCCDeclined=true;
+				_wasCreditCardSuccessful=false;
+				return null;
+			}
+			return resultNote;
 		}
 
 		///<summary>Returns true if payconnect is enabled and completely setup.</summary>
@@ -3591,6 +3749,56 @@ namespace OpenDental {
 			}
 		}
 
+		private void VoidPaySimpleTransaction(string refNum,string originalReceipt) {
+			PaySimple.ApiResponse response=null;
+			string receiptStr="";
+			Cursor=Cursors.WaitCursor;
+			try {
+				response=PaySimple.VoidPayment(refNum,_paymentCur.ClinicNum);
+			}
+			catch(ODException wex) {
+				MessageBox.Show(wex.Message);//This should have already been Lans.g if applicable.
+				return;
+			}
+			catch(Exception ex) {
+				MessageBox.Show(Lan.g(this,"Error:")+" "+ex.Message);
+				return;
+			}
+			string[] arrayTrans=originalReceipt.Replace("\r\n","\n").Replace("\r","\n").Split(new string[] { "\n" },StringSplitOptions.RemoveEmptyEntries);
+			string ccNum="";
+			string expDateStr="";
+			string nameOnCard="";
+			for(int i=0;i<arrayTrans.Length;i++) {
+				if(arrayTrans[i].StartsWith("Name")) {
+					nameOnCard=arrayTrans[i].Substring(4).Replace(".","");
+				}
+				if(arrayTrans[i].StartsWith("Account")) {
+					ccNum=arrayTrans[i].Substring(7).Replace(".","");
+				}
+				if(arrayTrans[i].StartsWith("Exp Date")) {
+					expDateStr=arrayTrans[i].Substring(8).Replace(".","");
+				}
+			}
+			response.BuildReceiptString(ccNum,PIn.Int(expDateStr.Substring(0,2)),PIn.Int(expDateStr.Substring(2)),nameOnCard,_paymentCur.ClinicNum);
+			receiptStr=response.TransactionReceipt;
+			Cursor=Cursors.Default;
+			Payment voidPayment=_paymentCur.Clone();
+			voidPayment.PayAmt*=-1; //The negated amount of the original payment
+			voidPayment.Receipt=receiptStr;
+			voidPayment.PayNote=response.ToNoteString();
+			voidPayment.PaymentSource=CreditCardSource.PaySimple;
+			voidPayment.ProcessStatus=ProcessStat.OfficeProcessed;
+			voidPayment.PayNum=Payments.Insert(voidPayment);
+			for(int i=0;i<_listSplitsCur.Count;i++) {//Modify the paysplits for the original transaction to work for the void transaction
+				PaySplit split=_listSplitsCur[i].Copy();
+				split.SplitAmt*=-1;
+				split.PayNum=voidPayment.PayNum;
+				PaySplits.Insert(split);
+			}
+			SecurityLogs.MakeLogEntry(Permissions.PaymentCreate,voidPayment.PatNum,
+				Patients.GetLim(voidPayment.PatNum).GetNameLF()+", "+voidPayment.PayAmt.ToString("c"));
+		}
+
 		private void menuXcharge_Click(object sender,EventArgs e) {
 			if(Security.IsAuthorized(Permissions.Setup)) {
 				FormXchargeSetup FormX=new FormXchargeSetup();
@@ -3603,6 +3811,14 @@ namespace OpenDental {
 			if(Security.IsAuthorized(Permissions.Setup)) {
 				FormPayConnectSetup fpcs=new FormPayConnectSetup();
 				fpcs.ShowDialog();
+				CheckUIState();
+			}
+		}
+
+		private void menuPaySimple_Click(object sender,EventArgs e) {
+			if(Security.IsAuthorized(Permissions.Setup)) {
+				FormPaySimpleSetup form=new FormPaySimpleSetup();
+				form.ShowDialog();
 				CheckUIState();
 			}
 		}
@@ -4613,6 +4829,7 @@ namespace OpenDental {
 			string refNum="";
 			string amount="";
 			string transactionID="";
+			string paySimplePaymentId="";
 			bool isDebit=false;
 			string[] arrayTrans=textNote.Text.Replace("\r\n","\n").Replace("\r","\n").Split(new string[] { "\n" },StringSplitOptions.RemoveEmptyEntries);
 			for(int i=0;i<arrayTrans.Length;i++) {
@@ -4631,12 +4848,22 @@ namespace OpenDental {
 				if(arrayTrans[i].StartsWith("TYPE=") && arrayTrans[i].Substring(5)=="Debit Purchase") {
 					isDebit=true;
 				}
+				if(arrayTrans[i].StartsWith(Lan.g("PaySimple","PaySimple Transaction Number"))) {
+					paySimplePaymentId=arrayTrans[i].Split(':')[1].Trim();//Lame, but better than substring 28 and a prayer to the Lans.g gods.  Alternatively we can remote Lans.g from paysimple receipts.
+				}
 			}
 			if(refNum!="") {//Void the PayConnect transaction if there is one
 				VoidPayConnectTransaction(refNum,amount);
 			}
 			else if(transactionID!="" && HasXCharge()) {//Void the X-Charge transaction if there is one
 				VoidXChargeTransaction(transactionID,amount,isDebit);
+			}
+			else if(!string.IsNullOrWhiteSpace(paySimplePaymentId)) {
+				string originalReceipt=_paymentCur.Receipt;
+				if(_paySimpleResponse!=null) {
+					originalReceipt=_paySimpleResponse.TransactionReceipt;
+				}
+				VoidPaySimpleTransaction(paySimplePaymentId,originalReceipt);
 			}
 			else {
 				MsgBox.Show(this,"Unable to void transaction");

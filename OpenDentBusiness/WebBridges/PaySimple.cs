@@ -22,13 +22,13 @@ namespace OpenDentBusiness {
 		}
 
 		///<summary>Throws exceptions.  Will purposefully throw ODExceptions that are already translated and formatted.</summary>
-		public static long AddCustomer(string fname,string lname,string idInDb = "",long clinicNum = -1) {
+		public static long AddCustomer(string fname,string lname,string idInDb="",long clinicNum=-1) {
 			ValidateProgram(clinicNum);
 			return PaySimpleApi.PostCustomer(GetAuthHeader(clinicNum),PaySimpleApi.MakeNewCustomerData(fname,lname,idInDb));
 		}
 
 		///<summary>Throws exceptions.  Will purposefully throw ODExceptions that are already translated and and formatted.</summary>
-		public static ApiResponse AddCreditCard(long customerId,string ccNum,DateTime ccExpDate,string billingZipCode = "",long clinicNum = -1) {
+		public static ApiResponse AddCreditCard(long customerId,string ccNum,DateTime ccExpDate,string billingZipCode="",long clinicNum=-1) {
 			ValidateProgram(clinicNum);
 			if(customerId==0) {
 				throw new ODException(Lans.g("PaySimple","Invalid PaySimple Customer ID provided: ")+customerId.ToString());
@@ -39,7 +39,7 @@ namespace OpenDentBusiness {
 		///<summary>Throws exceptions.  Will purposefully throw ODExceptions that are already translated and and formatted.
 		///If PatNum is 0, we will make a one time payment for an UNKNOWN patient.  This is currently only intended for prepaid insurance cards.
 		///Returns the PaymentId given by PaySimple.</summary>
-		public static ApiResponse MakePayment(long patNum,CreditCard cc,decimal payAmt,string ccNum,DateTime ccExpDate,bool isOneTimePayment,string billingZipCode = "",string cvv = "",long clinicNum = -1) {
+		public static ApiResponse MakePayment(long patNum,CreditCard cc,decimal payAmt,string ccNum,DateTime ccExpDate,bool isOneTimePayment,string billingZipCode="",string cvv="",long clinicNum=-1) {
 			ValidateProgram(clinicNum);
 			if(patNum==0) {
 				//MakePaymentNoPat will validate its credentials.
@@ -75,7 +75,7 @@ namespace OpenDentBusiness {
 
 		///<summary>Throws exceptions.  Will purposefully throw ODExceptions that are already translated and and formatted.
 		///Returns the PaymentId given by PaySimple.</summary>
-		public static ApiResponse MakePaymentByToken(CreditCard cc,decimal payAmt,long clinicNum = -1) {
+		public static ApiResponse MakePaymentByToken(CreditCard cc,decimal payAmt,long clinicNum=-1) {
 			ValidateProgram(clinicNum);
 			if(cc==null || string.IsNullOrWhiteSpace(cc.PaySimpleToken)) {
 				throw new ODException(Lans.g("PaySimple","Error making payment by token"));
@@ -84,7 +84,7 @@ namespace OpenDentBusiness {
 		}
 
 		///<summary>Throws exceptions.  Will purposefully throw ODExceptions that are already translated and and formatted.</summary>
-		public static ApiResponse VoidPayment(string paySimplePaymentId,long clinicNum = -1) {
+		public static ApiResponse VoidPayment(string paySimplePaymentId,long clinicNum=-1) {
 			ValidateProgram(clinicNum);
 			if(string.IsNullOrWhiteSpace(paySimplePaymentId)) {
 				throw new Exception(Lans.g("PaySimple","Invalid PaySimple Payment ID to void."));
@@ -93,7 +93,7 @@ namespace OpenDentBusiness {
 		}
 
 		///<summary>Throws exceptions.  Will purposefully throw ODExceptions that are already translated and and formatted.</summary>
-		public static ApiResponse ReversePayment(string paySimplePaymentId,long clinicNum = -1) {
+		public static ApiResponse ReversePayment(string paySimplePaymentId,long clinicNum=-1) {
 			ValidateProgram(clinicNum);
 			if(string.IsNullOrWhiteSpace(paySimplePaymentId)) {
 				throw new Exception(Lans.g("PaySimple","Invalid PaySimple Payment ID to reverse."));
@@ -103,7 +103,7 @@ namespace OpenDentBusiness {
 
 		///<summary>Throws exceptions.  Will purposefully throw ODExceptions that are already translated and and formatted.
 		///Returns the PaymentId given by PaySimple.</summary>
-		private static ApiResponse MakePaymentNoPat(decimal payAmt,string ccNum,DateTime ccExpDate,string billingZipCode = "",string cvv = "",long clinicNum = -1) {
+		private static ApiResponse MakePaymentNoPat(decimal payAmt,string ccNum,DateTime ccExpDate,string billingZipCode="",string cvv="",long clinicNum=-1) {
 			ValidateProgram(clinicNum);
 			if(string.IsNullOrWhiteSpace(ccNum) || ccExpDate.Year<DateTime.Today.Year) {
 				throw new ODException(Lans.g("PaySimple","Error making payment"));
@@ -115,7 +115,7 @@ namespace OpenDentBusiness {
 		}
 
 		///<summary>Returns the Authorization header for the api call, using the passed in clinicNum if provided, otherwise uses the currently selected clinic.</summary>
-		private static string GetAuthHeader(long clinicNum = -1) {
+		private static string GetAuthHeader(long clinicNum=-1) {
 			if(clinicNum==-1) {
 				clinicNum=Clinics.ClinicNum;
 			}
@@ -134,7 +134,7 @@ namespace OpenDentBusiness {
 
 		///<summary>Throws exceptions if the PaySimple program or program properties are not valid.
 		///If this method doesn't throw an exception, everything is assumed to be valid.</summary>
-		private static void ValidateProgram(long clinicNum = -1) {
+		private static void ValidateProgram(long clinicNum=-1) {
 			if(clinicNum==-1) {
 				clinicNum=Clinics.ClinicNum;
 			}
@@ -151,11 +151,11 @@ namespace OpenDentBusiness {
 				throw new ODException(Lans.g("PaySimple","PaySimple Username or Key is empty."));
 			}
 		}
-
+		
 		///<summary>Returns the CustomerId that PaySimple gave us for the given patNum.
 		///If addToPaySimpleIfMissing, the PaySimple API will add the given patNum if a link isn't in our database and return the new CustomerId.
 		///Otherwise, it will return 0.</summary>
-		public static long GetCustomerIdForPat(long patNum,string fname,string lname,long clinicNum = -1) {
+		public static long GetCustomerIdForPat(long patNum,string fname,string lname,long clinicNum=-1) {
 			long psCustomerId=PatientLinks.GetPatNumsLinkedFrom(patNum,PatientLinkType.PaySimple).FirstOrDefault();
 			if(psCustomerId==0) {//Patient doesn't have a PaySimpleCustomerId
 				psCustomerId=AddCustomer(fname,lname,(patNum>0 ? "PatNum: "+patNum.ToString() : ""),clinicNum);
@@ -190,7 +190,7 @@ namespace OpenDentBusiness {
 
 			///<summary>Builds the receipt string for a web service transaction.
 			///This method assumes ccExpYear is a 4 digit integer.</summary>
-			public void BuildReceiptString(string ccNum,int ccExpMonth,int ccExpYear,string nameOnCard,long clinicNum,bool wasSwiped = false) {
+			public void BuildReceiptString(string ccNum,int ccExpMonth,int ccExpYear,string nameOnCard,long clinicNum,bool wasSwiped=false) {
 				string result="";
 				int xleft=0;
 				int xright=15;
@@ -573,7 +573,7 @@ namespace OpenDentBusiness {
 							},
 							AccountId=(long)0,
 							InvoiceId="",
-							Amount=0.0,
+							Amount=(decimal)0.0,
 							IsDebit=false,
 							InvoiceNumber="123AB",//Can have alpha characters
 							PurchaseOrderNumber="",
@@ -600,12 +600,13 @@ namespace OpenDentBusiness {
 					PaySimpleToken=response.Response.AccountId.ToString(),
 					RefNumber=response.Response.ReferenceId.ToString(),//TODO:  Check that this ID is actually the same as paymentID.  I would prefer to get it from PaySimple instead of my parameter,
 					TransType=TransType.RETURN,
+					Amount=response.Response.Amount,
 				};
 			}
 
 			///<summary>Throws exception if the response from the server returned an http code of 300 or greater.</summary>
-			private static T Request<T>(ApiRoute route,HttpMethod method,string authHeader,string body,T responseType,string routeId = "") {
-				using(WebClient client = new WebClient()) {
+			private static T Request<T>(ApiRoute route,HttpMethod method,string authHeader,string body,T responseType,string routeId="") {
+				using(WebClient client=new WebClient()) {
 					client.Headers[HttpRequestHeader.Accept]="application/json";
 					client.Headers[HttpRequestHeader.ContentType]="application/json";
 					client.Headers[HttpRequestHeader.Authorization]=authHeader;
@@ -635,7 +636,7 @@ namespace OpenDentBusiness {
 					}
 					catch(WebException wex) {
 						string res="";
-						using(var sr = new StreamReader(((HttpWebResponse)wex.Response).GetResponseStream())) {
+						using(var sr=new StreamReader(((HttpWebResponse)wex.Response).GetResponseStream())) {
 							res=sr.ReadToEnd();
 						}
 						if(string.IsNullOrWhiteSpace(res)) {
@@ -663,16 +664,16 @@ namespace OpenDentBusiness {
 				}
 			}
 
-			#region MakePostData
+#region MakePostData
 
-			public static string MakeNewPaymentData(long accountId,decimal amt,string cvv = "") {
+			public static string MakeNewPaymentData(long accountId,decimal amt,string cvv="") {
 				return JsonConvert.SerializeObject(new {
 					//Required fields:
-					AccountId = accountId,
-					Amount = amt,
+					AccountId=accountId,
+					Amount=amt,
 					//Optional fields:
 					//IsDebit=true,
-					CVV = cvv,
+					CVV=cvv,
 					//PaymentSubType="MOTO",
 					//InvoiceId="",
 					//InvoiceNumber="",
@@ -690,44 +691,44 @@ namespace OpenDentBusiness {
 				});
 			}
 
-			public static string MakeNewCustomerData(string fname,string lname,string idInDb = "") {
+			public static string MakeNewCustomerData(string fname,string lname,string idInDb="") {
 				return JsonConvert.SerializeObject(new {
 					//Required fields:
-					FirstName = fname,
-					LastName = lname,
-					ShippingSameAsBilling = true,//Hardcoded because we don't support this
-												 //Optional fields:
-												 //BillingAddress=new {
-												 //	StreetAddress1="",
-												 //	StreetAddress2="",
-												 //	City="",
-												 //	StateCode="",
-												 //	ZipCode="",
-												 //	Country="",
-												 //},
-												 //ShippingAddress="",
-												 //Company="",
-												 //Notes="",
-					CustomerAccount = idInDb,
+					FirstName=fname,
+					LastName=lname,
+					ShippingSameAsBilling=true,//Hardcoded because we don't support this
+					//Optional fields:
+					//BillingAddress=new {
+					//	StreetAddress1="",
+					//	StreetAddress2="",
+					//	City="",
+					//	StateCode="",
+					//	ZipCode="",
+					//	Country="",
+					//},
+					//ShippingAddress="",
+					//Company="",
+					//Notes="",
+					CustomerAccount=idInDb,
 					//Email="",
 					//Phone="",
 				});
 			}
 
-			public static string MakeNewAccountCreditCardData(long customerId,string ccNum,DateTime ccExpDate,int issuer,string billingZipCode = "") {
+			public static string MakeNewAccountCreditCardData(long customerId,string ccNum,DateTime ccExpDate,int issuer,string billingZipCode="") {
 				return JsonConvert.SerializeObject(new {
 					//Required fields:
-					CustomerId = customerId,
-					CreditCardNumber = ccNum,
-					ExpirationDate = ccExpDate.ToString("MM/yyyy"),
-					Issuer = issuer,
-					IsDefault = false,
+					CustomerId=customerId,
+					CreditCardNumber=ccNum,
+					ExpirationDate=ccExpDate.ToString("MM/yyyy"),
+					Issuer=issuer,
+					IsDefault=false,
 					//Optional fields:
-					BillingZipCode = billingZipCode,
+					BillingZipCode=billingZipCode,
 				});
 			}
 
-			#endregion
+#endregion
 
 			public static string GetAuthHeader(string apiUserName,string apiKey) {
 				string nowAsString=DateTime.Now.ToString(@"yyyy-MM-ddTHH\:mm\:sszzz");//This matches the PaySimple documentation for C#.
@@ -763,7 +764,7 @@ namespace OpenDentBusiness {
 			}
 
 			///<summary>Returns the full URL according to the route/route id given.</summary>
-			private static string GetApiUrl(ApiRoute route,string routeId = "") {
+			private static string GetApiUrl(ApiRoute route,string routeId="") {
 #if DEBUG
 				string apiUrl="https://sandbox-api.paysimple.com/v4";
 #else

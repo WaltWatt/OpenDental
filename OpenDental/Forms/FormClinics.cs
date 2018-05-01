@@ -744,6 +744,7 @@ namespace OpenDental {
 			//We are doing this because of a previous bug that caused some customers to have over 3.4 million duplicate rows in their programproperty table
 			long payConnectProgNum=Programs.GetProgramNum(ProgramName.PayConnect);
 			long xChargeProgNum=Programs.GetProgramNum(ProgramName.Xcharge);
+			//Don't need to do this for PaySimple, because these will get generated as needed in FormPaySimpleSetup
 			bool hasChanges=ProgramProperties.InsertForClinic(payConnectProgNum,
 				ListClinics.Select(x => x.ClinicNum)
 					.Where(x => ProgramProperties.GetListForProgramAndClinic(payConnectProgNum,x).Count==0).ToList());

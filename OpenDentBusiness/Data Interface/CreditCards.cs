@@ -33,7 +33,7 @@ namespace OpenDentBusiness{
 		public static List<CreditCard> Refresh(long patNum){
 			//No need to check RemotingRole; no call to db.
 			return RefreshBySource(patNum,new List<CreditCardSource>() { CreditCardSource.None,CreditCardSource.PayConnect,CreditCardSource.XServer,
-				CreditCardSource.XServerPayConnect,CreditCardSource.XWeb,CreditCardSource.XWebPortalLogin });
+				CreditCardSource.XServerPayConnect,CreditCardSource.XWeb,CreditCardSource.XWebPortalLogin,CreditCardSource.PaySimple });
 		}
 
 		///<summary>Get all credit cards by a given list of CreditCardSource(s). Optionally filter by a given patNum.</summary>
@@ -94,6 +94,7 @@ namespace OpenDentBusiness{
 				PayPlanNum=0,
 				PayConnectToken="",
 				PayConnectTokenExp=DateTime.MinValue,
+				PaySimpleToken="",
 				Procedures="",
 			});
 		}
@@ -175,14 +176,14 @@ namespace OpenDentBusiness{
 			//NOTE: Query will return patients with or without payments regardless of when that payment occurred, filtering is done below.
 			string command="SELECT CreditCardNum,PatNum,PatName,FamBalTotal,PayPlanDue,"+POut.Date(DateTime.MinValue)+" AS LatestPayment,DateStart,Address,"
 				+"AddressPat,Zip,ZipPat,XChargeToken,CCNumberMasked,CCExpiration,ChargeAmt,PayPlanNum,ProvNum,PayPlanPatnum,ClinicNum,Procedures,BillingCycleDay,Guarantor,"
-				+"PayConnectToken,PayConnectTokenExp "
+				+"PayConnectToken,PayConnectTokenExp,PaySimpleToken "
 				+"FROM (";
 			#region Payments
 			//The PayOrder is used to differentiate rows attached to payment plans
 			command+="(SELECT 1 AS PayOrder,cc.CreditCardNum,cc.PatNum,"+DbHelper.Concat("pat.LName","', '","pat.FName")+" PatName,"
 				+"guar.LName GuarLName,guar.FName GuarFName,guar.BalTotal-guar.InsEst FamBalTotal,0 AS PayPlanDue,"
 				+"cc.DateStart,cc.Address,pat.Address AddressPat,cc.Zip,pat.Zip ZipPat,cc.XChargeToken,cc.CCNumberMasked,cc.CCExpiration,cc.ChargeAmt,"
-				+"cc.PayPlanNum,cc.DateStop,0 ProvNum,0 PayPlanPatNum,pat.ClinicNum,cc.Procedures,pat.BillingCycleDay,pat.Guarantor,cc.PayConnectToken,cc.PayConnectTokenExp "
+				+"cc.PayPlanNum,cc.DateStop,0 ProvNum,0 PayPlanPatNum,pat.ClinicNum,cc.Procedures,pat.BillingCycleDay,pat.Guarantor,cc.PayConnectToken,cc.PayConnectTokenExp,cc.PaySimpleToken "
 				+"FROM creditcard cc "
 				+"INNER JOIN patient pat ON pat.PatNum=cc.PatNum "
 				+"INNER JOIN patient guar ON guar.PatNum=pat.Guarantor "
@@ -197,7 +198,7 @@ namespace OpenDentBusiness{
 			else {//Oracle
 				command+="GROUP BY cc.CreditCardNum,cc.PatNum,"+DbHelper.Concat("pat.LName","', '","pat.FName")+",PatName,guar.BalTotal-guar.InsEst,"
 					+"cc.Address,pat.Address,cc.Zip,pat.Zip,cc.XChargeToken,cc.CCNumberMasked,cc.CCExpiration,cc.ChargeAmt,cc.PayPlanNum,cc.DateStop,PayPlanPatNum,"
-					+"pat.ClinicNum,cc.Procedures,pat.BillingCycleDay,pat.Guarantor,cc.PayConnectToken,cc.PayConnectTokenExp) ";
+					+"pat.ClinicNum,cc.Procedures,pat.BillingCycleDay,pat.Guarantor,cc.PayConnectToken,cc.PayConnectTokenExp,cc.PaySimpleToken) ";
 			}
 			#endregion
 			command+="UNION ALL ";
@@ -207,7 +208,7 @@ namespace OpenDentBusiness{
 				+"ROUND(COALESCE(ppc.pastCharges,0)-COALESCE(SUM(ps.SplitAmt),0),2) PayPlanDueCalc,"//payplancharges-paysplits attached to pp is PayPlanDueCalc
 				+"cc.DateStart,cc.Address,pat.Address AddressPat,cc.Zip,pat.Zip ZipPat,cc.XChargeToken,cc.CCNumberMasked,cc.CCExpiration,cc.ChargeAmt,"
 				+"cc.PayPlanNum,cc.DateStop,COALESCE(ppc.maxProvNum,0) ProvNum,COALESCE(ppc.maxPatNum,0) PayPlanPatNum,COALESCE(ppc.maxClinicNum,0) ClinicNum,cc.Procedures,"
-				+"pat.BillingCycleDay,pat.Guarantor,cc.PayConnectToken,cc.PayConnectTokenExp "
+				+"pat.BillingCycleDay,pat.Guarantor,cc.PayConnectToken,cc.PayConnectTokenExp,cc.PaySimpleToken "
 				+"FROM creditcard cc "
 				+"INNER JOIN patient pat ON pat.PatNum=cc.PatNum "
 				+"INNER JOIN patient guar ON guar.PatNum=pat.Guarantor "
@@ -230,7 +231,7 @@ namespace OpenDentBusiness{
 			else {//Oracle
 				command+="GROUP BY cc.CreditCardNum,cc.PatNum,"+DbHelper.Concat("pat.LName","', '","pat.FName")+",PatName,guar.BalTotal-guar.InsEst,"
 					+"cc.Address,pat.Address,cc.Zip,pat.Zip,cc.XChargeToken,cc.CCNumberMasked,cc.CCExpiration,cc.ChargeAmt,cc.PayPlanNum,cc.DateStop,PayPlanPatNum,"
-					+"ClinicNum,cc.Procedues,pat.BillingCycleDay,pat.Guarantor,cc.PayConnectToken,cc.PayConnectTokenExp ";
+					+"ClinicNum,cc.Procedues,pat.BillingCycleDay,pat.Guarantor,cc.PayConnectToken,cc.PayConnectTokenExp,cc.PaySimpleToken ";
 			}
 			command+="HAVING PayPlanDueCalc>0)";//don't show cc's attached to payplans when the payplan has nothing due
 			#endregion
@@ -386,6 +387,9 @@ namespace OpenDentBusiness{
 			{
 				command+="OR XChargeToken='"+POut.String(token)+"' ";
 			}
+			if(listSources.Contains(CreditCardSource.PaySimple)) {
+				command+="OR PaySimpleToken='"+POut.String(token)+"' ";
+			}
 			command+=")";
 			return Crud.CreditCardCrud.SelectMany(command);
 		}
@@ -418,7 +422,10 @@ namespace OpenDentBusiness{
 				|| listSources.Contains(CreditCardSource.XServerPayConnect)
 				|| listSources.Contains(CreditCardSource.XWebPortalLogin))
 			{
-				command+="OR XChargeToken!=''";
+				command+="OR XChargeToken!='' ";
+			}
+			if(listSources.Contains(CreditCardSource.PaySimple)) {
+				command+="OR PaySimpleToken!='' ";
 			}
 			command+=")";
 			return Crud.CreditCardCrud.SelectMany(command);

@@ -74,6 +74,8 @@ namespace OpenDentBusiness {
 		///<summary>4 - Credit card has been added through the local installation of X-Charge and the PayConnect web service.</summary>
 		XServerPayConnect,
 		///<summary>5 - Made from the login screen of the Patient Portal.</summary>
-		XWebPortalLogin
+		XWebPortalLogin,
+		///<summary>6 - PaySimple web service (from within OD).</summary>
+		PaySimple,
 	}
 }

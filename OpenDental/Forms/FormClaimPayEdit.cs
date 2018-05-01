@@ -68,6 +68,8 @@ namespace OpenDental{
 		private Deposit _depositOld;
 		///<summary>Set to the value of PrefName.ShowAutoDeposit on load.</summary>
 		private bool _hasAutoDeposit;
+		private UI.Button butPaySimple;
+
 		///<summary>Gets set to true when the user deletes the Deposit from the Edit Deposit window.</summary>
 		private bool _IsAutoDepositDeleted;
 
@@ -134,6 +136,7 @@ namespace OpenDental{
 			this.validDepositDate = new OpenDental.ValidDate();
 			this.labelDepositAmount = new System.Windows.Forms.Label();
 			this.validDoubleDepositAmt = new OpenDental.ValidDouble();
+			this.butPaySimple = new OpenDental.UI.Button();
 			this.groupPrepaid.SuspendLayout();
 			this.groupBoxDeposit.SuspendLayout();
 			this.SuspendLayout();
@@ -421,11 +424,12 @@ namespace OpenDental{
 			// 
 			// groupPrepaid
 			// 
+			this.groupPrepaid.Controls.Add(this.butPaySimple);
 			this.groupPrepaid.Controls.Add(this.butPayConnect);
 			this.groupPrepaid.Controls.Add(this.panelXcharge);
 			this.groupPrepaid.Location = new System.Drawing.Point(159, 326);
 			this.groupPrepaid.Name = "groupPrepaid";
-			this.groupPrepaid.Size = new System.Drawing.Size(209, 57);
+			this.groupPrepaid.Size = new System.Drawing.Size(335, 57);
 			this.groupPrepaid.TabIndex = 120;
 			this.groupPrepaid.TabStop = false;
 			this.groupPrepaid.Text = "Virtual Credit Card Payment";
@@ -437,7 +441,7 @@ namespace OpenDental{
 			this.butPayConnect.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
 			this.butPayConnect.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
 			this.butPayConnect.CornerRadius = 4F;
-			this.butPayConnect.Location = new System.Drawing.Point(111, 21);
+			this.butPayConnect.Location = new System.Drawing.Point(122, 21);
 			this.butPayConnect.Name = "butPayConnect";
 			this.butPayConnect.Size = new System.Drawing.Size(75, 24);
 			this.butPayConnect.TabIndex = 130;
@@ -549,6 +553,20 @@ namespace OpenDental{
 			this.validDoubleDepositAmt.Size = new System.Drawing.Size(68, 20);
 			this.validDoubleDepositAmt.TabIndex = 104;
 			this.validDoubleDepositAmt.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+			// 
+			// butPaySimple
+			// 
+			this.butPaySimple.AdjustImageLocation = new System.Drawing.Point(0, 0);
+			this.butPaySimple.Autosize = false;
+			this.butPaySimple.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
+			this.butPaySimple.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
+			this.butPaySimple.CornerRadius = 4F;
+			this.butPaySimple.Location = new System.Drawing.Point(236, 21);
+			this.butPaySimple.Name = "butPaySimple";
+			this.butPaySimple.Size = new System.Drawing.Size(75, 24);
+			this.butPaySimple.TabIndex = 131;
+			this.butPaySimple.Text = "PaySimple";
+			this.butPaySimple.Click += new System.EventHandler(this.butPaySimple_Click);
 			// 
 			// FormClaimPayEdit
 			// 
@@ -727,24 +745,28 @@ namespace OpenDental{
 		private void CheckUIState() {
 			Program progXcharge=Programs.GetCur(ProgramName.Xcharge);
 			Program progPayConnect=Programs.GetCur(ProgramName.PayConnect);
-			if(progXcharge==null || progPayConnect==null) {//Should not happen.
+			Program progPaySimple=Programs.GetCur(ProgramName.PaySimple);
+			if(progXcharge==null || progPayConnect==null || progPaySimple==null) {//Should not happen.
 				panelXcharge.Visible=(progXcharge!=null);
 				butPayConnect.Visible=(progPayConnect!=null);
-				groupPrepaid.Visible=(panelXcharge.Visible || butPayConnect.Visible);
+				butPaySimple.Visible=(progPaySimple!=null);
+				groupPrepaid.Visible=(panelXcharge.Visible || butPayConnect.Visible || butPaySimple.Visible);
 				return;
 			}
 			panelXcharge.Visible=false;
 			butPayConnect.Visible=false;
-			if(!progPayConnect.Enabled && !progXcharge.Enabled) {//if neither enabled
-				//show both so user can pick
+			butPaySimple.Visible=false;
+			if(!progPayConnect.Enabled && !progXcharge.Enabled && !progPaySimple.Enabled) {//if none enabled
+				//show all so user can pick
 				panelXcharge.Visible=true;
 				butPayConnect.Visible=true;
+				butPaySimple.Visible=true;
 				groupPrepaid.Visible=true;
 				return;
 			}
 			long clinicNum=GetClinicNumSelected();
 			List<Def> listDefs=Defs.GetDefsForCategory(DefCat.PaymentTypes,true);
-			//show if enabled.  User could have both enabled.
+			//Show if enabled.  User could have all enabled.
 			if(progPayConnect.Enabled) {
 				//if clinics are disabled, PayConnect is enabled if marked enabled
 				if(!PrefC.HasClinicsEnabled) {
@@ -776,7 +798,23 @@ namespace OpenDental{
 					}
 				}
 			}
-			groupPrepaid.Visible=(panelXcharge.Visible || butPayConnect.Visible);
+			if(progPaySimple.Enabled) {
+				//if clinics are disabled, PayConnect is enabled if marked enabled
+				if(!PrefC.HasClinicsEnabled) {
+					butPaySimple.Visible=true;
+				}
+				else {//if clinics are enabled, PayConnect is enabled if the PaymentType is valid and the Username and Password are not blank
+					string paymentType=ProgramProperties.GetPropVal(progPaySimple.ProgramNum,PaySimple.PropertyDescs.PaySimplePayType,clinicNum);
+					if(!string.IsNullOrEmpty(ProgramProperties.GetPropVal(progPaySimple.ProgramNum,PaySimple.PropertyDescs.PaySimpleApiUserName,clinicNum))
+						&& !string.IsNullOrEmpty(ProgramProperties.GetPropVal(progPaySimple.ProgramNum,PaySimple.PropertyDescs.PaySimpleApiKey,clinicNum))
+						&& listDefs.Any(x => x.DefNum.ToString()==paymentType))
+					{
+						butPaySimple.Visible=true;
+					}
+				}
+			}
+			groupPrepaid.Visible=true; //(panelXcharge.Visible || butPayConnect.Visible || butPaySimple.Visible);
+			butPaySimple.Visible=true;
 		}
 
 		private long GetClinicNumSelected() {
@@ -790,6 +828,7 @@ namespace OpenDental{
 		}
 
 		private void butCarrierSelect_Click(object sender,EventArgs e) {
+			CheckUIState();
 			FormCarriers formC=new FormCarriers();
 			formC.IsSelectMode=true;
 			formC.ShowDialog();
@@ -887,6 +926,24 @@ namespace OpenDental{
 			pay.ClinicNum=GetClinicNumSelected();
 			FormPayment form=new FormPayment(new Patient(),new Family(),pay,false);
 			string tranDetail=form.MakePayConnectTransaction(PIn.Double(textAmount.Text));
+			if(tranDetail!=null) {
+				if(textNote.Text!="") {
+					textNote.Text+="\r\n";
+				}
+				textNote.Text+=tranDetail;
+			}
+		}
+
+		private void butPaySimple_Click(object sender,EventArgs e) {
+			if(textAmount.Text=="" || PIn.Double(textAmount.Text)==0) {
+				MsgBox.Show(this,"Please enter an amount first.");
+				textAmount.Focus();
+				return;
+			}
+			Payment pay=new Payment();
+			pay.ClinicNum=GetClinicNumSelected();
+			FormPayment form=new FormPayment(new Patient(),new Family(),pay,false);
+			string tranDetail=form.MakePaySimpleTransaction(PIn.Double(textAmount.Text));
 			if(tranDetail!=null) {
 				if(textNote.Text!="") {
 					textNote.Text+="\r\n";

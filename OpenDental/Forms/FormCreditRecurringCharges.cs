@@ -41,7 +41,7 @@ namespace OpenDental {
 		///disable the event when we are setting the selected indexes programmatically.</summary>
 		private bool _isSelecting;
 
-		///<summary>Only works for XCharge and PayConnect so far.</summary>
+		///<summary>Only works for XCharge,PayConnect, and PaySimple so far.</summary>
 		public FormCreditRecurringCharges() {
 			InitializeComponent();
 			Lan.F(this);
@@ -57,6 +57,12 @@ namespace OpenDental {
 				labelUpdated.Visible=false;
 				checkForceDuplicates.Checked=PIn.Bool(ProgramProperties.GetPropValForClinicOrDefault(_progCur.ProgramNum,
 					PayConnect.ProgramProperties.PayConnectForceRecurringCharge,Clinics.ClinicNum));
+			}
+			else if(Programs.IsEnabled(ProgramName.PaySimple)) {
+				_progCur=Programs.GetCur(ProgramName.PaySimple);
+				labelUpdated.Visible=false;
+				checkForceDuplicates.Checked=false;
+				checkForceDuplicates.Visible=false;//PaySimple always rejects identical transactions made within 5 minutes of eachother.
 			}
 			else if(Programs.IsEnabled(ProgramName.Xcharge)) {
 				_progCur=Programs.GetCur(ProgramName.Xcharge);
@@ -85,7 +91,7 @@ namespace OpenDental {
 				}
 			}
 			if(_progCur==null) {
-				MsgBox.Show(this,"The PayConnect or X-Charge program link must be enabled in order to use the CC Recurring Charges feature.");
+				MsgBox.Show(this,"The PayConnect, PaySimple, or X-Charge program link must be enabled in order to use the CC Recurring Charges feature.");
 				Close();
 				return;
 			}
@@ -840,6 +846,135 @@ namespace OpenDental {
 			}
 		}
 
+		private void SendPaySimple() {
+			Dictionary<long,string> dictClinicNumDesc=new Dictionary<long,string>();
+			if(PrefC.HasClinicsEnabled) {
+				dictClinicNumDesc=Clinics.GetClinicsNoCache().ToDictionary(x => x.ClinicNum,x => x.Description);
+			}
+			dictClinicNumDesc[0]=PrefC.GetString(PrefName.PracticeTitle);
+			StringBuilder strBuilderResultFile=new StringBuilder();
+			strBuilderResultFile.AppendLine("Recurring charge results for "+DateTime.Now.ToShortDateString()+" ran at "+DateTime.Now.ToShortTimeString());
+			strBuilderResultFile.AppendLine();
+			#region Card Charge Loop
+			//Making a copy now because the user can change the selected index as we are looping through
+			List<int> listSelectedIndices=gridMain.SelectedIndices.ToList();
+			foreach(int selectedIndex in listSelectedIndices) {
+				DataRow rowCur=_listRowsCur[selectedIndex];
+				string paySimpleAccountId=rowCur["PaySimpleToken"].ToString();
+				int tokenCount=CreditCards.GetTokenCount(paySimpleAccountId,
+					new List<CreditCardSource> { CreditCardSource.PaySimple });
+				if(string.IsNullOrWhiteSpace(paySimpleAccountId) || tokenCount!=1) {
+					_failed++;
+					labelFailed.Text=Lan.g(this,"Failed=")+_failed;
+					string msg=(tokenCount>1)?"A duplicate token was found":"A token was not found";
+					MessageBox.Show(Lan.g(this,msg+", the card cannot be charged for customer")+": "+rowCur["PatName"].ToString());
+					continue;
+				}
+				long patNum=PIn.Long(rowCur["PatNum"].ToString());
+				Patient patCur=Patients.GetPat(patNum);
+				if(patCur==null) {
+					continue;
+				}
+				DateTime exp=PIn.Date(rowCur["CCExpiration"].ToString());//We don't have a PaySimpleTokenExpiration, so use the CC's stored one.
+				decimal amt=PIn.Decimal(rowCur["ChargeAmt"].ToString());
+				string zip=PIn.String(rowCur["Zip"].ToString());
+				long clinicNumCur=PIn.Long(rowCur["ClinicNum"].ToString());
+				double resultAmt=0;
+				Cursor=Cursors.WaitCursor;
+				StringBuilder strBuilderResultText=new StringBuilder();//this payment's result text, used in payment note and then appended to file string builder
+				strBuilderResultFile.AppendLine("PatNum: "+patNum+" Name: "+patCur.GetNameFLnoPref());
+				try {
+					PaySimple.ApiResponse response=PaySimple.MakePaymentByToken(new CreditCard() {
+						CreditCardNum=PIn.Long(rowCur["CreditCardNum"].ToString()),
+						PaySimpleToken=paySimpleAccountId,
+						PatNum=patCur.PatNum,
+					},amt,clinicNumCur);
+					if(response==null) {
+						//If this happens, the API method returned successfully and somehow we didn't create a response.
+						//The intent of the PaySimple API integration is that we always get a response or throw exceptions.
+						throw new ODException(Lan.g(this,"Unknown error making payment.  Please contact support."));
+					}
+					//approved sale, update CC, add result to file string builder			
+					_success++;
+					labelCharged.Text=Lan.g(this,"Charged=")+_success;
+					CreditCard ccCur=CreditCards.GetOne(PIn.Long(rowCur["CreditCardNum"].ToString()));
+					if(ccCur!=null && ccCur.PaySimpleToken!=response.PaySimpleToken) {
+						ccCur.PaySimpleToken=response.PaySimpleToken;
+						CreditCards.Update(ccCur);
+					}
+					//add to strbuilder that will be written to txt file and to the payment note
+					if(PrefC.HasClinicsEnabled && dictClinicNumDesc.ContainsKey(clinicNumCur)) {
+						strBuilderResultText.AppendLine("CLINIC="+dictClinicNumDesc[clinicNumCur]);
+					}
+					strBuilderResultText.AppendLine(response.ToNoteString());
+					strBuilderResultText.AppendLine("ENTRY=MANUAL");
+					strBuilderResultText.AppendLine("CLERK="+Security.CurUser.UserName);
+						strBuilderResultText.AppendLine("EXPIRATION="+ccCur.CCExpiration.Month.ToString().PadLeft(2,'0')
+							+(ccCur.CCExpiration.Year%100));
+					strBuilderResultText.AppendLine("CARD TYPE=PaySimple Token");
+					resultAmt=(double)response.Amount;
+					response.BuildReceiptString(ccCur.CCNumberMasked,ccCur.CCExpiration.Month,ccCur.CCExpiration.Year,"",clinicNumCur);
+					string receipt=response.TransactionReceipt;
+					CreatePayment(patCur,selectedIndex,strBuilderResultText.ToString(),resultAmt,receipt);
+				}
+				catch(Exception ex) {
+					ex.DoNothing();
+					_failed++;
+					labelFailed.Text=Lan.g(this,"Failed=")+_failed;
+					string clinicDesc="";
+					if(PrefC.HasClinicsEnabled && dictClinicNumDesc.ContainsKey(clinicNumCur)) {
+						clinicDesc=dictClinicNumDesc[clinicNumCur];
+					}
+					AddErrorToStrb(strBuilderResultText,ex.Message,clinicDesc);
+				}
+				finally {
+					strBuilderResultFile.AppendLine(strBuilderResultText.ToString());//add to the file string builder
+					Cursor=Cursors.Default;
+				}
+			}
+			#endregion Card Charge Loop
+			if(PrefC.AtoZfolderUsed==DataStorageType.LocalAtoZ) {
+				try {
+					Cursor=Cursors.WaitCursor;
+					string paySimpleResultDir=ODFileUtils.CombinePaths(ImageStore.GetPreferredAtoZpath(),"PaySimple");
+					if(!Directory.Exists(paySimpleResultDir)) {
+						Directory.CreateDirectory(paySimpleResultDir);
+					}
+					File.WriteAllText(ODFileUtils.CombinePaths(paySimpleResultDir,"RecurringChargeResult.txt"),strBuilderResultFile.ToString());
+					Cursor=Cursors.Default;
+				}
+				catch { } //Do nothing cause this is just for internal use.
+			}
+			else if(CloudStorage.IsCloudStorage) {
+				Cursor=Cursors.WaitCursor;
+				FormProgress FormP=new FormProgress();
+				FormP.DisplayText="Uploading...";
+				FormP.NumberFormat="F";
+				FormP.NumberMultiplication=1;
+				FormP.MaxVal=100;//Doesn't matter what this value is as long as it is greater than 0
+				FormP.TickMS=1000;
+				OpenDentalCloud.Core.TaskStateUpload state=CloudStorage.UploadAsync(
+					CloudStorage.AtoZPath+"/PaySimple"//I feel like this should be ODUtil.CombinePaths but I don't want to have to test it.
+					,"RecurringChargeResult.txt"
+					,Encoding.ASCII.GetBytes(strBuilderResultFile.ToString())
+					,new OpenDentalCloud.ProgressHandler(FormP.OnProgress));
+				if(FormP.ShowDialog()==DialogResult.Cancel) {
+					state.DoCancel=true;
+				}
+				else {
+					//Upload was successful
+				}
+			}
+		}
+
+		private void AddErrorToStrb(StringBuilder strb,string errorMsg,string clinicDesc) {
+			strb.AppendLine(Lan.g(this,"Transaction Type")+": "+PaySimple.TransType.SALE.ToString());
+			if(string.IsNullOrWhiteSpace(clinicDesc)) {
+				strb.AppendLine("CLINIC="+clinicDesc);
+			}
+			strb.AppendLine(Lan.g(this,"Error")+": "+errorMsg);
+		}
+
 		///<summary>Updates the credit card's masked number and expiration.</summary>
 		private void UpdateCreditCardPayConnect(CreditCard ccCur,transResponse payConnectResponse) {
 			if(ccCur==null || payConnectResponse==null || payConnectResponse.PaymentToken==null || payConnectResponse.PaymentToken.Expiration==null) {
@@ -892,6 +1027,9 @@ namespace OpenDental {
 			}
 			else if(_progCur.ProgName==ProgramName.PayConnect.ToString()) {
 				paymentCur.PaymentSource=CreditCardSource.PayConnect;
+			}
+			else if(_progCur.ProgName==ProgramName.PayConnect.ToString()) {
+				paymentCur.PaymentSource=CreditCardSource.PaySimple;
 			}
 			else {
 				paymentCur.PaymentSource=CreditCardSource.None;
@@ -990,6 +1128,9 @@ namespace OpenDental {
 			}
 			else if(_progCur.ProgName==ProgramName.PayConnect.ToString()) {
 				SendPayConnect();
+			}
+			else if(_progCur.ProgName==ProgramName.PaySimple.ToString()) {
+				SendPaySimple();
 			}
 			try {
 				FillGrid(true);

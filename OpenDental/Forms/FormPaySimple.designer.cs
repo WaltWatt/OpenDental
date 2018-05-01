@@ -25,13 +25,13 @@ namespace OpenDental{
 		private void InitializeComponent() {
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormPaySimple));
 			this.butCancel = new OpenDental.UI.Button();
-			this.labelStoreCCNumWarning = new System.Windows.Forms.Label();
-			this.checkSaveToken = new System.Windows.Forms.CheckBox();
+			this.checkOneTimePayment = new System.Windows.Forms.CheckBox();
 			this.labelRefNumber = new System.Windows.Forms.Label();
 			this.textRefNumber = new System.Windows.Forms.TextBox();
 			this.groupTransType = new System.Windows.Forms.GroupBox();
 			this.radioSale = new System.Windows.Forms.RadioButton();
 			this.radioReturn = new System.Windows.Forms.RadioButton();
+			this.radioAuthorization = new System.Windows.Forms.RadioButton();
 			this.radioVoid = new System.Windows.Forms.RadioButton();
 			this.textZipCode = new System.Windows.Forms.TextBox();
 			this.label7 = new System.Windows.Forms.Label();
@@ -46,7 +46,7 @@ namespace OpenDental{
 			this.textAmount = new System.Windows.Forms.TextBox();
 			this.labelAmount = new System.Windows.Forms.Label();
 			this.butOK = new OpenDental.UI.Button();
-			this.radioAuthorization = new System.Windows.Forms.RadioButton();
+			this.pd2 = new System.Drawing.Printing.PrintDocument();
 			this.groupTransType.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -59,32 +59,21 @@ namespace OpenDental{
 			this.butCancel.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
 			this.butCancel.CornerRadius = 4F;
 			this.butCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.butCancel.Location = new System.Drawing.Point(318, 313);
+			this.butCancel.Location = new System.Drawing.Point(318, 276);
 			this.butCancel.Name = "butCancel";
 			this.butCancel.Size = new System.Drawing.Size(75, 24);
 			this.butCancel.TabIndex = 2;
 			this.butCancel.Text = "&Cancel";
 			this.butCancel.Click += new System.EventHandler(this.butCancel_Click);
 			// 
-			// labelStoreCCNumWarning
+			// checkOneTimePayment
 			// 
-			this.labelStoreCCNumWarning.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
-			this.labelStoreCCNumWarning.Location = new System.Drawing.Point(66, 265);
-			this.labelStoreCCNumWarning.Name = "labelStoreCCNumWarning";
-			this.labelStoreCCNumWarning.Size = new System.Drawing.Size(300, 28);
-			this.labelStoreCCNumWarning.TabIndex = 27;
-			this.labelStoreCCNumWarning.Text = "You should turn off the option in Module Setup for \"allow storing credit card num" +
-    "bers\" in order to start using tokens.";
-			this.labelStoreCCNumWarning.Visible = false;
-			// 
-			// checkSaveToken
-			// 
-			this.checkSaveToken.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.checkSaveToken.Location = new System.Drawing.Point(24, 206);
-			this.checkSaveToken.Name = "checkSaveToken";
-			this.checkSaveToken.Size = new System.Drawing.Size(150, 17);
-			this.checkSaveToken.TabIndex = 38;
-			this.checkSaveToken.Text = "Save Token";
+			this.checkOneTimePayment.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.checkOneTimePayment.Location = new System.Drawing.Point(24, 206);
+			this.checkOneTimePayment.Name = "checkOneTimePayment";
+			this.checkOneTimePayment.Size = new System.Drawing.Size(150, 17);
+			this.checkOneTimePayment.TabIndex = 38;
+			this.checkOneTimePayment.Text = "One Time Payment";
 			// 
 			// labelRefNumber
 			// 
@@ -140,6 +129,17 @@ namespace OpenDental{
 			this.radioReturn.Text = "Return";
 			this.radioReturn.UseVisualStyleBackColor = true;
 			this.radioReturn.Click += new System.EventHandler(this.radioReturn_Click);
+			// 
+			// radioAuthorization
+			// 
+			this.radioAuthorization.AutoSize = true;
+			this.radioAuthorization.Location = new System.Drawing.Point(55, 19);
+			this.radioAuthorization.Name = "radioAuthorization";
+			this.radioAuthorization.Size = new System.Drawing.Size(47, 17);
+			this.radioAuthorization.TabIndex = 0;
+			this.radioAuthorization.Text = "Auth";
+			this.radioAuthorization.UseVisualStyleBackColor = true;
+			this.radioAuthorization.Click += new System.EventHandler(this.radioAuthorization_Click);
 			// 
 			// radioVoid
 			// 
@@ -257,31 +257,19 @@ namespace OpenDental{
 			this.butOK.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
 			this.butOK.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
 			this.butOK.CornerRadius = 4F;
-			this.butOK.Location = new System.Drawing.Point(227, 313);
+			this.butOK.Location = new System.Drawing.Point(227, 276);
 			this.butOK.Name = "butOK";
 			this.butOK.Size = new System.Drawing.Size(75, 24);
 			this.butOK.TabIndex = 3;
 			this.butOK.Text = "&OK";
 			this.butOK.Click += new System.EventHandler(this.butOK_Click);
 			// 
-			// radioAuthorization
-			// 
-			this.radioAuthorization.AutoSize = true;
-			this.radioAuthorization.Location = new System.Drawing.Point(55, 19);
-			this.radioAuthorization.Name = "radioAuthorization";
-			this.radioAuthorization.Size = new System.Drawing.Size(47, 17);
-			this.radioAuthorization.TabIndex = 0;
-			this.radioAuthorization.Text = "Auth";
-			this.radioAuthorization.UseVisualStyleBackColor = true;
-			this.radioAuthorization.Click += new System.EventHandler(this.radioAuthorization_Click);
-			// 
 			// FormPaySimple
 			// 
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
 			this.CancelButton = this.butCancel;
-			this.ClientSize = new System.Drawing.Size(422, 349);
-			this.Controls.Add(this.labelStoreCCNumWarning);
-			this.Controls.Add(this.checkSaveToken);
+			this.ClientSize = new System.Drawing.Size(422, 312);
+			this.Controls.Add(this.checkOneTimePayment);
 			this.Controls.Add(this.labelRefNumber);
 			this.Controls.Add(this.textRefNumber);
 			this.Controls.Add(this.groupTransType);
@@ -300,7 +288,7 @@ namespace OpenDental{
 			this.Controls.Add(this.butOK);
 			this.Controls.Add(this.butCancel);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-			this.MinimumSize = new System.Drawing.Size(438, 388);
+			this.MinimumSize = new System.Drawing.Size(438, 351);
 			this.Name = "FormPaySimple";
 			this.Text = "PaySimple Payment Information";
 			this.Load += new System.EventHandler(this.FormPaySimple_Load);
@@ -315,8 +303,7 @@ namespace OpenDental{
 
 		private OpenDental.UI.Button butOK;
 		private OpenDental.UI.Button butCancel;
-		private System.Windows.Forms.Label labelStoreCCNumWarning;
-		private System.Windows.Forms.CheckBox checkSaveToken;
+		private System.Windows.Forms.CheckBox checkOneTimePayment;
 		private System.Windows.Forms.Label labelRefNumber;
 		private System.Windows.Forms.TextBox textRefNumber;
 		private System.Windows.Forms.GroupBox groupTransType;
@@ -336,5 +323,6 @@ namespace OpenDental{
 		private System.Windows.Forms.TextBox textAmount;
 		private System.Windows.Forms.Label labelAmount;
 		private System.Windows.Forms.RadioButton radioAuthorization;
+		private System.Drawing.Printing.PrintDocument pd2;
 	}
 }

@@ -38,10 +38,6 @@ namespace OpenDental{
 			}
 		}
 
-		public double Value {
-			get { return OpenDentBusiness.PIn.Double(Text); }
-		}
-
 		///<summary></summary>
 		public ValidDouble(){
 			InitializeComponent();

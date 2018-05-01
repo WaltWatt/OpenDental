@@ -30,7 +30,7 @@ namespace OpenDental {
 			int xright=15;
 			int xmax=37;
 			result+=Environment.NewLine;
-			result+=AddClinicToReceipt(clinicNum);
+			result+=CreditCardUtils.AddClinicToReceipt(clinicNum);
 			//Print body
 			result+="Date".PadRight(xright-xleft,'.')+DateTime.Now.ToString()+Environment.NewLine;
 			result+=Environment.NewLine;
@@ -82,7 +82,7 @@ namespace OpenDental {
 			int xright=15;
 			int xmax=37;
 			result+=Environment.NewLine;
-			result+=AddClinicToReceipt(clinicNum);
+			result+=CreditCardUtils.AddClinicToReceipt(clinicNum);
 			//Print body
 			result+="Date".PadRight(xright-xleft,'.')+DateTime.Now.ToString()+Environment.NewLine;
 			result+=Environment.NewLine;
@@ -148,46 +148,6 @@ namespace OpenDental {
 				retStr+="".PadRight(xright,'.')+fieldValue.Substring(xmax-xright-1)+Environment.NewLine;
 			}
 			return retStr;
-		}
-
-		///<summary>Returns the clinic information for the passed in clinicNum.</summary>
-		private static string AddClinicToReceipt(long clinicNum) {
-			string result="";
-			Clinic clinicCur=null;
-			//clinicNum will be 0 if clinics are not enabled or if the payment.ClinicNum=0, which will happen if the patient.ClinicNum=0 and the user
-			//does not change the clinic on the payment before sending to PayConnect or if the user decides to process the payment for 'Headquarters'
-			//and manually changes the clinic on the payment from the patient's clinic to 'none'
-			if(clinicNum==0) {
-				clinicCur=Clinics.GetPracticeAsClinicZero();
-			}
-			else {
-				clinicCur=Clinics.GetClinic(clinicNum);
-			}
-			if(clinicCur!=null) {
-				if(clinicCur.Description.Length>0) {
-					result+=clinicCur.Description+Environment.NewLine;
-				}
-				if(clinicCur.Address.Length>0) {
-					result+=clinicCur.Address+Environment.NewLine;
-				}
-				if(clinicCur.Address2.Length>0) {
-					result+=clinicCur.Address2+Environment.NewLine;
-				}
-				if(clinicCur.City.Length>0 || clinicCur.State.Length>0 || clinicCur.Zip.Length>0) {
-					result+=clinicCur.City+", "+clinicCur.State+" "+clinicCur.Zip+Environment.NewLine;
-				}
-				if(clinicCur.Phone.Length==10
-					&& (CultureInfo.CurrentCulture.Name=="en-US" ||
-					CultureInfo.CurrentCulture.Name.EndsWith("CA"))) //Canadian. en-CA or fr-CA
-				{
-					result+="("+clinicCur.Phone.Substring(0,3)+")"+clinicCur.Phone.Substring(3,3)+"-"+clinicCur.Phone.Substring(6)+Environment.NewLine;
-				}
-				else if(clinicCur.Phone.Length>0) {
-					result+=clinicCur.Phone+Environment.NewLine;
-				}
-			}
-			result+=Environment.NewLine;
-			return result;
 		}
 
 	}

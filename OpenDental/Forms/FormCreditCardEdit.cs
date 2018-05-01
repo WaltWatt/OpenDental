@@ -18,6 +18,8 @@ namespace OpenDental {
 		private bool _isXChargeEnabled;
 		///<summary>True if PayConnect is enabled.  Recurring charge section will show if using PayConnect.</summary>
 		private bool _isPayConnectEnabled;
+		///<summary>True if PaySimple is enabled.  Recurring charge section will show if using PaySimple.</summary>
+		private bool _isPaySimpleEnabled;
 
 		public FormCreditCardEdit(Patient pat) {
 			InitializeComponent();
@@ -25,13 +27,14 @@ namespace OpenDental {
 			PatCur=pat;
 			_isXChargeEnabled=Programs.IsEnabled(ProgramName.Xcharge);
 			_isPayConnectEnabled=Programs.IsEnabled(ProgramName.PayConnect);
+			_isPaySimpleEnabled=Programs.IsEnabled(ProgramName.PaySimple);
 		}
 
 		private void FormCreditCardEdit_Load(object sender,EventArgs e) {
 			_creditCardOld=CreditCardCur.Clone();
 			FillData();
 			checkExcludeProcSync.Checked=CreditCardCur.ExcludeProcSync;
-			if((_isXChargeEnabled || _isPayConnectEnabled) 
+			if((_isXChargeEnabled || _isPayConnectEnabled || _isPaySimpleEnabled) 
 				&& !CreditCardCur.IsXWeb()) 
 			{//Get recurring payment plan information if using X-Charge or PayConnect and the card is not from XWeb.
 				PayPlanList=PayPlans.GetValidPlansNoIns(PatCur.PatNum);
@@ -57,6 +60,9 @@ namespace OpenDental {
 				groupRecurringCharges.Visible=false;
 				this.ClientSize=new System.Drawing.Size(this.ClientSize.Width,this.ClientSize.Height-356);
 			}
+			if(_isPaySimpleEnabled && !CreditCardCur.IsNew) {
+				textCardNumber.ReadOnly=true;
+			}
 			Plugins.HookAddCode(this,"FormCreditCardEdit.Load_end",PatCur);
 		}
 
@@ -73,7 +79,7 @@ namespace OpenDental {
 					textExpDate.Text=CreditCardCur.CCExpiration.ToString("MMyy");
 				}
 				textZip.Text=CreditCardCur.Zip;
-				if(_isXChargeEnabled || _isPayConnectEnabled) {//Only fill information if using X-Charge or PayConnect.
+				if(_isXChargeEnabled || _isPayConnectEnabled || _isPaySimpleEnabled) {//Only fill information if using X-Charge, PayConnect, or PaySimple.
 					if(CreditCardCur.ChargeAmt>0) {
 						textChargeAmt.Text=CreditCardCur.ChargeAmt.ToString("F");
 					}
@@ -125,7 +131,7 @@ namespace OpenDental {
 					return false;
 				}
 			}
-			if(_isXChargeEnabled || _isPayConnectEnabled) {//Only validate recurring setup if using X-Charge or PayConnect.
+			if(_isXChargeEnabled || _isPayConnectEnabled || _isPaySimpleEnabled) {//Only validate recurring setup if using X-Charge, PayConnect, or PaySimple.
 				if(textDateStart.errorProvider1.GetError(textDateStart)!=""
 					|| textDateStop.errorProvider1.GetError(textDateStop)!=""
 					|| textChargeAmt.errorProvider1.GetError(textChargeAmt)!="")
@@ -311,7 +317,7 @@ namespace OpenDental {
 			CreditCardCur.CCNumberMasked=textCardNumber.Text;
 			CreditCardCur.PatNum=PatCur.PatNum;
 			CreditCardCur.Zip=textZip.Text;
-			if(_isXChargeEnabled || _isPayConnectEnabled) {//Only update recurring if using X-Charge or PayConnect.
+			if(_isXChargeEnabled || _isPayConnectEnabled || _isPaySimpleEnabled) {//Only update recurring if using X-Charge, PayConnect,or PaySimple.
 				CreditCardCur.ChargeAmt=PIn.Double(textChargeAmt.Text);
 				CreditCardCur.DateStart=PIn.Date(textDateStart.Text);
 				CreditCardCur.DateStop=PIn.Date(textDateStop.Text);
@@ -443,6 +449,20 @@ namespace OpenDental {
 					//generated the next time a payment is processed using this card.
 					CreditCardCur.PayConnectToken="";
 					CreditCardCur.PayConnectTokenExp=DateTime.MinValue;
+				}
+				#endregion
+				#region PaySimple
+				//Special logic for had a token and changed number or expiration date PaySimple
+				//We have to compare the year and month of the expiration instead of just comparing expirations because the X-Charge logic stores the
+				//expiration day of the month as the 1st in the db, but it makes more sense to set the expriation day of month to the last day in that month.
+				//Since we only want to invalidate the PayConnect token if the expiration month or year is different, we will ignore any difference in day.
+				if(_isPaySimpleEnabled && CreditCardCur.PaySimpleToken!=""
+					&& (_creditCardOld.Zip!=CreditCardCur.Zip
+						|| _creditCardOld.CCExpiration.Year!=CreditCardCur.CCExpiration.Year
+						|| _creditCardOld.CCExpiration.Month!=CreditCardCur.CCExpiration.Month))
+				{
+					//If the billing zip or the expiration changes, the token is invalid and they need to get a new one.
+					CreditCardCur.PaySimpleToken="";
 				}
 				#endregion
 				CreditCards.Update(CreditCardCur);

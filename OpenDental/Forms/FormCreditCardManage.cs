@@ -22,7 +22,9 @@ namespace OpenDental {
 		
 		private void FormCreditCardManage_Load(object sender,EventArgs e) {
 			if(PrefC.GetBool(PrefName.StoreCCnumbers)
-				&& (Programs.IsEnabled(ProgramName.Xcharge) || Programs.IsEnabled(ProgramName.PayConnect)))//tokens supported by Xcharge and PayConnect
+				&& (Programs.IsEnabled(ProgramName.Xcharge) 
+					|| Programs.IsEnabled(ProgramName.PayConnect) 
+					|| Programs.IsEnabled(ProgramName.PaySimple)))//tokens supported by Xcharge and PayConnect
 			{
 				labelStoreCCNumWarning.Visible=true;
 			}
@@ -38,6 +40,9 @@ namespace OpenDental {
 			}
 			if(Programs.IsEnabled(ProgramName.PayConnect)) {
 				gridMain.Columns.Add(new ODGridColumn("PayConnect",85,HorizontalAlignment.Center));
+			}
+			if(Programs.IsEnabled(ProgramName.PaySimple)) {
+				gridMain.Columns.Add(new ODGridColumn("PaySimple",80,HorizontalAlignment.Center));
 			}
 			if(PrefC.HasOnlinePaymentEnabled()) {
 				gridMain.Columns.Add(new ODGridColumn("XWeb",45,HorizontalAlignment.Center));
@@ -57,7 +62,10 @@ namespace OpenDental {
 					row.Cells.Add(!string.IsNullOrEmpty(cc.XChargeToken) && !cc.IsXWeb()?"X":"");
 				}
 				if(Programs.IsEnabled(ProgramName.PayConnect)) {
-					row.Cells.Add(!string.IsNullOrEmpty(cc.PayConnectToken)?"X":"");
+					row.Cells.Add(!string.IsNullOrEmpty(cc.PayConnectToken) ? "X" : "");
+				}
+				if(Programs.IsEnabled(ProgramName.PaySimple)) {
+					row.Cells.Add(!string.IsNullOrEmpty(cc.PaySimpleToken) ? "X" : "");
 				}
 				if(PrefC.HasOnlinePaymentEnabled()) {
 					row.Cells.Add(!string.IsNullOrEmpty(cc.XChargeToken) && cc.IsXWeb()?"X":"");
@@ -80,34 +88,63 @@ namespace OpenDental {
 		}
 
 		private void butAdd_Click(object sender,EventArgs e) {
-			List<string> listDefaultProcs;
 			if(!PrefC.GetBool(PrefName.StoreCCnumbers)) {
 				bool addXCharge=false;
 				bool addPayConnect=false;
-				if(Programs.IsEnabled(ProgramName.Xcharge) && Programs.IsEnabled(ProgramName.PayConnect)) {
-					List<string> listCCProcessors=new List<string>() {"X-Charge","PayConnect","X-Charge and PayConnect" };
+				bool addPaySimple=false;
+				List<ProgramName> listEnabledProcessors=new List<ProgramName>();
+				if(Programs.IsEnabled(ProgramName.Xcharge)) {
+					listEnabledProcessors.Add(ProgramName.Xcharge);
+				}
+				if(Programs.IsEnabled(ProgramName.PayConnect)) {
+					listEnabledProcessors.Add(ProgramName.PayConnect);
+				}
+				if(Programs.IsEnabled(ProgramName.PaySimple)) {
+					listEnabledProcessors.Add(ProgramName.PaySimple);
+				}
+				if(listEnabledProcessors.Count>1) {
+					List<string> listCCProcessors=new List<string>();// {"X-Charge","PayConnect","X-Charge and PayConnect" };
+					if(listEnabledProcessors.Contains(ProgramName.Xcharge)) {
+						listCCProcessors.Add("X-Charge");
+					}
+					if(listEnabledProcessors.Contains(ProgramName.PayConnect)) {
+						listCCProcessors.Add("PayConnect");
+					}
+					if(listEnabledProcessors.Contains(ProgramName.Xcharge) && listEnabledProcessors.Contains(ProgramName.PayConnect)) {
+						listCCProcessors.Add("X-Charge and PayConnect");
+					}
+					if(listEnabledProcessors.Contains(ProgramName.PaySimple)) {
+						listCCProcessors.Add("PaySimple");
+					}
+					if(listEnabledProcessors.Contains(ProgramName.PaySimple) && listEnabledProcessors.Contains(ProgramName.Xcharge)) {
+						listCCProcessors.Add("PaySimple and X-Charge");
+					}
+					if(listEnabledProcessors.Contains(ProgramName.PaySimple) && listEnabledProcessors.Contains(ProgramName.PayConnect)) {
+						listCCProcessors.Add("PaySimple and PayConnect");
+					}
+					if(listEnabledProcessors.Contains(ProgramName.PaySimple)
+						&& listEnabledProcessors.Contains(ProgramName.Xcharge)
+						&& listEnabledProcessors.Contains(ProgramName.PayConnect)) {
+						listCCProcessors.Add("PaySimple, X-Charge, and PayConnect");
+					}
 					InputBox chooseProcessor=new InputBox(Lan.g(this,"For which credit card processing company would you like to add this card?"),
 						listCCProcessors);
 					if(chooseProcessor.ShowDialog()==DialogResult.Cancel) {
 						return;
 					}
-					addXCharge=(chooseProcessor.comboSelection.SelectedIndex==0 || chooseProcessor.comboSelection.SelectedIndex==2);
-					addPayConnect=(chooseProcessor.comboSelection.SelectedIndex==1 || chooseProcessor.comboSelection.SelectedIndex==2);
-					//If both are enabled, we will give the user the choice to use one or both credit card processors.
-					//FormChooseCreditCardProcessor FormCCCP=new FormChooseCreditCardProcessor();
-					//if(FormCCCP.ShowDialog()==DialogResult.Cancel) {
-					//	return;
-					//}
-					//else {
-					//	addXCharge=FormCCCP.IsXChargeChosen;
-					//	addPayConnect=FormCCCP.IsPayConnectChosen;
-					//}
+					int selectedIdx=chooseProcessor.comboSelection.SelectedIndex;
+					addXCharge=(selectedIdx==0 || selectedIdx==2 || selectedIdx==4 || selectedIdx==6);
+					addPayConnect=(selectedIdx==1 || selectedIdx==2 || selectedIdx==5 || selectedIdx==6);
+					addPaySimple=(selectedIdx==3 || selectedIdx==4 || selectedIdx==5);
 				}
 				else if(Programs.IsEnabled(ProgramName.Xcharge)) {
 					addXCharge=true;
 				}
 				else if(Programs.IsEnabled(ProgramName.PayConnect)) {
 					addPayConnect=true;
+				}
+				else if(Programs.IsEnabled(ProgramName.PaySimple)) {
+					addPaySimple=true;
 				}
 				else {//not storing CC numbers and both PayConnect and X-Charge are disabled
 					MsgBox.Show(this,"Not allowed to store credit cards.");
@@ -221,6 +258,10 @@ namespace OpenDental {
 				if(addPayConnect) {
 					FormPayConnect FormPC=new FormPayConnect(PatCur.ClinicNum,PatCur,(decimal)0.01,creditCardCur,true);
 					FormPC.ShowDialog();
+				}
+				if(addPaySimple) {
+					FormPaySimple formPS=new FormPaySimple(PatCur.ClinicNum,PatCur,0.01,creditCardCur,true);
+					formPS.ShowDialog();
 				}
 				FillGrid();
 				if(gridMain.Rows.Count>0 && creditCardCur!=null) {
