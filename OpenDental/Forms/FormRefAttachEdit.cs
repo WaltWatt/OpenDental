@@ -530,7 +530,10 @@ namespace OpenDental{
 		}
 
 		private void FillData(){
-			Referral referral=Referrals.GetReferral(RefAttachCur.ReferralNum);
+			Referral referral=ReferralL.GetReferral(RefAttachCur.ReferralNum);
+			if(referral==null) {
+				return;
+			}
 			textName.Text=referral.GetNameFL();
 			labelPatient.Visible=referral.PatNum>0;
 			textReferralNotes.Text=referral.Note;
@@ -579,7 +582,10 @@ namespace OpenDental{
 				MessageBox.Show(ex.Message);
 				return;
 			}
-			Referral referral=Referrals.GetReferral(RefAttachCur.ReferralNum);
+			Referral referral=ReferralL.GetReferral(RefAttachCur.ReferralNum);
+			if(referral==null) {
+				return;
+			}
 			FormReferralEdit FormRE=new FormReferralEdit(referral);
 			FormRE.ShowDialog();
 			Referrals.RefreshCache();

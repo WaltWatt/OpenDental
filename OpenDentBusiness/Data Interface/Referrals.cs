@@ -219,7 +219,7 @@ namespace OpenDentBusiness{
 
 		///<summary>Gets Referral info from memory.  Does not make a call to the database unless needed.
 		///Returns the first referral matching the referralNum passed in, null if 0 is passed in, or throws an exception if no match found.</summary>
-		public static Referral GetReferral(long referralNum) {
+		private static Referral GetReferral(long referralNum) {
 			//No need to check RemotingRole; no call to db.
 			if(referralNum==0) {
 				return null;
@@ -237,7 +237,10 @@ namespace OpenDentBusiness{
 			listRefAttaches=listRefAttaches??RefAttaches.Refresh(patNum);
 			for(int i=0;i<listRefAttaches.Count;i++) {
 				if(listRefAttaches[i].RefType==ReferralType.RefFrom) {
-					return GetReferral(listRefAttaches[i].ReferralNum);
+					Referral referral;
+					if(TryGetReferral(listRefAttaches[i].ReferralNum,out referral)) {
+						return referral;
+					}
 				}
 			}
 			return null;

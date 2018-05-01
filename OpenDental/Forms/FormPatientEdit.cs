@@ -4815,7 +4815,7 @@ namespace OpenDental{
 			if(refAttach==null) {
 				return;
 			}
-			Referral refCur=Referrals.GetReferral(refAttach.ReferralNum);
+			Referral refCur=ReferralL.GetReferral(refAttach.ReferralNum);
 			if(refCur==null) {
 				return;
 			}

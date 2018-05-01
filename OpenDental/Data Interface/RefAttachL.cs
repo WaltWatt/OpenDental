@@ -16,8 +16,8 @@ namespace OpenDental{
 			if(attachList[0].RefType!=ReferralType.RefFrom){
 				return "";
 			}
-			Referral referral=Referrals.GetReferral(attachList[0].ReferralNum);
-			if(referral.PatNum!=0){
+			Referral referral=ReferralL.GetReferral(attachList[0].ReferralNum);
+			if(referral==null || referral.PatNum!=0){
 				return "";
 			}
 			string retVal=referral.FName+" "+referral.MName+" "+referral.LName;

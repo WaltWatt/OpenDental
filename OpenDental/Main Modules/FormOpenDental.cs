@@ -3986,7 +3986,9 @@ namespace OpenDental{
 			Referral refer;
 			string str;
 			for(int i=0;i<refAttaches.Count;i++) {
-				refer=Referrals.GetReferral(refAttaches[i].ReferralNum);
+				if(!Referrals.TryGetReferral(refAttaches[i].ReferralNum,out refer)) {
+					continue;
+				}
 				if(refAttaches[i].RefType==ReferralType.RefFrom) {
 					str=Lan.g(this,"From");
 				}
@@ -4132,7 +4134,9 @@ namespace OpenDental{
 			Referral refer;
 			string str;
 			for(int i=0;i<refAttaches.Count;i++) {
-				refer=Referrals.GetReferral(refAttaches[i].ReferralNum);
+				if(!Referrals.TryGetReferral(refAttaches[i].ReferralNum,out refer)) {
+					continue;
+				}
 				if(refAttaches[i].RefType==ReferralType.RefFrom) {
 					str=Lan.g(this,"From");
 				}
@@ -4367,7 +4371,9 @@ namespace OpenDental{
 			Referral refer;
 			string str;
 			for(int i=0;i<refAttaches.Count;i++){
-				refer=Referrals.GetReferral(refAttaches[i].ReferralNum);
+				if(!Referrals.TryGetReferral(refAttaches[i].ReferralNum,out refer)) {
+					continue;
+				}
 				if(refAttaches[i].RefType==ReferralType.RefFrom) {
 					str=Lan.g(this,"From");
 				}

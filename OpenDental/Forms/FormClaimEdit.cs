@@ -5921,9 +5921,8 @@ namespace OpenDental{
 
 		private void butReferralEdit_Click(object sender,EventArgs e) {
 			//only enabled if ClaimCur.ReferringProv!=0
-			Referral refer=null;
-			if(!Referrals.TryGetReferral(ClaimCur.ReferringProv,out refer)) {
-				MsgBox.Show(this,"Referral not found.");
+			Referral refer=ReferralL.GetReferral(ClaimCur.ReferringProv);
+			if(refer==null) {
 				textRefProv.Text="";
 				ClaimCur.ReferringProv=0;
 				butReferralEdit.Enabled=false;

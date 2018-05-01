@@ -3910,8 +3910,10 @@ namespace OpenDental{
 				textReferral.Text="";
 			}
 			else {
-				Referral referral=Referrals.GetReferral(refsList[0].ReferralNum);
-				textReferral.Text=referral.LName+", ";
+				Referral referral;
+				if(Referrals.TryGetReferral(refsList[0].ReferralNum,out referral)) {
+					textReferral.Text=referral.LName+", ";
+				}
 				if(refsList[0].DateProcComplete.Year<1880) {
 					textReferral.Text+=refsList[0].RefDate.ToShortDateString();
 				}

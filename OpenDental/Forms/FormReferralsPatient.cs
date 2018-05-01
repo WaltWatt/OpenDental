@@ -310,6 +310,7 @@ namespace OpenDental{
 			gridMain.Columns.Add(new ODGridColumn(Lan.g("TableRefList","Note"),170));
 			gridMain.Columns.Add(new ODGridColumn(Lan.g("TableRefList","Email"),190));
 			gridMain.Rows.Clear();
+			bool hasInvalidRef=false;
 			ODGridRow row;
 			List<string> listRefTypeNames=new List<string>() {Lan.g(this,"To"),Lan.g(this,"From"),referralDescript };
 			for(int i=0;i<RefAttachList.Count;i++) {
@@ -338,10 +339,17 @@ namespace OpenDental{
 					row.Cells.Add(str);
 				}
 				row.Cells.Add(refAttachCur.Note);
-				Referral referral=Referrals.GetReferral(refAttachCur.ReferralNum);
+				Referral referral=ReferralL.GetReferral(refAttachCur.ReferralNum,false);
+				if(referral==null) {
+					hasInvalidRef=true;
+					continue;
+				}
 				row.Cells.Add(referral.EMail);
 				row.Tag=refAttachCur;
 				gridMain.Rows.Add(row);
+			}
+			if(hasInvalidRef) {
+				ReferralL.ShowReferralErrorMsg();
 			}
 			gridMain.EndUpdate();
 			for(int i=0;i<RefAttachList.Count;i++) {
@@ -550,7 +558,10 @@ namespace OpenDental{
 				MsgBox.Show(this,"Please select a referral first");
 				return;
 			}
-			Referral referral=Referrals.GetReferral(((RefAttach)gridMain.Rows[idx].Tag).ReferralNum);
+			Referral referral=ReferralL.GetReferral(((RefAttach)gridMain.Rows[idx].Tag).ReferralNum);
+			if(referral==null) {
+				return;
+			}
 			SheetDef sheetDef;
 			if(referral.Slip==0){
 				sheetDef=SheetsInternal.GetSheetDef(SheetInternalType.ReferralSlip);
