@@ -3604,7 +3604,9 @@ namespace OpenDental {
 				});
 				return;
 			}
-			ModuleSelected(PatCur.PatNum);//Always use PatCur because by the time this gets called the patient has been changed to reflect in PatCur.
+			if(PatCur!=null) {//If a user switches to another module, PatCur can be null
+				ModuleSelected(PatCur.PatNum);//Always use PatCur because by the time this gets called the patient has been changed to reflect in PatCur.
+			}
 		}
 
 		/// <summary></summary>
