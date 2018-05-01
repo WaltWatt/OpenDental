@@ -1891,7 +1891,7 @@ namespace OpenDental {
 				//show all so user can pick
 				panelXcharge.Visible=true;
 				butPayConnect.Visible=true;
-				butPaySimple.Visible=true;
+				//butPaySimple.Visible=true;
 				return;
 			}
 			//show if enabled.  User could have all enabled.

@@ -760,7 +760,7 @@ namespace OpenDental{
 				//show all so user can pick
 				panelXcharge.Visible=true;
 				butPayConnect.Visible=true;
-				butPaySimple.Visible=true;
+				//butPaySimple.Visible=true;
 				groupPrepaid.Visible=true;
 				return;
 			}
@@ -813,8 +813,7 @@ namespace OpenDental{
 					}
 				}
 			}
-			groupPrepaid.Visible=true; //(panelXcharge.Visible || butPayConnect.Visible || butPaySimple.Visible);
-			butPaySimple.Visible=true;
+			groupPrepaid.Visible=(panelXcharge.Visible || butPayConnect.Visible || butPaySimple.Visible);
 		}
 
 		private long GetClinicNumSelected() {
