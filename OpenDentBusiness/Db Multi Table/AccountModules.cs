@@ -1923,7 +1923,7 @@ namespace OpenDentBusiness {
 			if(statementNum==0) {
 				command="SELECT * FROM installmentplan WHERE PatNum IN ("+familyPatNums+")";
 				DataTable rawInstall=Db.GetTable(command);
-				retVal.Tables.Add(GetPayPlans(rawPayPlan,rawPay,rawInstall,rawClaimPay,fam,pat));
+				retVal.Tables.Add(GetPayPlans(rawPayPlan,rawPay,rawInstall,rawClaimPay,fam,pat,singlePatient));
 			}
 			else {
 				//Always includes the payment plan breakdown for statements, receipts, and invoices.  LimitedStatements will return an empty payplan table.
@@ -2100,7 +2100,9 @@ namespace OpenDentBusiness {
 
 		///<summary>Gets payment plans for the family.  This defines what will show in the PayPlans grid in the account module.
 		///RawPay will include any paysplits for anyone in the family plus any paysplits for payment plans being paid by someone outside the family. </summary>
-		private static DataTable GetPayPlans(DataTable rawPayPlan,DataTable rawPay,DataTable rawInstall,DataTable rawClaimPay, Family fam, Patient pat) {
+		private static DataTable GetPayPlans(DataTable rawPayPlan,DataTable rawPay,DataTable rawInstall,DataTable rawClaimPay,Family fam,Patient pat
+			,bool isSingle) 
+		{
 			//No need to check RemotingRole; no call to db.
 			DataConnection dcon=new DataConnection();
 			DataTable table=new DataTable("payplan");
@@ -2134,7 +2136,12 @@ namespace OpenDentBusiness {
 			decimal totCost;
 			decimal due;
 			decimal balance;
-			for(int i=0;i<rawPayPlan.Rows.Count;i++){
+			for(int i=0;i<rawPayPlan.Rows.Count;i++) {
+				if(PIn.Long(rawPayPlan.Rows[i]["PatNum"].ToString())!=pat.PatNum && PIn.Long(rawPayPlan.Rows[i]["Guarantor"].ToString())!=pat.PatNum 
+					&& isSingle)
+				{
+					continue;//skip pay plans that are not associated to this patient/guarantor
+				}
 				//first, calculate the numbers-------------------------------------------------------------
 				paid=0;
 				for(int p=0;p<rawPay.Rows.Count;p++){
