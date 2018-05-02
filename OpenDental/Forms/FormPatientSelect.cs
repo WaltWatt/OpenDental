@@ -1259,8 +1259,9 @@ namespace OpenDental{
 					}
 				}
 			}
+			DataTable ptTable=new DataTable();
 			_fillGridThread=new ODThread(new ODThread.WorkerDelegate((ODThread o) => {
-				PtDataTable=Patients.GetPtDataTable(limit,textLName.Text,textFName.Text,textHmPhone.Text,
+				ptTable=Patients.GetPtDataTable(limit,textLName.Text,textFName.Text,textHmPhone.Text,
 					textAddress.Text,checkHideInactive.Checked,textCity.Text,textState.Text,
 					textSSN.Text,textPatNum.Text,textChartNumber.Text,billingType,
 					checkGuarantors.Checked,checkShowArchived.Checked,
@@ -1271,6 +1272,7 @@ namespace OpenDental{
 				_fillGridThread=null;
 				try {
 					this.BeginInvoke((Action)(() => {
+						PtDataTable=ptTable;
 						FillGridFinal(limit);
 					}));
 				}catch(Exception) { } //do nothing. Usually just a race condition trying to invoke from a disposed form.
