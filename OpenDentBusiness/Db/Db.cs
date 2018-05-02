@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Reflection;
 using System.Text;
+using CodeBase;
 
 namespace OpenDentBusiness {
 	///<summary>Used to send queries. The methods are internal since it is not acceptable for the UI to be sending queries.</summary>
@@ -24,6 +25,28 @@ namespace OpenDentBusiness {
 			get {
 				return !string.IsNullOrEmpty(DataConnection.GetServerName()) || !string.IsNullOrEmpty(DataConnection.GetConnectionString());
 			}
+		}
+
+		///<summary>Returns true if mysql variable "AUTO_INCREMENT_OFFSET" equals 1, otherwise false.</summary>
+		public static bool IsAutoIncrementOffsetSetForReplication() {
+			if(GetAutoIncrementOffset().In(1,-1)) {//auto_increment_offset is default value or not found (not found shouldn't happen, but for safety's sake).
+				return false;
+			}
+			return true;
+		}
+
+		/// <summary>Returns mysql variable "AUTO_INCREMENT_OFFSET", or -1 if variable not found.</summary>
+		public static int GetAutoIncrementOffset() {
+			string command="SHOW VARIABLES LIKE 'auto_increment_offset'";
+			DataTable table=GetTable(command);
+			if(table.Rows.Count>0) {
+				foreach(DataRow row in table.Rows) {
+					if((string)row["Variable_name"]=="auto_increment_offset") {
+						return PIn.Int((string)table.Rows[0]["Value"]);
+					}
+				}
+			}
+			return -1;//auto_increment_offset variable not found, just in case.
 		}
 
 		///<summary></summary>

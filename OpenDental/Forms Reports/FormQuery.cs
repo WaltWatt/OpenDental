@@ -1312,7 +1312,9 @@ namespace OpenDental{
 
 		///<summary>Checks to see if the computer is allowed to use create table or drop table syntax queries.  Will return false if using replication and the computer OD is running on is not the ReplicationUserQueryServer set in replication setup.  Otherwise true.</summary>
 		private bool IsSafeSql() {
-			if(!PrefC.RandomKeys) {//If replication is disabled, then any command is safe.
+			if(!PrefC.RandomKeys && !Db.IsAutoIncrementOffsetSetForReplication()) {//If replication is disabled, then any command is safe.
+				//Previously users could set PrefName.RandomPrimaryKeys but there is no longer a UI for this.
+				//PrefName.RandomPrimaryKeys use to be required for replication but this has since changed so we can not rely on this due to replication setup changes.
 				return true;
 			}
 			bool isSafe=true;
