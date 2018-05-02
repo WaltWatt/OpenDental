@@ -70,10 +70,11 @@ namespace OpenDentBusiness {
 				&& x.OldValue != "NEW" && x.NewValue != "DELETED").ToList();
 			foreach(InsEditLog editLogCur in listInsPlanChangedLogs) {
 				if(editLogCur.FieldName == "PlanNum") {
-					InsPlan oldPlan = InsPlans.GetPlan(PIn.Long(editLogCur.OldValue),null);
-					List<Benefit> listOldBenefits = Benefits.RefreshForPlan(oldPlan.PlanNum,0);
-					listLogs.AddRange(GetLinkedLogs(oldPlan.PlanNum,InsEditLogType.InsPlan,editLogCur,true));
-					listLogs.AddRange(GetLinkedLogs(oldPlan.CarrierNum,InsEditLogType.Carrier,editLogCur,true));
+					InsPlan oldPlan = InsPlans.GetPlan(PIn.Long(editLogCur.OldValue),null);					
+					if(oldPlan!=null) {
+						listLogs.AddRange(GetLinkedLogs(oldPlan.CarrierNum,InsEditLogType.Carrier,editLogCur,true));
+					}
+					listLogs.AddRange(GetLinkedLogs(PIn.Long(editLogCur.OldValue),InsEditLogType.InsPlan,editLogCur,true));
 				}
 				if(editLogCur.FieldName == "CarrierNum") {
 					listLogs.AddRange(GetLinkedLogs(PIn.Long(editLogCur.OldValue),InsEditLogType.Carrier,editLogCur,true));
