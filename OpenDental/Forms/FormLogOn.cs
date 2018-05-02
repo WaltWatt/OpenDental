@@ -237,7 +237,7 @@ namespace OpenDental{
 			else if(Security.CurUser!=null) {
 				listUser.SelectedIndex=_listUsers.FindIndex(x => x.UserNum==Security.CurUser.UserNum);//can be -1 if not found
 			}
-			if(listUser.SelectedIndex==-1){
+			if(listUser.SelectedIndex==-1 && listUser.Items.Count>0){//It is possible there are no users in the list if all users are CEMT users.
 				listUser.SelectedIndex=0;
 			}
 			listUser.EndUpdate();
