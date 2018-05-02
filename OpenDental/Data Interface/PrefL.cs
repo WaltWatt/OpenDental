@@ -970,7 +970,15 @@ namespace OpenDental {
 			string arguments="\""+folderUpdate+"\""//pass the source directory to the file copier.
 				+" "+processId.ToString()//and the processId of Open Dental.
 				+" \""+appDir+"\"";//and the directory where OD is running
-			Process.Start(startFileName,arguments);
+			try {
+				Process.Start(startFileName,arguments);
+			}
+			catch(Exception ex) {
+				FriendlyException.Show(Lan.g("Prefs","Unable to start the update file copier. Try closing and reopening the program."),ex);
+				FormOpenDental.ExitCode=305;//Unable to start the UpdateFileCopier.exe process.
+				Environment.Exit(FormOpenDental.ExitCode);
+				return false;
+			}	
 			Environment.Exit(0);//always exits, whether launch of setup worked or not
 			return false;
 		}
