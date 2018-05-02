@@ -1017,7 +1017,11 @@ namespace OpenDental {
 				paymentCur.ClinicNum=PIn.Long(rowCur["ClinicNum"].ToString());
 			}
 			//ClinicNum can be 0 for 'Headquarters' or clinics not enabled, PayType will be the 0 clinic or headquarters PayType if using PayConnect
-			paymentCur.PayType=PIn.Int(ProgramProperties.GetPropVal(_progCur.ProgramNum,"PaymentType",paymentCur.ClinicNum));
+			string ppPayTypeDesc="PaymentType";
+			if(_progCur.ProgName==ProgramName.PaySimple.ToString()) {
+				ppPayTypeDesc=PaySimple.PropertyDescs.PaySimplePayType;
+			}
+			paymentCur.PayType=PIn.Int(ProgramProperties.GetPropVal(_progCur.ProgramNum,ppPayTypeDesc,paymentCur.ClinicNum));
 			paymentCur.PayAmt=amount;
 			double payPlanDue=PIn.Double(rowCur["PayPlanDue"].ToString());
 			paymentCur.PayNote=note;
@@ -1028,7 +1032,7 @@ namespace OpenDental {
 			else if(_progCur.ProgName==ProgramName.PayConnect.ToString()) {
 				paymentCur.PaymentSource=CreditCardSource.PayConnect;
 			}
-			else if(_progCur.ProgName==ProgramName.PayConnect.ToString()) {
+			else if(_progCur.ProgName==ProgramName.PaySimple.ToString()) {
 				paymentCur.PaymentSource=CreditCardSource.PaySimple;
 			}
 			else {
