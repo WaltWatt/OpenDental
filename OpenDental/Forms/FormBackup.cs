@@ -1339,21 +1339,21 @@ namespace OpenDental {
 			//Insert security logs and security log hashes using our large table helper logic - Uses insert batches, multiple threads, and makes sure inserts are under the max allowed packet size.
 			string errorMsg=LargeTableHelper.BulkInsertSecurityLogs((textArchiveServerName.Text==""?textArchiveURI.Text :textArchiveServerName.Text),
 				textArchiveUser.Text,textArchivePass.Text,dateTimeArchive.Value);
-			long maxPriKeySecurityLog=LargeTableHelper.ListPriKeyMaxPerBatch.Max();//Grab security log max primary key for delete statements later.  
+			long maxPriKeySecurityLog=LargeTableHelper.ListPriKeyMaxPerBatch.Count>0 ? LargeTableHelper.ListPriKeyMaxPerBatch.Max() : 0;//Grab security log max primary key for delete statements later.  
 			errorMsg+=LargeTableHelper.BulkInsertSecurityLogHashes();//Must be run after BulkInsertSecurityLogs
-			long maxPriKeySecurityLogHash=LargeTableHelper.ListPriKeyMaxPerBatch.Max();//Grab security log hash max primary key for delete statements later.
+			long maxPriKeySecurityLogHash=LargeTableHelper.ListPriKeyMaxPerBatch.Count>0 ? LargeTableHelper.ListPriKeyMaxPerBatch.Max() : 0;//Grab security log hash max primary key for delete statements later.
 			if(errorMsg!="") {
 				Cursor=Cursors.Default;
 				MsgBox.Show(this,errorMsg);
 				return;
 			}
 			dcon.SetDb(connectionStrArchive,"",dbTypeArchive,true);
-			if(SecurityLogs.GetOne(maxPriKeySecurityLog)==null) {
+			if(maxPriKeySecurityLog!=0 && SecurityLogs.GetOne(maxPriKeySecurityLog)==null) {
 				Cursor=Cursors.Default;
 				MsgBox.Show(this,"Archival process failed.  The archive securitylog table does not have all of the archived rows.  Contact us for support.");
 				return;
 			}
-			if(SecurityLogHashes.GetOne(maxPriKeySecurityLogHash)==null) {
+			if(maxPriKeySecurityLogHash!=0 && SecurityLogHashes.GetOne(maxPriKeySecurityLogHash)==null) {
 				Cursor=Cursors.Default;
 				MsgBox.Show(this,"Archival process failed.  The archive securityloghash table does not have all of the archived rows.  Contact us for support.");
 				return;

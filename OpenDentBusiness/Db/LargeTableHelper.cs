@@ -277,15 +277,11 @@ namespace OpenDentBusiness {
 				sbGetSelectCommand.Append(@",')') vals FROM `"+_tempTableName+"`");
 				for(int i=0;i<_listPriKeyMaxPerBatch.Count;i++) {
 					StringBuilder sbWhereClause=new StringBuilder();
-					if(i>0 || i<_listPriKeyMaxPerBatch.Count-1) {
-						sbWhereClause.Append(@" WHERE ");
-						if(i>0) {
-							sbWhereClause.Append(POut.String(_tablePriKeyField)+@">"+POut.Long(_listPriKeyMaxPerBatch[i-1]));
-						}
-						if(i<_listPriKeyMaxPerBatch.Count-1) {
-							sbWhereClause.Append((i>0?@" AND ":"")+POut.String(_tablePriKeyField)+@"<="+POut.Long(_listPriKeyMaxPerBatch[i]));
-						}
+					sbWhereClause.Append(@" WHERE ");
+					if(i>0) {
+						sbWhereClause.Append(POut.String(_tablePriKeyField)+@">"+POut.Long(_listPriKeyMaxPerBatch[i-1]));
 					}
+					sbWhereClause.Append((i>0?@" AND ":"")+POut.String(_tablePriKeyField)+@"<="+POut.Long(_listPriKeyMaxPerBatch[i]));
 					listCommands.Add(sbGetSelectCommand.ToString()+sbWhereClause.ToString());
 				}
 				#endregion Get Query Strings
