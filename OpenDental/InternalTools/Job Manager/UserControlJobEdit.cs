@@ -3018,14 +3018,8 @@ namespace OpenDental.InternalTools.Job_Manager {
 			if(butUpdateLog.BackColor==Color.LightGreen) {
 				return;
 			}
-			MakeLogEntry(_jobCur,_jobOld,true);
+			SaveJob(_jobCur);
 			UpdateLogColor();
-			if(!IsNew) {
-				Signalods.SetInvalid(InvalidType.Jobs,KeyType.Job,_jobCur.JobNum);
-			}
-			else {
-				IsChanged=true;
-			}
 		}
 
 		private void UpdateLogColor() {

@@ -427,6 +427,7 @@
 			this.textDescription.TabIndex = 169;
 			this.textDescription.Text = "";
 			this.textDescription.TextChanged += new System.EventHandler(this.textDescription_TextChanged);
+			this.textDescription.KeyUp += new System.Windows.Forms.KeyEventHandler(this.textDescription_KeyUp);
 			// 
 			// OdtextEditor
 			// 

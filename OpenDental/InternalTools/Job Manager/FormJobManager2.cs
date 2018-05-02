@@ -1312,6 +1312,23 @@ namespace OpenDental {
 			FillExtraGrids();
 		}
 
+		private void userControlQueryEdit_SaveClick(object sender,EventArgs e) {
+			Job jobNew=userControlQueryEdit.GetJob();
+			Job jobStale=_listJobsAll.FirstOrDefault(x=>x.JobNum==jobNew.JobNum);
+			if(jobStale==null) {
+				_listJobsAll.Add(jobNew);
+			}
+			else {
+				_listJobsAll[_listJobsAll.IndexOf(jobStale)]=jobNew;
+			}
+			UpdateNodes(jobNew);
+			FillGridActions();
+			FillGridQueries();
+			FillGridDocumentation();
+			FillGridNotify();
+			FillExtraGrids();
+		}
+
 		///<summary>Flat recursion. Updates any nodes displaying outdated information for the passed in job (identified by JobNum). Does not move nodes in tree, just updates job information.</summary>
 		private void UpdateNodes(Job jobNew) {
 			List<TreeNode> treeNodes=new List<TreeNode>(treeJobs.Nodes.Cast<TreeNode>());

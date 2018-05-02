@@ -382,6 +382,10 @@ namespace OpenDental {
 
 		///<summary></summary>
 		private void butSave_Click(object sender,EventArgs e) {
+			SaveText();
+		}
+
+		private void SaveText() {
 			EventArgs gArgs=new EventArgs();
 			if(SaveClick!=null) {
 				SaveClick(this,gArgs);
@@ -431,6 +435,18 @@ namespace OpenDental {
 
 		private void textImplementation_Enter(object sender,EventArgs e) {
 			_textFocused=textImplementation;
+		}
+
+		private void textRequirements_KeyUp(object sender,KeyEventArgs e) {
+			if(e.Control && e.KeyCode == Keys.S) {
+				SaveText();
+			}
+		}
+
+		private void textImplementation_KeyUp(object sender,KeyEventArgs e) {
+			if(e.Control && e.KeyCode == Keys.S) {
+				SaveText();
+			}
 		}
 	}
 

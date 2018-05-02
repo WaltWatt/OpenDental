@@ -440,6 +440,7 @@
 			this.textRequirements.Text = "";
 			this.textRequirements.TextChanged += new System.EventHandler(this.textDescription_TextChanged);
 			this.textRequirements.Enter += new System.EventHandler(this.textDescription_Enter);
+			this.textRequirements.KeyUp += new System.Windows.Forms.KeyEventHandler(this.textRequirements_KeyUp);
 			// 
 			// label1
 			// 
@@ -508,6 +509,7 @@
 			this.textImplementation.Text = "";
 			this.textImplementation.TextChanged += new System.EventHandler(this.textDescription_TextChanged);
 			this.textImplementation.Enter += new System.EventHandler(this.textImplementation_Enter);
+			this.textImplementation.KeyUp += new System.Windows.Forms.KeyEventHandler(this.textImplementation_KeyUp);
 			// 
 			// label2
 			// 

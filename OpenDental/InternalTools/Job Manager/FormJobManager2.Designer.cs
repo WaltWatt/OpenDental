@@ -565,6 +565,8 @@
 			this.userControlQueryEdit.Size = new System.Drawing.Size(987, 678);
 			this.userControlQueryEdit.TabIndex = 1;
 			this.userControlQueryEdit.Visible = false;
+			this.userControlQueryEdit.SaveClick += new System.EventHandler(this.userControlQueryEdit_SaveClick);
+			this.userControlQueryEdit.RequestJob += new OpenDental.InternalTools.Job_Manager.UserControlQueryEdit.RequestJobEvent(this.userControlJobEdit_RequestJob);
 			// 
 			// label5
 			// 
