@@ -648,7 +648,7 @@ namespace OpenDental {
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MinimumSize = new System.Drawing.Size(1075, 762);
 			this.Name = "FormRpCustomAging";
-			this.Text = "Aging Builder";
+			this.Text = "Custom Aging Report";
 			this.Load += new System.EventHandler(this.FormRpCustomAging_Load);
 			this.contextMenuStrip.ResumeLayout(false);
 			this.groupBox4.ResumeLayout(false);
