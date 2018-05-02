@@ -179,7 +179,8 @@ namespace OpenDentBusiness{
 				|| perm==Permissions.AdjustmentEdit
 				|| perm==Permissions.CommlogEdit//usually from a conversion
 				|| perm==Permissions.ProcDelete//because older versions did not set the DateEntryC.
-				|| perm==Permissions.ImageDelete)//In case an image has a creation date of DateTime.MinVal.
+				|| perm==Permissions.ImageDelete//In case an image has a creation date of DateTime.MinVal.
+				|| perm==Permissions.PerioEdit)//In case perio chart exam has a creation date of DateTime.MinValue.
 			{
 				if(date.Year<1880	&& dateLimit.Year<1880) {
 					return true;
