@@ -124,9 +124,9 @@
     <value>166, 17</value>
   </metadata>
   <data name="labelInstruct2.Text" xml:space="preserve">
-    <value>Before coming to this window, you will have entered payments for each of the claims from the Account module of each patient.
+    <value>Highlight one or more paid claims in the lower grid, and click Attach.
 
-Highlight one or more paid claims in the lower grid, and click Attach.
+If claim level payment amounts have not already been entered from each patient's account, you can do that here by double clicking the claims and entering payment details.
 
 As you go, you can reorder items in the upper grid to match the EOB.  You may close this window at any time, and all changes will be preserved until you return.
 
