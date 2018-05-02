@@ -768,7 +768,7 @@ namespace OpenDentBusiness {
 #if DEBUG
 				string apiUrl="https://sandbox-api.paysimple.com/v4";
 #else
-				string apiUrl="https://sandbox-api.paysimple.com/v4";//TODO:  CHANGE THIS TO PRODUCTION
+				string apiUrl="https://api.paysimple.com/v4";
 #endif
 				switch(route) {
 					case ApiRoute.Root:
