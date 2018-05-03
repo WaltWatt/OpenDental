@@ -382,7 +382,7 @@ namespace OpenDental{
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
-			this.MinimumSize = new System.Drawing.Size(846, 218);
+			this.MinimumSize = new System.Drawing.Size(1124, 218);
 			this.Name = "FormAudit";
 			this.ShowInTaskbar = false;
 			this.Text = "Audit Trail";
