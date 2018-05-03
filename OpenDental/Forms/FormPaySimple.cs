@@ -51,8 +51,11 @@ namespace OpenDental {
 				checkOneTimePayment.Checked=true;
 				checkOneTimePayment.Enabled=false;
 			}
-			textZipCode.Text=_patCur.Zip;
-			textNameOnCard.Text=_patCur.GetNameFL();
+			else {
+				checkOneTimePayment.Checked=!PrefC.GetBool(PrefName.StoreCCtokens);
+				textZipCode.Text=_patCur.Zip;
+				textNameOnCard.Text=_patCur.GetNameFL();
+			}
 			FillFieldsFromCard();
 			if(_isAddingCard) {
 				radioAuthorization.Checked=true;
