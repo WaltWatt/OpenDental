@@ -940,6 +940,8 @@ namespace OpenDental {
 				_webBrowserDocument=null;
 			}
 			DocSelected=new Document();
+			bool isNodeOldDoc=(NodeIdentifierOld.NodeType==ImageNodeType.Doc);
+			long docNumOld=NodeIdentifierOld.PriKey;
 			NodeIdentifierOld=nodeId;
 			//Disable all item tools until the currently selected node is loaded properly in the picture box.
 			EnableAllTreeItemTools(false);
@@ -953,6 +955,9 @@ namespace OpenDental {
 			//the current image has been erased. This will also avoid concurrent access to the the currently loaded images by
 			//the main and worker threads.
 			EraseCurrentImages();
+			if(PrefC.AtoZfolderUsed==DataStorageType.InDatabase && isNodeOldDoc) {
+				DeleteTempPdf(docNumOld);//Clean up the temp storage copy of PDF from DB.
+			}
 			if(nodeId.NodeType==ImageNodeType.ApteryxImage) {
 				ShowApteryxImage(node); //Display image in our own special way. 
 			}
@@ -1122,7 +1127,10 @@ namespace OpenDental {
 								_webBrowserDocument.Navigate(pdfFilePath);//The return status of this function doesn't seem to be helpful.
 								pictureBoxMain.Visible=false;
 								isExportable=true;
-								if(PrefC.AtoZfolderUsed!=DataStorageType.LocalAtoZ) {
+								if(PrefC.AtoZfolderUsed==DataStorageType.InDatabase) {
+									//Do nothing. Temp file will be deleted when leaving selected file.
+								}
+								else if(PrefC.AtoZfolderUsed!=DataStorageType.LocalAtoZ) {
 									File.Delete(pdfFilePath);//Delete temp file
 								}
 							}
@@ -1251,6 +1259,29 @@ namespace OpenDental {
 			if(nodeId.NodeType.In(ImageNodeType.Doc,ImageNodeType.Eob,ImageNodeType.Amd,ImageNodeType.ApteryxImage)) {
 				//Render the initial image within the current bounds of the picturebox (if the document is an image).
 				InvalidateSettings(ImageSettingFlags.ALL,true);
+			}
+		}
+
+		///<summary>When storing PDFs directly in DB, we download a temp file to display. This could cause local temp storage bloat if not cleaned up when tree 
+		///selection changes. Need to delete the temp file associated to NodeIdentifierOld, which persists even across module changes, so while 
+		///changing module will not cause the temp file to delete, returning to the image module or closing OpenDental cleans it up.</summary>
+		private void DeleteTempPdf(long docNum) {
+			Document doc=Documents.GetByNum(docNum,doReturnNullIfNotFound:true);//Get old document.
+			if(doc!=null && Path.GetExtension(doc.FileName).ToLower()==".pdf") {//Adobe acrobat file.
+				string pdfFilePath=ODFileUtils.CombinePaths(PrefC.GetTempFolderPath(),doc.DocNum+PatCur.PatNum+".pdf");
+				if(!xRayImageController.IsDisposed){
+					xRayImageController.Dispose();
+				}
+				if(File.Exists(pdfFilePath)){
+					try {
+						File.Delete(pdfFilePath);//Delete temp file
+					}
+					catch (Exception ex) {
+						ex.DoNothing();
+						//Can happen if user is clicking around very quickly and EraseCurrentImages() hasn't quite freed up the file.
+						//Do nothing, worst case we orphan a temp pdf that will clean up next time it's previewed.
+					}
+				}
 			}
 		}
 
@@ -3213,6 +3244,7 @@ namespace OpenDental {
 				return;
 			}
 			if(PrefC.AtoZfolderUsed==DataStorageType.InDatabase) {
+				MsgBox.Show(this,"Images stored directly in database. Export file in order to open with external program.");
 				return;//Documents must be stored in the A to Z Folder to open them outside of Open Dental.  Users can use the export button for now.
 			}
 			if(nodeId.NodeType==ImageNodeType.Mount) {
