@@ -87,7 +87,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <OutputPath>bin\Release\</OutputPath>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Optimize>true</Optimize>
+    <Optimize>false</Optimize>
     <WarningLevel>3</WarningLevel>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>x86</PlatformTarget>
