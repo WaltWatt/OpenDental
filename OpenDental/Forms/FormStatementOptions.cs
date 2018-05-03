@@ -1212,8 +1212,20 @@ namespace OpenDental{
 					Cursor=Cursors.Default;
 					return;
 				}
-				SheetDef sheetDef=SheetUtil.GetStatementSheetDef();
-				DataSet dataSet=null;
+				if(!SaveAsDocument(StmtCur,true)) {
+					return;
+				}
+				Cursor=Cursors.Default;
+			}
+			DialogResult=DialogResult.OK;
+		}
+
+		private bool SaveAsDocument(Statement stmtCur,bool printSheet=false,string pdfFileName="") {
+			SheetDef sheetDef=SheetUtil.GetStatementSheetDef();
+			DataSet dataSet=null;
+			string tempPath;
+			Sheet sheet;
+			if(pdfFileName=="" || printSheet) {
 				if(checkSuperStatement.Checked) {
 					//handled in SaveToDb()
 					//StmtCur.SuperFamily=Patients.GetPat(StmtCur.PatNum).SuperFamily;
@@ -1223,58 +1235,65 @@ namespace OpenDental{
 				else {
 					dataSet=AccountModules.GetAccount(StmtCur.PatNum,StmtCur,doIncludePatLName:checkShowLName.Checked);
 				}
-				Sheet sheet=SheetUtil.CreateSheet(sheetDef,StmtCur.PatNum,StmtCur.HidePayment);
+				sheet=SheetUtil.CreateSheet(sheetDef,StmtCur.PatNum,StmtCur.HidePayment);
 				sheet.Parameters.Add(new SheetParameter(true,"Statement") { ParamValue=StmtCur });
 				SheetFiller.FillFields(sheet,dataSet,StmtCur);
 				SheetUtil.CalculateHeights(sheet,dataSet,StmtCur);
-				string tempPath=CodeBase.ODFileUtils.CombinePaths(PrefC.GetTempFolderPath(),StmtCur.PatNum.ToString()+".pdf");
+				tempPath=ODFileUtils.CombinePaths(PrefC.GetTempFolderPath(),StmtCur.PatNum.ToString()+".pdf");
 				SheetPrinting.CreatePdf(sheet,tempPath,StmtCur,dataSet,null);
-				long category=0;
-				for(int i=0;i<_listImageCatDefs.Count;i++) {
-					if(Regex.IsMatch(_listImageCatDefs[i].ItemValue,@"S")) {
-						category=_listImageCatDefs[i].DefNum;
-						break;
-					}
+			}
+			else {
+				tempPath=pdfFileName;
+			}
+			long category=0;
+			for(int i=0;i<_listImageCatDefs.Count;i++) {
+				if(Regex.IsMatch(_listImageCatDefs[i].ItemValue,@"S")) {
+					category=_listImageCatDefs[i].DefNum;
+					break;
 				}
-				if(category==0) {
-					category=_listImageCatDefs[0].DefNum;//put it in the first category.
-				}
-				//create doc--------------------------------------------------------------------------------------
-				OpenDentBusiness.Document docc=null;
+			}
+			if(category==0) {
+				category=_listImageCatDefs[0].DefNum;//put it in the first category.
+			}
+			//create doc--------------------------------------------------------------------------------------
+			Document docc=null;
+			try {
+				docc=ImageStore.Import(tempPath,category,Patients.GetPat(StmtCur.PatNum));
+			}
+			catch {
+				MsgBox.Show(this,"Error saving document.");
+				//this.Cursor=Cursors.Default;
+				return false;
+			}
+			finally {
+				//Delete the temp file since we don't need it anymore.
 				try {
-					docc=ImageStore.Import(tempPath,category,Patients.GetPat(StmtCur.PatNum));
-				}
-				catch {
-					MsgBox.Show(this,"Error saving document.");
-					//this.Cursor=Cursors.Default;
-					return;
-				}
-				finally {
-					//Delete the temp file since we don't need it anymore.
-					try {
+					if(pdfFileName=="") {//If they're passing in a PDF file name, they probably have it open somewhere else.
 						File.Delete(tempPath);
 					}
-					catch {
-						//Do nothing.  This file will likely get cleaned up later.
-					}
 				}
-				docc.ImgType=ImageType.Document;
-				if(StmtCur.IsInvoice) {
-					docc.Description=Lan.g(this,"Invoice");
+				catch {
+					//Do nothing.  This file will likely get cleaned up later.
+				}
+			}
+			docc.ImgType=ImageType.Document;
+			if(StmtCur.IsInvoice) {
+				docc.Description=Lan.g(this,"Invoice");
+			}
+			else {
+				if(StmtCur.IsReceipt==true) {
+					docc.Description=Lan.g(this,"Receipt");
 				}
 				else {
-					if(StmtCur.IsReceipt==true) {
-						docc.Description=Lan.g(this,"Receipt");
-					}
-					else {
-						docc.Description=Lan.g(this,"Statement");
-					}
+					docc.Description=Lan.g(this,"Statement");
 				}
-				//Some customers have wanted to sort their statements in the images module by date and time.  
-				//We would need to enhance DateSent to include the time portion.
-				docc.DateCreated=StmtCur.DateSent;
-				StmtCur.DocNum=docc.DocNum;//this signals the calling class that the pdf was created successfully.
-				Statements.AttachDoc(StmtCur.StatementNum,docc);
+			}
+			//Some customers have wanted to sort their statements in the images module by date and time.  
+			//We would need to enhance DateSent to include the time portion.
+			docc.DateCreated=StmtCur.DateSent;
+			StmtCur.DocNum=docc.DocNum;//this signals the calling class that the pdf was created successfully.
+			Statements.AttachDoc(StmtCur.StatementNum,docc);
+			if(printSheet) {
 				//Actually print the statement.
 				//NOTE: This is printing a "fresh" GDI+ version of the statment which is ever so slightly different than the PDFSharp statment that was saved to disk.
 				sheet=SheetUtil.CreateSheet(sheetDef,StmtCur.PatNum,StmtCur.HidePayment);
@@ -1286,9 +1305,8 @@ namespace OpenDental{
 					StmtCur.IsInvoiceCopy=true;
 					Statements.Update(StmtCur);
 				}
-				Cursor=Cursors.Default;
 			}
-			DialogResult=DialogResult.OK;
+			return true;
 		}
 
 		private void butEmail_Click(object sender,EventArgs e) {
@@ -1664,12 +1682,17 @@ namespace OpenDental{
 				FormSheetFillEdit FormSFE=new FormSheetFillEdit(sheet,dataSet);
 				FormSFE.Stmt=StmtCur;
 				FormSFE.IsStatement=true;
+				FormSFE.SaveStatementToDocDelegate=SaveStatementAsDocument;
 				FormSFE.ShowDialog();
 				if(FormSFE.HasEmailBeenSent) {
 					FormSFE.Stmt.Mode_=StatementMode.Email;
 					listMode.SelectedIndex=(int)StatementMode.Email;
 				}
 			}
+		}
+
+		private void SaveStatementAsDocument(Statement stmt,string pdfFileName) {
+			checkIsSent.Checked=SaveAsDocument(stmt,pdfFileName:pdfFileName);
 		}
 
 		///<summary>Opens the saved PDF for the document.</summary>

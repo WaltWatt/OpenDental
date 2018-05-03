@@ -14,6 +14,7 @@ using OpenDental.UI;
 using OpenDentBusiness;
 
 namespace OpenDental {
+	public delegate void SaveStatementToDocDelegate(Statement stmt,string pdfFileName="");
 	public partial class FormSheetFillEdit:ODForm {
 		///<summary>Will be null if deleted.</summary>
 		public Sheet SheetCur;
@@ -38,6 +39,7 @@ namespace OpenDental {
 		public bool IsReadOnly;
 		///<summary>True if the user sent an email from this window.</summary>
 		public bool HasEmailBeenSent;
+		public SaveStatementToDocDelegate SaveStatementToDocDelegate;
 
 		public void ForceClose() {
 			try {
@@ -806,11 +808,15 @@ namespace OpenDental {
 			if(FormS.PaperCopies>0){
 				SheetPrinting.Print(SheetCur,FormS.PaperCopies,RxIsControlled,Stmt,MedLabCur);
 			}
+			string pdfFile="";
 			if(FormS.EmailPatOrLab){
-				EmailSheet(FormS.EmailPatOrLabAddress,SheetCur.Description.ToString());//subject could be improved
+				pdfFile=EmailSheet(FormS.EmailPatOrLabAddress,SheetCur.Description.ToString());//subject could be improved
 			}
 			if((SheetCur.SheetType==SheetTypeEnum.ReferralSlip || SheetCur.SheetType==SheetTypeEnum.ReferralLetter) && FormS.Email2) {
-				EmailSheet(FormS.Email2Address,Lan.g(this,"RE: ")+Patients.GetLim(SheetCur.PatNum).GetNameLF());//subject will work even if patnum invalid
+				pdfFile=EmailSheet(FormS.Email2Address,Lan.g(this,"RE: ")+Patients.GetLim(SheetCur.PatNum).GetNameLF());//subject will work even if patnum invalid
+			}
+			if(SheetCur.SheetType==SheetTypeEnum.Statement && SaveStatementToDocDelegate!=null) {
+				SaveStatementToDocDelegate(Stmt,pdfFile);
 			}
 			OkClose();
 		}
@@ -831,11 +837,15 @@ namespace OpenDental {
 				}
 			}
 			SheetPrinting.Print(SheetCur,1,RxIsControlled,Stmt,MedLabCur);
+			if(SheetCur.SheetType==SheetTypeEnum.Statement && SaveStatementToDocDelegate!=null) {
+				SaveStatementToDocDelegate(Stmt);
+			}
 			OkClose();
 		}
 
-		///<summary>Takes the "To" address and subject and correctly formats an email to the lab or patient</summary>
-		private void EmailSheet(string addr_to,string subject) {
+		///<summary>Takes the "To" address and subject and correctly formats an email to the lab or patient.
+		///Returns the file path to the pdf that is created.</summary>
+		private string EmailSheet(string addr_to,string subject) {
 			EmailMessage message;
 			Random rnd=new Random();
 			string attachPath=EmailAttaches.GetAttachPath();
@@ -851,7 +861,7 @@ namespace OpenDental {
 			}
 			if(!Security.IsAuthorized(Permissions.EmailSend,false)) {//Still need to return after printing, but not send emails.
 				OkClose();
-				return;
+				return "";
 			}
 			//Format Email
 			fileName=DateTime.Now.ToString("yyyyMMdd")+"_"+DateTime.Now.TimeOfDay.Ticks.ToString()+rnd.Next(1000).ToString()+".pdf";
@@ -882,7 +892,8 @@ namespace OpenDental {
 			if(FormE.ShowDialog()==DialogResult.OK) {
 				HasEmailBeenSent=true;
 			}
-			OkClose();	
+			OkClose();
+			return pdfFile;
 		}
 
 		private void butEmail_Click(object sender,EventArgs e) {
@@ -931,7 +942,10 @@ namespace OpenDental {
 					subject=Lan.g(this,"RE: ")+Patients.GetLim(SheetCur.PatNum).GetNameLF();
 				}
 			}
-			EmailSheet(emailAddress,subject);
+			string pdfFile=EmailSheet(emailAddress,subject);
+			if(SheetCur.SheetType==SheetTypeEnum.Statement && SaveStatementToDocDelegate!=null) {
+				SaveStatementToDocDelegate(Stmt,pdfFile);
+			}
 		}
 
 		private void butPDF_Click(object sender,EventArgs e) {
@@ -952,6 +966,9 @@ namespace OpenDental {
 			//g.Dispose();
 			Process.Start(filePathAndName);
 			SecurityLogs.MakeLogEntry(Permissions.SheetEdit,SheetCur.PatNum,SheetCur.Description+" from "+SheetCur.DateTimeSheet.ToShortDateString()+" pdf was created");
+			if(SheetCur.SheetType==SheetTypeEnum.Statement && SaveStatementToDocDelegate!=null) {
+				SaveStatementToDocDelegate(Stmt,filePathAndName);
+			}
 			OkClose();
 		}
 
