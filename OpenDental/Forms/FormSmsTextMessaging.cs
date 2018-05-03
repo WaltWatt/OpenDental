@@ -200,6 +200,9 @@ namespace OpenDental {
 				if(comboClinic.SelectedIndices.Count==0&&comboClinic.Items.Count>0) {
 					comboClinic.SetSelected(0,true);
 				}
+				if(Clinics.ClinicNum==0) { //HQ clinic is selected so select all clinics in the filter.
+					comboClinic.SetSelected(true);
+				}
 			}
 			textDateFrom.Text=DateTimeOD.Today.AddDays(-7).ToShortDateString();
 			textDateTo.Text=DateTimeOD.Today.ToShortDateString();			
