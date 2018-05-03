@@ -3920,7 +3920,7 @@ namespace OpenDental {
 				return;
 			}
 			PaySplits.PaySplitAssociated splitAssociatedOld=_listPaySplitsAssociated.Find(x => x.PaySplitLinked==paySplitOld);
-			FormPaySplitEdit FormPSE=new FormPaySplitEdit(_curFamOrSuperFam);
+			FormPaySplitEdit FormPSE=new FormPaySplitEdit(_curFamOrSuperFam,checkPayTypeNone.Checked);
 			FormPSE.ListSplitsCur=_listSplitsCur;
 			FormPSE.PaySplitCur=paySplit;
 			FormPSE.SplitAssociated=splitAssociatedOld??new PaySplits.PaySplitAssociated(null,null);
@@ -4205,7 +4205,7 @@ namespace OpenDental {
 			paySplit.PayNum=_paymentCur.PayNum;
 			paySplit.ProvNum=Patients.GetProvNum(_patCur);
 			paySplit.ClinicNum=_paymentCur.ClinicNum;
-			FormPaySplitEdit FormPSE=new FormPaySplitEdit(_curFamOrSuperFam);
+			FormPaySplitEdit FormPSE=new FormPaySplitEdit(_curFamOrSuperFam,checkPayTypeNone.Checked);
       FormPSE.ListSplitsCur=_listSplitsCur;
 			FormPSE.PaySplitCur=paySplit;
 			FormPSE.IsNew=true;
@@ -4257,7 +4257,7 @@ namespace OpenDental {
 
 		private void butCreatePartialSplit_Click(object sender,EventArgs e) {
 			if(checkPayTypeNone.Checked) {//Button only visible if EnforceFully is enabled
-				FormPaySplitManage FormPSM=new FormPaySplitManage();
+				FormPaySplitManage FormPSM=new FormPaySplitManage(checkPayTypeNone.Checked);
 				FormPSM.ListSplitsCur=_listSplitsCur;
 				FormPSM.PayDate=PIn.Date(textDate.Text);
 				FormPSM.PatCur=_patCur;

@@ -30,9 +30,11 @@ namespace OpenDental {
 		///<summary>A dictionary or patients that we may need to reference to fill the grids to eliminate unnecessary calls to the DB.
 		///Should contain all patients in the current family along with any patients of payment plans of which a member of this family is the guarantor.</summary>
 		private Dictionary<long,Patient> dictPatients;
+		private bool _isIncomeTransfer;
 
-		public FormPaySplitManage() {
+		public FormPaySplitManage(bool isIncomeTransfer) {
 			InitializeComponent();
+			_isIncomeTransfer=isIncomeTransfer;
 			Lan.F(this);
 		}
 
@@ -659,7 +661,7 @@ namespace OpenDental {
 			if(paySplit.DateEntry!=DateTime.MinValue && !Security.IsAuthorized(Permissions.PaymentEdit,paySplit.DatePay,false)) {
 				return;
 			}
-			FormPaySplitEdit FormPSE=new FormPaySplitEdit(FamCur);
+			FormPaySplitEdit FormPSE=new FormPaySplitEdit(FamCur,_isIncomeTransfer);
       FormPSE.ListSplitsCur=ListSplitsCur;
 			FormPSE.PaySplitCur=paySplit; if(paySplit.IsInterestSplit && !MsgBox.Show(this,MsgBoxButtons.OKCancel,"Editing or deleting interest splits for a payment plan charge can"
 				+" cause future splits to be allocated to the wrong provider. Do you want to continue?")) {
@@ -729,7 +731,7 @@ namespace OpenDental {
 			paySplit.PayNum=PaymentCur.PayNum;
 			paySplit.ProvNum=Patients.GetProvNum(PatCur);
 			paySplit.ClinicNum=PaymentCur.ClinicNum;
-			FormPaySplitEdit FormPSE=new FormPaySplitEdit(FamCur);
+			FormPaySplitEdit FormPSE=new FormPaySplitEdit(FamCur,_isIncomeTransfer);
       FormPSE.ListSplitsCur=ListSplitsCur;
 			FormPSE.PaySplitCur=paySplit;
 			FormPSE.IsNew=true;

@@ -113,12 +113,14 @@ namespace OpenDental
 		private double ProcInsEst;
 		private double ProcAdj;
 		private double ProcPrevPaid;	
-		private Family FamCur;	
+		private Family _famCur;	
 		///<summary>Filtered list of providers based on which clinic is selected. If no clinic is selected displays all providers. Also includes a dummy clinic at index 0 for "none"</summary>
 		private List<Provider> _listProviders;
 		private PaySplit _paySplitCopy;
 		private Procedure ProcCur;
 		private List<Def> _listPaySplitUnearnedTypeDefs;
+		///<summary>True if the payment for this paysplit is an income transfer.</summary>
+		private bool _isIncomeTransfer;
 		#endregion
 		///<summary>The PayPlanCharge that this paysplit is linked to. May be zero if the paysplit is not attached to a payplan or there are no charges
 		///due for the payplan.</summary>
@@ -126,9 +128,10 @@ namespace OpenDental
 			get;set;
 		}
 
-		public FormPaySplitEdit(Family famCur){//PaySplit paySplitCur,Family famCur){
+		public FormPaySplitEdit(Family famCur,bool isIncomeTransfer){
 			InitializeComponent();
-			FamCur=famCur;
+			_famCur=famCur;
+			_isIncomeTransfer=isIncomeTransfer;
 			Lan.F(this);
 		}
 
@@ -965,6 +968,7 @@ namespace OpenDental
 			this.Location = new System.Drawing.Point(0, 400);
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
+			this.MinimumSize = new System.Drawing.Size(766, 100);
 			this.Name = "FormPaySplitEdit";
 			this.ShowInTaskbar = false;
 			this.Text = "Edit Payment Split";
@@ -1154,9 +1158,9 @@ namespace OpenDental
 		///<summary>PaySplit.Patient is one value that is always kept in synch with the display.  If program changes PaySplit.Patient, then it will run this method to update the display.  If user changes display, then _MouseDown is run to update the PaySplit.Patient.</summary>
 		private void FillPatient(){
 			listPatient.Items.Clear();
-			for(int i=0;i<FamCur.ListPats.Length;i++){
-				listPatient.Items.Add(FamCur.GetNameInFamLFI(i));
-				if(PaySplitCur.PatNum==FamCur.ListPats[i].PatNum){
+			for(int i=0;i<_famCur.ListPats.Length;i++){
+				listPatient.Items.Add(_famCur.GetNameInFamLFI(i));
+				if(PaySplitCur.PatNum==_famCur.ListPats[i].PatNum){
 					listPatient.SelectedIndex=i;
 				}
 			}
@@ -1164,7 +1168,7 @@ namespace OpenDental
 			if(PaySplitCur.PatNum==0){
 				listPatient.SelectedIndex=0;
 				//the initial patient will be the first patient in the family, usually guarantor
-				PaySplitCur.PatNum=FamCur.ListPats[0].PatNum;
+				PaySplitCur.PatNum=_famCur.ListPats[0].PatNum;
 			}
 			if(listPatient.SelectedIndex==-1){//patient not in family
 				checkPatOtherFam.Checked=true;
@@ -1205,7 +1209,7 @@ namespace OpenDental
 			if(listPatient.SelectedIndex==-1){
 				return;
 			}
-			PaySplitCur.PatNum=FamCur.ListPats[listPatient.SelectedIndex].PatNum;
+			PaySplitCur.PatNum=_famCur.ListPats[listPatient.SelectedIndex].PatNum;
 		}
 
 		private void FillProcedure(){
@@ -1304,7 +1308,8 @@ namespace OpenDental
 			if(PrefC.HasClinicsEnabled) {
 				comboClinic.IndexSelectOrSetText(_listClinics.FindIndex(x => x.ClinicNum==PaySplitCur.ClinicNum),() => { return Clinics.GetAbbr(PaySplitCur.ClinicNum); });
 			}
-			listPatient.SelectedIndex=FamCur.ListPats.ToList().FindIndex(x => x.PatNum==PaySplitCur.PatNum);//Proc selected will always be for the pat this paysplit was made for
+			//Proc selected will always be for the pat this paysplit was made for
+			listPatient.SelectedIndex=_famCur.ListPats.ToList().FindIndex(x => x.PatNum==PaySplitCur.PatNum);
 			ComputeProcTotals();
 		}
 
@@ -1492,7 +1497,7 @@ namespace OpenDental
 				}
 				//PayPlan[] planListAll=PayPlans.Refresh(FamCur.List[listPatient.SelectedIndex].PatNum,0);
 				//get all plans where the selected patient is the patnum or the guarantor of the payplan. Do not include insurance payment plans
-				List<PayPlan> payPlanList=PayPlans.GetForPatNum(FamCur.ListPats[listPatient.SelectedIndex].PatNum).Where(x => x.PlanNum == 0).ToList();
+				List<PayPlan> payPlanList=PayPlans.GetForPatNum(_famCur.ListPats[listPatient.SelectedIndex].PatNum).Where(x => x.PlanNum == 0).ToList();
 				if(payPlanList.Count==0){//no valid plans
 					MsgBox.Show(this,"The selected patient is not the guarantor for any payment plans.");
 					checkPayPlan.Checked=false;
@@ -1547,38 +1552,43 @@ namespace OpenDental
 			DialogResult=DialogResult.OK;
 		}
 
-		private void butOK_Click(object sender, System.EventArgs e) {
-			if(textAmount.errorProvider1.GetError(textAmount)!=""
-				|| textDatePay.errorProvider1.GetError(textDatePay)!=""
-				){
-				MessageBox.Show(Lan.g(this,"Please fix data entry errors first."));
-				return;
+		private bool IsValid() {
+			if(textAmount.errorProvider1.GetError(textAmount)!=""	|| textDatePay.errorProvider1.GetError(textDatePay)!="")
+			{
+				MsgBox.Show(this,"Please fix data entry errors first.");
+				return false;
 			}
 			double amount=PIn.Double(textAmount.Text);
 			if(amount==0) {
 				MsgBox.Show(this,"Please enter an amount");
-				return;
+				return false;
 			}
 			if(PrefC.GetInt(PrefName.RigorousAccounting)==(int)RigorousAccounting.EnforceFully && PaySplitCur.UnearnedType!=0 && ProcCur!=null 
 				&& !_isEditAnyway) 
 			{
 				MsgBox.Show(this,"Cannot have an unallocated split that also has an attached procedure.");
-				return;
+				return false;
 			}
 			if(_remainAmt<0 && ProcCur!=null) {
 				if(!MsgBox.Show(this,MsgBoxButtons.OKCancel,"Remaining amount is negative.  Continue?","Overpaid Procedure Warning")) {
-					return;
+					return false;
 				}
 			}
 			if(checkPayPlan.Checked && checkPatOtherFam.Checked){
 				MessageBox.Show(Lan.g(this,"You cannot split outside of the family for a payment plan.")+"  "
 					+Lan.g(this,"Either uncheck the Attached to Payment Plan checkbox, or split to a family member instead."));
-				return;
+				return false;
 			}
       if(PrefC.GetInt(PrefName.RigorousAccounting)==(int)RigorousAccounting.EnforceFully && ProcCur==null && PaySplitCur.UnearnedType==0) {
 				MsgBox.Show(this,"You must attach a procedure to this payment.");
-				return;
+				return false;
       }
+			if(_isIncomeTransfer && PaySplitCur.UnearnedType!=0 && amount<0 && SplitAssociated?.PaySplitOrig==null) {
+				//To handle the case when they are manually making their prepayment and they forget to attach the original prepayment split.
+				//Only when this split is negative because they are free to correct previous mistakes with a positive split. 
+				MsgBox.Show(this,"You must attach a prepayment to this split.");
+				return false;
+			}
 			//Provider and Unearned combos will be correct at this point, based on ProvNum or UnearnedType.
 			//Unearned type and provider are set in SelectionChangeCommitted events for the respective combo boxes, when rigorous and provs not allowed
 			if(!_isEditAnyway && PrefC.GetInt(PrefName.RigorousAccounting)==(int)RigorousAccounting.EnforceFully) {
@@ -1586,8 +1596,10 @@ namespace OpenDental
 					PaySplitCur.UnearnedType=0;
 				}
 				else if(PaySplitCur.ProvNum<=0){
-					if(comboUnearnedTypes.SelectedIndex==0 && !MsgBox.Show(this,MsgBoxButtons.YesNo,"Having a provider of \"None\" will mark this paysplit as a prepayment.  Continue?")) {
-						return;
+					if(comboUnearnedTypes.SelectedIndex==0 
+						&& !MsgBox.Show(this,MsgBoxButtons.YesNo,"Having a provider of \"None\" will mark this paysplit as a prepayment.  Continue?")) 
+					{
+						return false;
 					}
 					PaySplitCur.ProvNum=0;//This means it's unallocated.
 					if(comboUnearnedTypes.SelectedIndex==0) {
@@ -1600,8 +1612,16 @@ namespace OpenDental
 			}
 			else if(comboUnearnedTypes.SelectedIndex==0 && comboProvider.SelectedIndex==0) {//may want to change this to match the above in the future.
 				MsgBox.Show(this,"Please select an unearned type or a provider.");
+				return false;
+			}
+			return true;
+		}
+
+		private void butOK_Click(object sender, System.EventArgs e) {
+			if(!IsValid()) {
 				return;
 			}
+			double amount=PIn.Double(textAmount.Text);
 			PaySplitCur.DatePay=PIn.Date(textDatePay.Text);//gets overwritten anyway
 			PaySplitCur.SplitAmt=amount;
 			PaySplitCur.ProcNum=ProcCur == null ? 0 : ProcCur.ProcNum;
