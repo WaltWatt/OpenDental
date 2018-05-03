@@ -5723,8 +5723,8 @@ namespace OpenDental {
 			else if(!Security.IsAuthorized(Permissions.ProcComplCreate,apt.AptDateTime)) {
 				return;
 			}
-			else if(apt.AptDateTime > DateTime.Today.Date && !PrefC.GetBool(PrefName.FutureTransDatesAllowed)) {
-				MsgBox.Show(this,"Not allowed to set procedures complete with future dates.");
+			else if(apt.AptDateTime.Date > DateTime.Today.Date && !PrefC.GetBool(PrefName.FutureTransDatesAllowed)) {
+				MsgBox.Show(this,"Not allowed to set appointments complete with future dates.");
 				return;
 			}
 			bool removeCompletedProcs=ProcedureL.DoRemoveCompletedProcs(apt,listProcs.FindAll(x => x.ProcStatus==ProcStat.C));
