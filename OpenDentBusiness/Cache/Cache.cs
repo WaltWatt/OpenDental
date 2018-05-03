@@ -530,7 +530,7 @@ namespace OpenDentBusiness {
 				UserClinics.FillCacheFromTable(ds.Tables["UserClinic"]);
 			}
 			if(listITypes.Contains(InvalidType.UserQueries) || isAll) {
-				DisplayFields.FillCacheFromTable(ds.Tables["UserQuery"]);
+				UserQueries.FillCacheFromTable(ds.Tables["UserQuery"]);
 			}
 			if(listITypes.Contains(InvalidType.Vaccines) || isAll) {
 				VaccineDefs.FillCacheFromTable(ds.Tables["VaccineDef"]);
