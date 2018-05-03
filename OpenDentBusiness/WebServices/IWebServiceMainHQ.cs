@@ -15,6 +15,7 @@ namespace OpenDentBusiness {
 		List<long> GetEServiceClinicsAllowed(List<long> listClinicNums,eServiceCode eService);
 		string WebSchedAsapSend(string officeData);
 		string TestConnection(string officeData);
+		string TestConnectionDb(string officeData);
 		string SetEConnectorType(string officeData,bool isListening);
 		string BuildWebSchedNewPatApptURLs(string registrationKey,string clinicNums);
 		string EServiceSetup(string officeData);

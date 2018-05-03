@@ -109,6 +109,8 @@ namespace OpenDentBusiness.WebServiceMainHQ {
         
         private System.Threading.SendOrPostCallback TestConnectionOperationCompleted;
         
+        private System.Threading.SendOrPostCallback TestConnectionDbOperationCompleted;
+        
         private System.Threading.SendOrPostCallback SubmitUnhandledExceptionOperationCompleted;
         
         private System.Threading.SendOrPostCallback EServiceSetupOperationCompleted;
@@ -270,6 +272,9 @@ namespace OpenDentBusiness.WebServiceMainHQ {
         
         /// <remarks/>
         public event TestConnectionCompletedEventHandler TestConnectionCompleted;
+        
+        /// <remarks/>
+        public event TestConnectionDbCompletedEventHandler TestConnectionDbCompleted;
         
         /// <remarks/>
         public event SubmitUnhandledExceptionCompletedEventHandler SubmitUnhandledExceptionCompleted;
@@ -1458,6 +1463,35 @@ namespace OpenDentBusiness.WebServiceMainHQ {
         }
         
         /// <remarks/>
+        [System.Web.Services.Protocols.SoapDocumentMethodAttribute("https://www.opendental.com/OpenDentalWebServiceHQ/TestConnectionDb", RequestNamespace="https://www.opendental.com/OpenDentalWebServiceHQ/", ResponseNamespace="https://www.opendental.com/OpenDentalWebServiceHQ/", Use=System.Web.Services.Description.SoapBindingUse.Literal, ParameterStyle=System.Web.Services.Protocols.SoapParameterStyle.Wrapped)]
+        public string TestConnectionDb(string officeData) {
+            object[] results = this.Invoke("TestConnectionDb", new object[] {
+                        officeData});
+            return ((string)(results[0]));
+        }
+        
+        /// <remarks/>
+        public void TestConnectionDbAsync(string officeData) {
+            this.TestConnectionDbAsync(officeData, null);
+        }
+        
+        /// <remarks/>
+        public void TestConnectionDbAsync(string officeData, object userState) {
+            if ((this.TestConnectionDbOperationCompleted == null)) {
+                this.TestConnectionDbOperationCompleted = new System.Threading.SendOrPostCallback(this.OnTestConnectionDbOperationCompleted);
+            }
+            this.InvokeAsync("TestConnectionDb", new object[] {
+                        officeData}, this.TestConnectionDbOperationCompleted, userState);
+        }
+        
+        private void OnTestConnectionDbOperationCompleted(object arg) {
+            if ((this.TestConnectionDbCompleted != null)) {
+                System.Web.Services.Protocols.InvokeCompletedEventArgs invokeArgs = ((System.Web.Services.Protocols.InvokeCompletedEventArgs)(arg));
+                this.TestConnectionDbCompleted(this, new TestConnectionDbCompletedEventArgs(invokeArgs.Results, invokeArgs.Error, invokeArgs.Cancelled, invokeArgs.UserState));
+            }
+        }
+        
+        /// <remarks/>
         [System.Web.Services.Protocols.SoapDocumentMethodAttribute("https://www.opendental.com/OpenDentalWebServiceHQ/SubmitUnhandledException", RequestNamespace="https://www.opendental.com/OpenDentalWebServiceHQ/", ResponseNamespace="https://www.opendental.com/OpenDentalWebServiceHQ/", Use=System.Web.Services.Description.SoapBindingUse.Literal, ParameterStyle=System.Web.Services.Protocols.SoapParameterStyle.Wrapped)]
         public string SubmitUnhandledException(string officeData) {
             object[] results = this.Invoke("SubmitUnhandledException", new object[] {
@@ -2561,6 +2595,32 @@ namespace OpenDentBusiness.WebServiceMainHQ {
         private object[] results;
         
         internal TestConnectionCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        /// <remarks/>
+        public string Result {
+            get {
+                this.RaiseExceptionIfNecessary();
+                return ((string)(this.results[0]));
+            }
+        }
+    }
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.7.2556.0")]
+    public delegate void TestConnectionDbCompletedEventHandler(object sender, TestConnectionDbCompletedEventArgs e);
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.7.2556.0")]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    public partial class TestConnectionDbCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        internal TestConnectionDbCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
                 base(exception, cancelled, userState) {
             this.results = results;
         }

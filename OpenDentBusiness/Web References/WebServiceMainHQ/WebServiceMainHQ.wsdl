@@ -570,6 +570,20 @@
           </s:sequence>
         </s:complexType>
       </s:element>
+      <s:element name="TestConnectionDb">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="officeData" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="TestConnectionDbResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="TestConnectionDbResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
       <s:element name="SubmitUnhandledException">
         <s:complexType>
           <s:sequence>
@@ -841,6 +855,12 @@
   <wsdl:message name="TestConnectionSoapOut">
     <wsdl:part name="parameters" element="tns:TestConnectionResponse" />
   </wsdl:message>
+  <wsdl:message name="TestConnectionDbSoapIn">
+    <wsdl:part name="parameters" element="tns:TestConnectionDb" />
+  </wsdl:message>
+  <wsdl:message name="TestConnectionDbSoapOut">
+    <wsdl:part name="parameters" element="tns:TestConnectionDbResponse" />
+  </wsdl:message>
   <wsdl:message name="SubmitUnhandledExceptionSoapIn">
     <wsdl:part name="parameters" element="tns:SubmitUnhandledException" />
   </wsdl:message>
@@ -1101,6 +1121,12 @@
   <wsdl:message name="TestConnectionHttpPostOut">
     <wsdl:part name="Body" element="tns:string" />
   </wsdl:message>
+  <wsdl:message name="TestConnectionDbHttpPostIn">
+    <wsdl:part name="officeData" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="TestConnectionDbHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
   <wsdl:message name="SubmitUnhandledExceptionHttpPostIn">
     <wsdl:part name="officeData" type="s:string" />
   </wsdl:message>
@@ -1274,6 +1300,10 @@
       <wsdl:input message="tns:TestConnectionSoapIn" />
       <wsdl:output message="tns:TestConnectionSoapOut" />
     </wsdl:operation>
+    <wsdl:operation name="TestConnectionDb">
+      <wsdl:input message="tns:TestConnectionDbSoapIn" />
+      <wsdl:output message="tns:TestConnectionDbSoapOut" />
+    </wsdl:operation>
     <wsdl:operation name="SubmitUnhandledException">
       <wsdl:input message="tns:SubmitUnhandledExceptionSoapIn" />
       <wsdl:output message="tns:SubmitUnhandledExceptionSoapOut" />
@@ -1443,6 +1473,10 @@
     <wsdl:operation name="TestConnection">
       <wsdl:input message="tns:TestConnectionHttpPostIn" />
       <wsdl:output message="tns:TestConnectionHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="TestConnectionDb">
+      <wsdl:input message="tns:TestConnectionDbHttpPostIn" />
+      <wsdl:output message="tns:TestConnectionDbHttpPostOut" />
     </wsdl:operation>
     <wsdl:operation name="SubmitUnhandledException">
       <wsdl:input message="tns:SubmitUnhandledExceptionHttpPostIn" />
@@ -1808,6 +1842,15 @@
     </wsdl:operation>
     <wsdl:operation name="TestConnection">
       <soap:operation soapAction="https://www.opendental.com/OpenDentalWebServiceHQ/TestConnection" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="TestConnectionDb">
+      <soap:operation soapAction="https://www.opendental.com/OpenDentalWebServiceHQ/TestConnectionDb" style="document" />
       <wsdl:input>
         <soap:body use="literal" />
       </wsdl:input>
@@ -2196,6 +2239,15 @@
         <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
+    <wsdl:operation name="TestConnectionDb">
+      <soap12:operation soapAction="https://www.opendental.com/OpenDentalWebServiceHQ/TestConnectionDb" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
     <wsdl:operation name="SubmitUnhandledException">
       <soap12:operation soapAction="https://www.opendental.com/OpenDentalWebServiceHQ/SubmitUnhandledException" style="document" />
       <wsdl:input>
@@ -2570,6 +2622,15 @@
     </wsdl:operation>
     <wsdl:operation name="TestConnection">
       <http:operation location="/TestConnection" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="TestConnectionDb">
+      <http:operation location="/TestConnectionDb" />
       <wsdl:input>
         <mime:content type="application/x-www-form-urlencoded" />
       </wsdl:input>
