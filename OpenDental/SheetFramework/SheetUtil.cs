@@ -283,6 +283,7 @@ namespace OpenDental{
 			odGrid.BottomMargin=bottomMargin;
 			odGrid.PageHeight=sheet.HeightPage;
 			odGrid.Title=field.FieldName;
+			odGrid.TranslationName="";
 			if(stmt!=null) {
 				odGrid.Title+=((stmt.Intermingled || stmt.SinglePatient)?".Intermingled":".NotIntermingled");//Important for calculating heights.
 			}

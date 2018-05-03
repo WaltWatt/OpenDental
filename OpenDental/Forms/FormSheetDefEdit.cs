@@ -569,6 +569,7 @@ namespace OpenDental {
 		private ODGrid CreateGridHelper(List<DisplayField> columns) {
 			ODGrid odGrid=new ODGrid();
 			odGrid.Width=0;
+			odGrid.TranslationName="";
 			//SheetDefCur.SheetFieldDefs[i].Width=0;
 			for(int c=0;c<columns.Count;c++) {
 				odGrid.Width+=columns[c].ColumnWidth;

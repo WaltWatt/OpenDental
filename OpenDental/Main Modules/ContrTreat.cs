@@ -3098,6 +3098,7 @@ namespace OpenDental{
 			#region printBenefits
 			if(checkShowIns.Checked) {
 				ODGrid gridFamIns=new ODGrid();
+				gridFamIns.TranslationName="";
 				this.Controls.Add(gridFamIns);
 				gridFamIns.BeginUpdate();
 				gridFamIns.Columns.Clear();
@@ -3131,6 +3132,7 @@ namespace OpenDental{
 				gridFamIns.Dispose();
 				//Individual Insurance---------------------
 				ODGrid gridIns=new ODGrid();
+				gridIns.TranslationName="";
 				this.Controls.Add(gridIns);
 				gridIns.BeginUpdate();
 				gridIns.Columns.Clear();

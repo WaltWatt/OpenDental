@@ -196,6 +196,7 @@ namespace OpenDental {
 		///<summary>This is a modified version of FormTimeCard.FillMain().  It fills one time card per employee.</summary>
 		private ODGrid GetGridForPrinting(Employee emp) {
 			ODGrid gridTimeCard=new ODGrid();
+			gridTimeCard.TranslationName="";
 			List<ClockEvent> clockEventList=ClockEvents.Refresh(emp.EmployeeNum,PIn.Date(textDateStart.Text),PIn.Date(textDateStop.Text),false);
 			List<TimeAdjust> timeAdjustList=TimeAdjusts.Refresh(emp.EmployeeNum,PIn.Date(textDateStart.Text),PIn.Date(textDateStop.Text));
 			ArrayList mergedAL=new ArrayList();

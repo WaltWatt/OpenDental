@@ -34,6 +34,7 @@ namespace OpenDental {
 			}
 			textWidth.Text=SheetFieldDefCur.Width.ToString();
 			UI.ODGrid odGrid=new ODGrid();
+			odGrid.TranslationName="";
 			using(Graphics g=Graphics.FromImage(new Bitmap(100,100))) {
 				if(SheetFieldDefCur.FieldName=="EraClaimsPaid") {
 					//Do not modify grid title heights for ERA claims paid grid as the heights are calculated elsewhere.

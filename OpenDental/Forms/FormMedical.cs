@@ -1457,7 +1457,7 @@ namespace OpenDental{
 
 		private void butPrint_Click(object sender,EventArgs e) {
 			Cursor=Cursors.WaitCursor;
-			gridMedsPrint=new ODGrid() { Width=800 };
+			gridMedsPrint=new ODGrid() { Width=800,TranslationName=""};
 			FillMeds(isForPrinting:true);//not nessecary to explicity name parameter but makes code easier to read.
 			pagesPrinted=0;
 			pd=new PrintDocument();

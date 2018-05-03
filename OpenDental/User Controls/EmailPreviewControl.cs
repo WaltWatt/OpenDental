@@ -599,7 +599,9 @@ namespace OpenDental {
 			//The passed in textBox's tag points to the grid of options.
 			//The created grid's tag will point to the textBox.
 			if(textBox.Tag==null) {
-				textBox.Tag=new ODGrid();
+				textBox.Tag=new ODGrid() {
+					TranslationName="",
+				};
 			}
 			ODGrid gridContacts=(ODGrid)textBox.Tag;
 			//textBox.Text could contain multiple email addresses.

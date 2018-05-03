@@ -902,6 +902,7 @@ namespace OpenDental{
 			ODGridRow grow;
 			if(!Stmt.HidePayment) {
 				ODGrid gridAging=new ODGrid();
+				gridAging.TranslationName="";
 				this.Controls.Add(gridAging);
 				gridAging.BeginUpdate();
 				gridAging.Columns.Clear();
@@ -1127,6 +1128,7 @@ namespace OpenDental{
 			ODGridColumn gcol;
 			ODGridRow grow;
 			ODGrid gridPP = new ODGrid();
+			gridPP.TranslationName="";
 			this.Controls.Add(gridPP);
 			gridPP.BeginUpdate();
 			gridPP.Columns.Clear();
@@ -1196,6 +1198,7 @@ namespace OpenDental{
 			#region Body Table definition
 			ODGrid gridPat = new ODGrid();
 			this.Controls.Add(gridPat);
+			gridPat.TranslationName="";
 			gridPat.BeginUpdate();
 			gridPat.Columns.Clear();
 			gcol=new ODGridColumn(Lan.g(this,"Date"),73);
