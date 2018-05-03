@@ -9066,8 +9066,14 @@ namespace OpenDental{
 				if(table.Rows.Count==0) {
 					return;
 				}
-				if(table.Rows[0]["Replicate_Do_Db"].ToString().ToLower()!=DataConnection.GetDatabaseName().ToLower()) {//if the database we're connected to is not even involved in replication
-					return;
+				string replicatedDbs=table.Rows[0]["Replicate_Do_Db"].ToString().ToLower();
+				string dbName=DataConnection.GetDatabaseName().ToLower();
+				//If multiple databases are being replicated, Replicate_Do_Db will contain the databases separated by a comma. Keep in mind that a database
+				//name can contain a comma.
+				bool isDbReplicated=(!dbName.Contains(',') && replicatedDbs.Split(',').Contains(dbName))
+					|| (dbName.Contains(',') && replicatedDbs.Contains(dbName));
+				if(!isDbReplicated) {
+					return;//if the database we're connected to is not even involved in replication
 				}
 				string statusSqlRunning=table.Rows[0]["Slave_SQL_Running"].ToString().ToUpper();
 				string statusIoRunning=table.Rows[0]["Slave_IO_Running"].ToString().ToUpper();
