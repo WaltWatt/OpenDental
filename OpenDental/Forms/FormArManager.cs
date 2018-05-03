@@ -21,7 +21,7 @@ namespace OpenDental {
 		private List<PatAging> _listPatAgingUnsentAll;
 		private List<PatAging> _listPatAgingSentAll;
 		private List<TsiTransType> _listNewStatuses;
-		private List<TsiTransType> _listAllTransTypes;
+		private List<TsiTransType> _listSentTabTransTypes;
 		private bool _isResizing;
 		private bool _hasResizeBegan;
 		///<summary>Used to reselect rows after sorting the grid by column.  Filled on grid MouseDown event and used in grid OnSortByColumn event to reselect.</summary>
@@ -148,15 +148,17 @@ namespace OpenDental {
 			_listProviders.ForEach(x => comboBoxMultiSentProvs.Items.Add(x.GetLongDesc()));
 			#endregion Sent Tab Provs Combo
 			#region Sent Tab Trans Type Combo
-			_listAllTransTypes=Enum.GetValues(typeof(TsiTransType)).OfType<TsiTransType>().ToList();
+			_listSentTabTransTypes=Enum.GetValues(typeof(TsiTransType)).OfType<TsiTransType>()
+				.Where(x => !x.In(TsiTransType.PF,TsiTransType.PT,TsiTransType.SS,TsiTransType.CN)).ToList();
 			List<TsiTransType> listDefaultLastTransTypes=PrefC.GetString(PrefName.ArManagerLastTransTypes)
 				.Split(new char[] { ',' },StringSplitOptions.RemoveEmptyEntries)
-				.Select(x => PIn.Enum<TsiTransType>(x,true)).ToList();
+				.Select(x => PIn.Enum<TsiTransType>(x,true))
+				.Where(x => !x.In(TsiTransType.PF,TsiTransType.PT,TsiTransType.SS,TsiTransType.CN)).ToList();
 			comboBoxMultiLastTransType.Items.Add(Lan.g(this,"All"));
-			comboBoxMultiLastTransType.SetSelected(0,_listAllTransTypes.All(x => !listDefaultLastTransTypes.Contains(x)));//select All if no valid defaults are set
-			for(int i=0;i<_listAllTransTypes.Count;i++) {
-				comboBoxMultiLastTransType.Items.Add(_listAllTransTypes[i].GetDescription());
-				if(listDefaultLastTransTypes.Contains(_listAllTransTypes[i])) {
+			comboBoxMultiLastTransType.SetSelected(0,_listSentTabTransTypes.All(x => !listDefaultLastTransTypes.Contains(x)));//select All if no valid defaults are set
+			for(int i=0;i<_listSentTabTransTypes.Count;i++) {
+				comboBoxMultiLastTransType.Items.Add(_listSentTabTransTypes[i].GetDescription());
+				if(listDefaultLastTransTypes.Contains(_listSentTabTransTypes[i])) {
 					comboBoxMultiLastTransType.SetSelected(i+1,true);//+1 for All
 				}
 			}
@@ -181,7 +183,7 @@ namespace OpenDental {
 			textSentDaysLastPay.TextChanged+=textSentDaysLastPay_TextChanged;
 			#endregion Sent Tab Textbox Filters
 			#region Sent Tab New Statuses Combo
-			_listNewStatuses=_listAllTransTypes.Where(x => x.In(TsiTransType.SS,TsiTransType.CN)).ToList();
+			_listNewStatuses=new List<TsiTransType>() { TsiTransType.SS,TsiTransType.CN };
 			_listNewStatuses.ForEach(x => comboNewStatus.Items.Add(x.GetDescription()));
 			#endregion Sent Tab New Statuses Combo
 			#region Sent Tab New Bill Types Combo
@@ -405,7 +407,7 @@ namespace OpenDental {
 			#region Sent Defaults
 			string selectedTransTypes="";//indicates all.
 			if(comboBoxMultiLastTransType.SelectedIndices.Count>0 && !comboBoxMultiLastTransType.SelectedIndices.Contains(0)) {
-				selectedTransTypes=string.Join(",",comboBoxMultiLastTransType.SelectedIndices.OfType<int>().Select(x => _listAllTransTypes[x-1]));//-1 for All
+				selectedTransTypes=string.Join(",",comboBoxMultiLastTransType.ListSelectedIndices.Select(x => _listSentTabTransTypes[x-1]));//-1 for All
 			}
 			string sentAgeOfAccount="";//indicates any age
 			if(comboSentAccountAge.SelectedIndex.In(1,2,3)) {
@@ -423,7 +425,7 @@ namespace OpenDental {
 			#region Unsent Defaults
 			string selectedBillTypes="";//indicates all.
 			if(comboBoxMultiBillTypes.SelectedIndices.Count>0 && !comboBoxMultiBillTypes.SelectedIndices.Contains(0)) {
-				selectedBillTypes=string.Join(",",comboBoxMultiBillTypes.SelectedIndices.OfType<int>().Select(x => _listBillTypesNoColl[x-1].DefNum));//-1 for All
+				selectedBillTypes=string.Join(",",comboBoxMultiBillTypes.ListSelectedIndices.Select(x => _listBillTypesNoColl[x-1].DefNum));//-1 for All
 			}
 			string unsentAgeOfAccount="";//indicates any age
 			if(comboUnsentAccountAge.SelectedIndex.In(1,2,3)) {
@@ -695,16 +697,16 @@ namespace OpenDental {
 				}
 				List<string> listErrors=new List<string>();
 				if(pAgeCur.Birthdate.Year<1880 || pAgeCur.Birthdate>DateTime.Today.AddYears(-18)) {
-					listErrors.Add("Birthdate");
+					listErrors.Add(Lan.g(this,"Birthdate"));
 				}
 				if(new[] { pAgeCur.Address,pAgeCur.City,pAgeCur.State,pAgeCur.Zip }.Any(x => string.IsNullOrWhiteSpace(x))) {
-					listErrors.Add("Address");
+					listErrors.Add(Lan.g(this,"Address"));
 				}
 				if(listErrors.Count==0) {
 					_toolTipUnsentErrors.RemoveAll();
 					return;
 				}
-				_toolTipUnsentErrors.SetToolTip(gridUnsent,Lan.g(this,"Invalid")+" "+string.Join(" and ",listErrors));
+				_toolTipUnsentErrors.SetToolTip(gridUnsent,Lan.g(this,"Invalid")+" "+string.Join(" "+Lan.g(this,"and")+" ",listErrors));
 			}
 			catch(Exception ex) {
 				_toolTipUnsentErrors.RemoveAll();
@@ -1339,7 +1341,7 @@ namespace OpenDental {
 			AgeOfAccount accountAge=new[] { AgeOfAccount.Any,AgeOfAccount.Over30,AgeOfAccount.Over60,AgeOfAccount.Over90 }[comboSentAccountAge.SelectedIndex];
 			List<TsiTransType> listTranTypes=new List<TsiTransType>();
 			if(!comboBoxMultiLastTransType.ListSelectedIndices.Contains(0)) {
-				listTranTypes=comboBoxMultiLastTransType.ListSelectedIndices.Select(x => _listAllTransTypes[x-1]).ToList();
+				listTranTypes=comboBoxMultiLastTransType.ListSelectedIndices.Select(x => _listSentTabTransTypes[x-1]).ToList();
 			}
 			List<long> listProvNums=new List<long>();
 			if(!comboBoxMultiSentProvs.ListSelectedIndices.Contains(0)) {
