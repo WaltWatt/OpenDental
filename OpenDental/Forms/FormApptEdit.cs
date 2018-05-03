@@ -2877,7 +2877,10 @@ namespace OpenDental{
 				return false;
 			}
 			#endregion
-			if(comboStatus.SelectedIndex==1 && AptCur.AptDateTime > DateTime.Today.Date && !PrefC.GetBool(PrefName.FutureTransDatesAllowed)) {
+			List<Procedure> listProcs=Procedures.GetProcsForSingle(AptCur.AptNum,false);
+			if(listProcs.Count > 0 && comboStatus.SelectedIndex==1 && AptCur.AptDateTime.Date > DateTime.Today.Date 
+				&& !PrefC.GetBool(PrefName.FutureTransDatesAllowed)) 
+			{
 				MsgBox.Show(this,"Not allowed to set procedures complete with future dates.");
 				return false;
 			}
