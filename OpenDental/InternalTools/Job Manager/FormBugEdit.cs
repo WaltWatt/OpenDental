@@ -75,7 +75,7 @@ namespace OpenDental {
 		}
 
 		private void gridSubs_TitleAddClick(object sender,EventArgs e) {
-			FormBugSubmissions FormBS=new FormBugSubmissions(viewMode:FormBugSumissionMode.SelectionMode);
+			FormBugSubmissions FormBS=new FormBugSubmissions(viewMode:FormBugSubmissionMode.SelectionMode);
 			if(FormBS.ShowDialog()!=DialogResult.OK) {
 				return;
 			}

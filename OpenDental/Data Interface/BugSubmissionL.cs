@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using CodeBase;
 using OpenDentBusiness;
 
 namespace OpenDental {
@@ -127,5 +129,80 @@ namespace OpenDental {
 			return bugNew;
 		}
 		
+		///<summary></summary>
+		public static bool TryAssociateSimilarBugSubmissions(List<BugSubmission> listAllSubs,Point pointFormLocaiton) {
+			List<BugSubmission> listUnattachedSubs=listAllSubs.Where(x => x.BugId==0).ToList();
+			if(listUnattachedSubs.Count==0) {
+				MsgBox.Show("FormBugSubmissions","All submissions are associated to bugs already.");
+				return false;
+			}
+			//Dictionary where key is a BugId and the value is list of submissions associated to that BugID.
+			//StackTraces are unique and if there are duplicate stack trace entries we select the one with the newest version.
+			Dictionary<long,List<BugSubmission>> dictAttachedSubs=listAllSubs.Where(x => x.BugId!=0)
+				.GroupBy(x => x.BugId)
+				.ToDictionary(x => x.Key, x => 
+					x.GroupBy(y => y.ExceptionStackTrace)
+					//Sub dictionary of unique ExceptionStackStraces as the key and the value is the submission from the highest version.
+					.ToDictionary(y => y.Key, y => y.OrderByDescending(z => new Version(z.Info.DictPrefValues[PrefName.ProgramVersion])).First())
+					.Values.ToList()
+				);
+			Dictionary<long,List<BugSubmission>> dictSimilarBugSubs=new Dictionary<long,List<BugSubmission>>();
+			List<long> listOrderedKeys=dictAttachedSubs.Keys.OrderByDescending(x => x).ToList();
+			foreach(long key in listOrderedKeys) {//Loop through submissions that are already attached to bugs
+				dictSimilarBugSubs[key]=new List<BugSubmission>();
+				foreach(BugSubmission sub in dictAttachedSubs[key]) {//Loop through the unique exception text from the submission with thie highest reported version.
+					List<BugSubmission> listSimilarBugSubs=listUnattachedSubs.Where(x => 
+						x.ExceptionStackTrace==sub.ExceptionStackTrace//Find submissions that are not attached to bugs with identical ExceptionStackTrace
+					).ToList();
+					if(listSimilarBugSubs.Count==0) {
+						continue;//All submissions with this stack trace are attached to a bug.
+					}
+					listUnattachedSubs.RemoveAll(x => listSimilarBugSubs.Contains(x));
+					dictSimilarBugSubs[key].AddRange(listSimilarBugSubs);
+				}
+			}
+			if(dictSimilarBugSubs.All(x => x.Value.Count==0)) {
+				MsgBox.Show("FormBugSubmissions","All similar submissions are already attached to bugs.  No action needed.");
+				return false;
+			}
+			dictSimilarBugSubs=dictSimilarBugSubs.Where(x => x.Value.Count!=0).ToDictionary(x => x.Key,x => x.Value);
+			bool isAutoAssign=(MsgBox.Show("FormBugSubmissions",MsgBoxButtons.YesNo,"Click Yes to auto attach duplicate submissions to bugs with identical stack traces?"
+				+"\r\nClick No to manually validate all groupings found."));
+			List<long> listBugIds=listAllSubs.Where(x => x.BugId!=0).Select(x => x.BugId).ToList();
+			List<JobLink> listLinks=JobLinks.GetManyForType(JobLinkType.Bug,listBugIds);
+			List<Bug> listBugs=Bugs.GetMany(listBugIds);
+			foreach(KeyValuePair<long,List<BugSubmission>> pair in dictSimilarBugSubs) {
+				Bug bugFixed=listBugs.FirstOrDefault(x => x.BugId==pair.Key && !string.IsNullOrEmpty(x.VersionsFixed));
+				if(bugFixed!=null) {
+					List<BugSubmission> listIssueSubs=pair.Value.Where(x => new Version(x.Info.DictPrefValues[PrefName.ProgramVersion])>=new Version(bugFixed.VersionsFixed.Split(';').Last())).ToList();
+					if(listIssueSubs.Count>0) {
+						MsgBox.Show("FormBugSubmissions","There appears to be a submission on a version that is newer than the previous fixed bug version (BugId: "+POut.Long(bugFixed.BugId)+").  "
+							+"These will be excluded.");
+						//TODO: Allow user to view these excluded submissions somehow.
+						pair.Value.RemoveAll(x => listIssueSubs.Contains(x));
+						if(pair.Value.Count==0) {
+							continue;
+						}
+					}
+				}
+				if(!isAutoAssign) {
+					FormBugSubmissions formGroupBugSubs=new FormBugSubmissions(viewMode:FormBugSubmissionMode.ValidationMode);
+					formGroupBugSubs.ListViewedSubs=pair.Value;//Add unnattached submissions to grid
+					formGroupBugSubs.ListViewedSubs.AddRange(dictAttachedSubs[pair.Key]);//Add already attached submissions to grid
+					formGroupBugSubs.StartPosition=FormStartPosition.Manual;
+					Point newLoc=pointFormLocaiton;
+					newLoc.X+=10;//Offset
+					newLoc.Y+=10;
+					formGroupBugSubs.Location=newLoc;
+					if(formGroupBugSubs.ShowDialog()!=DialogResult.OK) {
+						continue;
+					}	
+				}
+				BugSubmissions.UpdateBugIds(pair.Key,pair.Value.Select(x => x.BugSubmissionNum).ToList());
+			}
+			MsgBox.Show("FormBugSubmissions","Done.");
+			return true;
+		}
+
 	}
 }

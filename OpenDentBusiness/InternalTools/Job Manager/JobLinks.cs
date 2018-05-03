@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 
@@ -81,12 +82,19 @@ namespace OpenDentBusiness{
 			return Crud.JobLinkCrud.SelectMany(command);
 		}
 
-		public static List<JobLink> GetForType(JobLinkType linkType,long fKey) {
+		public static List<JobLink> GetForType(JobLinkType linkType,long FKey) {
+			return GetManyForType(linkType,new List<long>() { FKey });
+		}
+
+		public static List<JobLink> GetManyForType(JobLinkType linkType,List<long> listFkeys) {
+			if(listFkeys==null || listFkeys.Count==0) {
+				return new List<JobLink>();
+			}
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				return Meth.GetObject<List<JobLink>>(MethodBase.GetCurrentMethod(),linkType,fKey);
+				return Meth.GetObject<List<JobLink>>(MethodBase.GetCurrentMethod(),linkType,listFkeys);
 			}
 			string command="SELECT * FROM joblink WHERE LinkType="+POut.Int((int)linkType)+" "
-				+"AND FKey="+POut.Long(fKey);
+				+"AND FKey IN ("+string.Join(",",listFkeys.Select(x => POut.Long(x)))+")";
 			return Crud.JobLinkCrud.SelectMany(command);
 		}
 

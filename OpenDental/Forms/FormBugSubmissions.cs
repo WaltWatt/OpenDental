@@ -16,7 +16,7 @@ namespace OpenDental {
 		///<summary>When FormBugSumissionMode.AddBug, form will close after adding a bug.
 		///When FormBugSumissionMode.ViewOnly, the "Add Bug" button is not visable.
 		///When FormBugSumissionMode.SelectionMode, the "Add Bug" is changed to "Ok".</summary>
-		private FormBugSumissionMode _viewMode;
+		private FormBugSubmissionMode _viewMode;
 		///<summary>Used to determine if a new bug should show (Enhancement) in the description.</summary>
 		private Job _jobCur;
 		///<summary>Null unless a bug is added when _viewMode is FormBugSumissionMode.AddBug.</summary>
@@ -33,7 +33,7 @@ namespace OpenDental {
 		///<summary>Set job if you would like to create a bug with (Enhancement) in the bug text.
 		///When isViewOnlyMode is true, you will not be able to create a bug.
 		///When isSelectedMode is true, the form will close after a double click selection or a group selection.</summary>
-		public FormBugSubmissions(Job job=null,FormBugSumissionMode viewMode=FormBugSumissionMode.AddBug) {
+		public FormBugSubmissions(Job job=null,FormBugSubmissionMode viewMode=FormBugSubmissionMode.AddBug) {
 			InitializeComponent();
 			Lan.F(this);
 			_jobCur=job;
@@ -72,13 +72,25 @@ namespace OpenDental {
 			gridSubs.ContextMenu=gridSubMenu;
 			#endregion
 			FillSubGrid(true);
-			if(_viewMode==FormBugSumissionMode.ViewOnly) {
+			if(_viewMode==FormBugSubmissionMode.ViewOnly) {
 				butAddBug.Visible=false;
 				checkShowAttached.Checked=true;
 			}
-			else if(_viewMode==FormBugSumissionMode.SelectionMode) {
+			else if(_viewMode==FormBugSubmissionMode.SelectionMode) {
 				butAddBug.Text="OK";//On click the selected rows are saved and this form will close.
 			}
+			else if(_viewMode==FormBugSubmissionMode.ValidationMode) {
+				butAddBug.Text="OK";
+				checkShowAttached.Checked=true;
+				groupFilters.Enabled=false;
+			}
+		}
+		
+		private void findPreviouslyFixedSubmisisonsToolStripMenuItem_Click(object sender,EventArgs e) {
+			if(!BugSubmissionL.TryAssociateSimilarBugSubmissions(_listAllSubs,this.Location)) {
+				return;
+			}
+			FillSubGrid();
 		}
 
 		///<summary>Click method used by all gridClaimDetails right click options.</summary>
@@ -102,7 +114,7 @@ namespace OpenDental {
 		private void FillSubGrid(bool isRefreshNeeded=false) {
 			SetCustomerInfo();
 			if(isRefreshNeeded) {
-				if(_viewMode==FormBugSumissionMode.ViewOnly) {
+				if(_viewMode.In(FormBugSubmissionMode.ViewOnly,FormBugSubmissionMode.ValidationMode)) {
 					_listAllSubs=ListViewedSubs;
 				}
 				else {
@@ -326,11 +338,11 @@ namespace OpenDental {
 		}
 
 		private void gridSubs_CellDoubleClick(object sender,ODGridClickEventArgs e) {
-			if(_viewMode==FormBugSumissionMode.ViewOnly) {//Not allowed to create a bug.
+			if(_viewMode==FormBugSubmissionMode.ViewOnly) {//Not allowed to create a bug.
 				return;
 			}
 			List<BugSubmission> listSubs=(List<BugSubmission>)gridSubs.Rows[e.Row].Tag;//Because it is a double click, we know there will only be 1 item in list
-			if(_viewMode==FormBugSumissionMode.SelectionMode) {
+			if(_viewMode==FormBugSubmissionMode.SelectionMode) {
 				ListSelectedSubs=listSubs;
 				DialogResult=DialogResult.OK;
 				return;
@@ -474,7 +486,7 @@ namespace OpenDental {
 				return;
 			}
 			List<BugSubmission> listSubGroup=((List<BugSubmission>)gridSubs.Rows[gridSubs.GetSelectedIndex()].Tag);
-			FormBugSubmissions formGroupBugSubs=new FormBugSubmissions(viewMode:FormBugSumissionMode.ViewOnly);
+			FormBugSubmissions formGroupBugSubs=new FormBugSubmissions(viewMode:FormBugSubmissionMode.ViewOnly);
 			formGroupBugSubs.ListViewedSubs=listSubGroup;
 			formGroupBugSubs.ShowDialog();
 		}
@@ -546,8 +558,13 @@ namespace OpenDental {
 		}
 
 		private void butAdd_Click(object sender,EventArgs e) {
-			if(_viewMode==FormBugSumissionMode.SelectionMode) {//Text is set to "Ok" when SelectionMode
+			if(_viewMode==FormBugSubmissionMode.SelectionMode) {//Text is set to "Ok" when SelectionMode
 				ListSelectedSubs=gridSubs.SelectedIndices.SelectMany(x => (List<BugSubmission>)gridSubs.Rows[x].Tag).ToList();
+				DialogResult=DialogResult.OK;
+				return;
+			}
+			if(_viewMode==FormBugSubmissionMode.ValidationMode) {//Text is set to "Ok" when SelectionMode
+				ListSelectedSubs=_listAllSubs;
 				DialogResult=DialogResult.OK;
 				return;
 			}
@@ -572,12 +589,14 @@ namespace OpenDental {
 	}
 
 	///<summary>Enum controling the way the form displays and behaves.</summary>
-	public enum FormBugSumissionMode {
+	public enum FormBugSubmissionMode {
 		///<summary>This is the default way for the form to load. Used by job manager to add bugs</summary>
 		AddBug,
 		///<summary>Used when we wish to simply view the bug submissions, does not allow users to add bugs.</summary>
 		ViewOnly,
 		///<summary>Used when attaching bug submissions to exiting bugs. Changed butAdd to show "OK" and return selected rows.</summary>
-		SelectionMode
+		SelectionMode,
+		///<summary>Used when using the similiar bugs tool. Changed butAdd to show "OK" and returns all BugSubmissions in the grid on Ok click.</summary>
+		ValidationMode,
 	}
 }

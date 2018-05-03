@@ -11,6 +11,18 @@ namespace OpenDentBusiness{
 	///<summary></summary>
 	public class Bugs{
 		private const int THREAD_TIMEOUT=5000;
+		
+		///<summary>Returns a list of bugs for given bugIds.</summary>
+		public static List<Bug> GetMany(List<long> listBugIds) {
+			if(listBugIds==null || listBugIds.Count==0) {
+				return new List<Bug>();
+			}
+			List<Bug> listBugs=new List<Bug>();
+			DataAction.RunBugsHQ(() => {
+				listBugs=Crud.BugCrud.TableToList(DataCore.GetTable("SELECT * FROM bug WHERE BugID IN ("+string.Join(",",listBugIds)+")"));
+			},false);
+			return listBugs;
+		}
 
 		///<summary>Must pass in version as "Maj" or "Maj.Min" or "Maj.Min.Rev". Uses like operator. Can return null if the thread fails to join.</summary>
 		public static List<Bug> GetByVersion(string versionMajMin,string filter="") {

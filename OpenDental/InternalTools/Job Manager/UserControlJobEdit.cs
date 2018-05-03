@@ -2949,7 +2949,7 @@ namespace OpenDental.InternalTools.Job_Manager {
 					Signalods.SetInvalid(InvalidType.Jobs,KeyType.Job,_jobCur.JobNum);
 				});
 				menu.MenuItems.Add("View Submissions",(o,arg) => {
-					FormBugSubmissions FormBugSubs=new FormBugSubmissions(viewMode:FormBugSumissionMode.ViewOnly);
+					FormBugSubmissions FormBugSubs=new FormBugSubmissions(viewMode:FormBugSubmissionMode.ViewOnly);
 					FormBugSubs.ListViewedSubs=BugSubmissions.GetForBugId(FKey);
 					FormBugSubs.ShowDialog();
 				});
