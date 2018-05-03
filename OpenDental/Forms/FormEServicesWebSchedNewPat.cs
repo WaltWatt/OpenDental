@@ -42,12 +42,10 @@ namespace OpenDental {
 			int newPatApptDays=PrefC.GetInt(PrefName.WebSchedNewPatApptSearchAfterDays);
 			textWebSchedNewPatApptMessage.Text=PrefC.GetString(PrefName.WebSchedNewPatApptMessage);
 			textWebSchedNewPatApptSearchDays.Text=newPatApptDays>0 ? newPatApptDays.ToString() : "";
-			textWebSchedNewPatApptLength.Text=PrefC.GetString(PrefName.WebSchedNewPatApptTimePattern);
 			checkWebSchedNewPatForcePhoneFormatting.Checked=PrefC.GetBool(PrefName.WebSchedNewPatApptForcePhoneFormatting);
 			DateTime dateWebSchedNewPatSearch=DateTime.Now;
 			dateWebSchedNewPatSearch=dateWebSchedNewPatSearch.AddDays(newPatApptDays);
 			textWebSchedNewPatApptsDateStart.Text=dateWebSchedNewPatSearch.ToShortDateString();
-			FillTextWSNPAProcedures();
 			FillListBoxWebSchedBlockoutTypes(PrefC.GetString(PrefName.WebSchedNewPatApptIgnoreBlockoutTypes).Split(new char[] { ',' }),listboxWebSchedNewPatIgnoreBlockoutTypes);
 			FillGridWebSchedNewPatApptHostedURLs();
 			FillGridWSNPAReasons();
@@ -115,17 +113,8 @@ namespace OpenDental {
 		}
 
 		private void AuthorizeTabWebSchedNewPat(bool allowEdit) {
-			butWSNPAProcedures.Enabled=allowEdit;
 			butWebSchedNewPatBlockouts.Enabled=allowEdit;
 			textWebSchedNewPatApptSearchDays.Enabled=allowEdit;
-			textWebSchedNewPatApptLength.Enabled=allowEdit;
-		}
-
-		private void textWebSchedNewPatApptLength_Leave(object sender,EventArgs e) {
-			//Only refresh if the value of this preference changed.  _indexLastNewPatURL will be set to -1 if a refresh is needed.
-			if(_indexLastNewPatURL==-1) {
-				FillGridWebSchedNewPatApptTimeSlotsThreaded();
-			}
 		}
 
 		private void textWebSchedNewPatApptSearchDays_Leave(object sender,EventArgs e) {
@@ -145,8 +134,6 @@ namespace OpenDental {
 			List<Def> listDefs=Defs.GetDefsForCategory(DefCat.WebSchedNewPatApptTypes,true);
 			List<DefLink> listDefLinks=DefLinks.GetDefLinksByType(DefLinkType.AppointmentType);
 			List<AppointmentType> listApptTypes=AppointmentTypes.GetWhere(x => listDefLinks.Any(y => y.FKey==x.AppointmentTypeNum),true);
-			//Artificially insert a dummy def into the begininning of the list to represent the Default option.
-			listDefs.Insert(0,new Def() { DefNum=0,ItemName=Lan.g(this,"None") });
 			//The combo box within the available times group box should always reflect the grid.
 			comboWSNPADefApptType.Items.Clear();
 			gridWSNPAReasons.BeginUpdate();
@@ -156,19 +143,18 @@ namespace OpenDental {
 			gridWSNPAReasons.Rows.Clear();
 			ODGridRow row;
 			foreach(Def def in listDefs) {
-				string patternStr=Lan.g(this,"(use default length)");
 				AppointmentType apptType=null;
 				DefLink defLink=listDefLinks.FirstOrDefault(x => x.DefNum==def.DefNum);
-				if(defLink!=null) {
-					apptType=listApptTypes.FirstOrDefault(x => x.AppointmentTypeNum==defLink.FKey);
-					if(apptType==null) {
-						continue;//Corruption?
-					}
-					patternStr=(string.IsNullOrEmpty(apptType.Pattern) ? Lan.g(this,"(use procedure time pattern)") : apptType.Pattern);
+				if(defLink==null) {
+					continue;//Corruption?
+				}
+				apptType=listApptTypes.FirstOrDefault(x => x.AppointmentTypeNum==defLink.FKey);
+				if(apptType==null) {
+					continue;//Corruption?
 				}
 				row=new ODGridRow();
 				row.Cells.Add(def.ItemName);
-				row.Cells.Add(patternStr);
+				row.Cells.Add((string.IsNullOrEmpty(apptType.Pattern) ? Lan.g(this,"(use procedure time pattern)") : apptType.Pattern));
 				gridWSNPAReasons.Rows.Add(row);
 				comboWSNPADefApptType.Items.Add(new ODBoxItem<Def>(def.ItemName,def));
 			}
@@ -228,10 +214,6 @@ namespace OpenDental {
 			}
 		}
 
-		private void FillTextWSNPAProcedures() {
-			textWSNPAProcedures.Text=PrefC.GetString(PrefName.WebSchedNewPatApptProcs);
-		}
-
 		private void FillGridWebSchedNewPatApptOps() {
 			int opNameWidth=150;
 			int clinicWidth=150;
@@ -247,12 +229,15 @@ namespace OpenDental {
 			}
 			gridWebSchedNewPatApptOps.Columns.Add(new ODGridColumn(Lan.g("FormEServicesSetup","Provider"),60));
 			gridWebSchedNewPatApptOps.Columns.Add(new ODGridColumn(Lan.g("FormEServicesSetup","Hygienist"),60));
-			gridWebSchedNewPatApptOps.Columns.Add(new ODGridColumn(Lan.g("FormEServicesSetup","ApptType"),0));
+			gridWebSchedNewPatApptOps.Columns.Add(new ODGridColumn(Lan.g("FormEServicesSetup","ApptTypes"),0));
 			gridWebSchedNewPatApptOps.Rows.Clear();
 			//A list of all operatories that have IsWebSched set to true.
-			List<Operatory> listWebSchedNewPatApptOps=Operatories.GetOpsForWebSchedNewPatAppts();
+			List<Operatory> listWSNPAOps=Operatories.GetOpsForWebSchedNewPatAppts();
+			List<DefLink> listWSNPAOperatoryDefLinks=DefLinks.GetDefLinksForWebSchedNewPatApptOperatories();
+			List<DefLink> listWSNPAApptTypeDefLinks=DefLinks.GetDefLinksForWebSchedNewPatApptApptTypes();
+			List<Def> listWSNPAApptTypeDefs=Defs.GetDefs(DefCat.WebSchedNewPatApptTypes,listWSNPAApptTypeDefLinks.Select(x => x.DefNum).ToList());
 			ODGridRow row;
-			foreach(Operatory op in listWebSchedNewPatApptOps) {
+			foreach(Operatory op in listWSNPAOps) {
 				row=new ODGridRow();
 				row.Cells.Add(op.OpName);
 				row.Cells.Add(op.Abbrev);
@@ -261,7 +246,12 @@ namespace OpenDental {
 				}
 				row.Cells.Add(Providers.GetAbbr(op.ProvDentist));
 				row.Cells.Add(Providers.GetAbbr(op.ProvHygienist));
-				row.Cells.Add(AppointmentTypes.GetName(op.AppointmentTypeNum));
+				//Figure out the DefNum that is associated to this New Pat Appt operatory
+				long defNum=listWSNPAOperatoryDefLinks.First(x => x.FKey==op.OperatoryNum).DefNum;
+				//Get all appointment type def links associated to the corresponding DefNum
+				List<DefLink> listDefLinkApptTypes=listWSNPAApptTypeDefLinks.FindAll(x => x.DefNum==defNum);
+				//Display the name of all "appointment types" (definition.ItemName) that are associated with the appt type defs that were just found.
+				row.Cells.Add(string.Join(", ",listWSNPAApptTypeDefs.Where(x => listDefLinkApptTypes.Any(y => y.DefNum==x.DefNum)).Select(x => x.ItemName)));
 				row.Tag=op;
 				gridWebSchedNewPatApptOps.Rows.Add(row);
 			}
@@ -365,37 +355,12 @@ namespace OpenDental {
 		}
 
 		private void gridWSNPAReasons_DoubleClick(object sender,EventArgs e) {
+			if(!Security.IsAuthorized(Permissions.Setup)) {
+				return;
+			}
 			FormDefinitions FormD=new FormDefinitions(DefCat.WebSchedNewPatApptTypes);
 			FormD.ShowDialog();
 			FillGridWSNPAReasons();
-		}
-
-		private void butWSNPAProcedures_Click(object sender,EventArgs e) {
-			FormProcCodes FormPC=new FormProcCodes();
-			FormPC.IsSelectionMode=true;
-			FormPC.AllowMultipleSelections=true;
-			//Indicate which procedure codes should be preselected.
-			List<string> listProcCodeStrings=PrefC.GetString(PrefName.WebSchedNewPatApptProcs)
-				.Split(new char[] { ',' },StringSplitOptions.RemoveEmptyEntries)
-				.ToList();
-			FormPC.ListSelectedProcCodes=ProcedureCodes.GetProcCodes(listProcCodeStrings);
-			FormPC.ShowDialog();
-			if(FormPC.DialogResult!=DialogResult.OK) {
-				return;
-			}
-			string prefProcs="";
-			if(FormPC.ListSelectedProcCodes.Count > 0) {
-				prefProcs=string.Join(",",FormPC.ListSelectedProcCodes.Select(x => x.ProcCode));
-			}
-			if(Prefs.UpdateString(PrefName.WebSchedNewPatApptProcs,prefProcs)) {
-				FillTextWSNPAProcedures();
-			}
-		}
-
-		private void butWSNPAProceduresClear_Click(object sender,EventArgs e) {
-			if(Prefs.UpdateString(PrefName.WebSchedNewPatApptProcs,"")) {
-				FillTextWSNPAProcedures();
-			}
 		}
 
 		private void butWebSchedNewPatApptsToday_Click(object sender,EventArgs e) {
@@ -408,23 +373,6 @@ namespace OpenDental {
 			}
 			int newPatApptDays=PIn.Int(textWebSchedNewPatApptSearchDays.Text);
 			if(Prefs.UpdateInt(PrefName.WebSchedNewPatApptSearchAfterDays,newPatApptDays>0 ? newPatApptDays : 0)) {
-				_indexLastNewPatURL=-1;//Force refresh of the grid in because this setting changed.
-			}
-		}
-
-		private void textWebSchedNewPatApptLength_TextChanged(object sender,EventArgs e) {
-			int selectionStart=textWebSchedNewPatApptLength.SelectionStart;
-			char[] arrayChars=textWebSchedNewPatApptLength.Text.ToCharArray();
-			string newPatApptLength=new string(Array.FindAll<char>(arrayChars,(x => (x=='x' || x=='X' || x=='/')))).ToUpper();
-			textWebSchedNewPatApptLength.Text=newPatApptLength;
-			//If no text was removed, put the cursor back to where it was
-			if(arrayChars.Length==newPatApptLength.Length) {
-				textWebSchedNewPatApptLength.Select(selectionStart,0);
-			}
-			else if(selectionStart>0) {//The character typed in was removed and there is still text in the box.
-				textWebSchedNewPatApptLength.Select(selectionStart-1,0);
-			}
-			if(Prefs.UpdateString(PrefName.WebSchedNewPatApptTimePattern,newPatApptLength)) {
 				_indexLastNewPatURL=-1;//Force refresh of the grid in because this setting changed.
 			}
 		}

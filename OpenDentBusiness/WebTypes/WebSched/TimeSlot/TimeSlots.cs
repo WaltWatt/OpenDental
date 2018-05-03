@@ -74,27 +74,25 @@ namespace OpenDentBusiness.WebTypes.WebSched.TimeSlot {
 		///Passing in a clinicNum of 0 will only consider unassigned operatories.
 		///The timeslots on and between the Start and End dates passed in will be considered and potentially returned as available.
 		///Optionally pass in an appt type def num which will only consider operatories with the corresponding appointment type.
-		///Leaving defNumApptType 0 will ONLY consider operatories that do NOT have an appointment type set.
-		///The time pattern of the appointment will be determined via the appointment type as well.
+		///defNumApptType is required and will ONLY consider operatories that are associated to the def's corresponding appointment type.
+		///The time pattern and procedures on the appointment will be determined via the appointment type as well.
 		///Throws exceptions.</summary>
-		public static List<TimeSlot> GetAvailableNewPatApptTimeSlots(DateTime dateStart,DateTime dateEnd,long clinicNum,long defNumApptType=0) {
+		public static List<TimeSlot> GetAvailableNewPatApptTimeSlots(DateTime dateStart,DateTime dateEnd,long clinicNum,long defNumApptType) {
 			//No need to check RemotingRole; no call to db.
+			//Get the appointment type that is associated to the def passed in.  This is required for New Pat Appts.
 			AppointmentType appointmentType=AppointmentTypes.GetWebSchedNewPatApptTypeByDef(defNumApptType);
-			List<Operatory> listOperatories=Operatories.GetOpsForWebSchedNewPatAppts();
-			//Set the timePattern from the appointment type passed in.
-			string timePattern=RecallTypes.ConvertTimePattern(PrefC.GetString(PrefName.WebSchedNewPatApptTimePattern));
-			if(appointmentType==null) {//Search through operatories with "None" as their appointment type.
-				//Filter out any operatories that are associated to any appointment type.
-				listOperatories.RemoveAll(x => x.AppointmentTypeNum > 0);
+			if(appointmentType==null) {
+				//This message will typically show to a patient and we want them to call in OR to refresh the web app which should no longer show the reason.
+				throw new ODException(Lans.g("WebSched","The reason for your appointment is no longer available.")+"\r\n"
+					+Lans.g("WebSched","Please call us to schedule your appointment."));
 			}
-			else {
-				timePattern=AppointmentTypes.GetTimePatternForAppointmentType(appointmentType);
-				//Filter out any operatories that are not associated to the corresponding appointment type passed in.
-				listOperatories.RemoveAll(x => x.AppointmentTypeNum!=appointmentType.AppointmentTypeNum);
-			}
+			//Now we need to find all operatories that are associated to the aforementioned appointment type.
+			List<Operatory> listOperatories=Operatories.GetOpsForWebSchedNewPatApptDef(defNumApptType);
 			if(listOperatories.Count < 1) {//This is very possible for offices that aren't set up the way that we expect them to be.
-				return new List<TimeSlot>();//This will allow the web application to load correctly with no slots showing.
+				return new List<TimeSlot>();//Don't throw an exception here to the patient, they can just select another reason.
 			}
+			//Set the timePattern from the appointment type passed in.
+			string timePattern=AppointmentTypes.GetTimePatternForAppointmentType(appointmentType);
 			List<Provider> listProviders=Providers.GetProvidersForWebSchedNewPatAppt();
 			Clinic clinic=Clinics.GetClinic(clinicNum);
 			List<long> listProvNums=listProviders.Select(x => x.ProvNum).Distinct().ToList();

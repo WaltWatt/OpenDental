@@ -66,6 +66,7 @@ namespace OpenDental {
 			gridMain.Columns.Add(col);
 			gridMain.Rows.Clear();
 			ODGridRow row;
+			List<long> listWSNPAOperatoryNums=Operatories.GetOpsForWebSchedNewPatAppts().Select(x => x.OperatoryNum).ToList();
 			foreach(Operatory opCur in _listOps) {
 				row=new ODGridRow();
 				row.Cells.Add(opCur.OpName);
@@ -88,7 +89,7 @@ namespace OpenDental {
 					row.Cells.Add("");
 				}
 				row.Cells.Add(opCur.IsWebSched?"X":"");
-				row.Cells.Add(opCur.IsNewPatAppt?"X":"");
+				row.Cells.Add(listWSNPAOperatoryNums.Contains(opCur.OperatoryNum) ? "X" : "");
 				row.Tag=opCur;
 				gridMain.Rows.Add(row);
 			}

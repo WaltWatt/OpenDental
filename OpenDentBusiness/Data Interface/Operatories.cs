@@ -11,6 +11,64 @@ namespace OpenDentBusiness{
 	///<summary></summary>
 	public class Operatories {
 		#region Get Methods
+
+		public static string GetAbbrev(long operatoryNum) {
+			//No need to check RemotingRole; no call to db.
+			Operatory operatory=GetFirstOrDefault(x => x.OperatoryNum==operatoryNum);
+			return (operatory==null ? "" : operatory.Abbrev);
+		}
+
+		public static string GetOpName(long operatoryNum) {
+			//No need to check RemotingRole; no call to db.
+			Operatory operatory=GetFirstOrDefault(x => x.OperatoryNum==operatoryNum);
+			return (operatory==null ? "" : operatory.OpName);
+		}
+
+		///<summary>Gets the order of the op within ListShort or -1 if not found.</summary>
+		public static int GetOrder(long opNum) {
+			//No need to check RemotingRole; no call to db.
+			return _operatoryCache.GetFindIndex(x => x.OperatoryNum==opNum,true);
+		}
+
+		///<summary>Gets operatory from the cache.</summary>
+		public static Operatory GetOperatory(long operatoryNum) {
+			//No need to check RemotingRole; no call to db.
+			return GetFirstOrDefault(x => x.OperatoryNum==operatoryNum);
+		}
+
+		///<summary>Get all non-hidden operatories for the clinic passed in.</summary>
+		public static List<Operatory> GetOpsForClinic(long clinicNum) {
+			//No need to check RemotingRole; no call to db.
+			return GetWhere(x => x.ClinicNum==clinicNum,true);
+		}
+
+		public static List<Operatory> GetOpsForWebSched() {
+			//No need to check RemotingRole; no call to db.
+			//Only return the ops flagged as IsWebSched.
+			return GetWhere(x => x.IsWebSched,true);
+		}
+
+		///<summary>Returns operatories that are associated to a WebSchedNewPatApptTypes definition.</summary>
+		public static List<Operatory> GetOpsForWebSchedNewPatAppts(bool isShort=true) {
+			//No need to check RemotingRole; no call to db.
+			//Get all of the deflinks that are of type Operatory in order to get the operatory specific FKeys.
+			List<long> listOperatoryNums=DefLinks.GetDefLinksForWebSchedNewPatApptOperatories()
+				.Select(x => x.FKey)
+				.Distinct()
+				.ToList();
+			return GetWhere(x => listOperatoryNums.Contains(x.OperatoryNum),isShort);
+		}
+
+		///<summary>Returns operatories that are associated to the WebSchedNewPatApptTypes definition passed in.</summary>
+		public static List<Operatory> GetOpsForWebSchedNewPatApptDef(long defNum,bool isShort=true) {
+			//No need to check RemotingRole; no call to db.
+			List<long> listOperatoryNums=DefLinks.GetDefLinksForWebSchedNewPatApptOperatories()
+				.Where(x => x.DefNum==defNum)
+				.Select(x => x.FKey)
+				.Distinct()
+				.ToList();
+			return GetWhere(x => listOperatoryNums.Contains(x.OperatoryNum),isShort);
+		}
 		#endregion
 
 		#region Modification Methods
@@ -171,48 +229,6 @@ namespace OpenDentBusiness{
 			}
 			string command="SELECT * FROM operatory WHERE DateTStamp > "+POut.DateT(changedSince);
 			return Crud.OperatoryCrud.SelectMany(command);
-		}
-
-		public static string GetAbbrev(long operatoryNum) {
-			//No need to check RemotingRole; no call to db.
-			Operatory operatory=GetFirstOrDefault(x => x.OperatoryNum==operatoryNum);
-			return (operatory==null ? "" : operatory.Abbrev);
-		}
-
-		public static string GetOpName(long operatoryNum) {
-			//No need to check RemotingRole; no call to db.
-			Operatory operatory=GetFirstOrDefault(x => x.OperatoryNum==operatoryNum);
-			return (operatory==null ? "" : operatory.OpName);
-		}
-
-		///<summary>Gets the order of the op within ListShort or -1 if not found.</summary>
-		public static int GetOrder(long opNum) {
-			//No need to check RemotingRole; no call to db.
-			return _operatoryCache.GetFindIndex(x => x.OperatoryNum==opNum,true);
-		}
-
-		///<summary>Gets operatory from the cache.</summary>
-		public static Operatory GetOperatory(long operatoryNum) {
-			//No need to check RemotingRole; no call to db.
-			return GetFirstOrDefault(x => x.OperatoryNum==operatoryNum);
-		}
-
-		///<summary>Get all non-hidden operatories for the clinic passed in.</summary>
-		public static List<Operatory> GetOpsForClinic(long clinicNum) {
-			//No need to check RemotingRole; no call to db.
-			return GetWhere(x => x.ClinicNum==clinicNum,true);
-		}
-
-		public static List<Operatory> GetOpsForWebSched() {
-			//No need to check RemotingRole; no call to db.
-			//Only return the ops flagged as IsWebSched.
-			return GetWhere(x => x.IsWebSched,true);
-		}
-
-		public static List<Operatory> GetOpsForWebSchedNewPatAppts() {
-			//No need to check RemotingRole; no call to db.
-			//Only return the ops flagged as IsNewPatAppt.
-			return GetWhere(x => x.IsNewPatAppt,true);
 		}
 
 		///<summary>Gets a list of all future appointments for a given Operatory.  Ordered by dateTime</summary>

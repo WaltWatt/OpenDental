@@ -32,12 +32,10 @@ namespace OpenDentBusiness{
 		public DateTime DateTStamp;
 		///<summary>Operatories with IsWebSched set to true will be the ONLY operatories considered when searching for available time slots.</summary>
 		public bool IsWebSched;
-		///<summary>Operatories with IsNewPatAppt set to true will be the ONLY operatories considered when searching for available time slots.
+		///<summary>Deprecated as of 18.1.  Entries within the deflink table indicate if this operatory is in fact available for WebSched New Pat Appt.
+		///Old summary: Operatories with IsNewPatAppt set to true will be the ONLY operatories considered when searching for available time slots.
 		///This is in regards to the New Patient Appointment portion of the Web Sched web application.</summary>
 		public bool IsNewPatAppt;
-		///<summary>FK to appointmenttype.AppointmentTypeNum. Indicates that this is the only type of appointment that can be scheduled in this operatory.
-		///Currently only works for Web Sched New Pat appointments but can be implmemented in other places at a later date.</summary>
-		public long AppointmentTypeNum;
 
 		///<summary>True if the current op is in an HQ view.  Defaults to true for safety.  Not stored in the db.</summary>
 		[CrudColumn(IsNotDbColumn = true)]

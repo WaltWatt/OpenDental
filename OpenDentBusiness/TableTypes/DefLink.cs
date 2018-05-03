@@ -34,6 +34,8 @@ namespace OpenDentBusiness {
 		Patient,
 		///<summary>2. The definition is linked to an appointment type.</summary>
 		AppointmentType,
+		///<summary>3. The definition is linked to an operatory.</summary>
+		Operatory,
 	}
 
 	///<summary>Helper class for the DefLink table.  This class resides within DefLink.cs</summary>

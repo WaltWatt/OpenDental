@@ -50,15 +50,15 @@ namespace OpenDental{
 		private long _selectedClinicNum;
 		///<summary>Instead of relying on _listProviders[comboProv.SelectedIndex] to determine the selected Provider we use this variable to store it explicitly.</summary>
 		private long _selectedProvNum;
-		private Label label5;
-		private CheckBox checkIsNewPatAppt;
 		private Label labelApptType;
-		private ComboBox comboApptType;
 		private GroupBox groupBoxApptType;
 		private Label label10;
-
+		private UI.Button butWSNPAPickApptTypes;
 		///<summary>Instead of relying on _listProviders[comboProvHyg.SelectedIndex] to determine the selected Provider we use this variable to store it explicitly.</summary>
 		private long _selectedProvHygNum;
+		private TextBox textWSNPAApptTypes;
+		///<summary>All of the Web Sched New Pat Appt appointment type defs that this operatory is associated to.</summary>
+		private List<Def> _listWSNPAOperatoryDefs=new List<Def>();
 
 		///<summary></summary>
 		public FormOperatoryEdit(Operatory opCur)
@@ -94,10 +94,7 @@ namespace OpenDental{
 		private void InitializeComponent()
 		{
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormOperatoryEdit));
-			this.comboApptType = new System.Windows.Forms.ComboBox();
 			this.labelApptType = new System.Windows.Forms.Label();
-			this.label5 = new System.Windows.Forms.Label();
-			this.checkIsNewPatAppt = new System.Windows.Forms.CheckBox();
 			this.butPickHyg = new OpenDental.UI.Button();
 			this.butPickProv = new OpenDental.UI.Button();
 			this.butPickClin = new OpenDental.UI.Button();
@@ -123,46 +120,19 @@ namespace OpenDental{
 			this.label1 = new System.Windows.Forms.Label();
 			this.groupBoxApptType = new System.Windows.Forms.GroupBox();
 			this.label10 = new System.Windows.Forms.Label();
+			this.butWSNPAPickApptTypes = new OpenDental.UI.Button();
+			this.textWSNPAApptTypes = new System.Windows.Forms.TextBox();
 			this.groupBoxApptType.SuspendLayout();
 			this.SuspendLayout();
 			// 
-			// comboApptType
-			// 
-			this.comboApptType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.comboApptType.Location = new System.Drawing.Point(134, 59);
-			this.comboApptType.MaxDropDownItems = 30;
-			this.comboApptType.Name = "comboApptType";
-			this.comboApptType.Size = new System.Drawing.Size(252, 21);
-			this.comboApptType.TabIndex = 127;
-			// 
 			// labelApptType
 			// 
-			this.labelApptType.Location = new System.Drawing.Point(16, 60);
+			this.labelApptType.Location = new System.Drawing.Point(16, 42);
 			this.labelApptType.Name = "labelApptType";
 			this.labelApptType.Size = new System.Drawing.Size(117, 17);
 			this.labelApptType.TabIndex = 126;
 			this.labelApptType.Text = "New Pat Appt Type";
 			this.labelApptType.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-			// 
-			// label5
-			// 
-			this.label5.Location = new System.Drawing.Point(151, 39);
-			this.label5.Name = "label5";
-			this.label5.Size = new System.Drawing.Size(355, 16);
-			this.label5.TabIndex = 125;
-			this.label5.Text = "This operatory will be available for Web Sched new patient appointments.";
-			// 
-			// checkIsNewPatAppt
-			// 
-			this.checkIsNewPatAppt.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-			this.checkIsNewPatAppt.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.checkIsNewPatAppt.Location = new System.Drawing.Point(11, 38);
-			this.checkIsNewPatAppt.Name = "checkIsNewPatAppt";
-			this.checkIsNewPatAppt.Size = new System.Drawing.Size(135, 16);
-			this.checkIsNewPatAppt.TabIndex = 124;
-			this.checkIsNewPatAppt.Text = "Is New Pat Appt";
-			this.checkIsNewPatAppt.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-			this.checkIsNewPatAppt.CheckedChanged += new System.EventHandler(this.checkIsNewPatAppt_CheckedChanged);
 			// 
 			// butPickHyg
 			// 
@@ -361,7 +331,7 @@ namespace OpenDental{
 			this.textOpName.Location = new System.Drawing.Point(160, 20);
 			this.textOpName.MaxLength = 255;
 			this.textOpName.Name = "textOpName";
-			this.textOpName.Size = new System.Drawing.Size(241, 20);
+			this.textOpName.Size = new System.Drawing.Size(252, 20);
 			this.textOpName.TabIndex = 0;
 			// 
 			// butOK
@@ -405,27 +375,50 @@ namespace OpenDental{
 			// 
 			// groupBoxApptType
 			// 
+			this.groupBoxApptType.Controls.Add(this.textWSNPAApptTypes);
+			this.groupBoxApptType.Controls.Add(this.butWSNPAPickApptTypes);
 			this.groupBoxApptType.Controls.Add(this.label10);
-			this.groupBoxApptType.Controls.Add(this.comboApptType);
-			this.groupBoxApptType.Controls.Add(this.label5);
 			this.groupBoxApptType.Controls.Add(this.labelApptType);
-			this.groupBoxApptType.Controls.Add(this.checkIsNewPatAppt);
 			this.groupBoxApptType.Controls.Add(this.label4);
 			this.groupBoxApptType.Controls.Add(this.checkIsWebSched);
 			this.groupBoxApptType.Location = new System.Drawing.Point(26, 190);
 			this.groupBoxApptType.Name = "groupBoxApptType";
-			this.groupBoxApptType.Size = new System.Drawing.Size(515, 108);
+			this.groupBoxApptType.Size = new System.Drawing.Size(515, 100);
 			this.groupBoxApptType.TabIndex = 128;
 			this.groupBoxApptType.TabStop = false;
 			this.groupBoxApptType.Text = "Web Sched Settings";
 			// 
 			// label10
 			// 
-			this.label10.Location = new System.Drawing.Point(131, 83);
+			this.label10.Location = new System.Drawing.Point(131, 65);
 			this.label10.Name = "label10";
-			this.label10.Size = new System.Drawing.Size(355, 16);
+			this.label10.Size = new System.Drawing.Size(378, 29);
 			this.label10.TabIndex = 128;
-			this.label10.Text = "Only appointments of this type will be allowed in this operatory.";
+			this.label10.Text = "Only the above appointment types will be allowed within this operatory.\r\nAppt Typ" +
+    "e is required to be considered for Web Sched New Pat Appt.";
+			// 
+			// butWSNPAPickApptTypes
+			// 
+			this.butWSNPAPickApptTypes.AdjustImageLocation = new System.Drawing.Point(0, 0);
+			this.butWSNPAPickApptTypes.Autosize = false;
+			this.butWSNPAPickApptTypes.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
+			this.butWSNPAPickApptTypes.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
+			this.butWSNPAPickApptTypes.CornerRadius = 2F;
+			this.butWSNPAPickApptTypes.Location = new System.Drawing.Point(386, 40);
+			this.butWSNPAPickApptTypes.Name = "butWSNPAPickApptTypes";
+			this.butWSNPAPickApptTypes.Size = new System.Drawing.Size(23, 22);
+			this.butWSNPAPickApptTypes.TabIndex = 129;
+			this.butWSNPAPickApptTypes.Text = "...";
+			this.butWSNPAPickApptTypes.Click += new System.EventHandler(this.butWSNPAPickApptTypes_Click);
+			// 
+			// textWSNPAApptTypes
+			// 
+			this.textWSNPAApptTypes.Location = new System.Drawing.Point(134, 41);
+			this.textWSNPAApptTypes.MaxLength = 255;
+			this.textWSNPAApptTypes.Name = "textWSNPAApptTypes";
+			this.textWSNPAApptTypes.ReadOnly = true;
+			this.textWSNPAApptTypes.Size = new System.Drawing.Size(252, 20);
+			this.textWSNPAApptTypes.TabIndex = 129;
 			// 
 			// FormOperatoryEdit
 			// 
@@ -460,6 +453,7 @@ namespace OpenDental{
 			this.Text = "Edit Operatory";
 			this.Load += new System.EventHandler(this.FormOperatoryEdit_Load);
 			this.groupBoxApptType.ResumeLayout(false);
+			this.groupBoxApptType.PerformLayout();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -478,15 +472,6 @@ namespace OpenDental{
 			_listClinics=new List<Clinic>() { new Clinic() { Abbr=Lan.g(this,"None") } }; //Seed with "None"
 			Clinics.GetForUserod(Security.CurUser).ForEach(x => _listClinics.Add(x));//do not re-organize from cache. They could either be alphabetizeded or sorted by item order.
 			_listClinics.ForEach(x => comboClinic.Items.Add(x.Abbr));//Add to UI control
-			List<AppointmentType> listAppointmentTypes=AppointmentTypes.GetDeepCopy(true);
-			//Always allow for an appointment type of "None".
-			listAppointmentTypes.Insert(0,new AppointmentType() {
-				AppointmentTypeNum=0,
-				AppointmentTypeName=Lan.g(this,"None"),
-			});
-			foreach(AppointmentType apptType in listAppointmentTypes) {
-				comboApptType.Items.Add(new ODBoxItem<AppointmentType>(apptType.AppointmentTypeName,apptType));
-			}
 			//Set Selected nums
 			_selectedClinicNum=OpCur.ClinicNum;//can be 0
 			_selectedProvNum=OpCur.ProvDentist;
@@ -495,14 +480,20 @@ namespace OpenDental{
 			comboProv.SelectedIndex=-1;
 			comboHyg.SelectedIndex=-1;
 			comboClinic.IndexSelectOrSetText(_listClinics.FindIndex(x => x.ClinicNum==_selectedClinicNum),() => { return Clinics.GetAbbr(_selectedClinicNum); });
-			comboApptType.IndexSelectOrSetText(listAppointmentTypes.FindIndex(x => x.AppointmentTypeNum==OpCur.AppointmentTypeNum),
-				() => { return AppointmentTypes.GetName(OpCur.AppointmentTypeNum); });
-			fillComboProvHyg();
+			_listWSNPAOperatoryDefs=Defs.GetDefsByDefLinkFKey(DefCat.WebSchedNewPatApptTypes,OpCur.OperatoryNum,DefLinkType.Operatory);
+			FillWSNPAApptTypes();
+			FillComboProvHyg();
 			checkIsHygiene.Checked=OpCur.IsHygiene;
 			checkSetProspective.Checked=OpCur.SetProspective;
 			checkIsWebSched.Checked=OpCur.IsWebSched;
-			checkIsNewPatAppt.Checked=OpCur.IsNewPatAppt;
-			comboApptType.Enabled=checkIsNewPatAppt.Checked;
+		}
+
+		private void FillWSNPAApptTypes() {
+			textWSNPAApptTypes.Clear();
+			if(_listWSNPAOperatoryDefs.Count < 1) {
+				return;
+			}
+			textWSNPAApptTypes.Text=string.Join(", ",_listWSNPAOperatoryDefs.Select(x => x.ItemName));
 		}
 
 		private void butPickClin_Click(object sender,EventArgs e) {
@@ -542,7 +533,7 @@ namespace OpenDental{
 			if(comboClinic.SelectedIndex>-1) {
 				_selectedClinicNum=_listClinics[comboClinic.SelectedIndex].ClinicNum;
 			}
-			fillComboProvHyg();
+			FillComboProvHyg();
 		}
 
 		private void comboProv_SelectedIndexChanged(object sender,EventArgs e) {
@@ -557,14 +548,17 @@ namespace OpenDental{
 			}
 		}
 
-		private void checkIsNewPatAppt_CheckedChanged(object sender,EventArgs e) {
-			//Operatory appointment types are explicitly linked to Web Sched New Pat Appt.
-			//This setting will hopefully get applied to more things than just New Pat Appt so this "enabled" logic will need to be deleted in the future.
-			comboApptType.Enabled=checkIsNewPatAppt.Checked;
+		private void butWSNPAPickApptTypes_Click(object sender,EventArgs e) {
+			FormDefinitionPicker FormDP=new FormDefinitionPicker(DefCat.WebSchedNewPatApptTypes,_listWSNPAOperatoryDefs);
+			FormDP.IsMultiSelectionMode=true;
+			if(FormDP.ShowDialog()==DialogResult.OK) {
+				_listWSNPAOperatoryDefs=FormDP.ListSelectedDefs.Select(x => x.Copy()).ToList();
+				FillWSNPAApptTypes();
+			}
 		}
 
 		///<summary>Fills combo provider based on which clinic is selected and attempts to preserve provider selection if any.</summary>
-		private void fillComboProvHyg() {
+		private void FillComboProvHyg() {
 			if(comboProv.SelectedIndex>-1) {//valid prov selected, non none or nothing.
 				_selectedProvNum = _listProviders[comboProv.SelectedIndex].ProvNum;
 			}
@@ -603,10 +597,7 @@ namespace OpenDental{
 			OpCur.IsHygiene=checkIsHygiene.Checked;
 			OpCur.SetProspective=checkSetProspective.Checked;
 			OpCur.IsWebSched=checkIsWebSched.Checked;
-			OpCur.IsNewPatAppt=checkIsNewPatAppt.Checked;
-			if(comboApptType.SelectedIndex > -1) {
-				OpCur.AppointmentTypeNum=comboApptType.SelectedTag<AppointmentType>().AppointmentTypeNum;
-			}
+			DefLinks.SetWebSchedNewPatApptOpLinksForDefs(OpCur.OperatoryNum,_listWSNPAOperatoryDefs.Select(x => x.DefNum).ToList());
 			if(IsNew) {
 				ListOps.Insert(OpCur.ItemOrder,OpCur);//Insert into list at appropriate spot
 				for(int i=0;i<ListOps.Count;i++) {
@@ -619,7 +610,6 @@ namespace OpenDental{
 		private void butCancel_Click(object sender, System.EventArgs e) {
 			DialogResult=DialogResult.Cancel;
 		}
-
 	}
 
 }

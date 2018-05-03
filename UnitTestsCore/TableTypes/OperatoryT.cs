@@ -9,7 +9,7 @@ namespace UnitTestsCore {
 
 		///<summary></summary>
 		public static Operatory CreateOperatory(string abbrev="",string opName="",long provDentist=0,long provHygienist=0,long clinicNum=0
-			,bool isHygiene=false,bool isWebSched=false,int itemOrder=0,bool isNewPatAppt=false,long appointmentTypeNum=0)
+			,bool isHygiene=false,bool isWebSched=false,int itemOrder=0,bool isNewPatAppt=false)
 		{
 			Operatory op=new Operatory();
 			op.Abbrev=abbrev;
@@ -26,7 +26,6 @@ namespace UnitTestsCore {
 			}
 			op.ProvDentist=provDentist;
 			op.ProvHygienist=provHygienist;
-			op.AppointmentTypeNum=appointmentTypeNum;
 			Operatories.Insert(op);
 			if(abbrev=="") {
 				op.Abbrev=op.OperatoryNum.ToString();

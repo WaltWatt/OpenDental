@@ -199,15 +199,11 @@ namespace OpenDentBusiness {
 			return Crud.DefCrud.SelectMany(command);
 		}
 
-		///<summary>Returns the first definition that is associated to the FKey and type passed in.  Returns null if no match found.</summary>
-		public static Def GetDefByDefLinkFKey(DefCat defCat,long fKey,DefLinkType defLinkType) {
+		///<summary>Returns definitions that are associated to the defCat, fKey, and defLinkType passed in.</summary>
+		public static List<Def> GetDefsByDefLinkFKey(DefCat defCat,long fKey,DefLinkType defLinkType) {
 			//No need to check RemotingRole; no call to db.
-			List<DefLink> listDefLinks=DefLinks.GetDefLinksByType(defLinkType);
-			DefLink defLink=listDefLinks.FirstOrDefault(x => x.FKey==fKey);
-			if(defLink==null) {
-				return null;
-			}
-			return Defs.GetDef(defCat,defLink.DefNum);
+			List<DefLink> listDefLinks=DefLinks.GetDefLinksByType(defLinkType).FindAll(x => x.FKey==fKey);
+			return Defs.GetDefs(defCat,listDefLinks.Select(x => x.DefNum).Distinct().ToList());
 		}
 
 		///<summary>Throws an exception if there are no definitions in the category provided.  This is to preserve old behavior.</summary>
@@ -250,13 +246,13 @@ namespace OpenDentBusiness {
 		#endregion
 
 		#region Delete
-		///<summary>CAUTION.  This does not perform all validations.  It only properly validates for four def types right now:
-		///SupplyCats, ClaimCustomTracking, InsurancePaymentType, and AutoNoteCats.</summary>
+		///<summary>CAUTION.  This does not perform all validations.  Throws exceptions.</summary>
 		public static void Delete(Def def) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
 				Meth.GetVoid(MethodBase.GetCurrentMethod(),def);
 				return;
 			}
+			string command;
 			List<string> listCommands=new List<string>();
 			switch(def.Category) {
 				case DefCat.ClaimCustomTracking:
@@ -279,9 +275,11 @@ namespace OpenDentBusiness {
 					listCommands.Add("SELECT COUNT(*) FROM autonote WHERE Category="+POut.Long(def.DefNum));//just in case update failed or concurrency issue
 					break;
 				case DefCat.WebSchedNewPatApptTypes:
-					//Users can delete WebSchedNewPatApptTypes entries which are associated to appointment types via the deflink table.
-					//If they delete all of these defs then the Web Sched app will simply load with an error message telling the patient to call the office.
-					//Therefore, let the user do whatever they want here.
+					//Do not let the user delete the last WebSchedNewPatApptTypes definition.  Must be at least one.
+					command="SELECT COUNT(*) FROM definition WHERE Category="+POut.Int((int)DefCat.WebSchedNewPatApptTypes);
+					if(PIn.Int(Db.GetCount(command),false)<=1) {
+						throw new ApplicationException("NOT Allowed to delete the last def of this type.");
+					}
 					break;
 				default:
 					throw new ApplicationException("NOT Allowed to delete this type of def.");
@@ -291,7 +289,7 @@ namespace OpenDentBusiness {
 					throw new ApplicationException(Lans.g("Defs","Def is in use.  Not allowed to delete."));
 				}
 			}
-			string command="DELETE FROM definition WHERE DefNum="+POut.Long(def.DefNum);
+			command="DELETE FROM definition WHERE DefNum="+POut.Long(def.DefNum);
 			Db.NonQ(command);
 			command="UPDATE definition SET ItemOrder=ItemOrder-1 "
 				+"WHERE Category="+POut.Long((int)def.Category)

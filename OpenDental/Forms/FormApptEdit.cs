@@ -1356,6 +1356,7 @@ namespace OpenDental{
 			{
 				FormApptTypes FormAT=new FormApptTypes();
 				FormAT.IsSelectionMode=true;
+				FormAT.IsNoneAllowed=true;
 				FormAT.ShowDialog();
 				if(FormAT.DialogResult==DialogResult.OK) {
 					_selectedAptType=FormAT.SelectedAptType;

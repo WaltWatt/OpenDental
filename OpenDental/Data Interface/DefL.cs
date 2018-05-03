@@ -227,6 +227,7 @@ namespace OpenDental {
 					case DefCat.WebSchedNewPatApptTypes:
 						defCOption.CanDelete=true;
 						defCOption.CanHide=false;
+						defCOption.ValueText=Lans.g("FormDefinitions","Appointment Type");
 						defCOption.HelpText=Lans.g("FormDefinitions","Appointment types to be displayed in the Web Sched New Pat Appt web application.  These are selectable for the new patients and will be saved to the appointment note.");
 						break;
 					case DefCat.CarrierGroupNames:

@@ -790,11 +790,19 @@ namespace OpenDentBusiness{
 				listProvNumsWithZero.Add(0);//Always add 0 so that blockouts can be returned.
 			}
 			string blockoutsToIgnore="";
+			string operatoryFilter="";
 			if(isRecall) {
 				blockoutsToIgnore=PrefC.GetString(PrefName.WebSchedRecallIgnoreBlockoutTypes);
+				operatoryFilter="operatory.IsWebSched=1 ";
 			}
 			else {
 				blockoutsToIgnore=PrefC.GetString(PrefName.WebSchedNewPatApptIgnoreBlockoutTypes);
+				//Get all of the operatory nums for operatories that are New Pat ready.
+				List<Operatory> listOperatories=Operatories.GetOpsForWebSchedNewPatAppts();
+				if(listOperatories==null || listOperatories.Count < 1) {
+					return new List<Schedule>(); //No operatories setup for WSNP.
+				}
+				operatoryFilter="operatory.OperatoryNum IN ("+string.Join(",",listOperatories.Select(x => x.OperatoryNum))+") ";
 			}
 			string clinicFilter="";
 			if(PrefC.HasClinicsEnabled) {
@@ -804,7 +812,7 @@ namespace OpenDentBusiness{
 				(SELECT schedule.* FROM schedule 
 					INNER JOIN scheduleop ON schedule.ScheduleNum=scheduleop.ScheduleNum
 					INNER JOIN operatory ON operatory.OperatoryNum=scheduleop.OperatoryNum 
-					WHERE "+(isRecall?"operatory.IsWebSched":"operatory.IsNewPatAppt")+@"=1
+					WHERE "+operatoryFilter+@"
 					"+clinicFilter+@"
 					AND schedule.ProvNum IN ("+String.Join(",",listProvNumsWithZero)+@")
 					AND schedule.BlockoutType > -1 -- We need to include all blockouts and non-blockouts.
@@ -820,7 +828,7 @@ namespace OpenDentBusiness{
 					LEFT JOIN scheduleop ON schedule.ScheduleNum=scheduleop.ScheduleNum 
 					WHERE provider.IsHidden!=1
 					AND provider.ProvNum IN ("+String.Join(",",listProvNumsWithZero)+@")
-					AND "+(isRecall?"operatory.IsWebSched":"operatory.IsNewPatAppt")+@"=1
+					AND "+operatoryFilter+@"
 					"+clinicFilter+@"
 					AND schedule.BlockoutType = 0 -- Blockouts should be ignored because they HAVE to be assigned to an operatory.
 					AND scheduleop.OperatoryNum IS NULL -- Only consider schedules that are NOT assigned to any operatories (dynamic schedules)

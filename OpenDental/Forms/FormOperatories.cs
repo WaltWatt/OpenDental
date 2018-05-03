@@ -305,6 +305,7 @@ namespace OpenDental{
 			gridMain.Columns.Add(col);
 			gridMain.Rows.Clear();
 			UI.ODGridRow row;
+			List<long> listWSNPAOperatoryNums=Operatories.GetOpsForWebSchedNewPatAppts(false).Select(x => x.OperatoryNum).ToList();
 			for(int i=0;i<_listOps.Count;i++){
 				if(PrefC.HasClinicsEnabled 
 					&& !comboClinic.IsAllSelected
@@ -333,7 +334,7 @@ namespace OpenDental{
 					row.Cells.Add("");
 				}
 				row.Cells.Add(_listOps[i].IsWebSched?"X":"");
-				row.Cells.Add(_listOps[i].IsNewPatAppt?"X":"");
+				row.Cells.Add(listWSNPAOperatoryNums.Contains(_listOps[i].OperatoryNum) ? "X" : "");
 				row.Tag=_listOps[i];
 				gridMain.Rows.Add(row);
 			}

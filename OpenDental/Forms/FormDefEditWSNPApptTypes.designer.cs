@@ -26,7 +26,6 @@ namespace OpenDental{
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormDefEditWSNPApptTypes));
 			this.butOK = new OpenDental.UI.Button();
 			this.butCancel = new OpenDental.UI.Button();
-			this.butClearValue = new OpenDental.UI.Button();
 			this.butSelect = new OpenDental.UI.Button();
 			this.checkHidden = new System.Windows.Forms.CheckBox();
 			this.butColor = new System.Windows.Forms.Button();
@@ -69,20 +68,6 @@ namespace OpenDental{
 			this.butCancel.TabIndex = 2;
 			this.butCancel.Text = "&Cancel";
 			this.butCancel.Click += new System.EventHandler(this.butCancel_Click);
-			// 
-			// butClearValue
-			// 
-			this.butClearValue.AdjustImageLocation = new System.Drawing.Point(1, 0);
-			this.butClearValue.Autosize = true;
-			this.butClearValue.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
-			this.butClearValue.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
-			this.butClearValue.CornerRadius = 4F;
-			this.butClearValue.Image = global::OpenDental.Properties.Resources.deleteX18;
-			this.butClearValue.Location = new System.Drawing.Point(395, 55);
-			this.butClearValue.Name = "butClearValue";
-			this.butClearValue.Size = new System.Drawing.Size(21, 22);
-			this.butClearValue.TabIndex = 210;
-			this.butClearValue.Click += new System.EventHandler(this.butClearValue_Click);
 			// 
 			// butSelect
 			// 
@@ -191,7 +176,6 @@ namespace OpenDental{
 			this.CancelButton = this.butCancel;
 			this.ClientSize = new System.Drawing.Size(479, 171);
 			this.Controls.Add(this.butDelete);
-			this.Controls.Add(this.butClearValue);
 			this.Controls.Add(this.butSelect);
 			this.Controls.Add(this.checkHidden);
 			this.Controls.Add(this.butColor);
@@ -215,7 +199,6 @@ namespace OpenDental{
 
 		private OpenDental.UI.Button butOK;
 		private OpenDental.UI.Button butCancel;
-		private UI.Button butClearValue;
 		private UI.Button butSelect;
 		private System.Windows.Forms.CheckBox checkHidden;
 		private System.Windows.Forms.Button butColor;

@@ -142,9 +142,10 @@ namespace OpenDental {
 		private void butAdd_Click(object sender,EventArgs e) {
 			FormProcCodes FormPC=new FormProcCodes();
 			FormPC.IsSelectionMode=true;
+			FormPC.AllowMultipleSelections=true;
 			FormPC.ShowDialog();
 			if(FormPC.DialogResult==DialogResult.OK) {
-				_listProcCodes.Add(ProcedureCodes.GetProcCode(FormPC.SelectedCodeNum));
+				_listProcCodes.AddRange(FormPC.ListSelectedProcCodes.Select(x => x.Copy()).ToList());
 			}
 			RefreshListBoxProcCodes();
 		}

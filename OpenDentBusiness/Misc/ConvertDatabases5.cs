@@ -7543,23 +7543,178 @@ No Action Required in many cases, check your new patient Web Sched on your web s
 				command="UPDATE payplancharge SET SecDateTEdit = SYSTIMESTAMP";
 				Db.NonQ(command);
 			}
-			//add FKey for appointmenttype to operatory table
+			#region Web Sched New Pat Appt Appointment Types
+			#region Preferences
+			//Get all preferences that will help convert our Web Sched New Pat Appts over to forcefully using appointment types.
+			command="SELECT ValueString FROM preference WHERE preference.PrefName = 'WebSchedNewPatApptTimePattern'";
+			string prefWebSchedNewPatApptTimePattern=Db.GetScalar(command);
+			command="SELECT ValueString FROM preference WHERE preference.PrefName = 'WebSchedNewPatApptProcs'";
+			string prefWebSchedNewPatApptProcs=Db.GetScalar(command);
+			command="SELECT ValueString FROM preference WHERE preference.PrefName = 'AppointmentTimeIncrement'";
+			string prefAppointmentTimeIncrement=Db.GetScalar(command);
+			//Convert the current time pattern into a five minute increment pattern because appointment types ALWAYS store the pattern in 5 min increments.
+			StringBuilder patternConverted=new StringBuilder();
+			for(int i=0;i<prefWebSchedNewPatApptTimePattern.Length;i++) {
+				patternConverted.Append(prefWebSchedNewPatApptTimePattern.Substring(i,1));
+				if(prefAppointmentTimeIncrement=="10") {
+					patternConverted.Append(prefWebSchedNewPatApptTimePattern.Substring(i,1));
+				}
+				if(prefAppointmentTimeIncrement=="15") {
+					patternConverted.Append(prefWebSchedNewPatApptTimePattern.Substring(i,1));
+					patternConverted.Append(prefWebSchedNewPatApptTimePattern.Substring(i,1));
+				}
+			}
+			if(patternConverted.ToString()=="") {
+				if(prefAppointmentTimeIncrement=="15") {
+					patternConverted.Append("///XXX///");
+				}
+				else {
+					patternConverted.Append("//XX//");
+				}
+			}
+			#endregion
+			long appointmentTypeNum=0;
+			long defNumApptTypeDefault=0;
+			#region Default Appointment Type
+			string defaultApptTypeName="WebSched New Patient Default";
+			int attempts=0;
+			//Make sure that the name of the new appointment type is unique.
+			do {
+				if(attempts > 0) {
+					defaultApptTypeName=defaultApptTypeName+" "+POut.Int(attempts);
+				}
+				command="SELECT COUNT(*) FROM appointmenttype WHERE AppointmentTypeName = '"+POut.String(defaultApptTypeName)+"'";
+				attempts++;
+			} while(Db.GetCount(command)!="0");
+			//Get the ItemOrder for the new default appointment type.  We want this appointment type to be at the end of the list.
+			command="SELECT COALESCE(MAX(ItemOrder),-1)+1 FROM appointmenttype";
+			int defaultApptTypeItemOrder=PIn.Int(Db.GetCount(command));
 			if(DataConnection.DBtype==DatabaseType.MySql) {
-				command="ALTER TABLE operatory ADD AppointmentTypeNum bigint NOT NULL";
-				Db.NonQ(command);
-				command="ALTER TABLE operatory ADD INDEX (AppointmentTypeNum)";
-				Db.NonQ(command);
+				command="INSERT INTO appointmenttype (AppointmentTypeName,AppointmentTypeColor,ItemOrder,IsHidden,Pattern,CodeStr) "
+					+"VALUES("
+					+"'"+POut.String(defaultApptTypeName)+"',"//AppointmentTypeName
+					+"0,"//AppointmentTypeColor
+					+POut.Int(defaultApptTypeItemOrder)+","//ItemOrder
+					+"0,"//IsHidden
+					+"'"+POut.String(patternConverted.ToString())+"',"//Pattern
+					+"'"+POut.String(prefWebSchedNewPatApptProcs)+"')";//CodeStr
+				appointmentTypeNum=Db.NonQ(command,true);
 			}
 			else {//oracle
-				command="ALTER TABLE operatory ADD AppointmentTypeNum number(20)";
-				Db.NonQ(command);
-				command="UPDATE operatory SET AppointmentTypeNum = 0 WHERE AppointmentTypeNum IS NULL";
-				Db.NonQ(command);
-				command="ALTER TABLE operatory MODIFY AppointmentTypeNum NOT NULL";
-				Db.NonQ(command);
-				command=@"CREATE INDEX operatory_AppointmentTypeNum ON operatory (AppointmentTypeNum)";
+				command="INSERT INTO appointmenttype (AppointmentTypeNum,AppointmentTypeName,AppointmentTypeColor,ItemOrder,IsHidden,Pattern,CodeStr) "
+					+"VALUES("
+					+"(SELECT COALESCE(MAX(AppointmentTypeNum),0)+1 FROM appointmenttype),"//AppointmentTypeNum
+					+"'"+POut.String(defaultApptTypeName)+"',"//AppointmentTypeName
+					+"0,"//AppointmentTypeColor
+					+POut.Int(defaultApptTypeItemOrder)+","//ItemOrder
+					+"0,"//IsHidden
+					+"'"+POut.String(patternConverted.ToString())+"',"//Pattern
+					+"'"+POut.String(prefWebSchedNewPatApptProcs)+"')";//CodeStr
+				appointmentTypeNum=Db.NonQ(command,true);
+			}
+			#endregion
+			#region Default Definition
+			string defaultItemName="New Patient General";
+			attempts=0;
+			//Make sure that the name of the new appointment type is unique.
+			do {
+				if(attempts > 0) {
+					defaultItemName=defaultItemName+" "+POut.Int(attempts);
+				}
+				command="SELECT COUNT(*) FROM definition "
+					+"WHERE Category = 42 "//WebSchedNewPatApptTypes
+					+"AND ItemName = '"+POut.String(defaultItemName)+"'";
+				attempts++;
+			} while(Db.GetCount(command)!="0");
+			//We need to increment all ItemOrders for the WebSchedNewPatApptTypes PRIOR to inserting the definition.
+			command="SELECT DefNum FROM definition WHERE Category = 42 ORDER BY ItemOrder";
+			table=Db.GetTable(command);
+			for(int i=0;i<table.Rows.Count;i++) {
+				//ItemOrder is 0-based on the definition table so increment i by 1 in order to make room for an ItemOrder of 0.
+				//Users cannot hide entries within the WebSchedNewPatApptTypes category so we don't have to worry about how they are treated.
+				command="UPDATE definition SET ItemOrder = "+POut.Int(i+1)+" "
+					+"WHERE DefNum = "+POut.String(table.Rows[i]["DefNum"].ToString());
 				Db.NonQ(command);
 			}
+			//Insert the new definition with a hardcoded ItemOrder of 0 because we just incremented all existing defs in the category by 1.
+			if(DataConnection.DBtype==DatabaseType.MySql) {
+				command="INSERT INTO definition (Category,ItemOrder,ItemName,ItemValue,ItemColor,IsHidden) "
+					+"VALUES("
+					+"42,"//Category - WebSchedNewPatApptTypes
+					+"0,"//ItemOrder
+					+"'"+POut.String(defaultItemName)+"',"//ItemName
+					+"'',"//ItemValue
+					+"0,"//ItemColor
+					+"0)";//IsHidden
+				defNumApptTypeDefault=Db.NonQ(command,true);
+			}
+			else {//oracle
+				command="INSERT INTO definition (DefNum,Category,ItemOrder,ItemName,ItemValue,ItemColor,IsHidden) "
+					+"VALUES("
+					+"(SELECT COALESCE(MAX(DefNum),0)+1 FROM definition),"//DefNum
+					+"42,"//Category - WebSchedNewPatApptTypes
+					+"0,"//ItemOrder
+					+"'"+POut.String(defaultItemName)+"',"//ItemName
+					+"'',"//ItemValue
+					+"0,"//ItemColor
+					+"0)";//IsHidden
+				defNumApptTypeDefault=Db.NonQ(command,true);
+			}
+			#endregion
+			#region Link Definitions to Appointment Type
+			//WebSchedNewPatApptTypes definitions are associated to one and only one appointment type and it is now a requirement.
+			//Link all definitions to the new appointment type that was just created.
+			command="SELECT DefNum FROM definition WHERE Category = 42 ORDER BY ItemOrder";
+			List<long> listWSNPADefNums=Db.GetListLong(command);
+			foreach(long defNumApptType in listWSNPADefNums) {
+				if(DataConnection.DBtype==DatabaseType.MySql) {
+					command="INSERT INTO deflink (DefNum,FKey,LinkType) "
+						+"VALUES("
+						+POut.Long(defNumApptType)+","//DefNum
+						+POut.Long(appointmentTypeNum)+","//FKey
+						+"2)";//LinkType.  2 - AppointmentType
+					Db.NonQ(command);
+				}
+				else {//oracle
+					command="INSERT INTO deflink (DefLinkNum,DefNum,FKey,LinkType) "
+						+"VALUES("
+						+"(SELECT COALESCE(MAX(DefLinkNum),0)+1 FROM deflink),"//DefLinkNum
+						+POut.Long(defNumApptType)+","//DefNum
+						+POut.Long(appointmentTypeNum)+","//FKey
+						+"2)";//LinkType.  2 - AppointmentType
+					Db.NonQ(command);
+				}
+			}
+			#endregion
+			#region Link Operatories to All WebSchedNewPatApptTypes Definitions
+			//Each operatory can support multiple appointment types being scheduled within them.
+			//Therefore, make an entry in the deflink table for each operatory that is set up correctly for Web Sched New Pat Appt.
+			command="SELECT OperatoryNum FROM operatory WHERE IsNewPatAppt=1";
+			List<long> listWSNPAOpNums=Db.GetListLong(command);
+			foreach(long operatoryNum in listWSNPAOpNums) {
+				//Insert an deflink for every WebSchedNewPatApptTypes definition (preserves old behavior).
+				foreach(long defNumApptType in listWSNPADefNums) {
+					if(DataConnection.DBtype==DatabaseType.MySql) {
+						command="INSERT INTO deflink (DefNum,FKey,LinkType) "
+							+"VALUES("
+							+POut.Long(defNumApptType)+","//DefNum
+							+POut.Long(operatoryNum)+","//FKey
+							+"3)";//LinkType.  3 - Operatory
+						Db.NonQ(command);
+					}
+					else {//oracle
+						command="INSERT INTO deflink (DefLinkNum,DefNum,FKey,LinkType) "
+							+"VALUES("
+							+"(SELECT COALESCE(MAX(DefLinkNum),0)+1 FROM deflink),"//DefLinkNum
+							+POut.Long(defNumApptType)+","//DefNum
+							+POut.Long(operatoryNum)+","//FKey
+							+"2)";//LinkType.  3 - Operatory
+						Db.NonQ(command);
+					}
+				}
+			}
+			#endregion
+			#endregion
 			if(DataConnection.DBtype==DatabaseType.MySql) {
 				command="INSERT INTO preference (PrefName,ValueString) VALUES('MiddleTierCacheFees','1')";//true by default.
 				Db.NonQ(command);

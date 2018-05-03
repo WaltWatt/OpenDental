@@ -36,7 +36,7 @@ namespace OpenDentBusiness{
 		}
 
 		///<summary>Returns a copy of the appointment.</summary>
-		public AppointmentType Clone() {
+		public AppointmentType Copy() {
 			return (AppointmentType)this.MemberwiseClone();
 		}
 

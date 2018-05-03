@@ -16,12 +16,21 @@ namespace OpenDental {
 		///<summary>Stale deep copy of _listApptTypes to use with sync.</summary>
 		private List<AppointmentType> _listApptTypesOld;
 		private bool _isChanged=false;
+		public bool IsNoneAllowed;
 		public bool IsSelectionMode;
+		///<summary>Set to true when IsSelectionMode is true and the user will be able to select multiple appointment types instead of just one.
+		///ListSelectedApptTypes will contain all of the types that the user selected.</summary>
+		public bool AllowMultipleSelections;
 		///<summary>The appointment type that was selected if IsSelectionMode is true.
 		///If IsSelectionMode is true and this object is prefilled with an appointment type then the grid will preselect that type if possible.
 		///It is not guaranteed that the appointment type will be selected.
-		///This object should only be read from externally after DialogResult.OK has been returned.  Can be null.</summary>
+		///This object should only be read from externally after DialogResult.OK has been returned.  Can be null.</summary></summary>
 		public AppointmentType SelectedAptType;
+		///<summary>Contains all of the selected appointment types if IsSelectionMode is true.
+		///If IsSelectionMode and AllowMultiple are true, this object can be prefilled with appointment types which will be preselected if possible.
+		///It is not guaranteed that all appointment types will be selected (due to hidden).
+		///This list should only be read from externally after DialogResult.OK has been returned.</summary>
+		public List<AppointmentType> ListSelectedApptTypes=new List<AppointmentType>();
 
 		public FormApptTypes() {
 			InitializeComponent();
@@ -37,7 +46,13 @@ namespace OpenDental {
 				butUp.Visible=false;
 				checkWarn.Visible=false;
 				checkPrompt.Visible=false;
-				this.Text=Lan.g(this,"Select Appointment Type");
+				if(AllowMultipleSelections) {
+					this.Text=Lan.g(this,"Select Appointment Types");
+					gridMain.SelectionMode=GridSelectionMode.MultiExtended;
+				}
+				else {
+					this.Text=Lan.g(this,"Select Appointment Type");
+				}
 				gridMain.Location=new Point(8,6);
 				gridMain.Size=new Size(292,447);
 			}
@@ -47,11 +62,14 @@ namespace OpenDental {
 			_listApptTypes=AppointmentTypes.GetDeepCopy(IsSelectionMode);
 			_listApptTypesOld=AppointmentTypes.GetDeepCopy();
 			FillMain();
-			//Preselect the corresponding appointment type once on load.  Do not do this within FillMain().
-			if(SelectedAptType!=null) {
+			//Preselect the corresponding appointment type(s) once on load.  Do not do this within FillMain().
+			if(IsSelectionMode) {
+				if(SelectedAptType!=null) {
+					ListSelectedApptTypes.Add(SelectedAptType);
+				}
 				for(int i=0;i<gridMain.Rows.Count;i++) {
-					if(((AppointmentType)gridMain.Rows[i].Tag)!=null 
-						&& SelectedAptType.AppointmentTypeNum==((AppointmentType)gridMain.Rows[i].Tag).AppointmentTypeNum) 
+					if(((AppointmentType)gridMain.Rows[i].Tag)!=null //The "None" option will always be null
+						&& ListSelectedApptTypes.Any(x => x.AppointmentTypeNum==((AppointmentType)gridMain.Rows[i].Tag).AppointmentTypeNum)) 
 					{
 						gridMain.SetSelected(i,true);
 					}
@@ -81,7 +99,7 @@ namespace OpenDental {
 				gridMain.Rows.Add(row);
 			}
 			//Always add a None option to the end of the list when in selection mode.
-			if(IsSelectionMode) {
+			if(IsNoneAllowed) {
 				row=new ODGridRow();
 				row.Cells.Add(Lan.g(this,"None"));
 				gridMain.Rows.Add(row);
@@ -128,7 +146,8 @@ namespace OpenDental {
 
 		private void gridMain_CellDoubleClick(object sender,ODGridClickEventArgs e) {
 			if(IsSelectionMode) {
-				SelectedAptType=gridMain.SelectedTag<AppointmentType>();
+				ListSelectedApptTypes=gridMain.SelectedTags<AppointmentType>();
+				SelectedAptType=ListSelectedApptTypes.FirstOrDefault();
 				this.DialogResult=DialogResult.OK;
 			}
 			else {
@@ -250,7 +269,8 @@ namespace OpenDental {
 		}
 
 		private void butOK_Click(object sender,EventArgs e) {
-			SelectedAptType=gridMain.SelectedTag<AppointmentType>();
+			ListSelectedApptTypes=gridMain.SelectedTags<AppointmentType>();
+			SelectedAptType=ListSelectedApptTypes.FirstOrDefault();
 			this.DialogResult=DialogResult.OK;
 		}
 

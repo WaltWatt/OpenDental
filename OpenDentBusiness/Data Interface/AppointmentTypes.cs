@@ -22,13 +22,6 @@ namespace OpenDentBusiness{
 			return retVal;
 		}
 
-		///<summary>Returns all non-hidden appointment types that are associated to non-hidden operatories.</summary>
-		public static List<AppointmentType> GetTypesFromOps() {
-			//No need to check RemotingRole; no call to db.
-			List<Operatory> listOperatories=Operatories.GetWhere(x => x.AppointmentTypeNum > 0,true);
-			return GetWhere(x => listOperatories.Any(y => y.AppointmentTypeNum==x.AppointmentTypeNum),true);
-		}
-
 		///<summary>Returns the time pattern for the specified appointment type (time pattern returned will always be in 5 min increments).
 		///If the Pattern variable is not set on the appointment type object then the pattern will be dynamically calculated.
 		///Optionally pass in provider information in order to use specific provider time patterns.</summary>
@@ -87,7 +80,7 @@ namespace OpenDentBusiness{
 				return Crud.AppointmentTypeCrud.TableToList(table);
 			}
 			protected override AppointmentType Copy(AppointmentType appointmentType) {
-				return appointmentType.Clone();
+				return appointmentType.Copy();
 			}
 			protected override DataTable ListToTable(List<AppointmentType> listAppointmentTypes) {
 				return Crud.AppointmentTypeCrud.ListToTable(listAppointmentTypes,"AppointmentType");

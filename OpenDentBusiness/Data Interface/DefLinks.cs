@@ -17,6 +17,7 @@ namespace OpenDentBusiness{
 			string command="SELECT * FROM deflink WHERE LinkType="+POut.Int((int)defType);
 			return Crud.DefLinkCrud.SelectMany(command);
 		}
+
 		///<summary>Gets list of all DefLinks for the definition and defLinkType passed in.</summary>
 		public static List<DefLink> GetDefLinksByType(DefLinkType defType,long defNum) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
@@ -26,6 +27,38 @@ namespace OpenDentBusiness{
 				+"WHERE LinkType="+POut.Int((int)defType)+" "
 				+"AND DefNum="+POut.Long(defNum);
 			return Crud.DefLinkCrud.SelectMany(command);
+		}
+
+		///<summary>Gets list of all DefLinks for the definitions and defLinkType passed in.</summary>
+		public static List<DefLink> GetDefLinksByTypeAndDefs(DefLinkType defType,List<long> listDefNums) {
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				return Meth.GetObject<List<DefLink>>(MethodBase.GetCurrentMethod(),defType,listDefNums);
+			}
+			if(listDefNums==null || listDefNums.Count < 1) {
+				return new List<DefLink>();
+			}
+			string command="SELECT * FROM deflink "
+				+"WHERE LinkType="+POut.Int((int)defType)+" "
+				+"AND DefNum IN("+string.Join(",",listDefNums.Select(x => POut.Long(x)))+")";
+			return Crud.DefLinkCrud.SelectMany(command);
+		}
+
+		///<summary>Gets list of all operatory specific DefLinks associated to the WebSchedNewPatApptTypes definition category.</summary>
+		public static List<DefLink> GetDefLinksForWebSchedNewPatApptOperatories() {
+			//No need to check RemotingRole; no call to db.
+			//Get all definitions that are associated to the WebSchedNewPatApptTypes category that are linked to an operatory.
+			List<Def> listWSNPAATDefs=Defs.GetDefsForCategory(DefCat.WebSchedNewPatApptTypes);//Cannot hide defs of this category at this time.
+			//Return all of the deflinks that are of type Operatory in order to get the operatory specific deflinks.
+			return DefLinks.GetDefLinksByTypeAndDefs(DefLinkType.Operatory,listWSNPAATDefs.Select(x => x.DefNum).ToList());
+		}
+
+		///<summary>Gets list of all appointment type specific DefLinks associated to the WebSchedNewPatApptTypes definition category.</summary>
+		public static List<DefLink> GetDefLinksForWebSchedNewPatApptApptTypes() {
+			//No need to check RemotingRole; no call to db.
+			//Get all definitions that are associated to the WebSchedNewPatApptTypes category that are linked to an operatory.
+			List<Def> listWSNPAATDefs=Defs.GetDefsForCategory(DefCat.WebSchedNewPatApptTypes);//Cannot hide defs of this category at this time.
+			//Return all of the deflinks that are of type Operatory in order to get the operatory specific deflinks.
+			return DefLinks.GetDefLinksByTypeAndDefs(DefLinkType.AppointmentType,listWSNPAATDefs.Select(x => x.DefNum).ToList());
 		}
 
 		///<summary>Gets one DefLinks by FKey. Must provide DefLinkType.  Returns null if not found.</summary>
@@ -75,21 +108,50 @@ namespace OpenDentBusiness{
 
 		///<summary>Inserts or updates the FKey entry for the corresponding definition passed in.
 		///This is a helper method that should only be used when there can only be a one to one relationship between DefNum and FKey.</summary>
-		public static void SetFKeyForDef(long defNum,long fKey,DefLinkType defType) {
-			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				Meth.GetVoid(MethodBase.GetCurrentMethod(),defNum,fKey,defType);
-				return;
-			}
+		public static void SetFKeyForDef(long defNum,long fKey,DefLinkType linkType) {
+			//No need to check RemotingRole; no call to db.
 			//Look for the def link first to decide if we need to run an update or an insert statement.
-			List<DefLink> listDefLinks=GetDefLinksByType(defType,defNum);
+			List<DefLink> listDefLinks=GetDefLinksByType(linkType,defNum);
 			if(listDefLinks.Count > 0) {
-				UpdateDefWithFKey(defNum,fKey,defType);
+				UpdateDefWithFKey(defNum,fKey,linkType);
 			}
 			else {
 				Insert(new DefLink() {
 					DefNum=defNum,
 					FKey=fKey,
-					LinkType=defType,
+					LinkType=linkType,
+				});
+			}
+		}
+
+		public static void SetWebSchedNewPatApptOpLinksForDefs(long operatoryNum,List<long> listDefNums) {
+			//No need to check RemotingRole; no call to db.
+			if(listDefNums==null) {
+				listDefNums=new List<long>();//So that the table gets cleared out.
+			}
+			//Get the current DefNums that are linked to the operatory passed in.
+			List<DefLink> listOpDefLinks=GetDefLinksForWebSchedNewPatApptOperatories()
+				.Where(x => x.FKey==operatoryNum)
+				.ToList();
+			//Delete all def links that are associated to DefNums that are not in listDefNums.
+			List<DefLink> listDefLinksToDelete=listOpDefLinks.Where(x => !listDefNums.Contains(x.DefNum)).ToList();
+			DeleteDefLinks(listDefLinksToDelete.Select(x => x.DefLinkNum).ToList());
+			//Insert new DefLinks for all DefNums that were passed in that are not in listOpDefLinks.
+			List<long> listDefNumsToInsert=listDefNums.Where(x => !listOpDefLinks.Select(y => y.DefNum).Contains(x)).ToList();
+			InsertDefLinksForDefs(listDefNumsToInsert,operatoryNum,DefLinkType.Operatory);
+			//There is no reason to "update" deflinks so there is nothing else to do.
+		}
+
+		public static void InsertDefLinksForDefs(List<long> listDefNums,long fKey,DefLinkType linkType) {
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {//Remoting role check to save on middle tier calls due to loop.
+				Meth.GetVoid(MethodBase.GetCurrentMethod(),listDefNums,fKey,linkType);
+				return;
+			}
+			foreach(long defNum in listDefNums) {
+				Insert(new DefLink() {
+					DefNum=defNum,
+					FKey=fKey,
+					LinkType=linkType,
 				});
 			}
 		}
@@ -143,6 +205,18 @@ namespace OpenDentBusiness{
 			string command="DELETE FROM deflink "
 				+"WHERE LinkType="+POut.Int((int)defType)+" "
 				+"AND DefNum="+POut.Long(defNum);
+			Db.NonQ(command);
+		}
+
+		public static void DeleteDefLinks(List<long> listDefLinkNums) {
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				Meth.GetVoid(MethodBase.GetCurrentMethod(),listDefLinkNums);
+				return;
+			}
+			if(listDefLinkNums==null || listDefLinkNums.Count < 1) {
+				return;
+			}
+			string command="DELETE FROM deflink WHERE DefLinkNum IN ("+string.Join(",",listDefLinkNums)+")";
 			Db.NonQ(command);
 		}
 		#endregion

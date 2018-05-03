@@ -1301,9 +1301,11 @@ namespace OpenDentBusiness {
 		WebSchedNewPatApptIgnoreBlockoutTypes,
 		///<summary>String.  Is not empty by default.  Stores the message that will show up on the Web Sched New Pat web application.</summary>
 		WebSchedNewPatApptMessage,
-		///<summary>Comma delimited list of procedures that should be put onto the new patient appointment.</summary>
+		///<summary>Deprecated in v18.1.1 - Utilize appointment types instead.
+		///Comma delimited list of procedures that should be put onto the new patient appointment.</summary>
 		WebSchedNewPatApptProcs,
-		///<summary>The time pattern that will be used to determine the length of the new patient appointment.
+		///<summary>Deprecated in v18.1.1 - Utilize appointment types instead.
+		///The time pattern that will be used to determine the length of the new patient appointment.
 		///This time pattern is stored as /'s and X's that each represent an amount of time dictated by the current AppointmentTimeIncrement pref.
 		///This functionality matches the recall system, not the appointment system (which always stores /'s and X's as 5 mins).</summary>
 		WebSchedNewPatApptTimePattern,

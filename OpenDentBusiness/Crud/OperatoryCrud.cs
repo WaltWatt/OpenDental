@@ -46,20 +46,19 @@ namespace OpenDentBusiness.Crud{
 			Operatory operatory;
 			foreach(DataRow row in table.Rows) {
 				operatory=new Operatory();
-				operatory.OperatoryNum      = PIn.Long  (row["OperatoryNum"].ToString());
-				operatory.OpName            = PIn.String(row["OpName"].ToString());
-				operatory.Abbrev            = PIn.String(row["Abbrev"].ToString());
-				operatory.ItemOrder         = PIn.Int   (row["ItemOrder"].ToString());
-				operatory.IsHidden          = PIn.Bool  (row["IsHidden"].ToString());
-				operatory.ProvDentist       = PIn.Long  (row["ProvDentist"].ToString());
-				operatory.ProvHygienist     = PIn.Long  (row["ProvHygienist"].ToString());
-				operatory.IsHygiene         = PIn.Bool  (row["IsHygiene"].ToString());
-				operatory.ClinicNum         = PIn.Long  (row["ClinicNum"].ToString());
-				operatory.SetProspective    = PIn.Bool  (row["SetProspective"].ToString());
-				operatory.DateTStamp        = PIn.DateT (row["DateTStamp"].ToString());
-				operatory.IsWebSched        = PIn.Bool  (row["IsWebSched"].ToString());
-				operatory.IsNewPatAppt      = PIn.Bool  (row["IsNewPatAppt"].ToString());
-				operatory.AppointmentTypeNum= PIn.Long  (row["AppointmentTypeNum"].ToString());
+				operatory.OperatoryNum  = PIn.Long  (row["OperatoryNum"].ToString());
+				operatory.OpName        = PIn.String(row["OpName"].ToString());
+				operatory.Abbrev        = PIn.String(row["Abbrev"].ToString());
+				operatory.ItemOrder     = PIn.Int   (row["ItemOrder"].ToString());
+				operatory.IsHidden      = PIn.Bool  (row["IsHidden"].ToString());
+				operatory.ProvDentist   = PIn.Long  (row["ProvDentist"].ToString());
+				operatory.ProvHygienist = PIn.Long  (row["ProvHygienist"].ToString());
+				operatory.IsHygiene     = PIn.Bool  (row["IsHygiene"].ToString());
+				operatory.ClinicNum     = PIn.Long  (row["ClinicNum"].ToString());
+				operatory.SetProspective= PIn.Bool  (row["SetProspective"].ToString());
+				operatory.DateTStamp    = PIn.DateT (row["DateTStamp"].ToString());
+				operatory.IsWebSched    = PIn.Bool  (row["IsWebSched"].ToString());
+				operatory.IsNewPatAppt  = PIn.Bool  (row["IsNewPatAppt"].ToString());
 				retVal.Add(operatory);
 			}
 			return retVal;
@@ -84,7 +83,6 @@ namespace OpenDentBusiness.Crud{
 			table.Columns.Add("DateTStamp");
 			table.Columns.Add("IsWebSched");
 			table.Columns.Add("IsNewPatAppt");
-			table.Columns.Add("AppointmentTypeNum");
 			foreach(Operatory operatory in listOperatorys) {
 				table.Rows.Add(new object[] {
 					POut.Long  (operatory.OperatoryNum),
@@ -100,7 +98,6 @@ namespace OpenDentBusiness.Crud{
 					POut.DateT (operatory.DateTStamp,false),
 					POut.Bool  (operatory.IsWebSched),
 					POut.Bool  (operatory.IsNewPatAppt),
-					POut.Long  (operatory.AppointmentTypeNum),
 				});
 			}
 			return table;
@@ -141,7 +138,7 @@ namespace OpenDentBusiness.Crud{
 			if(useExistingPK || PrefC.RandomKeys) {
 				command+="OperatoryNum,";
 			}
-			command+="OpName,Abbrev,ItemOrder,IsHidden,ProvDentist,ProvHygienist,IsHygiene,ClinicNum,SetProspective,IsWebSched,IsNewPatAppt,AppointmentTypeNum) VALUES(";
+			command+="OpName,Abbrev,ItemOrder,IsHidden,ProvDentist,ProvHygienist,IsHygiene,ClinicNum,SetProspective,IsWebSched,IsNewPatAppt) VALUES(";
 			if(useExistingPK || PrefC.RandomKeys) {
 				command+=POut.Long(operatory.OperatoryNum)+",";
 			}
@@ -157,8 +154,7 @@ namespace OpenDentBusiness.Crud{
 				+    POut.Bool  (operatory.SetProspective)+","
 				//DateTStamp can only be set by MySQL
 				+    POut.Bool  (operatory.IsWebSched)+","
-				+    POut.Bool  (operatory.IsNewPatAppt)+","
-				+    POut.Long  (operatory.AppointmentTypeNum)+")";
+				+    POut.Bool  (operatory.IsNewPatAppt)+")";
 			if(useExistingPK || PrefC.RandomKeys) {
 				Db.NonQ(command);
 			}
@@ -191,7 +187,7 @@ namespace OpenDentBusiness.Crud{
 			if(isRandomKeys || useExistingPK) {
 				command+="OperatoryNum,";
 			}
-			command+="OpName,Abbrev,ItemOrder,IsHidden,ProvDentist,ProvHygienist,IsHygiene,ClinicNum,SetProspective,IsWebSched,IsNewPatAppt,AppointmentTypeNum) VALUES(";
+			command+="OpName,Abbrev,ItemOrder,IsHidden,ProvDentist,ProvHygienist,IsHygiene,ClinicNum,SetProspective,IsWebSched,IsNewPatAppt) VALUES(";
 			if(isRandomKeys || useExistingPK) {
 				command+=POut.Long(operatory.OperatoryNum)+",";
 			}
@@ -207,8 +203,7 @@ namespace OpenDentBusiness.Crud{
 				+    POut.Bool  (operatory.SetProspective)+","
 				//DateTStamp can only be set by MySQL
 				+    POut.Bool  (operatory.IsWebSched)+","
-				+    POut.Bool  (operatory.IsNewPatAppt)+","
-				+    POut.Long  (operatory.AppointmentTypeNum)+")";
+				+    POut.Bool  (operatory.IsNewPatAppt)+")";
 			if(useExistingPK || isRandomKeys) {
 				Db.NonQ(command);
 			}
@@ -221,19 +216,18 @@ namespace OpenDentBusiness.Crud{
 		///<summary>Updates one Operatory in the database.</summary>
 		public static void Update(Operatory operatory){
 			string command="UPDATE operatory SET "
-				+"OpName            = '"+POut.String(operatory.OpName)+"', "
-				+"Abbrev            = '"+POut.String(operatory.Abbrev)+"', "
-				+"ItemOrder         =  "+POut.Int   (operatory.ItemOrder)+", "
-				+"IsHidden          =  "+POut.Bool  (operatory.IsHidden)+", "
-				+"ProvDentist       =  "+POut.Long  (operatory.ProvDentist)+", "
-				+"ProvHygienist     =  "+POut.Long  (operatory.ProvHygienist)+", "
-				+"IsHygiene         =  "+POut.Bool  (operatory.IsHygiene)+", "
-				+"ClinicNum         =  "+POut.Long  (operatory.ClinicNum)+", "
-				+"SetProspective    =  "+POut.Bool  (operatory.SetProspective)+", "
+				+"OpName        = '"+POut.String(operatory.OpName)+"', "
+				+"Abbrev        = '"+POut.String(operatory.Abbrev)+"', "
+				+"ItemOrder     =  "+POut.Int   (operatory.ItemOrder)+", "
+				+"IsHidden      =  "+POut.Bool  (operatory.IsHidden)+", "
+				+"ProvDentist   =  "+POut.Long  (operatory.ProvDentist)+", "
+				+"ProvHygienist =  "+POut.Long  (operatory.ProvHygienist)+", "
+				+"IsHygiene     =  "+POut.Bool  (operatory.IsHygiene)+", "
+				+"ClinicNum     =  "+POut.Long  (operatory.ClinicNum)+", "
+				+"SetProspective=  "+POut.Bool  (operatory.SetProspective)+", "
 				//DateTStamp can only be set by MySQL
-				+"IsWebSched        =  "+POut.Bool  (operatory.IsWebSched)+", "
-				+"IsNewPatAppt      =  "+POut.Bool  (operatory.IsNewPatAppt)+", "
-				+"AppointmentTypeNum=  "+POut.Long  (operatory.AppointmentTypeNum)+" "
+				+"IsWebSched    =  "+POut.Bool  (operatory.IsWebSched)+", "
+				+"IsNewPatAppt  =  "+POut.Bool  (operatory.IsNewPatAppt)+" "
 				+"WHERE OperatoryNum = "+POut.Long(operatory.OperatoryNum);
 			Db.NonQ(command);
 		}
@@ -286,10 +280,6 @@ namespace OpenDentBusiness.Crud{
 				if(command!=""){ command+=",";}
 				command+="IsNewPatAppt = "+POut.Bool(operatory.IsNewPatAppt)+"";
 			}
-			if(operatory.AppointmentTypeNum != oldOperatory.AppointmentTypeNum) {
-				if(command!=""){ command+=",";}
-				command+="AppointmentTypeNum = "+POut.Long(operatory.AppointmentTypeNum)+"";
-			}
 			if(command==""){
 				return false;
 			}
@@ -334,9 +324,6 @@ namespace OpenDentBusiness.Crud{
 				return true;
 			}
 			if(operatory.IsNewPatAppt != oldOperatory.IsNewPatAppt) {
-				return true;
-			}
-			if(operatory.AppointmentTypeNum != oldOperatory.AppointmentTypeNum) {
 				return true;
 			}
 			return false;

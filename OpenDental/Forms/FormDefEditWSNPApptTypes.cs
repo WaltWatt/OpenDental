@@ -50,11 +50,6 @@ namespace OpenDental {
 			FillTextValue();
 		}
 
-		private void butClearValue_Click(object sender,EventArgs e) {
-			_apptTypeCur=null;
-			textValue.Clear();
-		}
-
 		private void butColor_Click(object sender,EventArgs e) {
 			colorDialog1.Color=butColor.BackColor;
 			colorDialog1.ShowDialog();
@@ -63,7 +58,11 @@ namespace OpenDental {
 
 		private void butOK_Click(object sender,EventArgs e) {
 			if(string.IsNullOrEmpty(textName.Text.Trim())) {
-				MsgBox.Show(this,"Name required.");
+				MsgBox.Show(this,"Reason required.");
+				return;
+			}
+			if(_apptTypeCur==null) {
+				MsgBox.Show(this,"Appointment Type required.");
 				return;
 			}
 			_defCur.ItemName=PIn.String(textName.Text);
@@ -73,12 +72,7 @@ namespace OpenDental {
 			else {
 				Defs.Update(_defCur);
 			}
-			if(_apptTypeCur==null) {
-				DefLinks.DeleteAllForDef(_defCur.DefNum,DefLinkType.AppointmentType);
-			}
-			else {
-				DefLinks.SetFKeyForDef(_defCur.DefNum,_apptTypeCur.AppointmentTypeNum,DefLinkType.AppointmentType);
-			}
+			DefLinks.SetFKeyForDef(_defCur.DefNum,_apptTypeCur.AppointmentTypeNum,DefLinkType.AppointmentType);
 			DialogResult=DialogResult.OK;
 		}
 
@@ -89,7 +83,9 @@ namespace OpenDental {
 		private void butDelete_Click(object sender,EventArgs e) {
 			try {
 				Defs.Delete(_defCur);
+				//Web Sched New Pat Appt appointment type defs are associated to appointment type and operatory deflinks.  Clean them up.
 				DefLinks.DeleteAllForDef(_defCur.DefNum,DefLinkType.AppointmentType);
+				DefLinks.DeleteAllForDef(_defCur.DefNum,DefLinkType.Operatory);
 				IsDeleted=true;
 				DialogResult=DialogResult.OK;
 			}
