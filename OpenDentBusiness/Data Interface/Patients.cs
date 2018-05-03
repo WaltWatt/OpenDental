@@ -3997,7 +3997,9 @@ namespace OpenDentBusiness {
 			bool isEmailValidForClinic=(EmailAddresses.GetFirstOrDefault(x => x.EmailAddressNum==clinic.EmailAddressNum)!=null);
 			bool isTextingEnabledForClinic=Clinics.IsTextingEnabled(clinic.ClinicNum);
 			string curCulture=System.Globalization.CultureInfo.CurrentCulture.Name.Right(2);
-			return Db.GetTable(command).Select().Select(x => new PatComm(x,isEmailValidForClinic,isTextingEnabledForClinic,isUnknownNo,curCulture)).ToList();
+			string countryCodePhone=SmsPhones.GetForClinics(new List<long> { clinic.ClinicNum }).FirstOrDefault()?.CountryCode??"";
+			return Db.GetTable(command).Select().Select(x => new PatComm(x,isEmailValidForClinic,isTextingEnabledForClinic,isUnknownNo,curCulture,
+				countryCodePhone)).ToList();
 		}
 
 		public static List<PatComm> GetPatComms(List<Patient> listPats) {
@@ -4009,7 +4011,8 @@ namespace OpenDentBusiness {
 				Clinic clinic=Clinics.GetFirstOrDefault(x => x.ClinicNum==pat.ClinicNum)??Clinics.GetPracticeAsClinicZero();
 				bool isEmailValidForClinic=(EmailAddresses.GetFirstOrDefault(x => x.EmailAddressNum==clinic.EmailAddressNum)!=null);
 				bool isTextingEnabledForClinic=Clinics.IsTextingEnabled(clinic.ClinicNum);
-				listPatComms.Add(new PatComm(pat,isEmailValidForClinic,isTextingEnabledForClinic,isUnknownNo,curCulture));
+				string countryCodePhone=SmsPhones.GetForClinics(new List<long> { clinic.ClinicNum }).FirstOrDefault()?.CountryCode??"";
+				listPatComms.Add(new PatComm(pat,isEmailValidForClinic,isTextingEnabledForClinic,isUnknownNo,curCulture,countryCodePhone));
 			}
 			return listPatComms;
 		}
@@ -4114,7 +4117,9 @@ namespace OpenDentBusiness {
 		public PatComm() {
 		}
 
-		public PatComm(Patient pat,bool isEmailValidForClinic,bool isTextingEnabledForClinic,bool isUnknownNo,string curCulture) {
+		public PatComm(Patient pat,bool isEmailValidForClinic,bool isTextingEnabledForClinic,bool isUnknownNo,string curCulture,
+			string smsPhoneCountryCode) 
+		{
 			PatNum=pat.PatNum;
 			PatStatus=pat.PatStatus;
 			PreferConfirmMethod=pat.PreferConfirmMethod;
@@ -4129,10 +4134,12 @@ namespace OpenDentBusiness {
 			FName=pat.FName;
 			LName=pat.LName;
 			Guarantor=pat.Guarantor;
-			SetSmsEmailFields(isEmailValidForClinic,isTextingEnabledForClinic,isUnknownNo,curCulture);
+			SetSmsEmailFields(isEmailValidForClinic,isTextingEnabledForClinic,isUnknownNo,curCulture,smsPhoneCountryCode);
 		}
 
-		public PatComm(DataRow dataRow,bool isEmailValidForClinic,bool isTextingEnabledForClinic,bool isUnknownNo,string curCulture) {
+		public PatComm(DataRow dataRow,bool isEmailValidForClinic,bool isTextingEnabledForClinic,bool isUnknownNo,string curCulture,
+			string smsPhoneCountryCode) 
+		{
 			PatNum=PIn.Long(dataRow["PatNum"].ToString());
 			PatStatus=(PatientStatus)PIn.Int(dataRow["PatStatus"].ToString());
 			PreferConfirmMethod=(ContactMethod)PIn.Int(dataRow["PreferConfirmMethod"].ToString());
@@ -4147,10 +4154,12 @@ namespace OpenDentBusiness {
 			FName=PIn.String(dataRow["FName"].ToString());
 			LName=PIn.String(dataRow["LName"].ToString());
 			Guarantor=PIn.Long(dataRow["Guarantor"].ToString());
-			SetSmsEmailFields(isEmailValidForClinic,isTextingEnabledForClinic,isUnknownNo,curCulture);
+			SetSmsEmailFields(isEmailValidForClinic,isTextingEnabledForClinic,isUnknownNo,curCulture,smsPhoneCountryCode);
 		}
 		
-		private void SetSmsEmailFields(bool isEmailValidForClinic,bool isTextingEnabledForClinic,bool isUnknownNo,string curCulture) {
+		private void SetSmsEmailFields(bool isEmailValidForClinic,bool isTextingEnabledForClinic,bool isUnknownNo,string curCulture,
+			string smsPhoneCountryCode) 
+		{
 			IsSmsPhoneFormatOk=false;
 			if(TxtMsgOk==YN.No||(isUnknownNo&&TxtMsgOk==YN.Unknown)) {
 				SmsPhone="";
@@ -4159,7 +4168,7 @@ namespace OpenDentBusiness {
 				//Previously chose between WirelessPhone,HmPhone,WkPhone. Now chooses WirelessPhone or nothing at all.
 				SmsPhone=new[] { WirelessPhone }.FirstOrDefault(y => !string.IsNullOrWhiteSpace(y))??"";
 				try {
-					SmsPhone=SmsToMobiles.ConvertPhoneToInternational(SmsPhone,curCulture);
+					SmsPhone=SmsToMobiles.ConvertPhoneToInternational(SmsPhone,curCulture,smsPhoneCountryCode);
 					IsSmsPhoneFormatOk=true;
 				}
 				catch(Exception e) { //Formatting for sms failed to set to empty so we don't try to use it.
