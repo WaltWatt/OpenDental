@@ -657,7 +657,7 @@ namespace OpenDentBusiness {
 			autoSplitData.Payment=constructResults.Payment;
 			//Create Auto-splits for the current payment to any remaining non-zero charges FIFO by date.
 			if(PrefC.GetInt(PrefName.RigorousAccounting)==(int)RigorousAccounting.DontEnforce) {
-				return new AutoSplit();
+				return autoSplitData;
 			}
 			#region Auto-Split Current Payment
 			double payAmt=autoSplitData.Payment.PayAmt;
