@@ -71,8 +71,10 @@ namespace OpenDental {
 				MsgBox.Show(this,"Please enter a note, or delete this entry.");
 				return;
 			}
+			//We need the old datetime to check if the user made any changes.  We overrite TaskNoteCur's date time below so need to get it here.
+			DateTime dateTimeNoteOld=TaskNoteCur.DateTimeNote;
 			try {
-				TaskNoteCur.DateTimeNote=DateTime.Parse(textDateTime.Text);//Will not reach database if note is not actually edited.
+				TaskNoteCur.DateTimeNote=DateTime.Parse(textDateTime.Text);
 			}
 			catch{
 				MsgBox.Show(this,"Please fix date.");
@@ -87,7 +89,7 @@ namespace OpenDental {
 				DialogResult=DialogResult.OK;
 				OnEditComplete();
 			}
-			else if(TaskNoteCur.Note!=textNote.Text){
+			else if(TaskNoteCur.Note!=textNote.Text || dateTimeNoteOld!=TaskNoteCur.DateTimeNote) {
 				//This refreshes "new" status for the task as appropriate.
 				DataValid.SetInvalidTask(TaskNoteCur.TaskNum,true);//popup
 				TaskNoteCur.Note=textNote.Text;
