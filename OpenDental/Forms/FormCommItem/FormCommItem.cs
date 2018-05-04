@@ -134,6 +134,13 @@ namespace OpenDental {
 			textUser.Text=_controller.GetUserodName(_model.CommlogCur.UserNum);
 		}
 
+		///<summary>This is a hack in order to set the PK of the current commlog object associated to the view's model.
+		///This method needs to get call as soon as the commlog has been inserted into the db so that subsequent updates can actually work.</summary>
+		public void SetCommlogNum(long commlogNum) {
+			_model.CommlogCur.CommlogNum=commlogNum;
+			textCommlogNum.Text=_model.CommlogCur.CommlogNum.ToString();
+		}
+
 		///<summary>Helper method to update textDateTime with DateTime.Now</summary>
 		public void UpdateButNow() {
 			textDateTime.Text=DateTime.Now.ToShortDateString()+"  "+DateTime.Now.ToShortTimeString();

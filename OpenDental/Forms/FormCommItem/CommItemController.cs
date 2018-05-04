@@ -57,7 +57,7 @@ namespace OpenDental {
 		public void AutoSaveCommItem(Commlog commlog) {
 			if(IsNew) {
 				//Insert
-				Commlogs.Insert(commlog);
+				_view.SetCommlogNum(Commlogs.Insert(commlog));
 				SecurityLogs.MakeLogEntry(Permissions.CommlogEdit,commlog.PatNum,"Autosave Insert");
 				IsNew=false;
 			}
@@ -75,7 +75,7 @@ namespace OpenDental {
 				return false;
 			}
 			if(IsNew || IsPersistent) {
-				Commlogs.Insert(commlog);
+				_view.SetCommlogNum(Commlogs.Insert(commlog));
 				SecurityLogs.MakeLogEntry(Permissions.CommlogEdit,commlog.PatNum,"Insert");
 				//Post insert persistent user preferences.
 				if(IsPersistent) {
