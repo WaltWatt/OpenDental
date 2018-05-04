@@ -806,14 +806,14 @@ namespace OpenDental{
 			}
 			if(_listFeeScheds.Count==0) {//No fee schedules in the database so set the first item to none.
 				comboFeeSched.Items.Add(Lan.g(this,"None"));
-				comboFeeSched.Items.Add(Lan.g(this,"None"));
+				comboFeeSchedTo.Items.Add(Lan.g(this,"None"));
 			}
 			comboFeeSched.SelectedIndex=0;
 			comboFeeSchedTo.SelectedIndex=0;
 			if(!PrefC.HasClinicsEnabled) {//No clinics
 				//Add none even though clinics is turned off so that 0 is a valid index to select.
 				comboClinic.Items.Add(Lan.g(this,"None"));
-				comboClinicTo.Items.Add(new ODBoxItem<Clinic>(Lan.g(this,"None")));
+				comboClinicTo.Items.Add(new ODBoxItem<Clinic>(Lan.g(this,"None"),new Clinic() { ClinicNum=0 }));
 				comboBoxMultiClinics.Items.Clear();
 				comboBoxMultiClinics.Items.Add(new ODBoxItem<Clinic>(Lan.g(this,"None"),new Clinic() { ClinicNum=0 }));
 				comboBoxMultiClinics.SetSelected(0,true);
