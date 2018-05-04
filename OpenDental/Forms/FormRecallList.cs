@@ -501,6 +501,7 @@ namespace OpenDental{
 			this.gridMain.CellFont = new System.Drawing.Font("Microsoft Sans Serif", 8.5F);
 			this.gridMain.HasAddButton = false;
 			this.gridMain.HasDropDowns = false;
+			this.gridMain.HasLinkDetect = false;
 			this.gridMain.HasMultilineHeaders = false;
 			this.gridMain.HeaderFont = new System.Drawing.Font("Microsoft Sans Serif", 8.5F, System.Drawing.FontStyle.Bold);
 			this.gridMain.HeaderHeight = 15;
