@@ -125,7 +125,7 @@ namespace OpenDentBusiness{
 
 		///<summary>Throws an exception to display to the user if anything goes wrong.</summary>
 		public static void TryToConnect(CentralConnection centralConnection,DatabaseType dbType,string connectionString="",bool noShowOnStartup=false
-			,List<string> listAdminCompNames=null) 
+			,List<string> listAdminCompNames=null,bool saveOnSuccess=false) 
 		{
 			if(!string.IsNullOrEmpty(centralConnection.ServiceURI)) {
 				LoadMiddleTierProxySettings();
@@ -177,7 +177,9 @@ namespace OpenDentBusiness{
 				//a direct connection does not utilize lower privileges.
 				RemotingClient.RemotingRole=RemotingRole.ClientDirect;
 			}
-			TrySaveConnectionSettings(centralConnection,dbType,connectionString,noShowOnStartup,listAdminCompNames);
+			if(saveOnSuccess) {
+				TrySaveConnectionSettings(centralConnection,dbType,connectionString,noShowOnStartup,listAdminCompNames);
+			}
 		}
 
 		///<summary>If MiddleTierProxyConfix.xml is present, this loads the three variables from that file into memory.
