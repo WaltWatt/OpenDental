@@ -134,7 +134,7 @@ namespace OpenDentBusiness{
 			}
 
 			protected override bool IsInListShort(UserQuery userQuery) {
-				return  !userQuery.IsReleased;
+				return  userQuery.IsReleased;
 			}
 		}
 
