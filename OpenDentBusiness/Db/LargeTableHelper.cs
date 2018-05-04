@@ -28,11 +28,16 @@ namespace OpenDentBusiness {
 		///<summary>At least this many threads will be inserting the batches of data.  If there are more than this many cores on the current machine, it
 		///will be the number of cores.</summary>
 		private const int INSERT_THREAD_MIN_COUNT=8;
-		///<summary>Queue to hold batches for FIFO processing.  A batch is a string of comma delimited values per row in parentheses,
-		///i.e. (1,3,'string','0001-01-01',...).  The queue is filled by QUEUE_BATCHES_THREAD_COUNT threads to a maximum capacity of MAX_QUEUE_COUNT.
+		///<summary>Queue to hold batches for FIFO processing.  A batch is two strings:
+		///Item1: insert statement with comma delimited values per row in parentheses, i.e. INSERT INTO t (...,...) VALUES (...,...),(...,...)...
+		///Item2: alternate insert stmt to be used if the Item1 stmt throws and error in order to prevent the convert from resulting in a corrupt db,
+		///	i.e. INSERT INTO t ... SELECT ... FROM tempt WHERE pKey>x1 AND pKey&lt;=x2 AND pKey NOT IN (SELECT pKey FROM t WHERE pKey>x1 AND pKey&lt;=x2)
+		///	The alternate statement will only insert rows that were not inserted with the first statement, but it may be slower than inserting the values
+		///	explicitly and put other queries into a queue until it's finished, since it will lock the auto-increment variable. But it's only a precaution.
+		///The queue is filled by QUEUE_BATCHES_THREAD_COUNT threads to a maximum capacity of MAX_QUEUE_COUNT.
 		///The maximum of INSERT_THREAD_MIN_COUNT or the number of cores on the current computer will process the batches dequeued.  Make sure to use
 		///_lockObjQueueBatchData when manipulating this queue for thread safety.</summary>
-		private static Queue<string> _queueBatchQueries;
+		private static Queue<Tuple<string,string>> _queueBatchQueries;
 		///<summary>Lock object to keep the queue thread safe.</summary>
 		private static object _lockObjQueueBatchQueries=new object();
 		///<summary>False until the filling threads have added the last batch of data to the queue.  Once true AND the queue is empty, the main thread is
@@ -259,7 +264,7 @@ namespace OpenDentBusiness {
 				//data types that require special characters escaped and will be surrounded by quotes (using the MySql QUOTE() method).
 				string[] dataTypeQuotesArr=new[] { "date","datetime","timestamp","time","char","varchar","text","mediumtext","longtext","blob","mediumblob","longblob" };
 				StringBuilder sbGetSelectCommand=new StringBuilder(@"SELECT CONCAT('('");
-				List<string> listCommands=new List<string>();
+				List<string> listWheres=new List<string>();
 				int index=0;
 				foreach(KeyValuePair<string,string> kvp in dictColNamesAndTypes) {
 					sbGetSelectCommand.Append(@",");
@@ -274,34 +279,33 @@ namespace OpenDentBusiness {
 					}
 					index++;
 				}
-				sbGetSelectCommand.Append(@",')') vals FROM `"+_tempTableName+"`");
+				sbGetSelectCommand.Append(@",')') vals FROM `"+_tempTableName+"` ");
 				for(int i=0;i<_listPriKeyMaxPerBatch.Count;i++) {
-					StringBuilder sbWhereClause=new StringBuilder();
-					sbWhereClause.Append(@" WHERE ");
+					string where="WHERE "+POut.String(_tablePriKeyField)+"<="+POut.Long(_listPriKeyMaxPerBatch[i]);
 					if(i>0) {
-						sbWhereClause.Append(POut.String(_tablePriKeyField)+@">"+POut.Long(_listPriKeyMaxPerBatch[i-1]));
+						where+=" AND "+POut.String(_tablePriKeyField)+">"+POut.Long(_listPriKeyMaxPerBatch[i-1]);
 					}
-					sbWhereClause.Append((i>0?@" AND ":"")+POut.String(_tablePriKeyField)+@"<="+POut.Long(_listPriKeyMaxPerBatch[i]));
-					listCommands.Add(sbGetSelectCommand.ToString()+sbWhereClause.ToString());
+					listWheres.Add(where);
 				}
 				#endregion Get Query Strings
 				#region Run Commands and Queue Results
 				#region Create List of Actions
 				List<Action> listActions=new List<Action>();
-				foreach(string command in listCommands) {
+				string colNames=string.Join(",",dictColNamesAndTypes.Keys.Select(x => POut.String(x)));
+				foreach(string whereStr in listWheres) {
 					listActions.Add(new Action(() => {
-						List<string> listRowVals=Db.GetListString(command);
+						List<string> listRowVals=Db.GetListString(sbGetSelectCommand.ToString()+whereStr);
 						if(listRowVals==null || listRowVals.Count==0) {
 							return;
 						}
-						StringBuilder sbInsertCommand=new StringBuilder(@"INSERT INTO `"+_tableName+"` "
-							+@"("+string.Join(@",",dictColNamesAndTypes.Keys.Select(x => "`"+x+"`"))+@") "
-							+@"VALUES "+string.Join(@",",listRowVals));
+						string insertCommand="INSERT INTO `"+_tableName+"` ("+colNames+") VALUES "+string.Join(",",listRowVals);
+						string insertCommand2="INSERT INTO `"+_tableName+"` ("+colNames+") SELECT "+colNames+" FROM `"+_tempTableName+"` "+whereStr+" "
+							+"AND "+POut.String(_tablePriKeyField)+" NOT IN (SELECT "+POut.String(_tablePriKeyField)+" FROM `"+_tableName+"` "+whereStr+")";
 						bool isDataQueued=false;
 						while(!isDataQueued) {
 							lock(_lockObjQueueBatchQueries) {
 								if(_queueBatchQueries.Count<MAX_QUEUE_COUNT) {//Wait until queue is a reasonable size before queueing more.
-									_queueBatchQueries.Enqueue(sbInsertCommand.ToString());
+									_queueBatchQueries.Enqueue(Tuple.Create(insertCommand,insertCommand2));
 									isDataQueued=true;
 									queueCount++;
 								}
@@ -354,31 +358,52 @@ namespace OpenDentBusiness {
 							DataConnection dcon=new DataConnection();
 							dcon.SetDbT(_serverTo,_databaseTo,_userTo,_passwordTo,"","",DatabaseType.MySql);
 						}
-						int attemptCount=0;
-						while(!_areQueueBatchThreadsDone || _queueBatchQueries.Count>0) {//if queue batch thread is done and queue is empty, loop is finished
-							string insertString="";
-							if(attemptCount++>0) {
-								Thread.Sleep(100);
-							}
+						bool isBatchQueued=false;
+						bool insertFailed=true;
+						while(!_areQueueBatchThreadsDone || isBatchQueued) {//if queue batch thread is done and queue is empty, loop is finished
+							string command="";
+							string command2="";
 							try {
+								Tuple<string,string> insertCmds=null;
 								lock(_lockObjQueueBatchQueries) {
 									if(_queueBatchQueries.Count==0) {
 										//queueBatchThread must not be finished gathering batches but the queue is empty, give the batch thread time to catch up
 										continue;
 									}
-									insertString=_queueBatchQueries.Dequeue();
+									insertCmds=_queueBatchQueries.Dequeue();
 								}
-								if(string.IsNullOrEmpty(insertString)) {
+								if(insertCmds==null || string.IsNullOrEmpty(insertCmds.Item1)) {
 									continue;
 								}
-								Db.NonQ(insertString);
-								_insertBatchCount++;
+								command=insertCmds.Item1;
+								command2=insertCmds.Item2;
+								Db.NonQ(command);
+								insertFailed=false;
 							}
 							catch(Exception ex) {//just loop again and wait if necessary
 								ex.DoNothing();
+								insertFailed=true;
+								if(!string.IsNullOrEmpty(command2)) {
+									try {
+										Db.NonQ(command2);
+										insertFailed=false;
+									}
+									catch(Exception ex2) {
+										ex2.DoNothing();
+										insertFailed=true;
+									}
+								}
 								continue;
 							}
-							attemptCount=0;
+							finally {
+								lock(_lockObjQueueBatchQueries) {
+									if(!insertFailed) {
+										insertFailed=true;
+										_insertBatchCount++;
+									}
+									isBatchQueued=_queueBatchQueries.Count>0;
+								}
+							}
 						}//end of while loop
 					}));//end of listActions.Add
 				}//end of for loop
@@ -413,7 +438,7 @@ namespace OpenDentBusiness {
 			ODThread odThreadQueueData=new ODThread(QueueBatches);
 			try {
 				lock(_lockObjQueueBatchQueries) {
-					_queueBatchQueries=new Queue<string>();
+					_queueBatchQueries=new Queue<Tuple<string,string>>();
 				}
 				_areQueueBatchThreadsDone=false;
 				odThreadQueueData.Name="QueueDataThread";
@@ -496,7 +521,7 @@ namespace OpenDentBusiness {
 			ODThread odThreadQueueData=new ODThread(QueueBatches);
 			try {
 				lock(_lockObjQueueBatchQueries) {
-					_queueBatchQueries=new Queue<string>();
+					_queueBatchQueries=new Queue<Tuple<string,string>>();
 				}
 				_areQueueBatchThreadsDone=false;
 				odThreadQueueData.Name="QueueDataThread";
