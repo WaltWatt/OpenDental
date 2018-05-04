@@ -93,7 +93,7 @@ namespace OpenDentBusiness{
 					+"SELECT insplan.PlanNum,carrier.CarrierName "
 					+"FROM carrier "
 					+"INNER JOIN insplan ON carrier.CarrierNum=insplan.CarrierNum "
-					+"WHERE carrier.CarrierName LIKE '"+POut.String(carrierName)+"%'"
+					+"WHERE carrier.CarrierName LIKE '%"+POut.String(carrierName)+"%'"
 				+") carrierA "
 				+"INNER JOIN claim ON carrierA.PlanNum=claim.PlanNum AND claim.ClaimType!='PreAuth' ";
 			if(claimID!="") {
@@ -147,7 +147,7 @@ namespace OpenDentBusiness{
 					table.Rows[i]["Description"]=dictClinicNames[clinicNumCur];
 				}
 			}
-			return ClaimPaySplitTableToList(table).OrderBy(x => x.Carrier).ThenBy(x => x.PatName).ToList();
+			return ClaimPaySplitTableToList(table).OrderByDescending(x => x.Carrier.StartsWith(carrierName)).ThenBy(x => x.Carrier).ThenBy(x => x.PatName).ToList();
 		}
 
 		/// <summary>Gets all 'claims' attached to the claimpayment.</summary>
