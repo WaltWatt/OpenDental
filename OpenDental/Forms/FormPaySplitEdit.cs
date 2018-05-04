@@ -968,7 +968,7 @@ namespace OpenDental
 			this.Location = new System.Drawing.Point(0, 400);
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
-			this.MinimumSize = new System.Drawing.Size(766, 100);
+			this.MinimumSize = new System.Drawing.Size(766, 580);
 			this.Name = "FormPaySplitEdit";
 			this.ShowInTaskbar = false;
 			this.Text = "Edit Payment Split";
@@ -1297,8 +1297,9 @@ namespace OpenDental
 			if(PrefC.GetInt(PrefName.RigorousAccounting)==(int)RigorousAccounting.EnforceFully) {
 				comboProvider.Enabled=false;
 				comboClinic.Enabled=false;
-				comboUnearnedTypes.Enabled=false;
 			}
+			comboUnearnedTypes.SelectedIndex=0;//First item is always None, if there is a procedure it cannot be a prepayment, regardless of enforce fully.
+			comboUnearnedTypes.Enabled=false;
 			textPatient.Enabled=false;
 			groupPatient.Enabled=false;
 			checkPatOtherFam.Enabled=false;
