@@ -516,6 +516,8 @@ namespace OpenDental{
 			this.gridMain.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
 			this.gridMain.TitleHeight = 18;
 			this.gridMain.TranslationName = "TableRecallList";
+			this.gridMain.CellDoubleClick += new OpenDental.UI.ODGridClickEventHandler(this.gridMain_CellDoubleClick);
+			this.gridMain.CellClick += new OpenDental.UI.ODGridClickEventHandler(this.gridMain_CellClick);
 			// 
 			// groupBox3
 			// 
