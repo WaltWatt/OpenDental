@@ -4603,7 +4603,10 @@ namespace OpenDental{
 		private void ProcNoteUiHelper() {
 			string procNoteDefault="";
 			if(_isQuickAdd) {//Quick Procs should insert both TP Default Note and C Default Note.
-				procNoteDefault=ProcCodeNotes.GetNote(_selectedProvNum,ProcCur.CodeNum,ProcStat.TP)+"\r\n";
+				procNoteDefault=ProcCodeNotes.GetNote(_selectedProvNum,ProcCur.CodeNum,ProcStat.TP);
+				if(!string.IsNullOrEmpty(procNoteDefault)) {
+					procNoteDefault+="\r\n";
+				}
 			}
 			procNoteDefault+=ProcCodeNotes.GetNote(_selectedProvNum,ProcCur.CodeNum,ProcStat.C);
 			if(textNotes.Text!="" && procNoteDefault!="") { //check to see if a default note is defined.
