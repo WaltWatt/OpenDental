@@ -361,6 +361,7 @@ namespace OpenDental {
 			FormDefinitions FormD=new FormDefinitions(DefCat.WebSchedNewPatApptTypes);
 			FormD.ShowDialog();
 			FillGridWSNPAReasons();
+			FillGridWebSchedNewPatApptTimeSlotsThreaded();
 		}
 
 		private void butWebSchedNewPatApptsToday_Click(object sender,EventArgs e) {
