@@ -205,7 +205,7 @@ namespace OpenDental {
 				return;
 			}
 			_dicRowNotes.Clear();
-			Userod userFilter = null;
+			Userod userFilter = Security.CurUser;
 			if(comboUser.SelectedIndex==1) {
 				userFilter=new Userod() { UserName="Unassigned",UserNum=0 };
 			}
@@ -329,7 +329,7 @@ namespace OpenDental {
 				return;
 			}
 			_dicRowNotes.Clear();
-			Userod userFilter = null;
+			Userod userFilter = Security.CurUser;
 			if(comboUser.SelectedIndex==1) {
 				userFilter=new Userod() { UserName="Unassigned",UserNum=0 };
 			}
@@ -429,7 +429,7 @@ namespace OpenDental {
 				return;
 			}
 			_dicRowNotes.Clear();
-			Userod userFilter = null;
+			Userod userFilter = Security.CurUser;
 			if(comboUser.SelectedIndex==1) {
 				userFilter=new Userod() { UserName="Unassigned",UserNum=0 };
 			}
@@ -1218,6 +1218,7 @@ namespace OpenDental {
 				FormJobAdd FormJA=new FormJobAdd(jobNew);
 				if(FormJA.ShowDialog()==DialogResult.OK) {
 					GoToJob(jobNew.JobNum);
+					Signalods.SetInvalid(InvalidType.Jobs,KeyType.Job,jobNew.JobNum);
 				}
 				return;//We don't want to continue for normal jobs
 			}
