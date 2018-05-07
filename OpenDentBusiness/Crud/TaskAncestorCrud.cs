@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Text;
 
 namespace OpenDentBusiness.Crud{
 	public class TaskAncestorCrud {
@@ -122,6 +123,48 @@ namespace OpenDentBusiness.Crud{
 				taskAncestor.TaskAncestorNum=Db.NonQ(command,true,"TaskAncestorNum","taskAncestor");
 			}
 			return taskAncestor.TaskAncestorNum;
+		}
+
+		///<summary>Inserts many TaskAncestors into the database.  Provides option to use the existing priKey.</summary>
+		public static void InsertMany(List <TaskAncestor> listTaskAncestors){
+			if(DataConnection.DBtype==DatabaseType.Oracle || PrefC.RandomKeys) {
+				foreach(TaskAncestor taskAncestor in listTaskAncestors) {
+					Insert(taskAncestor);
+				}
+			}
+			else {
+				StringBuilder sbCommands=null;
+				int index=0;
+				while(index < listTaskAncestors.Count) {
+					TaskAncestor taskAncestor=listTaskAncestors[index];
+					StringBuilder sbRow=new StringBuilder("(");
+					bool hasComma=false;
+					if(sbCommands==null) {
+						sbCommands=new StringBuilder();
+						sbCommands.Append("INSERT INTO taskancestor (");
+						sbCommands.Append("TaskNum,TaskListNum) VALUES ");
+					}
+					else {
+						hasComma=true;
+					}
+					sbRow.Append(POut.Long(taskAncestor.TaskNum)); sbRow.Append(",");
+					sbRow.Append(POut.Long(taskAncestor.TaskListNum)); sbRow.Append(")");
+					if(sbCommands.Length+sbRow.Length+1 > TableBase.MaxAllowedPacketCount) {
+						Db.NonQ(sbCommands.ToString());
+						sbCommands=null;
+					}
+					else {
+						if(hasComma) {
+							sbCommands.Append(",");
+						}
+						sbCommands.Append(sbRow.ToString());
+						if(index==listTaskAncestors.Count-1) {
+							Db.NonQ(sbCommands.ToString());
+						}
+						index++;
+					}
+				}
+			}
 		}
 
 		///<summary>Inserts one TaskAncestor into the database.  Returns the new priKey.  Doesn't use the cache.</summary>

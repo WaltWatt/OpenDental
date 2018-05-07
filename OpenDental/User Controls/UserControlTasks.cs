@@ -1160,9 +1160,12 @@ namespace OpenDental {
 			_wasCut=false;
 		}
 
-		///<summary>When cutting and pasting, Task hist will be lost because the pasted task has a new TaskNum.</summary>
+		///<summary>When copying and pasting, Task hist will be lost because the pasted task has a new TaskNum.</summary>
 		private void Paste_Clicked() {
 			if(_clipTaskList!=null) {//a taskList is on the clipboard
+				if(!_wasCut) {
+					return;//Tasklists are no longer allowed to be copied, only cut.  Code should never make it this far.
+				}
 				TaskList newTL=_clipTaskList.Copy();
 				if(_listTaskListTreeHistory.Count>0) {//not on main trunk
 					newTL.Parent=_listTaskListTreeHistory[_listTaskListTreeHistory.Count-1].TaskListNum;
@@ -1237,12 +1240,12 @@ namespace OpenDental {
 					//We change the TaskList's direct children to have the parent of the TaskList being moved.
 					MoveListIntoAncestor(newTL,_clipTaskList.Parent);
 				}
-				else { 
+				else {
 					if(tabContr.SelectedTab==tabUser || tabContr.SelectedTab==tabMain || tabContr.SelectedTab==tabReminders) {
-						DuplicateExistingList(newTL,true);
+						MoveTaskList(newTL,true);
 					}
 					else {
-						DuplicateExistingList(newTL,false);
+						MoveTaskList(newTL,false);
 					}
 				}
 				DataValid.SetInvalid(InvalidType.Task);
@@ -1457,7 +1460,33 @@ namespace OpenDental {
 			}
 		}
 
-		///<summary>A recursive function that duplicates an entire existing TaskList.  
+		///<summary>Assign new parent FKey for existing tasklist, and update TaskAncestors.  Used when cutting and pasting a tasklist.
+		///Does not create new task or tasklist entries.</summary>
+		private void MoveTaskList(TaskList newList,bool isInMainOrUser) {
+			List<TaskList> childLists=TaskLists.RefreshChildren(newList.TaskListNum,Security.CurUser.UserNum,0,TaskType.All);
+			List<Task> childTasks=Tasks.RefreshChildren(newList.TaskListNum,true,DateTime.MinValue,Security.CurUser.UserNum,0,TaskType.All);
+			TaskLists.Update(newList);//Not making a new TaskList, just moving an old one
+			for(int i=0;i<childLists.Count;i++) { //updates all the child tasklists and recursively calls this method for each of their children lists.
+				childLists[i].Parent=newList.TaskListNum;
+				if(newList.IsRepeating) {
+					childLists[i].IsRepeating=true;
+					childLists[i].DateTL=DateTime.MinValue;//never a date
+				}
+				else {
+					childLists[i].IsRepeating=false;
+				}
+				childLists[i].FromNum=0;
+				if(!isInMainOrUser) {
+					childLists[i].DateTL=DateTime.MinValue;
+					childLists[i].DateType=TaskDateType.None;
+				}
+				MoveTaskList(childLists[i],isInMainOrUser);//delete any existing subscriptions
+			}
+			TaskAncestors.SynchManyForSameTasklist(childTasks,newList.TaskListNum,newList.Parent);
+		}
+
+		///<summary>Only used for dated task lists. Should NOT be used for regular task lists, puts too much strain on DB with large amount of tasks.
+		///A recursive function that duplicates an entire existing TaskList. 
 		///For the initial loop, make changes to the original taskList before passing it in.  
 		///That way, Date and type are only set in initial loop.  All children preserve original dates and types. 
 		///The isRepeating value will be applied in all loops.  Also, make sure to change the parent num to the new one before calling this function.
@@ -1788,7 +1817,12 @@ namespace OpenDental {
 			else {
 				menuItemEdit.Enabled=true;
 				menuItemCut.Enabled=true;
-				menuItemCopy.Enabled=true;
+				if(_clickedI < _listTaskLists.Count) {//Is a tasklist
+					menuItemCopy.Enabled=false;//We don't want users to copy tasklists, only move them by cut.
+				}
+				else {
+					menuItemCopy.Enabled=true;
+				}
 				menuItemDelete.Enabled=true;
 			}
 			//Paste----------------------------------------
