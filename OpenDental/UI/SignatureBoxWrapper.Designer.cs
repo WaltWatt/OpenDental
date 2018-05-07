@@ -105,6 +105,7 @@
 			this.sigBox.Name = "sigBox";
 			this.sigBox.Size = new System.Drawing.Size(362, 79);
 			this.sigBox.TabIndex = 87;
+			this.sigBox.MouseDown += new System.Windows.Forms.MouseEventHandler(this.sigBox_MouseDown);
 			this.sigBox.MouseUp += new System.Windows.Forms.MouseEventHandler(this.sigBox_MouseUp);
 			// 
 			// SignatureBoxWrapper
