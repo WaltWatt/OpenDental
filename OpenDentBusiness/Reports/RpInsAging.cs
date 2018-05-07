@@ -105,7 +105,7 @@ namespace OpenDentBusiness {
 				bool doAgePatPayPlanPayments=false;
 				DataTable regAging = ReportsComplex.RunFuncOnReportServer(() => RpAging.GetAgingTable(asOfDate,isWoAged,hasDateLastPay,isGroupByFam,isOnlyNeg,
 					AgeOfAccount.Any,isIncludeNeg,isExcludeInactive,isExcludeBadAddress,listProv,listClinicNums,listBillType,isExcludeArchived,isIncludeInsNoBal,
-					isOnlyInsNoBal,isForceAgeNegAdj,doAgePatPayPlanPayments,isForInsAging));
+					isOnlyInsNoBal,isForceAgeNegAdj,isForInsAging,doAgePatPayPlanPayments));
 			//------------ Combine Tables ---------------------------------------------
 			DataTable insAgingTable = new DataTable();
 			//define columns here
