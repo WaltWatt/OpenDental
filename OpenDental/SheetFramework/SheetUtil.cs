@@ -1714,5 +1714,15 @@ namespace OpenDental{
 			}
 			return retval;
 		}
+
+		///<summary>For all combo boxes that have not had an item selected, select the first option.</summary>
+		public static void SetDefaultValueForComboBoxes(Sheet sheet) {
+			foreach(SheetField field in sheet.SheetFields.Where(x => x.FieldType==SheetFieldType.ComboBox)) {
+				if(SheetComboBox.HasSelection(field.FieldValue)) {
+					continue;
+				}
+				field.FieldValue=SheetComboBox.FirstOption(field.FieldValue);
+			}
+		}
 	}
 }

@@ -49,6 +49,25 @@ namespace OpenDental {
 			}
 		}
 
+		///<summary>Formats the selected option and the list of options in a string that can be saved to the database.</summary>
+		public string ToFieldValue() {
+			//FieldValue will contain the selected option, followed by a semicolon, followed by a | delimited list of all options.
+			return SelectedOption+";"+string.Join("|",ComboOptions);
+		}
+
+		///<summary>Returns true if the fieldValue string has a selected option.</summary>
+		public static bool HasSelection(string fieldValue) {
+			//E.g. "Tall;Tall|Medium|Short" returns true
+			//";Tall|Medium|Short" returns false
+			return fieldValue.Split(';')[0]!="";
+		}
+
+		///<summary>Selects the first option in the passed in fieldValue.</summary>
+		public static string FirstOption(string fieldValue) {
+			//E.g. ";Tall|Medium|Short" returns "Tall;Tall|Medium|Short"
+			return fieldValue.Split('|')[0].Substring(fieldValue.IndexOf(';')+1)+fieldValue;
+		}
+
 		private void menuItemContext_Click(object sender,EventArgs e) {
 			if(sender.GetType()!=typeof(MenuItem)) {
 				return;

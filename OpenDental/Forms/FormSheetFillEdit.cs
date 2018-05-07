@@ -163,6 +163,9 @@ namespace OpenDental {
 				butEmail.Enabled=false;
 				butToKiosk.Enabled=false;
 			}
+			if(IsStatement) {
+				SelectFirstOptionComboBoxes();
+			}
 			if(SheetCur.IsNew && SheetCur.SheetType!=SheetTypeEnum.PaymentPlan) {//payplan does not get saved to db so sheet is always new
 				return;
 			}
@@ -393,6 +396,19 @@ namespace OpenDental {
 					textbox.ReadOnly=true;
 					panelMain.Controls.Add(textbox);
 					textbox.BringToFront();
+				}
+			}
+		}
+
+		///<summary>For all the combo boxes on the form, selects the first option if nothing is already selected.</summary>
+		private void SelectFirstOptionComboBoxes() {
+			foreach(Control control in panelMain.Controls) {
+				if(control.GetType()!=typeof(SheetComboBox)) {
+					continue;
+				}
+				SheetComboBox comboBox=(SheetComboBox)control;
+				if(comboBox.ComboOptions.Length > 0 && comboBox.SelectedOption=="") {
+					comboBox.SelectedOption=comboBox.ComboOptions[0];
 				}
 			}
 		}
@@ -731,7 +747,7 @@ namespace OpenDental {
 				SaveSignaturePayPlan();
 			}
 			else {
-				if(!IsStatement && !TryToSaveData()) {//short circuit with !IsStatement
+				if(!TryToSaveData()) {
 					return;
 				}
 				if(hasSheetFromDb) {
@@ -827,7 +843,7 @@ namespace OpenDental {
 				SaveSignaturePayPlan();
 			}
 			else {
-				if(!IsStatement && !TryToSaveData()) {//short circuit with !IsStatement
+				if(!TryToSaveData()) {
 					return;
 				}
 				if(hasSheetFromDb) {
@@ -902,7 +918,7 @@ namespace OpenDental {
 				SaveSignaturePayPlan();
 			}
 			else {
-				if(!IsStatement && !TryToSaveData()) {//short circuit with !IsStatement
+				if(!TryToSaveData()) {
 					return;
 				}
 				if(hasSheetFromDb) {
@@ -953,7 +969,7 @@ namespace OpenDental {
 				SaveSignaturePayPlan();
 			}
 			else {
-				if(!IsStatement && !TryToSaveData()) {
+				if(!TryToSaveData()) {
 					return;
 				}
 				if(!IsStatement && SheetCur.SheetType!=SheetTypeEnum.TreatmentPlan) {
@@ -1002,7 +1018,12 @@ namespace OpenDental {
 			butUnlock.Visible=false;
 		}
 
+		///<summary>If this sheet is a statement, then the sheet does not actually get saved to the database.</summary>
 		private bool TryToSaveData() {
+			if(IsStatement) {
+				FillFieldsFromComboBoxes();
+				return true;//We don't actually save a statement sheet to the database.
+			}
 			if(!butOK.Enabled) {//if the OK button is not enabled, user does not have permission.
 				return true;
 			}
@@ -1134,17 +1155,7 @@ namespace OpenDental {
 				}
 			}
 			//ComboBoxes-----------------------------------------------
-			foreach(Control control in panelMain.Controls) {
-				if(control.GetType()!=typeof(SheetComboBox)) {
-					continue;
-				}
-				if(control.Tag==null) {
-					continue;
-				}
-				SheetComboBox comboBox=(SheetComboBox)control;
-				//FieldValue will contain the selected option, followed by a semicolon, followed by a | delimited list of all options.
-				((SheetField)control.Tag).FieldValue=comboBox.SelectedOption+";"+String.Join("|",comboBox.ComboOptions);
-			}
+			FillFieldsFromComboBoxes();
 			//ToothChart------------------------------------------------
 			foreach(Control control in panelMain.Controls) {
 				if(control.GetType()!=typeof(ScreenToothChart)) {
@@ -1183,6 +1194,20 @@ namespace OpenDental {
 			//SigBoxes---------------------------------------------------
 				//SigBoxes won't be strictly checked for validity
 				//or data saved to the field until it's time to actually save to the database.
+		}
+
+		///<summary>Fills the sheet fields with their combo boxes.</summary>
+		private void FillFieldsFromComboBoxes() {
+			foreach(Control control in panelMain.Controls) {
+				if(control.GetType()!=typeof(SheetComboBox)) {
+					continue;
+				}
+				if(control.Tag==null) {
+					continue;
+				}
+				SheetComboBox comboBox=(SheetComboBox)control;
+				((SheetField)control.Tag).FieldValue=comboBox.ToFieldValue();
+			}
 		}
 
 		///<summary>Returns true when all of the sheet fields with IsRequired set to true have a value set. Otherwise, a message box shows and false is returned.</summary>

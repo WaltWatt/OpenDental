@@ -475,6 +475,9 @@ namespace OpenDental {
 				}
 				field.SigKey=Sheets.GetSignatureKey(sheet);
 			}
+			if(stmt!=null) {//Because most of the time statements do not display the Fill Sheet window, so there is no opportunity to select a combobox.
+				SheetUtil.SetDefaultValueForComboBoxes(sheet);
+			}
 			SheetUtil.CalculateHeights(sheet,_dataSet,_stmt,_isPrinting,_printMargin.Top,_printMargin.Bottom,_medLab);
 			_sheetList=new List<Sheet>();
 			for(int i=0;i<copies;i++) {
@@ -2461,6 +2464,9 @@ namespace OpenDental {
 					continue;
 				}
 				field.SigKey=Sheets.GetSignatureKey(sheet);
+			}
+			if(stmt!=null) {//Because most of the time statements do not display the Fill Sheet window, so there is no opportunity to select a combobox.
+				SheetUtil.SetDefaultValueForComboBoxes(sheet);
 			}
 			//this will set the page breaks as well as adjust for growth behavior
 			SheetUtil.CalculateHeights(sheet,dataSet,_stmt,_isPrinting,_printMargin.Top,_printMargin.Bottom,_medLab,pat,patGuar);
