@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet type="text/xsl" href="OpenDentalDocumentation.xsl"?>
-<database version="18.1.0">
+<database version="18.1.5.0">
     <table name="account">
         <summary>Used in the accounting section in chart of accounts.  Not related to patient accounts in any way.</summary>
         <column order="0" name="AccountNum" type="bigint(20)">
@@ -2931,6 +2931,7 @@
                 <EnumValue name="PayConnect">3 - PayConnect web service (from within OD).</EnumValue>
                 <EnumValue name="XServerPayConnect">4 - Credit card has been added through the local installation of X-Charge and the PayConnect web service.</EnumValue>
                 <EnumValue name="XWebPortalLogin">5 - Made from the login screen of the Patient Portal.</EnumValue>
+                <EnumValue name="PaySimple">6 - PaySimple web service (from within OD).</EnumValue>
             </Enumeration>
         </column>
         <column order="17" name="ClinicNum" type="bigint(20)" fk="clinic">
@@ -3186,6 +3187,7 @@
                 <EnumValue name="Clinic">0. The definition is linked to a clinic.</EnumValue>
                 <EnumValue name="Patient">1. The definition is linked to a patient.</EnumValue>
                 <EnumValue name="AppointmentType">2. The definition is linked to an appointment type.</EnumValue>
+                <EnumValue name="Operatory">3. The definition is linked to an operatory.</EnumValue>
             </Enumeration>
         </column>
     </table>
@@ -7690,12 +7692,9 @@
             <summary>Operatories with IsWebSched set to true will be the ONLY operatories considered when searching for available time slots.</summary>
         </column>
         <column order="12" name="IsNewPatAppt" type="tinyint(4)">
-            <summary>Operatories with IsNewPatAppt set to true will be the ONLY operatories considered when searching for available time slots.
+            <summary>Deprecated as of 18.1.  Entries within the deflink table indicate if this operatory is in fact available for WebSched New Pat Appt.
+            Old summary: Operatories with IsNewPatAppt set to true will be the ONLY operatories considered when searching for available time slots.
             This is in regards to the New Patient Appointment portion of the Web Sched web application.</summary>
-        </column>
-        <column order="13" name="AppointmentTypeNum" type="bigint(20)" fk="appointmenttype">
-            <summary>FK to appointmenttype.AppointmentTypeNum. Indicates that this is the only type of appointment that can be scheduled in this operatory.
-            Currently only works for Web Sched New Pat appointments but can be implmemented in other places at a later date.</summary>
         </column>
     </table>
     <table name="orionproc">
@@ -8520,6 +8519,7 @@
                 <EnumValue name="PayConnect">3 - PayConnect web service (from within OD).</EnumValue>
                 <EnumValue name="XServerPayConnect">4 - Credit card has been added through the local installation of X-Charge and the PayConnect web service.</EnumValue>
                 <EnumValue name="XWebPortalLogin">5 - Made from the login screen of the Patient Portal.</EnumValue>
+                <EnumValue name="PaySimple">6 - PaySimple web service (from within OD).</EnumValue>
             </Enumeration>
         </column>
         <column order="17" name="ProcessStatus" type="tinyint(4)">
@@ -11410,6 +11410,9 @@
         <column order="16" name="DocNum" type="bigint(20)" fk="document">
             <summary>FK to document.DocNum.  Referrel letters are stored as PDF in the A to Z folder.</summary>
         </column>
+        <column order="17" name="ClinicNum" type="bigint(20)" fk="clinic">
+            <summary>FK to clinic.ClinicNum. Used by webforms to limit the sheets displayed based on the currently selected clinic.</summary>
+        </column>
     </table>
     <table name="sheetdef">
         <summary>A definition (template) for a sheet.  Can be pulled from the database, or it can be internally defined.</summary>
@@ -11890,7 +11893,7 @@
                 <EnumValue name="ServerWeb">This dll is part of a web server that is providing data via web services.</EnumValue>
             </Enumeration>
         </column>
-        <column order="7" name="MsgValue" type="varchar(255)">
+        <column order="7" name="MsgValue" type="text">
             <summary>Message value of the signal.</summary>
         </column>
     </table>
@@ -12079,6 +12082,7 @@
                 <EnumValue name="WebSchedASAP">9. Sending an SMS for the Web Sched ASAP feature.</EnumValue>
                 <EnumValue name="Verify">10. Sending an SMS for the Web Sched verify feature.</EnumValue>
                 <EnumValue name="Statements">11. Sending an SMS to let the patient know that a statement is available.</EnumValue>
+                <EnumValue name="VerifyWSNP">11. Sending an SMS to let the patient know that a statement is available.</EnumValue>
             </Enumeration>
         </column>
         <column order="8" name="MsgText" type="text">
@@ -12651,7 +12655,7 @@
             <summary>FK to userod.UserNum. The user who created this tasknote.</summary>
         </column>
         <column order="3" name="DateTimeNote" type="datetime">
-            <summary>Date and time the note was created (editable).</summary>
+            <summary>Date and time the note was created or last modified (editable).</summary>
         </column>
         <column order="4" name="Note" type="text">
             <summary>Note. Text that the user wishes to show on the task.</summary>
@@ -13997,6 +14001,7 @@
                 <EnumValue name="PayConnect">3 - PayConnect web service (from within OD).</EnumValue>
                 <EnumValue name="XServerPayConnect">4 - Credit card has been added through the local installation of X-Charge and the PayConnect web service.</EnumValue>
                 <EnumValue name="XWebPortalLogin">5 - Made from the login screen of the Patient Portal.</EnumValue>
+                <EnumValue name="PaySimple">6 - PaySimple web service (from within OD).</EnumValue>
             </Enumeration>
         </column>
     </table>
