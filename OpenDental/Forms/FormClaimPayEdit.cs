@@ -760,7 +760,7 @@ namespace OpenDental{
 				//show all so user can pick
 				panelXcharge.Visible=true;
 				butPayConnect.Visible=true;
-				//butPaySimple.Visible=true;
+				butPaySimple.Visible=true;
 				groupPrepaid.Visible=true;
 				return;
 			}

@@ -148,7 +148,7 @@ namespace OpenDental{
 
 		private void FillList(){
 			Programs.RefreshCache();
-			_listPrograms=Programs.GetListDeep().FindAll(x=> x.ProgName!="PaySimple");
+			_listPrograms=Programs.GetListDeep();
 			gridProgram.BeginUpdate();
 			gridProgram.Columns.Clear();
 			gridProgram.Columns.Add(new ODGridColumn("Enabled",55,HorizontalAlignment.Center));
