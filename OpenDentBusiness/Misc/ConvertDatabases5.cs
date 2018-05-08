@@ -7000,6 +7000,15 @@ No Action Required in many cases, check your new patient Web Sched on your web s
 			}
 		}
 
+		private static void To17_4_64() {
+			string command;
+			if(DataConnection.DBtype==DatabaseType.MySql) {
+				command="ALTER TABLE signalod MODIFY MsgValue text NOT NULL"; //Change from varchar[255] to text.
+				Db.NonQ(command);
+				//Oracle allows up to 4 gigs in CLOB, not conver needed.
+			}
+		}
+
 		private static void To18_1_1() {
 			string command;
 			DataTable table;
@@ -8301,5 +8310,23 @@ No Action Required in many cases, check your new patient Web Sched on your web s
 					Db.NonQ(command);
 				}
 		}//End of 18_1_1() method
+
+		private static void To18_1_5() {
+			string command;
+			if(DataConnection.DBtype==DatabaseType.MySql) {
+				//May have already been converted in 17_4_64. This was a backport to stable originally.
+				string databaseName=Db.GetScalar("SELECT DATABASE()");
+				command=@"SELECT DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS 
+					WHERE TABLE_SCHEMA='"+POut.String(databaseName)+@"'
+					AND TABLE_NAME='signalod' 
+					AND COLUMN_NAME='MsgValue'";
+				string dataType=Db.GetScalar(command);
+				if(dataType.ToLower()!="text") {
+					command="ALTER TABLE signalod MODIFY MsgValue text NOT NULL"; //Change from varchar[255] to text.
+					Db.NonQ(command);
+				}
+				//Oracle allows up to 4 gigs in CLOB, not conver needed.
+			}
+		}
 	}
 }

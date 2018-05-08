@@ -3719,6 +3719,11 @@ namespace OpenDental{
 					_butText=new ODToolBarButton(Lan.g(this,"Text"),5,Lan.g(this,"Send Text Message"),"Text");
 					_butText.Style=ODToolBarButtonStyle.DropDownButton;
 					_butText.DropDownMenu=menuText;
+					_butText.Enabled=Programs.IsEnabled(ProgramName.CallFire)||SmsPhones.IsIntegratedTextingEnabled();
+					//The Notification text has not been set since startup.  We need an accurate starting count.
+					if(SmsPhones.IsIntegratedTextingEnabled()) {
+						SetSmsNotificationText();
+					}
 				}
 				ToolBarMain.Buttons.Add(_butText);
 				button=new ODToolBarButton(Lan.g(this,"Letter"),-1,Lan.g(this,"Quick Letter"),"Letter");
@@ -3880,11 +3885,8 @@ namespace OpenDental{
 				if(!Programs.UsingEcwTightMode()) {//eCW tight only gets Patient Select and Popups toolbar buttons
 					ToolBarMain.Buttons["Commlog"].Enabled=true;
 					ToolBarMain.Buttons["Email"].Enabled=true;
-					if(Programs.IsEnabled(ProgramName.CallFire) || SmsPhones.IsIntegratedTextingEnabled()) {
-						ToolBarMain.Buttons["Text"].Enabled=true;
-					}
-					else {
-						ToolBarMain.Buttons["Text"].Enabled=false;
+					if(_butText!=null) {
+						_butText.Enabled=Programs.IsEnabled(ProgramName.CallFire) || SmsPhones.IsIntegratedTextingEnabled();
 					}
 					ToolBarMain.Buttons["WebMail"].Enabled=true;
 					ToolBarMain.Buttons["Letter"].Enabled=true;
@@ -4503,30 +4505,49 @@ namespace OpenDental{
 
 		private void ShowFormTextMessagingModeless(bool isSent, bool isReceived) {
 			if(_formSmsTextMessaging==null || _formSmsTextMessaging.IsDisposed) {
-				_formSmsTextMessaging=new FormSmsTextMessaging(CurPatNum,isSent,isReceived,SetSmsNotificationText);
+				_formSmsTextMessaging=new FormSmsTextMessaging(isSent,isReceived,() => { SetSmsNotificationText(); });
 				_formSmsTextMessaging.FormClosed+=new FormClosedEventHandler((o,e) => { _formSmsTextMessaging=null; });
 			}
 			_formSmsTextMessaging.Show();
 			_formSmsTextMessaging.BringToFront();
 		}
 
-		///<summary>Set isSignalNeeded to true if a refresh signal should be sent out to the other workstations.</summary>
-		private void SetSmsNotificationText(string smsNotificationText,bool isSignalNeeded) {
+		///<summary>Set signalSmsCount to null if you want to query the db for the current value and send a signal.
+		///If responding to a signal then the structured data will be parsed from signalSmsCount.MsgValue and not new signal will be generated.</summary>
+		private void SetSmsNotificationText(Signalod signalSmsCount=null) {
+			if(_butText==null) {
+				return;//This button does not exist in eCW tight integration mode.
+			}
 			try {
-				if(_butText==null) {
-					return;//This button does not exist in eCW tight integration mode.
-				}
 				if(!_butText.Enabled) {
 					return;//This button is disabled when neither of the Text Messaging bridges have been enabled.
 				}
-				if(this.InvokeRequired) {//For when called from the ThreadSmsTextMessageNotify() thread.
-					this.Invoke((Action)delegate() { SetSmsNotificationText(smsNotificationText,isSignalNeeded); });
+				List<SmsFromMobiles.SmsNotification> listNotifications=null;
+				if(signalSmsCount!=null) { //Try to pull structured data out of the signal directly. We will get null back if this fails.
+					listNotifications=SmsFromMobiles.SmsNotification.GetListFromJson(signalSmsCount.MsgValue);
 				}
-				if(smsNotificationText=="0") {
-					smsNotificationText="";
+				if(listNotifications==null) { //Notification not provided or signal was malformed. Either way recalculate and post a new signal.
+					listNotifications=SmsFromMobiles.UpdateSmsNotification();
 				}
-				if(_butText.NotificationText==smsNotificationText) {
-					return;//This prevents the toolbar from being invalidated unnecessarily.  Also prevents unnecessary signals.
+				int smsUnreadCount=0;
+				if(!PrefC.HasClinicsEnabled||Clinics.ClinicNum==0) {
+					//No clinics or HQ clinic is active so sum them all.
+					smsUnreadCount=listNotifications.Sum(x => x.Count);
+				}
+				else {
+					//Only count the active clinic.
+					smsUnreadCount=listNotifications.Where(x => x.ClinicNum==Clinics.ClinicNum).Sum(x => x.Count);
+				}
+				//Default to empty so we show nothing if there aren't any notifications.
+				string smsNotificationText="";
+				if(smsUnreadCount>99) { //We only have room in the UI for a 2-digit number.
+					smsNotificationText="99";
+				}
+				else if(smsUnreadCount>0) { //We have a "real" number so show it.
+					smsNotificationText=smsUnreadCount.ToString();
+				}
+				if(_butText.NotificationText==smsNotificationText) { //Prevent the toolbar from being invalidated unnecessarily.
+					return;
 				}
 				_butText.NotificationText=smsNotificationText;
 				if(menuItemTextMessagesReceived.Text.Contains("(")) {//Remove the old count from the menu item.
@@ -4535,13 +4556,10 @@ namespace OpenDental{
 				if(smsNotificationText!="") {
 					menuItemTextMessagesReceived.Text+=" ("+smsNotificationText+")";
 				}
-				if(isSignalNeeded) {
-					Signalods.InsertSmsNotification(PIn.Long(smsNotificationText));
-				}
-			}			
-			finally { //Always redraw the toolbar item. We may call this method just for this purpose.
+			}
+			finally { //Always redraw the toolbar item.
 				ToolBarMain.Invalidate(_butText.Bounds);//To cause the Text button to redraw.			
-			}			
+			}
 		}
 
 		#endregion SMS Text Messaging
@@ -4621,7 +4639,7 @@ namespace OpenDental{
 		///<summary>This is used to set the private class wide variable _clinicNum and refreshes the current module.</summary>
 		private void RefreshCurrentClinic(Clinic clinicCur) {
 			Clinics.ClinicNum=clinicCur.ClinicNum;
-			Text=PatientL.GetMainTitle(Patients.GetPat(CurPatNum),Clinics.ClinicNum);
+			SetSmsNotificationText();
 			if(PrefC.GetBool(PrefName.AppointmentClinicTimeReset)) {
 				AppointmentL.DateSelected=DateTimeOD.Today;
 				if(AppointmentL.DateSelected.DayOfWeek==DayOfWeek.Sunday) {
@@ -5109,10 +5127,6 @@ namespace OpenDental{
 				if(Security.CurUser==null) {
 					//User must be at the log in screen, so no need to process signals. We will need to look for shutdown signals since the last refreshed time when the user attempts to log in.
 					return;
-				}		
-				//Pre-Signal Processing
-				if(_butText!=null && _butText.Enabled && _butText.NotificationText==null) {//The Notification text has not been set since startup.  We need an accurate starting count.
-					SetSmsNotificationText(SmsFromMobiles.GetSmsNotification(),true);//Queries the database.  Send signal since we queried the database.
 				}
 				CheckAlerts();
 			}
@@ -5521,20 +5535,11 @@ namespace OpenDental{
 			}
 			#region SMS Notifications
 			Logger.LogToPath("SMS Notifications",LogPath.Signals,LogPhase.Start);
-			if(_butText!=null) { //Not visible if eCW, and not enabled unless Text Messaging is enabled.
-				Signalod signalSmsCount=listSignals.OrderByDescending(x => x.SigDateTime)
-					.FirstOrDefault(x => x.IType==InvalidType.SmsTextMsgReceivedUnreadCount);
-				if(signalSmsCount!=null && signalSmsCount.FKeyType==KeyType.SmsMsgUnreadCount) {
-					//This signal is not used when using Callfire so we should not have any conflicts here.
-					//The toolbar button might need to change state if we have just recently changed the state of IsIntegratedTextingEnabled().
-					_butText.Enabled=(Programs.IsEnabled(ProgramName.CallFire) || SmsPhones.IsIntegratedTextingEnabled());
-					SetSmsNotificationText(signalSmsCount.FKey.ToString(),false);//Do not resend the signal again.  Would cause infinate signal loop.
-				}
-				//The Notification text has not been set since startup.  We need an accurate starting count.
-				if(_butText.Enabled && _butText.NotificationText==null) {
-					//Usually only run once at startup.
-					SetSmsNotificationText(SmsFromMobiles.GetSmsNotification(),true);//Queries the database.  Send signal since we queried the database.
-				}
+			Signalod signalSmsCount=listSignals.OrderByDescending(x => x.SigDateTime)
+				.FirstOrDefault(x => x.IType==InvalidType.SmsTextMsgReceivedUnreadCount && x.FKeyType==KeyType.SmsMsgUnreadCount);
+			if(signalSmsCount!=null) {
+				//Provide the pre-existing value here. This will act as a flag indicating that we should not resend the signal.  This would cause infinite signal loop.
+				SetSmsNotificationText(signalSmsCount);
 			}
 			Logger.LogToPath("SMS Notifications",LogPath.Signals,LogPhase.End);
 			#endregion SMS Notifications
@@ -7267,6 +7272,7 @@ namespace OpenDental{
 				Clinics.ClinicNum=Security.CurUser.ClinicNum;
 			}
 			Text=PatientL.GetMainTitle(Patients.GetPat(CurPatNum),Clinics.ClinicNum);
+			SetSmsNotificationText();
 			RefreshMenuClinics();//this calls ModuleSelected, so no need to call RefreshCurrentModule
 		}
 
@@ -7376,7 +7382,7 @@ namespace OpenDental{
 			//this menu item is only visible if the clinics show feature is enabled (!EasyNoClinics)
 			if(Clinics.GetDesc(Clinics.ClinicNum)=="") {//will be empty string if ClinicNum is not valid, in case they deleted the clinic
 				Clinics.ClinicNum=Security.CurUser.ClinicNum;
-				Text=PatientL.GetMainTitle(Patients.GetPat(CurPatNum),Clinics.ClinicNum);
+				SetSmsNotificationText();
 			}
 			RefreshMenuClinics();
 			//reset the main title bar in case the user changes the clinic description for the selected clinic
@@ -7949,9 +7955,7 @@ namespace OpenDental{
 			if(!Security.IsAuthorized(Permissions.Setup)){
 				return;
 			}
-			//MessageBox.Show("Not yet functional.");
-			new FormEServicesSetup(FormEServicesSetup.EService.MobileOld).ShowDialog();
-			//SecurityLogs.MakeLogEntry(Permissions.Setup,0,"Mobile Sync");
+			ShowEServicesSetup(FormEServicesSetup.EService.MobileOld);
 		}
 
 		private void menuItemNewCropBilling_Click(object sender,EventArgs e) {
@@ -8073,44 +8077,44 @@ namespace OpenDental{
 
 		#region eServices
 
+		private void ShowEServicesSetup(FormEServicesSetup.EService eService) {
+			FormEServicesSetup FormESS=new FormEServicesSetup(eService);
+			FormESS.ShowDialog();
+			if(_butText!=null) { //User may just have signed up for texting.
+				_butText.Enabled=Programs.IsEnabled(ProgramName.CallFire)||SmsPhones.IsIntegratedTextingEnabled();
+			}
+		}
+
 		private void menuItemSignup_Click(object sender,EventArgs e) {
-			FormEServicesSetup FormESS=new FormEServicesSetup(FormEServicesSetup.EService.SignupPortal);
-			FormESS.ShowDialog(); 
+			ShowEServicesSetup(FormEServicesSetup.EService.SignupPortal);
 		}
 
 		private void menuMobileWeb_Click(object sender,EventArgs e) {
-			FormEServicesSetup FormESS=new FormEServicesSetup(FormEServicesSetup.EService.MobileNew);
-			FormESS.ShowDialog();
+			ShowEServicesSetup(FormEServicesSetup.EService.MobileNew);
 		}
 
 		private void menuItemPatientPortal_Click(object sender,EventArgs e) {
-			FormEServicesSetup FormESS=new FormEServicesSetup(FormEServicesSetup.EService.PatientPortal);
-			FormESS.ShowDialog();
+			ShowEServicesSetup(FormEServicesSetup.EService.PatientPortal);
 		}
 
 		private void menuItemIntegratedTexting_Click(object sender,EventArgs e) {
-			FormEServicesSetup FormESS=new FormEServicesSetup(FormEServicesSetup.EService.SmsService);
-			FormESS.ShowDialog();
+			ShowEServicesSetup(FormEServicesSetup.EService.SmsService);
 		}
 
 		private void menuItemWebSched_Click(object sender,EventArgs e) {
-			FormEServicesSetup FormESS=new FormEServicesSetup(FormEServicesSetup.EService.WebSched);
-			FormESS.ShowDialog();
+			ShowEServicesSetup(FormEServicesSetup.EService.WebSched);
 		}
 
 		private void menuItemEConfirmRemind_Click(object sender,EventArgs e) {
-			FormEServicesSetup FormESS=new FormEServicesSetup(FormEServicesSetup.EService.eConfirmRemind);
-			FormESS.ShowDialog();
+			ShowEServicesSetup(FormEServicesSetup.EService.eConfirmRemind);
 		}
 
 		private void menuItemEMisc_Click(object sender,EventArgs e) {
-			FormEServicesSetup FormESS=new FormEServicesSetup(FormEServicesSetup.EService.eMisc);
-			FormESS.ShowDialog();
+			ShowEServicesSetup(FormEServicesSetup.EService.eMisc);
 		}
 
 		private void menuItemListenerService_Click(object sender,EventArgs e) {
-			FormEServicesSetup FormESS=new FormEServicesSetup(FormEServicesSetup.EService.ListenerService);
-			FormESS.ShowDialog();
+			ShowEServicesSetup(FormEServicesSetup.EService.ListenerService);
 		}
 
 		#endregion
@@ -8257,8 +8261,7 @@ namespace OpenDental{
 						FormPP.FormClosed+=this.alertFormClosingHelper;
 						break;
 					case FormType.FormEServicesWebSchedRecall:
-						FormEServicesSetup FormESS=new FormEServicesSetup(FormEServicesSetup.EService.WebSched);
-						FormESS.ShowDialog();
+						ShowEServicesSetup(FormEServicesSetup.EService.WebSched);
 						break;
 					case FormType.FormRadOrderList:
 						List<FormRadOrderList> listFormROLs=Application.OpenForms.OfType<FormRadOrderList>().ToList();
@@ -8273,16 +8276,13 @@ namespace OpenDental{
 						}
 						break;
 					case FormType.FormEServicesSignupPortal:
-						FormEServicesSetup FormESSSignupPortal=new FormEServicesSetup(FormEServicesSetup.EService.SignupPortal);
-						FormESSSignupPortal.ShowDialog();
+						ShowEServicesSetup(FormEServicesSetup.EService.SignupPortal);
 						break;
 					case FormType.FormEServicesWebSchedNewPat:
-						FormEServicesSetup FormESSSWebSched=new FormEServicesSetup(FormEServicesSetup.EService.WebSchedNewPat);
-						FormESSSWebSched.ShowDialog();
+						ShowEServicesSetup(FormEServicesSetup.EService.WebSchedNewPat);
 						break;
 					case FormType.FormEServicesEConnector:
-						FormEServicesSetup FormESSSEConnector=new FormEServicesSetup(FormEServicesSetup.EService.ListenerService);
-						FormESSSEConnector.ShowDialog();
+						ShowEServicesSetup(FormEServicesSetup.EService.ListenerService);
 						break;
 					case FormType.FormApptEdit:
 						Appointment appt=Appointments.GetOneApt(alertItem.FKey);

@@ -14,12 +14,9 @@ namespace OpenDental {
 		#region Private data; properties/fields
 		///<summary>List of Clinics associated with ComboClinic.  May contain an entry for clinicnum=0.  ComboClinic indexes match 1to1.</summary>
 		private List<Clinic> _listClinics=null;
-		///<summary>Allows FormSmsTextMessaging to update the unread SMS text message count in FormOpenDental as the user reads their messages.</summary>
-		public delegate void SmsNotificationDelegate(string smsNotificationText,bool isSignalNeeded);
-		///<summary>Set from FormOpenDental.  This can be null if the calling code does not wish to get dynamic unread message counts.</summary>
-		private SmsNotificationDelegate _smsNotifier=null;
-		///<summary>This gets set externally beforehand.  Lets user quickly select messages for current patient.</summary>
-		private long _patNumOnLoad;
+		///<summary>Set from FormOpenDental.  This can be null if the calling code does not wish to get dynamic unread message counts.
+		///Allows FormSmsTextMessaging to update the unread SMS text message count in FormOpenDental as the user reads their messages.</summary>
+		private Action _smsNotifier=null;
 		///<summary>The selected patNum.  Can be 0 to include all.</summary>
 		private long _patNumCur=0;
 		///<summary>The column index of the Status column within the Messages grid.
@@ -130,6 +127,9 @@ namespace OpenDental {
 					int index=(int)comboClinic.SelectedIndices[i];
 					ret.Add(_listClinics[index].ClinicNum);
 				}
+				if(ret.Contains(0)) { //If 0-clinic is select, just select all.
+					ret=new List<long>(_listClinics.Select(x => x.ClinicNum));
+				}
 				return ret;
 			}
 		}
@@ -162,12 +162,11 @@ namespace OpenDental {
 		#endregion
 
 		#region Init
-		public FormSmsTextMessaging(long curPatNum,bool isSent,bool isReceived,SmsNotificationDelegate smsNotifier) {
+		public FormSmsTextMessaging(bool isSent,bool isReceived,Action smsNotifier) {
 			InitializeComponent();
 			Lan.F(this);
 			checkSent.Checked=isSent;
 			checkRead.Checked=isReceived;
-			_patNumOnLoad=curPatNum;
 			_smsNotifier=smsNotifier;
 			_groupByPref=UserOdPrefs.GetFirstOrNewByUserAndFkeyType(Security.CurUser.UserNum,UserOdFkeyType.SmsGroupBy);
 			if(_groupByPref.ValueString=="1") {
@@ -318,7 +317,6 @@ namespace OpenDental {
 				}
 				gridMessages.Rows.Add(row);
 			}
-			FireNotificationChanged();
 			if(checkSent.Checked) {
 				foreach(SmsToMobile smsToMobile in _listSmsToMobile) {
 					if(!checkHidden.Checked && smsToMobile.IsHidden) {
@@ -382,12 +380,21 @@ namespace OpenDental {
 				}
 			}
 			FillGridMessageThread();
-			if(_selectedPatNum==0) {
-				Text=Lan.g(this,"Text Messaging");
+		}
+
+		string GetDeliverStatus(SmsDeliveryStatus smsStatus) {
+			switch(smsStatus) {
+				case SmsDeliveryStatus.DeliveryConf:
+				case SmsDeliveryStatus.DeliveryUnconf:
+					//Treated the same as far as the user is concerned.
+					return Lan.g(this,"Delivered");
+				case SmsDeliveryStatus.FailWithCharge:
+				case SmsDeliveryStatus.FailNoCharge:
+					//Treated the same as far as the user is concerned.
+					return Lan.g(this,"Failed");
 			}
-			else {
-				Text=Lan.g(this,"Text Messaging - Patient:")+" "+GetPatientName(_selectedPatNum);
-			}
+			//Default to the actual status.
+			return smsStatus.ToString();
 		}
 
 		private void FillGridTextMessagesGroupedYes(int sortByColIdx,bool isSortAsc,long selectedPatNum,TextMessageGrouped selectedSmsGroup) {
@@ -397,6 +404,7 @@ namespace OpenDental {
 			gridMessages.Columns.Clear();
 			gridMessages.Columns.Add(new UI.ODGridColumn("DateTime",140,HorizontalAlignment.Left) { SortingStrategy=UI.GridSortingStrategy.DateParse });
 			gridMessages.Columns.Add(new UI.ODGridColumn("Status",100,HorizontalAlignment.Left) { SortingStrategy=UI.GridSortingStrategy.StringCompare });
+			_columnStatusIdx=gridMessages.Columns.Count-1;
 			gridMessages.Columns.Add(new UI.ODGridColumn("Patient\r\nPhone",100,HorizontalAlignment.Center) { SortingStrategy=UI.GridSortingStrategy.StringCompare });
 			gridMessages.Columns.Add(new UI.ODGridColumn("Patient",150,HorizontalAlignment.Left) { SortingStrategy=UI.GridSortingStrategy.StringCompare });
 			if(PrefC.HasClinicsEnabled) {
@@ -422,20 +430,6 @@ namespace OpenDental {
 					ListFromMobile=x.ToList(),
 				}).ToList();
 			if(checkSent.Checked) {
-				Func<SmsDeliveryStatus,string> getDeliverStatus=new Func<SmsDeliveryStatus,string>((smsStatus) => {
-					switch(smsStatus) {
-						case SmsDeliveryStatus.DeliveryConf:
-						case SmsDeliveryStatus.DeliveryUnconf:
-							//Treated the same as far as the user is concerned.
-							return Lan.g(this,"Delivered");
-						case SmsDeliveryStatus.FailWithCharge:
-						case SmsDeliveryStatus.FailNoCharge:
-							//Treated the same as far as the user is concerned.
-							return Lan.g(this,"Failed");
-					}
-					//Default to the actual status.
-					return smsStatus.ToString();
-				});
 				groupToMobile=_listSmsToMobile
 					.Where(x => (x.IsHidden && checkHidden.Checked) || !x.IsHidden)
 					.OrderByDescending(x => x.DateTimeSent)
@@ -449,7 +443,7 @@ namespace OpenDental {
 						PatName=x.First().PatNum==0 ? Lan.g(this,"Unassigned") : GetPatientName(x.First().PatNum),
 						TextMsg=x.First().MsgText,
 						HasUnread=false,
-						Status=Lan.g(this,"Sent")+" - "+getDeliverStatus(x.First().SmsStatus),
+						Status=Lan.g(this,"Sent")+" - "+GetDeliverStatus(x.First().SmsStatus),
 						ListFromMobile=new List<SmsFromMobile>(),
 						ListToMobile=x.ToList(),
 					}).ToList();
@@ -486,7 +480,6 @@ namespace OpenDental {
 				row.Cells.Add(sms.TextMsg);
 				gridMessages.Rows.Add(row);
 			}
-			FireNotificationChanged();
 			gridMessages.EndUpdate();
 			gridMessages.SortForced(sortByColIdx,isSortAsc);
 			//Check new grid rows against previous selection and re-select.			
@@ -502,15 +495,15 @@ namespace OpenDental {
 				}
 			}
 			FillGridMessageThread();
+		}
+
+		private void FillGridMessageThread() {
 			if(_selectedPatNum==0) {
 				Text=Lan.g(this,"Text Messaging");
 			}
 			else {
 				Text=Lan.g(this,"Text Messaging - Patient:")+" "+GetPatientName(_selectedPatNum);
 			}
-		}
-
-		private void FillGridMessageThread() {
 			if(_selectedPatNum==0) { //A message with no patNum was selected or nothing is selected at all.
 				if(_selectedSmsToMobile!=null) { //SmsToMobile is selected.
 					smsThreadView.ListSmsThreadMessages=new List<SmsThreadMessage>() { new SmsThreadMessage(_selectedSmsToMobile.DateTimeSent,_selectedSmsToMobile.MsgText,true,true,true) };
@@ -563,14 +556,10 @@ namespace OpenDental {
 			butSend.Enabled=true;
 			textReply.Enabled=true;
 		}
-
-		private void FireNotificationChanged() {
-			_smsNotifier(PIn.Long(SmsFromMobiles.GetSmsNotification()).ToString(),true);
-		}
-
+		
 		#region Control Event Handlers
 		private void butPatCurrent_Click(object sender,EventArgs e) {
-			_patNumCur=_patNumOnLoad;
+			_patNumCur=FormOpenDental.CurPatNum;
 			if(_patNumCur==0) {
 				textPatient.Text="";
 			}
@@ -610,17 +599,53 @@ namespace OpenDental {
 				listMarkReceivedRead.Add(_selectedSmsFromMobile);
 			}
 			if(_selectedSmsGroup!=null) {
-				listMarkReceivedRead.AddRange(_selectedSmsGroup.ListFromMobile.FindAll(x => x.SmsStatus==SmsFromStatus.ReceivedUnread));				
+				listMarkReceivedRead.AddRange(_selectedSmsGroup.ListFromMobile.FindAll(x => x.SmsStatus==SmsFromStatus.ReceivedUnread));
 			}
 			if(listMarkReceivedRead.Count>0) {
+				//Messages were marked as 'Read' so update the db and update the grid in place.
 				foreach(SmsFromMobile fromMobile in listMarkReceivedRead) {
 					SmsFromMobile oldSmsFromMobile=fromMobile.Copy();
 					fromMobile.SmsStatus=SmsFromStatus.ReceivedRead;
 					SmsFromMobiles.Update(fromMobile,oldSmsFromMobile);
 				}
-				FireNotificationChanged();
+				_smsNotifier?.Invoke();
+				//Fix the rows in place. Forcing an entire refresh would cause sorting of grid not to persist.
+				gridMessages.Rows[gridMessages.SelectedIndices[0]].Bold=false;
+				var tag=gridMessages.Rows[gridMessages.SelectedIndices[0]].Tag;
+				if(tag is TextMessageGrouped) {
+					TextMessageGrouped smsGroup=(TextMessageGrouped)tag;
+					smsGroup.HasUnread=false;
+					//Latest entry wins for this column value.
+					var latestFromMobile=smsGroup.ListFromMobile.OrderByDescending(x => x.DateTimeReceived).FirstOrDefault()??new SmsFromMobile() { DateTimeReceived=DateTime.MinValue };
+					var latestToMobile=smsGroup.ListToMobile.OrderByDescending(x => x.DateTimeSent).FirstOrDefault()??new SmsToMobile() {DateTimeSent=DateTime.MinValue };
+					gridMessages.Rows[gridMessages.SelectedIndices[0]].Cells[_columnStatusIdx].Text=
+						latestFromMobile.DateTimeReceived>latestToMobile.DateTimeSent ? 
+							Lan.g(this,"Rcv")+" - "+SmsFromMobiles.GetSmsFromStatusDescript(SmsFromStatus.ReceivedRead) : 
+							Lan.g(this,"Sent")+" - "+GetDeliverStatus(latestToMobile.SmsStatus);
+				}
+				else if(tag is SmsFromMobile) {
+					SmsFromMobile smsFrom=(SmsFromMobile)tag;
+					smsFrom.SmsStatus=SmsFromStatus.ReceivedRead;
+					gridMessages.Rows[gridMessages.SelectedIndices[0]].Cells[_columnStatusIdx].Text=SmsFromMobiles.GetSmsFromStatusDescript(SmsFromStatus.ReceivedRead);
+				}			
 			}
-			FillGridTextMessages(true);
+			//Update highlighted rows.
+			long selectedPatNum=_selectedPatNum;
+			gridMessages.Rows.ToList().ForEach(x => {
+				long patNum=0;
+				if(x.Tag is TextMessageGrouped) {
+					patNum=((TextMessageGrouped)x.Tag).PatNum;
+				}
+				else if(x.Tag is SmsFromMobile) {
+					patNum=((SmsFromMobile)x.Tag).PatNum;					
+				}
+				else if(x.Tag is SmsToMobile) {
+					patNum=((SmsToMobile)x.Tag).PatNum;
+				}
+				x.ColorBackG=patNum!=0 && selectedPatNum==patNum ? _colorSelect : Color.White;
+			});
+			gridMessages.Invalidate();
+			FillGridMessageThread();
 		}
 		
 		///<summary>Sets the given status for the selected receieved message.</summary>
@@ -645,7 +670,7 @@ namespace OpenDental {
 				row.Bold=true;
 			}			
 			gridMessages.Invalidate();//To show the status changes in the grid.
-			FireNotificationChanged();
+			_smsNotifier?.Invoke();
 			Cursor=Cursors.Default;
 		}
 
@@ -663,7 +688,7 @@ namespace OpenDental {
 				_selectedSmsFromMobile.MobilePhoneNumber,
 				//Country code of current environment.
 				CultureInfo.CurrentCulture.Name.Substring(CultureInfo.CurrentCulture.Name.Length-2),
-				_listClinicNumsSelected)
+				Clinics.ClinicNum==0?null : _listClinicNumsSelected.Union(new List<long>() { _selectedSmsFromMobile.ClinicNum }).ToList())
 				//Convert to a list of patnums.
 				.Select(x=>x[0]).ToList();
 			if(form.ShowDialog()!=DialogResult.OK) {
@@ -889,5 +914,101 @@ namespace OpenDental {
 			public List<SmsToMobile> ListToMobile=new List<SmsToMobile>();
 		}
 		#endregion
+		
+#if DEBUG
+		private void InsertDemoData() {
+			bool insertInboud=false;
+			bool insertOutbound=false;
+			if(!insertInboud&&!insertOutbound) {
+				return;
+			}
+			Random rand=new Random();
+			var clinics=Clinics.GetDeepCopy();
+			clinics.Add(Clinics.GetPracticeAsClinicZero());
+			var vlns=SmsPhones.GetAll();
+			var patients=Patients.GetAllPatients()
+				.FindAll(x => !string.IsNullOrEmpty(x.HmPhone))
+				.GroupBy(x => x.ClinicNum)
+				.ToDictionary(x => x.Key,x => x.ToList());
+			Action addMissingVLNs=new Action(() => {
+				var missingVlns=patients.Keys
+					.Select(x => x)
+					.Where(x => !vlns.Any(y => y.ClinicNum==x)).ToList();
+				foreach(var missingVln in missingVlns) {
+					SmsPhones.Insert(new SmsPhone() {
+						ClinicNum=missingVln,
+						CountryCode="US",
+						DateTimeActive=DateTime.Now.Subtract(TimeSpan.FromDays(1)),
+						PhoneNumber=rand.Next(0,999999999).ToString("D10"),
+					});
+				}
+				vlns=SmsPhones.GetAll();
+			});
+			if(insertInboud) {
+				List<SmsFromMobile> listInbound=new List<SmsFromMobile>();
+				int count=rand.Next(100,200);
+				addMissingVLNs();
+				for(int i = 0;i<count;i++) {
+					string unique=rand.Next(0,1000000).ToString("D7");
+					SmsPhone vln=vlns[rand.Next(0,vlns.Count)];
+					long clinicNum=vln.ClinicNum;
+					if(!patients.ContainsKey(clinicNum)) {
+						continue;
+					}
+					var patsForClinic=patients[clinicNum];
+					Patient pat=patsForClinic[rand.Next(0,patsForClinic.Count)];
+					string patPhone=pat.HmPhone;
+					listInbound.Add(new SmsFromMobile() {
+						ClinicNum=clinicNum,
+						DateTimeReceived=DateTime.Now.Subtract(TimeSpan.FromMinutes(rand.Next(5,2000))),
+						GuidMessage="TEST"+unique,
+						MobilePhoneNumber=patPhone,
+						MsgPart=1,
+						MsgTotal=1,
+						MsgRefID="x",
+						MsgText="msg - "+unique,
+						SmsPhoneNumber=vln.PhoneNumber,
+						SmsStatus=SmsFromStatus.ReceivedUnread,
+						PatNum=0, //Leave unassigned, we will find the match below
+					});
+				}
+				SmsFromMobiles.ProcessInboundSms(listInbound);
+			}
+			if(insertOutbound) {
+				List<SmsToMobile> listOutbound=new List<SmsToMobile>();
+				int count=rand.Next(10,100);
+				addMissingVLNs();
+				for(int i = 0;i<count;i++) {
+					string unique=rand.Next(0,1000000).ToString("D7");
+					SmsPhone vln=vlns[rand.Next(0,vlns.Count)];
+					long clinicNum=vln.ClinicNum;
+					if(!patients.ContainsKey(clinicNum)) {
+						continue;
+					}
+					var patsForClinic=patients[clinicNum];
+					Patient pat=patsForClinic[rand.Next(0,patsForClinic.Count)];
+					string patPhone=pat.HmPhone;
+					DateTime dtSent=DateTime.Now.Subtract(TimeSpan.FromMinutes(rand.Next(5,2000)));
+					listOutbound.Add(new SmsToMobile() {
+						ClinicNum=clinicNum,
+						DateTimeSent=dtSent,
+						DateTimeTerminated=dtSent.Add(TimeSpan.FromSeconds(rand.Next(60,240))),
+						GuidBatch="TEST"+unique,
+						GuidMessage="TEST"+unique,
+						IsTimeSensitive=true,
+						MobilePhoneNumber=patPhone,
+						MsgChargeUSD=.04f,
+						MsgParts=1,
+						MsgText="outbound - "+unique,
+						MsgType=SmsMessageSource.DirectSms,
+						PatNum=pat.PatNum,
+						SmsPhoneNumber=vln.PhoneNumber,
+						SmsStatus=SmsDeliveryStatus.DeliveryConf,
+					});
+				}
+				listOutbound.ForEach(x => SmsToMobiles.Insert(x));
+			}
+		}
+#endif
 	}
 }

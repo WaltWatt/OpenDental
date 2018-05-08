@@ -143,12 +143,16 @@ namespace OpenDentBusiness.Crud{
 				+"'"+POut.String(signalod.FKeyType.ToString())+"',"
 				+    POut.Int   ((int)signalod.IType)+","
 				+    POut.Int   ((int)signalod.RemoteRole)+","
-				+"'"+POut.String(signalod.MsgValue)+"')";
+				+    DbHelper.ParamChar+"paramMsgValue)";
+			if(signalod.MsgValue==null) {
+				signalod.MsgValue="";
+			}
+			OdSqlParameter paramMsgValue=new OdSqlParameter("paramMsgValue",OdDbType.Text,POut.StringParam(signalod.MsgValue));
 			if(useExistingPK || PrefC.RandomKeys) {
-				Db.NonQ(command);
+				Db.NonQ(command,paramMsgValue);
 			}
 			else {
-				signalod.SignalNum=Db.NonQ(command,true,"SignalNum","signalod");
+				signalod.SignalNum=Db.NonQ(command,true,"SignalNum","signalod",paramMsgValue);
 			}
 			return signalod.SignalNum;
 		}
@@ -187,12 +191,16 @@ namespace OpenDentBusiness.Crud{
 				+"'"+POut.String(signalod.FKeyType.ToString())+"',"
 				+    POut.Int   ((int)signalod.IType)+","
 				+    POut.Int   ((int)signalod.RemoteRole)+","
-				+"'"+POut.String(signalod.MsgValue)+"')";
+				+    DbHelper.ParamChar+"paramMsgValue)";
+			if(signalod.MsgValue==null) {
+				signalod.MsgValue="";
+			}
+			OdSqlParameter paramMsgValue=new OdSqlParameter("paramMsgValue",OdDbType.Text,POut.StringParam(signalod.MsgValue));
 			if(useExistingPK || isRandomKeys) {
-				Db.NonQ(command);
+				Db.NonQ(command,paramMsgValue);
 			}
 			else {
-				signalod.SignalNum=Db.NonQ(command,true,"SignalNum","signalod");
+				signalod.SignalNum=Db.NonQ(command,true,"SignalNum","signalod",paramMsgValue);
 			}
 			return signalod.SignalNum;
 		}
@@ -206,9 +214,13 @@ namespace OpenDentBusiness.Crud{
 				+"FKeyType   = '"+POut.String(signalod.FKeyType.ToString())+"', "
 				+"IType      =  "+POut.Int   ((int)signalod.IType)+", "
 				+"RemoteRole =  "+POut.Int   ((int)signalod.RemoteRole)+", "
-				+"MsgValue   = '"+POut.String(signalod.MsgValue)+"' "
+				+"MsgValue   =  "+DbHelper.ParamChar+"paramMsgValue "
 				+"WHERE SignalNum = "+POut.Long(signalod.SignalNum);
-			Db.NonQ(command);
+			if(signalod.MsgValue==null) {
+				signalod.MsgValue="";
+			}
+			OdSqlParameter paramMsgValue=new OdSqlParameter("paramMsgValue",OdDbType.Text,POut.StringParam(signalod.MsgValue));
+			Db.NonQ(command,paramMsgValue);
 		}
 
 		///<summary>Updates one Signalod in the database.  Uses an old object to compare to, and only alters changed fields.  This prevents collisions and concurrency problems in heavily used tables.  Returns true if an update occurred.</summary>
@@ -240,14 +252,18 @@ namespace OpenDentBusiness.Crud{
 			}
 			if(signalod.MsgValue != oldSignalod.MsgValue) {
 				if(command!=""){ command+=",";}
-				command+="MsgValue = '"+POut.String(signalod.MsgValue)+"'";
+				command+="MsgValue = "+DbHelper.ParamChar+"paramMsgValue";
 			}
 			if(command==""){
 				return false;
 			}
+			if(signalod.MsgValue==null) {
+				signalod.MsgValue="";
+			}
+			OdSqlParameter paramMsgValue=new OdSqlParameter("paramMsgValue",OdDbType.Text,POut.StringParam(signalod.MsgValue));
 			command="UPDATE signalod SET "+command
 				+" WHERE SignalNum = "+POut.Long(signalod.SignalNum);
-			Db.NonQ(command);
+			Db.NonQ(command,paramMsgValue);
 			return true;
 		}
 

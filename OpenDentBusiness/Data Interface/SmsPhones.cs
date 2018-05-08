@@ -200,6 +200,14 @@ namespace OpenDentBusiness{
 			return Crud.SmsPhoneCrud.SelectMany(command);
 		}
 
+		public static List<SmsPhone> GetAll() {
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				return Meth.GetObject<List<SmsPhone>>(MethodBase.GetCurrentMethod());
+			}
+			string command= "SELECT * FROM smsphone";
+			return Crud.SmsPhoneCrud.SelectMany(command);
+		}
+
 		public static DataTable GetSmsUsageLocal(List<long> listClinicNums, DateTime dateMonth) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
 				return Meth.GetTable(MethodBase.GetCurrentMethod(),listClinicNums,dateMonth);

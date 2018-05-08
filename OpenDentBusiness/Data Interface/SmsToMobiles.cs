@@ -200,16 +200,16 @@ namespace OpenDentBusiness{
 			if(dateEnd>DateTime.MinValue) {
 				listCommandFilters.Add(DbHelper.DtimeToDate("DateTimeSent")+"<="+POut.Date(dateEnd));
 			}
-			if(listClinicNums.Count>0) {
-				string[] arrayClinicNumStrs=new string[listClinicNums.Count];
-				for(int i=0;i<listClinicNums.Count;i++) {
-					arrayClinicNumStrs[i]=POut.Long(listClinicNums[i]);
+			if(patNum==0) {
+				//Only limit clinic if not searching for a particular PatNum.
+				if(listClinicNums.Count>0) {
+					listCommandFilters.Add("ClinicNum IN ("+String.Join(",",listClinicNums.Select(x => POut.Long(x)))+")");
 				}
-				listCommandFilters.Add("ClinicNum IN ("+String.Join(",",arrayClinicNumStrs)+")");
 			}
-			if(patNum!=0) {
+			else {
 				listCommandFilters.Add("PatNum="+POut.Long(patNum));
 			}
+			
 			string command="SELECT * FROM smstomobile";
 			if(listCommandFilters.Count>0) {
 				command+=" WHERE "+String.Join(" AND ",listCommandFilters);

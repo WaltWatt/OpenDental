@@ -37,7 +37,7 @@ namespace OpenDental {
 		private void FillMessageThread() {
 			panelScroll.Controls.Clear();
 			Invalidate();
-			if(_listSmsThreadMessages==null) {
+			if(_listSmsThreadMessages==null || _listSmsThreadMessages.Count<1) {
 				return;
 			}
 			BuildListMessages();

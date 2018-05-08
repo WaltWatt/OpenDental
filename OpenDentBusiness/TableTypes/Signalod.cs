@@ -26,6 +26,7 @@ namespace OpenDentBusiness {
 		///<summary>Enum:RemotingRole The RemotingRole of the instance that created this signal.</summary>
 		public RemotingRole RemoteRole;
 		///<summary>Message value of the signal.</summary>
+		[CrudColumn(SpecialType=CrudSpecialColType.TextIsClob)]
 		public string MsgValue;
 
 		///<summary></summary>

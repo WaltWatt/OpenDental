@@ -5,6 +5,8 @@ using System.Reflection;
 using System.Text;
 using System.Linq;
 using System.Globalization;
+using Newtonsoft.Json;
+using CodeBase;
 
 namespace OpenDentBusiness{
 	///<summary></summary>
@@ -70,20 +72,39 @@ namespace OpenDentBusiness{
 		}
 		*/
 
-		///<summary>Returns the number of messages which have not yet been read.  If there are no unread messages, then empty string is returned.  If more than 99 messages are unread, then "99" is returned.  The count limit is 99, because only 2 digits can fit in the SMS notification text.</summary>
-		public static string GetSmsNotification() {
+		///<summary>Structured data to be stored as json List in Signalod.MsgValue for InvalidType.SmsTextMsgReceivedUnreadCount.</summary>
+		public class SmsNotification {
+			[JsonProperty(PropertyName = "A")]
+			public long ClinicNum { get; set; }
+			[JsonProperty(PropertyName="B")]
+			public int Count { get; set; }
+
+			public static string GetJsonFromList(List<SmsNotification> listNotifications) {
+				return JsonConvert.SerializeObject(listNotifications);
+			}
+
+			public static List<SmsNotification> GetListFromJson(string json) {
+				List<SmsNotification> ret=null;
+				ODException.SwallowAnyException(() => ret=JsonConvert.DeserializeObject<List<SmsNotification>>(json));
+				return ret;
+			}
+		}
+
+		///<summary>A list item per each clinic indicating the number of messages which have not yet been read for that clinic (practice). 
+		///Inserts a new InvalidType.SmsTextMsgReceivedUnreadCount signal.</summary>
+		public static List<SmsNotification> UpdateSmsNotification() {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				return Meth.GetString(MethodBase.GetCurrentMethod());
+				return Meth.GetObject<List<SmsNotification>>(MethodBase.GetCurrentMethod());
 			}
-			string command="SELECT COUNT(*) FROM smsfrommobile WHERE SmsStatus="+POut.Int((int)SmsFromStatus.ReceivedUnread);
-			int smsUnreadCount=PIn.Int(Db.GetCount(command));
-			if(smsUnreadCount==0) {
-				return "";
-			}
-			if(smsUnreadCount>99) {
-				return "99";
-			}
-			return smsUnreadCount.ToString();
+			string command="SELECT ClinicNum,COUNT(*) AS CountUnread FROM smsfrommobile WHERE SmsStatus=0 GROUP BY ClinicNum";
+			List<SmsNotification> ret=Db.GetTable(command).AsEnumerable()
+				.Select(x => new SmsNotification() {
+					ClinicNum=PIn.Long(x["ClinicNum"].ToString()),
+					Count=PIn.Int(x["CountUnread"].ToString()),
+				}).ToList();
+			//Insert as structured data signal so all workstations won't have to query the db to get the counts. They will get it directly from Signalod.MsgValue.
+			Signalods.InsertSmsNotification(SmsNotification.GetJsonFromList(ret));
+			return ret;
 		}
 
 		///<summary>Call ProcessInboundSms instead.</summary>
@@ -105,6 +126,7 @@ namespace OpenDentBusiness{
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
 				return Meth.GetObject<List<SmsFromMobile>>(MethodBase.GetCurrentMethod(),dateStart,dateEnd,listClinicNums,patNum,isMessageThread,arrayStatuses);
 			}
+			List<SmsFromStatus> statusFilters=new List<SmsFromStatus>(arrayStatuses);
 			List <string> listCommandFilters=new List<string>();
 			if(dateStart>DateTime.MinValue) {
 				listCommandFilters.Add(DbHelper.DtimeToDate("DateTimeReceived")+">="+POut.Date(dateStart));
@@ -112,21 +134,24 @@ namespace OpenDentBusiness{
 			if(dateEnd>DateTime.MinValue) {
 				listCommandFilters.Add(DbHelper.DtimeToDate("DateTimeReceived")+"<="+POut.Date(dateEnd));
 			}
-			if(listClinicNums.Count>0) {
-				listCommandFilters.Add("ClinicNum IN ("+string.Join(",",listClinicNums.Select(x => POut.Long(x)))+")");
+			if(patNum==0) {
+				//Only limit clinic if not searching for a particular PatNum.
+				if(listClinicNums.Count>0) {
+					listCommandFilters.Add("ClinicNum IN ("+string.Join(",",listClinicNums.Select(x => POut.Long(x)))+")");
+				}
 			}
-			if(arrayStatuses.Length>0) {
-				listCommandFilters.Add("SmsStatus IN ("+string.Join(",",arrayStatuses.Select(x => POut.Int((int)x)))+")");
-			}
-			if(patNum!=0) {
+			else {
 				listCommandFilters.Add("PatNum="+POut.Long(patNum));
+			}
+			if(!isMessageThread) { //Always show unread in the grid.
+				statusFilters.Add(SmsFromStatus.ReceivedUnread);
+			}
+			if(statusFilters.Count>0) {
+				listCommandFilters.Add("SmsStatus IN ("+string.Join(",",statusFilters.GroupBy(x => x).Select(x => POut.Int((int)x.Key)))+")");
 			}
 			string command="SELECT * FROM smsfrommobile";
 			if(listCommandFilters.Count>0) {
 				command+=" WHERE "+string.Join(" AND ",listCommandFilters);
-			}
-			if(!isMessageThread) {
-				command +=" OR SmsStatus="+(int)SmsFromStatus.ReceivedUnread;//ALWAYS show unread messages.
 			}
 			return Crud.SmsFromMobileCrud.SelectMany(command);
 		}
@@ -150,9 +175,17 @@ namespace OpenDentBusiness{
 					sms.ClinicNum=smsPhone.ClinicNum;
 					countryCode=smsPhone.CountryCode;
 				}
-				//Item1=PatNum; Item2=Guarantor
-				List<long[]> listPatNums=FindPatNums(sms.MobilePhoneNumber,countryCode);
+				//First try the clinic that belongs to this phone.
+				List<long> listClinicNums=new List<long>();
+				if(sms.ClinicNum!=0) {
+					listClinicNums.Add(sms.ClinicNum);
+				}
+				List<long[]> listPatNums=FindPatNums(sms.MobilePhoneNumber,countryCode,listClinicNums);
+				if(listPatNums.Count==0 && listClinicNums.Count>0) { //Could not find that patient in this clinic so try again for all clinics.
+					listPatNums=FindPatNums(sms.MobilePhoneNumber,countryCode);
+				}
 				sms.MatchCount=listPatNums.Count;
+				//Item1=PatNum; Item2=Guarantor
 				if(listPatNums.Count==0 || listPatNums.Select(x => x[1]).Distinct().ToList().Count!=1){
 					//We could not find definitive match, either 0 matches found, or more than one match found with different garantors
 					Insert(sms);
@@ -175,12 +208,7 @@ namespace OpenDentBusiness{
 				sms.CommlogNum=Commlogs.Insert(comm);
 				Insert(sms);
 			}
-			Signalod sig=new Signalod();
-			sig.IType=InvalidType.SmsTextMsgReceivedUnreadCount;
-			sig.DateViewing=DateTime.MinValue;
-			sig.FKey=PIn.Long(GetSmsNotification());
-			sig.FKeyType=KeyType.SmsMsgUnreadCount;
-			Signalods.Insert(sig);
+			UpdateSmsNotification();
 		}
 
 		public static string GetSmsFromStatusDescript(SmsFromStatus smsFromStatus) {

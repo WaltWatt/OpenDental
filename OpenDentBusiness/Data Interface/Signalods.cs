@@ -341,12 +341,14 @@ namespace OpenDentBusiness {
 			Insert(sig);
 		}
 
-		///<summary>Inserts a signal which tells all client machines to update the received unread SMS message count inside the Text button of the main toolbar.  To get the current count from the database, use SmsFromMobiles.GetSmsNotification().</summary>
-		public static long InsertSmsNotification(long smsReceivedUnreadCount) {
-			Signalod sig=new Signalod();
-			sig.IType=InvalidType.SmsTextMsgReceivedUnreadCount;
-			sig.FKeyType=KeyType.SmsMsgUnreadCount;
-			sig.FKey=smsReceivedUnreadCount;
+		///<summary>Inserts an InvalidType.SmsTextMsgReceivedUnreadCount signal which tells all client machines to update the received unread SMS message count.
+		///To get the current count from the database, use SmsFromMobiles.GetSmsNotification().</summary>
+		public static long InsertSmsNotification(string json) {
+			Signalod sig=new Signalod() {
+				IType=InvalidType.SmsTextMsgReceivedUnreadCount,
+				FKeyType=KeyType.SmsMsgUnreadCount,
+				MsgValue=json,
+			};
 			return Signalods.Insert(sig);
 		}
 
