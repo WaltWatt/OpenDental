@@ -231,11 +231,10 @@ namespace OpenDental {
 			gridWebSchedNewPatApptOps.Columns.Add(new ODGridColumn(Lan.g("FormEServicesSetup","Hygienist"),60));
 			gridWebSchedNewPatApptOps.Columns.Add(new ODGridColumn(Lan.g("FormEServicesSetup","ApptTypes"),0));
 			gridWebSchedNewPatApptOps.Rows.Clear();
-			//A list of all operatories that have IsWebSched set to true.
+			//A list of all operatories that are considered for web sched new pat appt.
 			List<Operatory> listWSNPAOps=Operatories.GetOpsForWebSchedNewPatAppts();
-			List<DefLink> listWSNPAOperatoryDefLinks=DefLinks.GetDefLinksForWebSchedNewPatApptOperatories();
-			List<DefLink> listWSNPAApptTypeDefLinks=DefLinks.GetDefLinksForWebSchedNewPatApptApptTypes();
-			List<Def> listWSNPAApptTypeDefs=Defs.GetDefs(DefCat.WebSchedNewPatApptTypes,listWSNPAApptTypeDefLinks.Select(x => x.DefNum).ToList());
+			List<long> listWSNPADefNums=listWSNPAOps.SelectMany(x => x.ListWSNPAOperatoryDefNums).Distinct().ToList();
+			List<Def> listWSNPADefs=Defs.GetDefs(DefCat.WebSchedNewPatApptTypes,listWSNPADefNums);
 			ODGridRow row;
 			foreach(Operatory op in listWSNPAOps) {
 				row=new ODGridRow();
@@ -246,12 +245,8 @@ namespace OpenDental {
 				}
 				row.Cells.Add(Providers.GetAbbr(op.ProvDentist));
 				row.Cells.Add(Providers.GetAbbr(op.ProvHygienist));
-				//Figure out the DefNum that is associated to this New Pat Appt operatory
-				long defNum=listWSNPAOperatoryDefLinks.First(x => x.FKey==op.OperatoryNum).DefNum;
-				//Get all appointment type def links associated to the corresponding DefNum
-				List<DefLink> listDefLinkApptTypes=listWSNPAApptTypeDefLinks.FindAll(x => x.DefNum==defNum);
-				//Display the name of all "appointment types" (definition.ItemName) that are associated with the appt type defs that were just found.
-				row.Cells.Add(string.Join(", ",listWSNPAApptTypeDefs.Where(x => listDefLinkApptTypes.Any(y => y.DefNum==x.DefNum)).Select(x => x.ItemName)));
+				//Display the name of all "appointment types" (definition.ItemName) that are associated with the current operatory.
+				row.Cells.Add(string.Join(", ",listWSNPADefs.Where(x => op.ListWSNPAOperatoryDefNums.Any(y => y==x.DefNum)).Select(x => x.ItemName)));
 				row.Tag=op;
 				gridWebSchedNewPatApptOps.Rows.Add(row);
 			}

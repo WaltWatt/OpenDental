@@ -119,9 +119,9 @@ namespace OpenDental{
 			this.butCancel = new OpenDental.UI.Button();
 			this.label1 = new System.Windows.Forms.Label();
 			this.groupBoxApptType = new System.Windows.Forms.GroupBox();
-			this.label10 = new System.Windows.Forms.Label();
-			this.butWSNPAPickApptTypes = new OpenDental.UI.Button();
 			this.textWSNPAApptTypes = new System.Windows.Forms.TextBox();
+			this.butWSNPAPickApptTypes = new OpenDental.UI.Button();
+			this.label10 = new System.Windows.Forms.Label();
 			this.groupBoxApptType.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -131,7 +131,7 @@ namespace OpenDental{
 			this.labelApptType.Name = "labelApptType";
 			this.labelApptType.Size = new System.Drawing.Size(117, 17);
 			this.labelApptType.TabIndex = 126;
-			this.labelApptType.Text = "New Pat Appt Type";
+			this.labelApptType.Text = "New Pat Appt Types";
 			this.labelApptType.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
 			// butPickHyg
@@ -388,14 +388,14 @@ namespace OpenDental{
 			this.groupBoxApptType.TabStop = false;
 			this.groupBoxApptType.Text = "Web Sched Settings";
 			// 
-			// label10
+			// textWSNPAApptTypes
 			// 
-			this.label10.Location = new System.Drawing.Point(131, 65);
-			this.label10.Name = "label10";
-			this.label10.Size = new System.Drawing.Size(378, 29);
-			this.label10.TabIndex = 128;
-			this.label10.Text = "Only the above appointment types will be allowed within this operatory.\r\nAppt Typ" +
-    "e is required to be considered for Web Sched New Pat Appt.";
+			this.textWSNPAApptTypes.Location = new System.Drawing.Point(134, 41);
+			this.textWSNPAApptTypes.MaxLength = 255;
+			this.textWSNPAApptTypes.Name = "textWSNPAApptTypes";
+			this.textWSNPAApptTypes.ReadOnly = true;
+			this.textWSNPAApptTypes.Size = new System.Drawing.Size(252, 20);
+			this.textWSNPAApptTypes.TabIndex = 129;
 			// 
 			// butWSNPAPickApptTypes
 			// 
@@ -411,14 +411,14 @@ namespace OpenDental{
 			this.butWSNPAPickApptTypes.Text = "...";
 			this.butWSNPAPickApptTypes.Click += new System.EventHandler(this.butWSNPAPickApptTypes_Click);
 			// 
-			// textWSNPAApptTypes
+			// label10
 			// 
-			this.textWSNPAApptTypes.Location = new System.Drawing.Point(134, 41);
-			this.textWSNPAApptTypes.MaxLength = 255;
-			this.textWSNPAApptTypes.Name = "textWSNPAApptTypes";
-			this.textWSNPAApptTypes.ReadOnly = true;
-			this.textWSNPAApptTypes.Size = new System.Drawing.Size(252, 20);
-			this.textWSNPAApptTypes.TabIndex = 129;
+			this.label10.Location = new System.Drawing.Point(131, 65);
+			this.label10.Name = "label10";
+			this.label10.Size = new System.Drawing.Size(378, 29);
+			this.label10.TabIndex = 128;
+			this.label10.Text = "Only the above appointment types will be allowed within this operatory.\r\nAppt Typ" +
+    "e is required to be considered for Web Sched New Pat Appt.";
 			// 
 			// FormOperatoryEdit
 			// 
@@ -479,8 +479,12 @@ namespace OpenDental{
 			//Set comboindexes for compatibility with fillComboProvHyg
 			comboProv.SelectedIndex=-1;
 			comboHyg.SelectedIndex=-1;
-			comboClinic.IndexSelectOrSetText(_listClinics.FindIndex(x => x.ClinicNum==_selectedClinicNum),() => { return Clinics.GetAbbr(_selectedClinicNum); });
-			_listWSNPAOperatoryDefs=Defs.GetDefsByDefLinkFKey(DefCat.WebSchedNewPatApptTypes,OpCur.OperatoryNum,DefLinkType.Operatory);
+			comboClinic.IndexSelectOrSetText(_listClinics.FindIndex(x => x.ClinicNum==_selectedClinicNum)
+				,() => { return Clinics.GetAbbr(_selectedClinicNum); });
+			if(OpCur.ListWSNPAOperatoryDefNums!=null) {
+				//This is an existing operatory with WSNPA appointment types associated.  Go get them in order to display to the user.
+				_listWSNPAOperatoryDefs=Defs.GetDefs(DefCat.WebSchedNewPatApptTypes,OpCur.ListWSNPAOperatoryDefNums);
+			}
 			FillWSNPAApptTypes();
 			FillComboProvHyg();
 			checkIsHygiene.Checked=OpCur.IsHygiene;
@@ -597,7 +601,7 @@ namespace OpenDental{
 			OpCur.IsHygiene=checkIsHygiene.Checked;
 			OpCur.SetProspective=checkSetProspective.Checked;
 			OpCur.IsWebSched=checkIsWebSched.Checked;
-			DefLinks.SetWebSchedNewPatApptOpLinksForDefs(OpCur.OperatoryNum,_listWSNPAOperatoryDefs.Select(x => x.DefNum).ToList());
+			OpCur.ListWSNPAOperatoryDefNums=_listWSNPAOperatoryDefs.Select(x => x.DefNum).ToList();
 			if(IsNew) {
 				ListOps.Insert(OpCur.ItemOrder,OpCur);//Insert into list at appropriate spot
 				for(int i=0;i<ListOps.Count;i++) {

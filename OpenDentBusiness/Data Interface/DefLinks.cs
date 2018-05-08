@@ -124,25 +124,31 @@ namespace OpenDentBusiness{
 			}
 		}
 
-		public static void SetWebSchedNewPatApptOpLinksForDefs(long operatoryNum,List<long> listDefNums) {
+		///<summary>Sync method for inserting all necessary DefNums associated to the operatory passed in.
+		///Does nothing if operatory.ListWSNPAOperatoryDefNums is null.  Will delete all deflinks if the list is empty.
+		///Optionally pass in the list of deflinks to consider in order to save database calls.</summary>
+		public static void SyncWebSchedNewPatApptOpLinks(Operatory operatory,List<DefLink> listOpDefLinks=null) {
 			//No need to check RemotingRole; no call to db.
-			if(listDefNums==null) {
-				listDefNums=new List<long>();//So that the table gets cleared out.
+			if(operatory.ListWSNPAOperatoryDefNums==null) {
+				return;//null means that this column was never even considered.  Save time by simply returning.
 			}
-			//Get the current DefNums that are linked to the operatory passed in.
-			List<DefLink> listOpDefLinks=GetDefLinksForWebSchedNewPatApptOperatories()
-				.Where(x => x.FKey==operatoryNum)
-				.ToList();
+			//Get all operatory deflinks from the database if a specific list was not passed in.
+			listOpDefLinks=listOpDefLinks??GetDefLinksForWebSchedNewPatApptOperatories();
+			//Filter the deflinks down in order to get the current DefNums that are linked to the operatory passed in.
+			listOpDefLinks=listOpDefLinks.Where(x => x.FKey==operatory.OperatoryNum).ToList();
 			//Delete all def links that are associated to DefNums that are not in listDefNums.
-			List<DefLink> listDefLinksToDelete=listOpDefLinks.Where(x => !listDefNums.Contains(x.DefNum)).ToList();
+			List<DefLink> listDefLinksToDelete=listOpDefLinks.Where(x => !operatory.ListWSNPAOperatoryDefNums.Contains(x.DefNum)).ToList();
 			DeleteDefLinks(listDefLinksToDelete.Select(x => x.DefLinkNum).ToList());
 			//Insert new DefLinks for all DefNums that were passed in that are not in listOpDefLinks.
-			List<long> listDefNumsToInsert=listDefNums.Where(x => !listOpDefLinks.Select(y => y.DefNum).Contains(x)).ToList();
-			InsertDefLinksForDefs(listDefNumsToInsert,operatoryNum,DefLinkType.Operatory);
+			List<long> listDefNumsToInsert=operatory.ListWSNPAOperatoryDefNums.Where(x => !listOpDefLinks.Select(y => y.DefNum).Contains(x)).ToList();
+			InsertDefLinksForDefs(listDefNumsToInsert,operatory.OperatoryNum,DefLinkType.Operatory);
 			//There is no reason to "update" deflinks so there is nothing else to do.
 		}
 
 		public static void InsertDefLinksForDefs(List<long> listDefNums,long fKey,DefLinkType linkType) {
+			if(listDefNums==null || listDefNums.Count < 1) {
+				return;
+			}
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {//Remoting role check to save on middle tier calls due to loop.
 				Meth.GetVoid(MethodBase.GetCurrentMethod(),listDefNums,fKey,linkType);
 				return;
@@ -196,6 +202,21 @@ namespace OpenDentBusiness{
 			Crud.DefLinkCrud.Delete(defLinkNum);
 		}
 
+		///<summary>Deletes all links for the specified FKey and link type.</summary>
+		public static void DeleteAllForFKeys(List<long> listFKeys,DefLinkType defType) {
+			if(listFKeys==null || listFKeys.Count < 1) {
+				return;
+			}
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				Meth.GetVoid(MethodBase.GetCurrentMethod(),listFKeys,defType);
+				return;
+			}
+			string command="DELETE FROM deflink "
+				+"WHERE LinkType="+POut.Int((int)defType)+" "
+				+"AND FKey IN("+string.Join(",",listFKeys.Select(x => POut.Long(x)))+")";
+			Db.NonQ(command);
+		}
+
 		///<summary>Deletes all links for the specified definition and link type.</summary>
 		public static void DeleteAllForDef(long defNum,DefLinkType defType) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
@@ -209,11 +230,11 @@ namespace OpenDentBusiness{
 		}
 
 		public static void DeleteDefLinks(List<long> listDefLinkNums) {
-			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				Meth.GetVoid(MethodBase.GetCurrentMethod(),listDefLinkNums);
+			if(listDefLinkNums==null || listDefLinkNums.Count < 1) {
 				return;
 			}
-			if(listDefLinkNums==null || listDefLinkNums.Count < 1) {
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				Meth.GetVoid(MethodBase.GetCurrentMethod(),listDefLinkNums);
 				return;
 			}
 			string command="DELETE FROM deflink WHERE DefLinkNum IN ("+string.Join(",",listDefLinkNums)+")";

@@ -107,13 +107,21 @@ namespace OpenDentBusiness{
 			protected override List<Operatory> TableToList(DataTable table) {
 				List<Operatory> listOps=Crud.OperatoryCrud.TableToList(table);
 				//The IsInHQView flag is not important enough to cause filling the cache to fail.
-				try {
+				ODException.SwallowAnyException(() => {
 					for(int i=0;i<table.Rows.Count;i++) {
 						listOps[i].IsInHQView=PIn.Bool(table.Rows[i]["IsInHQView"].ToString());
 					}
-				}
-				catch(Exception e) {
-					e.DoNothing();
+				});
+				//WSNPA operatory defs are important enough that we want this portion to fail if it has problems.
+				//Create a dictionary comprised of Key: OperatoryNum and value: List of definition DefNums.
+				Dictionary<long,List<long>> dictWSNPAOperatoryDefNums=DefLinks.GetDefLinksByType(DefLinkType.Operatory)
+					.GroupBy(x => x.FKey)//FKey for DefLinkType.Operatory is OperatoryNum
+					.ToDictionary(x => x.Key,x => x.Select(y => y.DefNum).ToList());
+				foreach(long operatoryNum in dictWSNPAOperatoryDefNums.Keys) {
+					Operatory op=listOps.FirstOrDefault(x => x.OperatoryNum==operatoryNum);
+					if(op!=null) {
+						op.ListWSNPAOperatoryDefNums=dictWSNPAOperatoryDefNums[operatoryNum];
+					}
 				}
 				return listOps;
 			}
@@ -190,13 +198,26 @@ namespace OpenDentBusiness{
 
 		#region Sync Pattern
 
-		///<summary>Inserts, updates, or deletes database rows to match supplied list.</summary>
+		///<summary>Inserts, updates, or deletes database rows to match supplied list.
+		///Also syncs each operatory's deflink entries if the operatory.ListWSNPAOperatoryDefNums is not null.</summary>
 		public static void Sync(List<Operatory> listNew,List<Operatory> listOld) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
 				Meth.GetVoid(MethodBase.GetCurrentMethod(),listNew,listOld);//never pass DB list through the web service
 				return;
 			}
 			Crud.OperatoryCrud.Sync(listNew,listOld);
+			//Regardless if changes were made during the sync, we need to make sure to sync the DefLinks for WSNPA appointment types.
+			//This needs to happen after the sync call so that the PKs have been correctly set for listNew.
+			List<DefLink> listDefLinksAll=DefLinks.GetDefLinksForWebSchedNewPatApptOperatories();
+			foreach(Operatory operatory in listNew) {
+				DefLinks.SyncWebSchedNewPatApptOpLinks(operatory,listDefLinksAll);
+			}
+			//Delete any deflinks for operatories that are present within listOld but are not present within listNew.
+			List<long> listDeleteOpNums=listOld.Where(x => !listNew.Any(y => y.OperatoryNum==x.OperatoryNum))
+				.Select(x => x.OperatoryNum)
+				.Distinct()
+				.ToList();
+			DefLinks.DeleteAllForFKeys(listDeleteOpNums,DefLinkType.Operatory);
 		}
 
 		#endregion

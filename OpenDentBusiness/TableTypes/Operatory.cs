@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace OpenDentBusiness{
 	///<summary>Each row is a single operatory or column in the appts module.</summary>
@@ -38,8 +39,13 @@ namespace OpenDentBusiness{
 		public bool IsNewPatAppt;
 
 		///<summary>True if the current op is in an HQ view.  Defaults to true for safety.  Not stored in the db.</summary>
-		[CrudColumn(IsNotDbColumn = true)]
+		[CrudColumn(IsNotDbColumn=true)]
 		public bool IsInHQView=true;
+		///<summary>DefNums of category WebSchedNewPatApptTypes that this operatory is associated to.  Filled within the OperatoryCache.
+		///Necessary for the sync method so that DefLink enteries can be made for newly created operatories.
+		///Also, used as an indicator that this operatory is ready for WSNPA (replaces IsNewPatAppt bool column above).</summary>
+		[CrudColumn(IsNotDbColumn=true)]
+		public List<long> ListWSNPAOperatoryDefNums;
 
 		///<summary>Returns a copy of this Operatory.</summary>
 		public Operatory Copy(){
