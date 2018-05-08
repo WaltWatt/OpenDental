@@ -89,69 +89,46 @@ namespace OpenDental {
 
 		private void butAdd_Click(object sender,EventArgs e) {
 			if(!PrefC.GetBool(PrefName.StoreCCnumbers)) {
-				bool addXCharge=false;
-				bool addPayConnect=false;
-				bool addPaySimple=false;
-				List<ProgramName> listEnabledProcessors=new List<ProgramName>();
+				bool hasXCharge=false;
+				bool hasPayConnect=false;
+				bool hasPaySimple=false;
+				Dictionary<string,int> dictEnabledProcessors=new Dictionary<string,int>();
+				int idx=0;
 				if(Programs.IsEnabled(ProgramName.Xcharge)) {
-					listEnabledProcessors.Add(ProgramName.Xcharge);
+					dictEnabledProcessors["X-Charge"]=idx++;
 				}
 				if(Programs.IsEnabled(ProgramName.PayConnect)) {
-					listEnabledProcessors.Add(ProgramName.PayConnect);
+					dictEnabledProcessors["PayConnect"]=idx++;
 				}
 				if(Programs.IsEnabled(ProgramName.PaySimple)) {
-					listEnabledProcessors.Add(ProgramName.PaySimple);
+					dictEnabledProcessors["PaySimple"]=idx++;
 				}
-				if(listEnabledProcessors.Count>1) {
-					List<string> listCCProcessors=new List<string>();// {"X-Charge","PayConnect","X-Charge and PayConnect" };
-					if(listEnabledProcessors.Contains(ProgramName.Xcharge)) {
-						listCCProcessors.Add("X-Charge");
-					}
-					if(listEnabledProcessors.Contains(ProgramName.PayConnect)) {
-						listCCProcessors.Add("PayConnect");
-					}
-					if(listEnabledProcessors.Contains(ProgramName.Xcharge) && listEnabledProcessors.Contains(ProgramName.PayConnect)) {
-						listCCProcessors.Add("X-Charge and PayConnect");
-					}
-					if(listEnabledProcessors.Contains(ProgramName.PaySimple)) {
-						listCCProcessors.Add("PaySimple");
-					}
-					if(listEnabledProcessors.Contains(ProgramName.PaySimple) && listEnabledProcessors.Contains(ProgramName.Xcharge)) {
-						listCCProcessors.Add("PaySimple and X-Charge");
-					}
-					if(listEnabledProcessors.Contains(ProgramName.PaySimple) && listEnabledProcessors.Contains(ProgramName.PayConnect)) {
-						listCCProcessors.Add("PaySimple and PayConnect");
-					}
-					if(listEnabledProcessors.Contains(ProgramName.PaySimple)
-						&& listEnabledProcessors.Contains(ProgramName.Xcharge)
-						&& listEnabledProcessors.Contains(ProgramName.PayConnect)) {
-						listCCProcessors.Add("PaySimple, X-Charge, and PayConnect");
-					}
-					InputBox chooseProcessor=new InputBox(Lan.g(this,"For which credit card processing company would you like to add this card?"),
-						listCCProcessors);
+				if(dictEnabledProcessors.Count>1) {
+					List<string> listCCProcessors=dictEnabledProcessors.Select(x => x.Key).ToList();
+					InputBox chooseProcessor=
+						new InputBox(Lan.g(this,"For which credit card processing company would you like to add this card?"),listCCProcessors,true);
 					if(chooseProcessor.ShowDialog()==DialogResult.Cancel) {
 						return;
 					}
-					int selectedIdx=chooseProcessor.comboSelection.SelectedIndex;
-					addXCharge=(selectedIdx==0 || selectedIdx==2 || selectedIdx==4 || selectedIdx==6);
-					addPayConnect=(selectedIdx==1 || selectedIdx==2 || selectedIdx==5 || selectedIdx==6);
-					addPaySimple=(selectedIdx==3 || selectedIdx==4 || selectedIdx==5);
+					hasXCharge=dictEnabledProcessors.ContainsKey("X-Charge") && chooseProcessor.SelectedIndices.Contains(dictEnabledProcessors["X-Charge"]);
+					hasPayConnect=dictEnabledProcessors.ContainsKey("PayConnect") && chooseProcessor.SelectedIndices.Contains(dictEnabledProcessors["PayConnect"]);
+					hasPaySimple=dictEnabledProcessors.ContainsKey("PaySimple") && chooseProcessor.SelectedIndices.Contains(dictEnabledProcessors["PaySimple"]);
 				}
 				else if(Programs.IsEnabled(ProgramName.Xcharge)) {
-					addXCharge=true;
+					hasXCharge=true;
 				}
 				else if(Programs.IsEnabled(ProgramName.PayConnect)) {
-					addPayConnect=true;
+					hasPayConnect=true;
 				}
 				else if(Programs.IsEnabled(ProgramName.PaySimple)) {
-					addPaySimple=true;
+					hasPaySimple=true;
 				}
 				else {//not storing CC numbers and both PayConnect and X-Charge are disabled
 					MsgBox.Show(this,"Not allowed to store credit cards.");
 					return;
 				}
 				CreditCard creditCardCur=null;
-				if(addXCharge) {
+				if(hasXCharge) {
 					Program prog=Programs.GetCur(ProgramName.Xcharge);
 					string path=Programs.GetProgramPath(prog);
 					string xUsername=ProgramProperties.GetPropVal(prog.ProgramNum,"Username",Clinics.ClinicNum).Trim();
@@ -255,12 +232,12 @@ namespace OpenDental {
 						MsgBox.Show(this,"There was a problem adding the credit card.  Please try again.");
 					}
 				}
-				if(addPayConnect) {
+				if(hasPayConnect) {
 					FormPayConnect FormPC=new FormPayConnect(PatCur.ClinicNum,PatCur,(decimal)0.01,creditCardCur,true);
 					FormPC.ShowDialog();
 				}
-				if(addPaySimple) {
-					FormPaySimple formPS=new FormPaySimple(PatCur.ClinicNum,PatCur,0.01,creditCardCur,true);
+				if(hasPaySimple) {
+					FormPaySimple formPS=new FormPaySimple(PatCur.ClinicNum,PatCur,(decimal)0.01,creditCardCur,true);
 					formPS.ShowDialog();
 				}
 				FillGrid();

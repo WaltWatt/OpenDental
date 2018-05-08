@@ -12,7 +12,7 @@ namespace OpenDental {
 	public partial class FormPaySimpleSetup:ODForm {
 
 		private Program _progCur;
-		///<summary>Local cache of all of the clinic nums the current user has permission to access at the time the form loads.  Filled at the same time
+		///<summary>Local cache of all of the ClinicNums the current user has permission to access at the time the form loads.  Filled at the same time
 		///as comboClinic and is used to set programproperty.ClinicNum when saving.</summary>
 		private List<long> _listUserClinicNums;
 		///<summary>List of PaySimple program properties for all clinics.
@@ -75,7 +75,7 @@ namespace OpenDental {
 			}
 			_listProgProps=ProgramProperties.GetForProgram(_progCur.ProgramNum);
 			if(PrefC.HasClinicsEnabled) {
-				foreach(Clinic clinicCur in Clinics.GetAllForUserod(Security.CurUser)) {
+				foreach(Clinic clinicCur in Clinics.GetForUserod(Security.CurUser)) {
 					AddNeededProgramProperties(clinicCur.ClinicNum);
 				}
 			}
@@ -88,7 +88,7 @@ namespace OpenDental {
 					ClinicNum=clinicNum,
 					PropertyDesc=PaySimple.PropertyDescs.PaySimpleApiUserName,
 					ProgramNum=_progCur.ProgramNum,
-					PropertyValue="",//This could probably be enhanced to default to the clinic 0 value
+					PropertyValue=_listProgProps.FirstOrDefault(x => x.PropertyDesc==PaySimple.PropertyDescs.PaySimpleApiUserName && x.ClinicNum==0).PropertyValue,
 				});
 			}
 			if(!_listProgProps.Any(x => x.ClinicNum==clinicNum && x.PropertyDesc==PaySimple.PropertyDescs.PaySimpleApiKey)) {
@@ -96,7 +96,7 @@ namespace OpenDental {
 					ClinicNum=clinicNum,
 					PropertyDesc=PaySimple.PropertyDescs.PaySimpleApiKey,
 					ProgramNum=_progCur.ProgramNum,
-					PropertyValue="",//This could probably be enhanced to default to the clinic 0 value
+					PropertyValue=_listProgProps.FirstOrDefault(x => x.PropertyDesc==PaySimple.PropertyDescs.PaySimpleApiKey && x.ClinicNum==0).PropertyValue,
 				});
 			}
 			if(!_listProgProps.Any(x => x.ClinicNum==clinicNum && x.PropertyDesc==PaySimple.PropertyDescs.PaySimplePayType)) {
@@ -104,7 +104,7 @@ namespace OpenDental {
 					ClinicNum=clinicNum,
 					PropertyDesc=PaySimple.PropertyDescs.PaySimplePayType,
 					ProgramNum=_progCur.ProgramNum,
-					PropertyValue="",//This could probably be enhanced to default to the clinic 0 value
+					PropertyValue=_listProgProps.FirstOrDefault(x => x.PropertyDesc==PaySimple.PropertyDescs.PaySimplePayType && x.ClinicNum==0).PropertyValue,
 				});
 			}
 		}
@@ -133,9 +133,9 @@ namespace OpenDental {
 			}
 			//if PaySimple is enabled and the username and key are set for the current clinic,
 			//make the user select a payment type before switching clinics
-			if(checkEnabled.Checked && textUsername.Text!="" && textKey.Text!="" && comboPaymentType.SelectedIndex==-1) {
+			if(checkEnabled.Checked && !IsClinicCurSetupDone()) {
 				comboClinic.SelectedIndex=_indexClinicRevert;
-				MsgBox.Show(this,"Please select a payment type first.");
+				MsgBox.Show(this,"Please select a username, key, and/or payment type first.");
 				return;
 			}
 			SynchWithHQ();//if the user just modified the HQ credentials, change any credentials that were the same as HQ to keep them synched
@@ -150,6 +150,18 @@ namespace OpenDental {
 				.ForEach(x => x.PropertyValue=_listPaymentTypeDefs[comboPaymentType.SelectedIndex].DefNum.ToString());//always 1 item; null safe
 			_indexClinicRevert=comboClinic.SelectedIndex;//now that we've updated the values for the clinic we're switching from, update _indexClinicRevert
 			FillFields();
+		}
+
+		private bool IsClinicCurSetupDone() {
+			//If nothing is set, they are OK to change clinics and save.
+			if(string.IsNullOrWhiteSpace(textUsername.Text) && string.IsNullOrWhiteSpace(textKey.Text)){
+				return true;
+			}
+			//If everything is set, they are OK to change clinics and save.
+			if(!string.IsNullOrWhiteSpace(textUsername.Text) && !string.IsNullOrWhiteSpace(textKey.Text) && comboPaymentType.SelectedIndex>=0) {
+				return true;
+			}
+			return false;
 		}
 
 		///<summary>For each clinic, if the Username and Key are the same as the HQ (ClinicNum=0) Username and Key, update the clinic with the
@@ -195,17 +207,8 @@ namespace OpenDental {
 			//if clinics are not enabled and the PaySimple program link is enabled, make sure there is a username and key set
 			//if clinics are enabled, the program link can be enabled with blank username and/or key fields for some clinics
 			//clinics with blank username and/or key will essentially not have PaySimple enabled
-			if(checkEnabled.Checked && !PrefC.HasClinicsEnabled &&
-				(textUsername.Text=="" || textKey.Text=="")) {
-				MsgBox.Show(this,"Please enter a username and key first.");
-				return;
-			}
-			if(checkEnabled.Checked //if PaySimple is enabled
-				&& comboPaymentType.SelectedIndex<0 //and the payment type is not set
-				&& (!PrefC.HasClinicsEnabled  //and either clinics are not enabled (meaning this is the only set of username, key, payment type values)
-				|| (textUsername.Text!="" && textKey.Text!=""))) //or clinics are enabled and this clinic's link has a username and key set
-			{
-				MsgBox.Show(this,"Please select a payment type first.");
+			if(checkEnabled.Checked && !IsClinicCurSetupDone()) {//Also works for offices not using clinics
+				MsgBox.Show(this,"Please enter a username, key, and/or payment type first.");
 				return;
 			}
 			SynchWithHQ();//if the user changes the HQ credentials, any clinic that had the same credentials will be kept in synch with HQ

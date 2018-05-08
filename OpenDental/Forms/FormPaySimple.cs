@@ -27,12 +27,10 @@ namespace OpenDental {
 		private long _clinicNum;
 		private Program _progCur;
 
-		public FormPaySimple(long clinicNum,Patient pat,double amount,CreditCard creditCard,bool isAddingCard=false) {
+		public FormPaySimple(long clinicNum,Patient pat,decimal amount,CreditCard creditCard,bool isAddingCard=false) {
 			InitializeComponent();
 			Lan.F(this);
-			if(amount>0) {
-				textAmount.Text=POut.Double(amount);//This varies from payconnect because payconnect uses a decimal.
-			}
+			textAmount.Text=POut.Decimal(amount);
 			_clinicNum=clinicNum;
 			_patCur=pat;
 			_creditCardCur=creditCard;
@@ -55,8 +53,10 @@ namespace OpenDental {
 				checkOneTimePayment.Checked=!PrefC.GetBool(PrefName.StoreCCtokens);
 				textZipCode.Text=_patCur.Zip;
 				textNameOnCard.Text=_patCur.GetNameFL();
+				if(_creditCardCur!=null) {
+					FillFieldsFromCard();
+				}
 			}
-			FillFieldsFromCard();
 			if(_isAddingCard) {
 				radioAuthorization.Checked=true;
 				_trantype=PaySimple.TransType.AUTH;
@@ -70,9 +70,6 @@ namespace OpenDental {
 		}
 
 		private void FillFieldsFromCard() {
-			if(_creditCardCur==null) {
-				return;
-			}
 			//User selected a credit card from drop down.
 			if(_creditCardCur.CCNumberMasked!="") {
 				string ccNum=_creditCardCur.CCNumberMasked;
@@ -232,17 +229,18 @@ namespace OpenDental {
 							,new DateTime(expYear,expMonth,1),checkOneTimePayment.Checked,textZipCode.Text,textSecurityCode.Text,_clinicNum);
 						break;
 					case PaySimple.TransType.AUTH:
-						long customerId=PaySimple.GetCustomerIdForPat(_patCur.PatNum,_patCur.FName,_patCur.LName,_clinicNum);//Will retreive a new customer id from PaySimple if the patient doesn't exist already.
+						//Will retreive a new customer id from PaySimple if the patient doesn't exist already.
+						long paySimpleCustomerId=PaySimple.GetCustomerIdForPat(_patCur.PatNum,_patCur.FName,_patCur.LName,_clinicNum);
 						//I have no idea if an insurance can make an auth payment but incase they can I check for it.
-						if(customerId==0) {//Insurance payment, make a new customer id every time per Nathan on 04/26/2018
+						if(paySimpleCustomerId==0) {//Insurance payment, make a new customer id every time per Nathan on 04/26/2018
 							if((_patCur==null || _patCur.PatNum==0)) {
-								customerId=PaySimple.AddCustomer("UNKNOWN","UNKNOWN","",_clinicNum);
+								paySimpleCustomerId=PaySimple.AddCustomer("UNKNOWN","UNKNOWN","",_clinicNum);
 							}
 							else {
 								throw new ODException(Lan.g(this,"Invalid PaySimple Customer Id found."));
 							}
 						}
-						retVal=PaySimple.AddCreditCard(customerId,textCardNumber.Text,new DateTime(expYear,expMonth,1),textZipCode.Text,_clinicNum);
+						retVal=PaySimple.AddCreditCard(paySimpleCustomerId,textCardNumber.Text,new DateTime(expYear,expMonth,1),textZipCode.Text,_clinicNum);
 						break;
 					case PaySimple.TransType.RETURN:
 						if(string.IsNullOrWhiteSpace(textRefNumber.Text)) {
@@ -282,8 +280,6 @@ namespace OpenDental {
 			if(checkOneTimePayment.Checked) {//not storing the card token
 				return retVal;
 			}
-			//response must be non-null and the status code must be 0=Approved
-			//also, the user must have the pref StoreCCnumbers enabled or they have the checkSaveTokens checked
 			if(_creditCardCur==null) {//user selected Add new card from the payment window, save it or its token depending on settings
 				_creditCardCur=new CreditCard();
 				_creditCardCur.IsNew=true;
@@ -303,11 +299,6 @@ namespace OpenDental {
 				CreditCards.Insert(_creditCardCur);
 			}
 			else {
-				//==Josh 04/27/2018:  Commented this line of code out because it currently will never get hit (_creditCardCur.CCSource gets set right above this if/else).
-				//This was copy pasted from FormPayConnect, but I don't have the heart to ask someone if I should use precious time to fully care about something that has been broken for at least 6 months
-				//if(_creditCardCur.CCSource==CreditCardSource.XServer) {//This card has also been added for XCharge.
-				//	_creditCardCur.CCSource=CreditCardSource.XServerPayConnect;
-				//}
 				CreditCards.Update(_creditCardCur);
 			}
 			return retVal;
@@ -364,7 +355,7 @@ namespace OpenDental {
 				MsgBox.Show(this,"Ref Number required.");
 				return false;
 			}
-			string paytype=ProgramProperties.GetPropVal(_progCur.ProgramNum,PaySimple.PropertyDescs.PaySimplePayType,_clinicNum);
+			string paytype=ProgramProperties.GetPropValForClinicOrDefault(_progCur.ProgramNum,PaySimple.PropertyDescs.PaySimplePayType,_clinicNum);
 			if(!Defs.GetDefsForCategory(DefCat.PaymentTypes,true).Any(x => x.DefNum.ToString()==paytype)) { //paytype is not a valid DefNum
 				MsgBox.Show(this,"The PaySimple payment type has not been set.");
 				return false;
@@ -409,8 +400,8 @@ namespace OpenDental {
 				return false;
 			}
 			//verify the selected clinic has a username and password type entered
-			if(string.IsNullOrWhiteSpace(ProgramProperties.GetPropVal(_progCur.ProgramNum,PaySimple.PropertyDescs.PaySimpleApiUserName,_clinicNum))
-				|| string.IsNullOrWhiteSpace(ProgramProperties.GetPropVal(_progCur.ProgramNum,PaySimple.PropertyDescs.PaySimpleApiKey,_clinicNum))) //if username or password is blank
+			if(string.IsNullOrWhiteSpace(ProgramProperties.GetPropValForClinicOrDefault(_progCur.ProgramNum,PaySimple.PropertyDescs.PaySimpleApiUserName,_clinicNum))
+				|| string.IsNullOrWhiteSpace(ProgramProperties.GetPropValForClinicOrDefault(_progCur.ProgramNum,PaySimple.PropertyDescs.PaySimpleApiKey,_clinicNum))) //if username or password is blank
 			{
 				MsgBox.Show(this,"The PaySimple username and/or key has not been set.");
 				return false;
@@ -427,7 +418,7 @@ namespace OpenDental {
 				return;
 			}
 			ApiResponseOut=ProcessPayment(expYear,expMonth);
-			bool isSuccess=ApiResponseOut!=null;
+			bool isSuccess=(ApiResponseOut!=null);
 			Cursor=Cursors.Default;
 			if(isSuccess) {
 				DialogResult=DialogResult.OK;

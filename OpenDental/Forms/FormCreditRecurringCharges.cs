@@ -24,7 +24,6 @@ namespace OpenDental {
 		private int pagesPrinted;
 		private int headingPrintH;
 		private bool headingPrinted;
-		private bool insertPayment;
 		private Program _progCur;
 		private DateTime _nowDateTime;
 		private string _xPath;
@@ -541,7 +540,6 @@ namespace OpenDental {
 					continue;
 				}
 				password=MiscUtils.Decrypt(password);
-				insertPayment=false;
 				ProcessStartInfo info=new ProcessStartInfo(_xPath);
 				long patNum=PIn.Long(rowCur["PatNum"].ToString());
 				Patient patCur=Patients.GetPat(patNum);
@@ -642,7 +640,6 @@ namespace OpenDental {
 								if(line=="RESULT=SUCCESS") {
 									_success++;
 									labelCharged.Text=Lan.g(this,"Charged=")+_success;
-									insertPayment=true;
 								}
 								else {
 									_failed++;
@@ -861,8 +858,7 @@ namespace OpenDental {
 			foreach(int selectedIndex in listSelectedIndices) {
 				DataRow rowCur=_listRowsCur[selectedIndex];
 				string paySimpleAccountId=rowCur["PaySimpleToken"].ToString();
-				int tokenCount=CreditCards.GetTokenCount(paySimpleAccountId,
-					new List<CreditCardSource> { CreditCardSource.PaySimple });
+				int tokenCount=CreditCards.GetTokenCount(paySimpleAccountId,new List<CreditCardSource> { CreditCardSource.PaySimple });
 				if(string.IsNullOrWhiteSpace(paySimpleAccountId) || tokenCount!=1) {
 					_failed++;
 					labelFailed.Text=Lan.g(this,"Failed=")+_failed;
@@ -904,21 +900,16 @@ namespace OpenDental {
 					}
 					//add to strbuilder that will be written to txt file and to the payment note
 					if(PrefC.HasClinicsEnabled && dictClinicNumDesc.ContainsKey(clinicNumCur)) {
-						strBuilderResultText.AppendLine("CLINIC="+dictClinicNumDesc[clinicNumCur]);
+						strBuilderResultText.AppendLine("Clinic="+dictClinicNumDesc[clinicNumCur]);
 					}
-					strBuilderResultText.AppendLine(response.ToNoteString());
-					strBuilderResultText.AppendLine("ENTRY=MANUAL");
-					strBuilderResultText.AppendLine("CLERK="+Security.CurUser.UserName);
-						strBuilderResultText.AppendLine("EXPIRATION="+ccCur.CCExpiration.Month.ToString().PadLeft(2,'0')
-							+(ccCur.CCExpiration.Year%100));
-					strBuilderResultText.AppendLine("CARD TYPE=PaySimple Token");
+					strBuilderResultText.AppendLine(response.ToNoteString(dictClinicNumDesc[clinicNumCur],"Manual"
+						,Security.CurUser.UserName,ccCur.CCExpiration.Month.ToString().PadLeft(2,'0')+(ccCur.CCExpiration.Year%100),"PaySimple Token"));
 					resultAmt=(double)response.Amount;
 					response.BuildReceiptString(ccCur.CCNumberMasked,ccCur.CCExpiration.Month,ccCur.CCExpiration.Year,"",clinicNumCur);
 					string receipt=response.TransactionReceipt;
 					CreatePayment(patCur,selectedIndex,strBuilderResultText.ToString(),resultAmt,receipt);
 				}
 				catch(Exception ex) {
-					ex.DoNothing();
 					_failed++;
 					labelFailed.Text=Lan.g(this,"Failed=")+_failed;
 					string clinicDesc="";
@@ -943,7 +934,9 @@ namespace OpenDental {
 					File.WriteAllText(ODFileUtils.CombinePaths(paySimpleResultDir,"RecurringChargeResult.txt"),strBuilderResultFile.ToString());
 					Cursor=Cursors.Default;
 				}
-				catch { } //Do nothing cause this is just for internal use.
+				catch(Exception ex) {
+					ex.DoNothing();//Do nothing cause this is just for internal use.
+				}
 			}
 			else if(CloudStorage.IsCloudStorage) {
 				Cursor=Cursors.WaitCursor;
@@ -995,8 +988,8 @@ namespace OpenDental {
 			}
 		}
 
-		///<summary>Inserts a payment and paysplit, called after processing a payment through either X-Charge or PayConnect. selectedIndex is the current 
-		///selected index of the gridMain row this payment is for.</summary>
+		///<summary>Inserts a payment and paysplit, called after processing a payment through either X-Charge or PayConnect or PaySimple.
+		///selectedIndex is the current selected index of the gridMain row this payment is for.</summary>
 		private void CreatePayment(Patient patCur,int selectedIndex,string note,double amount,string receipt) {
 			DataRow rowCur=_listRowsCur[selectedIndex];
 			Payment paymentCur=new Payment();
@@ -1016,7 +1009,7 @@ namespace OpenDental {
 			if(PrefC.HasClinicsEnabled) {
 				paymentCur.ClinicNum=PIn.Long(rowCur["ClinicNum"].ToString());
 			}
-			//ClinicNum can be 0 for 'Headquarters' or clinics not enabled, PayType will be the 0 clinic or headquarters PayType if using PayConnect
+			//ClinicNum can be 0 for 'Headquarters' or clinics not enabled, PayType will be the 0 clinic or headquarters PayType if using PayConnect or PaySimple
 			string ppPayTypeDesc="PaymentType";
 			if(_progCur.ProgName==ProgramName.PaySimple.ToString()) {
 				ppPayTypeDesc=PaySimple.PropertyDescs.PaySimplePayType;
@@ -1113,8 +1106,9 @@ namespace OpenDental {
 			}
 		}
 
-		///<summary>Will process payments for all authorized charges for each CC stored and marked for recurring charges.  X-Charge or PayConnect must be
-		///enabled.  Program validation done on load and if properties are not valid the form will close and exit.</summary>
+		///<summary>Will process payments for all authorized charges for each CC stored and marked for recurring charges.
+		///X-Charge or PayConnect or PaySimple must be enabled.
+		///Program validation done on load and if properties are not valid the form will close and exit.</summary>
 		private void butSend_Click(object sender,EventArgs e) {
 			RefreshRecurringCharges(false,true);
 			if(gridMain.SelectedIndices.Length<1) {

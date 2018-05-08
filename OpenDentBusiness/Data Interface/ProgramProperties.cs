@@ -201,7 +201,7 @@ namespace OpenDentBusiness {
 				return listClinicProperties;//return the defaults cause ClinicNum of 0 is default.
 			}
 			//Get all the defaults and return a list of defaults mixed with overrides.
-			List<ProgramProperty> listClinicAndDefaultProperties=GetWhere(x => x.ProgramNum==programNum 
+			List<ProgramProperty> listClinicAndDefaultProperties=GetWhere(x => x.ProgramNum==programNum && x.ClinicNum==0
 				&& !listClinicProperties.Any(y => y.PropertyDesc==x.PropertyDesc));
 			listClinicAndDefaultProperties.AddRange(listClinicProperties);
 			return listClinicAndDefaultProperties;//Clinic users need to have all properties, defaults with the clinic overrides.

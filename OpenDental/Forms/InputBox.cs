@@ -62,12 +62,15 @@ namespace OpenDental{
 
 		public List<int> SelectedIndices {
 			get {
-				Control comboBox=_listInputControls.FirstOrDefault(x => x is ComboBox || x is ComboBoxMulti);
+				Control comboBox=_listInputControls.FirstOrDefault(x => x is ComboBox || x is ComboBoxMulti || x is ListBox);
 				if(comboBox==null) {
 					return new List<int>();
 				}
 				if(comboBox is ComboBoxMulti) {
 					return ((ComboBoxMulti)comboBox).SelectedIndices.Cast<int>().ToList();
+				}
+				if(comboBox is ListBox) {
+					return ((ListBox)comboBox).SelectedIndices.Cast<int>().ToList();
 				}
 				else {
 					return new List<int> { ((ComboBox)comboBox).SelectedIndex };
@@ -126,7 +129,7 @@ namespace OpenDental{
 		///<summary>This constructor allows a list of strings to be sent in and fill a comboBox for users to select from.</summary>
 		public InputBox(string prompt,List<string> listSelections,bool isMultiSelect)
 			: this(new List<InputBoxParam> {
-					new InputBoxParam(isMultiSelect ? InputBoxType.ComboMultiSelect : InputBoxType.ComboSelect,prompt,listSelections) }) {
+					new InputBoxParam(isMultiSelect ? (listSelections.Count>=10 ? InputBoxType.ComboMultiSelect : InputBoxType.ListBoxMulti) : InputBoxType.ComboSelect,prompt,listSelections) }) {
 
 		}
 
@@ -350,6 +353,19 @@ namespace OpenDental{
 						inputControl=validDouble;
 						curLocationY+=22;
 						break;
+					case InputBoxType.ListBoxMulti:
+						ListBox listBox=new ListBox();
+						listBox.Name="listBox"+itemOrder;
+						listBox.Location=new Point(posX,curLocationY);
+						listBox.BackColor=SystemColors.Window;
+						listBox.SelectionMode=SelectionMode.MultiSimple;
+						foreach(string selection in inputParam.ListSelections) {
+							listBox.Items.Add(selection);
+						}
+						listBox.Size=new Size(controlWidth,listBox.PreferredHeight);
+						inputControl=listBox;
+						curLocationY+=(listBox.PreferredHeight)+2;
+						break;
 					default:
 						throw new NotImplementedException("InputBoxType: "+inputParam.ParamType+" not implemented.");
 				}
@@ -457,7 +473,8 @@ namespace OpenDental{
 		ValidDate,
 		ValidTime,
 		ValidDouble,
-		CheckBox
+		CheckBox,
+		ListBoxMulti,
 	}
 	
 }

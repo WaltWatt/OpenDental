@@ -147,8 +147,9 @@ namespace OpenDentBusiness {
 			}
 			string apiUserName=ProgramProperties.GetPropValForClinicOrDefault(progPaySimple.ProgramNum,PropertyDescs.PaySimpleApiUserName,clinicNum);
 			string apiKey=ProgramProperties.GetPropValForClinicOrDefault(progPaySimple.ProgramNum,PropertyDescs.PaySimpleApiKey,clinicNum);
-			if(string.IsNullOrWhiteSpace(apiUserName) || string.IsNullOrWhiteSpace(apiKey)) {
-				throw new ODException(Lans.g("PaySimple","PaySimple Username or Key is empty."));
+			string payType=ProgramProperties.GetPropValForClinicOrDefault(progPaySimple.ProgramNum,PropertyDescs.PaySimplePayType,clinicNum);
+			if(string.IsNullOrWhiteSpace(apiUserName) || string.IsNullOrWhiteSpace(apiKey) || string.IsNullOrWhiteSpace(payType)) {
+				throw new ODException(Lans.g("PaySimple","PaySimple Username, Key, or PayType is empty."));
 			}
 		}
 		
@@ -233,13 +234,30 @@ namespace OpenDentBusiness {
 			}
 
 			///<summary>Returns the translated and note-formatted string that represents the result of the API call.</summary>
-			public string ToNoteString() {
-				return Lans.g("PaySimple","Transaction Type")+": "+Enum.GetName(typeof(TransType),this.TransType)+Environment.NewLine+
+			public string ToNoteString(string clinicDesc="",string entry="",string curUserName="",string expDateStr="",string cardType="") {
+				string retVal="";
+				if(!string.IsNullOrWhiteSpace(clinicDesc)) {
+					retVal+=Lans.g("PaySimple","Clinic")+": "+clinicDesc+Environment.NewLine;
+				}
+				retVal+=Lans.g("PaySimple","Transaction Type")+": "+Enum.GetName(typeof(TransType),this.TransType)+Environment.NewLine+
 					Lans.g("PaySimple","Status")+": "+this.Status+Environment.NewLine+
 					Lans.g("PaySimple","Auth Code")+": "+this.AuthCode+Environment.NewLine+
 					Lans.g("PaySimple","Amount")+": "+this.Amount+Environment.NewLine+
 					Lans.g("PaySimple","PaySimple Account ID")+": "+this.PaySimpleToken+Environment.NewLine+
 					Lans.g("PaySimple","PaySimple Transaction Number")+": "+this.RefNumber;
+				if(!string.IsNullOrWhiteSpace(entry)) {
+					retVal+=Lans.g("PaySimple","Entry")+": "+entry+Environment.NewLine;
+				}
+				if(!string.IsNullOrWhiteSpace(curUserName)) {
+					retVal+=Lans.g("PaySimple","Clerk")+": "+curUserName+Environment.NewLine;
+				}
+				if(!string.IsNullOrWhiteSpace(expDateStr)) {
+					retVal+=Lans.g("PaySimple","Expiration")+": "+expDateStr+Environment.NewLine;
+				}
+				if(!string.IsNullOrWhiteSpace(cardType)) {
+					retVal+=Lans.g("PaySimple","Card Type")+": "+cardType+Environment.NewLine;
+				}
+				return retVal;
 			}
 		}
 

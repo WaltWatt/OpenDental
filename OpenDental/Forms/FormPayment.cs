@@ -1932,9 +1932,9 @@ namespace OpenDental {
 					butPaySimple.Visible=true;
 				}
 				else {//if clinics are enabled, PaySimple is enabled if the PaymentType is valid and the Username and Key are not blank
-					string paymentType=ProgramProperties.GetPropVal(progPaySimple.ProgramNum,PaySimple.PropertyDescs.PaySimplePayType,_paymentCur.ClinicNum);
-					if(!string.IsNullOrEmpty(ProgramProperties.GetPropVal(progPaySimple.ProgramNum,PaySimple.PropertyDescs.PaySimpleApiUserName,_paymentCur.ClinicNum))
-						&& !string.IsNullOrEmpty(ProgramProperties.GetPropVal(progPaySimple.ProgramNum,PaySimple.PropertyDescs.PaySimpleApiKey,_paymentCur.ClinicNum))
+					string paymentType=ProgramProperties.GetPropValForClinicOrDefault(progPaySimple.ProgramNum,PaySimple.PropertyDescs.PaySimplePayType,_paymentCur.ClinicNum);
+					if(!string.IsNullOrEmpty(ProgramProperties.GetPropValForClinicOrDefault(progPaySimple.ProgramNum,PaySimple.PropertyDescs.PaySimpleApiUserName,_paymentCur.ClinicNum))
+						&& !string.IsNullOrEmpty(ProgramProperties.GetPropValForClinicOrDefault(progPaySimple.ProgramNum,PaySimple.PropertyDescs.PaySimpleApiKey,_paymentCur.ClinicNum))
 						&& _listPaymentTypeDefs.Any(x => x.DefNum.ToString()==paymentType)) {
 						butPaySimple.Visible=true;
 					}
@@ -3314,6 +3314,9 @@ namespace OpenDental {
 			MakePayConnectTransaction();
 		}
 
+		///<summary>Launches the PayConnect transaction window.  Returns null upon failure, otherwise returns the transaction detail as a string.
+		///If prepaidAmt is not zero, then will show the PayConnect window with the given prepaid amount and let the user enter card # and exp.
+		///A patient is not required for prepaid cards.</summary>
 		public string MakePayConnectTransaction(double prepaidAmt=0) {
 			if(!HasPayConnect()) {
 				return null;
@@ -3519,13 +3522,16 @@ namespace OpenDental {
 			MakePaySimpleTransaction();
 		}
 
+		///<summary>Launches the PaySimple transaction window.  Returns null upon failure, otherwise returns the transaction detail as a string.
+		///If prepaidAmt is not zero, then will show the PaySimple window with the given prepaid amount and let the user enter card # and exp.
+		///A patient is not required for prepaid cards.</summary>
 		public string MakePaySimpleTransaction(double prepaidAmt=0) {
 			if(!HasPaySimple()) {
 				return null;
 			}
 			CreditCard cc=null;
 			List<CreditCard> creditCards=null;
-			decimal amount=Math.Abs(PIn.Decimal(textAmount.Text));//PayConnect always wants a positive number even for voids and returns.
+			decimal amount=Math.Abs(PIn.Decimal(textAmount.Text));//PaySimple always wants a positive number even for voids and returns.
 			if(prepaidAmt==0) {
 				creditCards=CreditCards.Refresh(_patCur.PatNum);
 				if(comboCreditCards.SelectedIndex<creditCards.Count) {
@@ -3535,10 +3541,10 @@ namespace OpenDental {
 			else {//Prepaid card
 				amount=(decimal)prepaidAmt;
 			}
-			FormPaySimple form=new FormPaySimple(_paymentCur.ClinicNum,_patCur,prepaidAmt,cc);
+			FormPaySimple form=new FormPaySimple(_paymentCur.ClinicNum,_patCur,amount,cc);
 			form.ShowDialog();
 			if(prepaidAmt==0) {//Regular credit cards (not prepaid cards).
-				//If PayConnect response is not null, refresh comboCreditCards and select the index of the card used for this payment if the token was saved
+				//If PaySimple response is not null, refresh comboCreditCards and select the index of the card used for this payment if the token was saved
 				creditCards=CreditCards.Refresh(_patCur.PatNum);
 				comboCreditCards.Items.Clear();
 				comboCreditCards.SelectedIndex=-1;
@@ -3561,7 +3567,7 @@ namespace OpenDental {
 				}
 				Program prog=Programs.GetCur(ProgramName.PaySimple);
 				//still need to add functionality for accountingAutoPay
-				string paytype=ProgramProperties.GetPropVal(prog.ProgramNum,PaySimple.PropertyDescs.PaySimplePayType,_paymentCur.ClinicNum);//paytype could be an empty string
+				string paytype=ProgramProperties.GetPropValForClinicOrDefault(prog.ProgramNum,PaySimple.PropertyDescs.PaySimplePayType,_paymentCur.ClinicNum);//paytype could be an empty string
 				listPayType.SelectedIndex=Defs.GetOrder(DefCat.PaymentTypes,PIn.Long(paytype));
 				SetComboDepositAccounts();
 			}
@@ -3616,7 +3622,7 @@ namespace OpenDental {
 						voidPayment.PayAmt*=-1;//the negation of the original amount
 						voidPayment.PayNote=resultNote;
 						voidPayment.Receipt=form.ApiResponseOut.TransactionReceipt;
-						voidPayment.PaymentSource=CreditCardSource.PayConnect;
+						voidPayment.PaymentSource=CreditCardSource.PaySimple;
 						voidPayment.ProcessStatus=ProcessStat.OfficeProcessed;
 						voidPayment.PayNum=Payments.Insert(voidPayment);
 						foreach(PaySplit splitCur in _listSplitsCur) {//Modify the paysplits for the original transaction to work for the void transaction
@@ -3651,7 +3657,7 @@ namespace OpenDental {
 				}
 			}
 			if(form.ApiResponseOut==null) { //The transaction failed.
-				//PayConnect checks the transaction type here and sets the amount the user chose to the textAmount textbox. 
+				//PaySimple checks the transaction type here and sets the amount the user chose to the textAmount textbox. 
 				//We don't have that information here so do nothing.
 				_isCCDeclined=true;
 				_wasCreditCardSuccessful=false;
@@ -3660,16 +3666,16 @@ namespace OpenDental {
 			return resultNote;
 		}
 
-		///<summary>Returns true if payconnect is enabled and completely setup.</summary>
+		///<summary>Returns true if PaySimple is enabled and completely setup.</summary>
 		private bool HasPaySimple() {
 			_listPaymentTypeDefs=_listPaymentTypeDefs??Defs.GetDefsForCategory(DefCat.PaymentTypes,true);
 			Program prog=Programs.GetCur(ProgramName.PaySimple);
 			bool isSetupRequired=false;
 			if(prog.Enabled) {
 				//If clinics are disabled, _paymentCur.ClinicNum will be 0 and the Username and Key will be the 'Headquarters' or practice credentials
-				string paymentType=ProgramProperties.GetPropVal(prog.ProgramNum,PaySimple.PropertyDescs.PaySimplePayType,_paymentCur.ClinicNum);
-				if(string.IsNullOrEmpty(ProgramProperties.GetPropVal(prog.ProgramNum,PaySimple.PropertyDescs.PaySimpleApiUserName,_paymentCur.ClinicNum))
-					|| string.IsNullOrEmpty(ProgramProperties.GetPropVal(prog.ProgramNum,PaySimple.PropertyDescs.PaySimpleApiKey,_paymentCur.ClinicNum))
+				string paymentType=ProgramProperties.GetPropValForClinicOrDefault(prog.ProgramNum,PaySimple.PropertyDescs.PaySimplePayType,_paymentCur.ClinicNum);
+				if(string.IsNullOrEmpty(ProgramProperties.GetPropValForClinicOrDefault(prog.ProgramNum,PaySimple.PropertyDescs.PaySimpleApiUserName,_paymentCur.ClinicNum))
+					|| string.IsNullOrEmpty(ProgramProperties.GetPropValForClinicOrDefault(prog.ProgramNum,PaySimple.PropertyDescs.PaySimpleApiKey,_paymentCur.ClinicNum))
 					|| !_listPaymentTypeDefs.Any(x => x.DefNum.ToString()==paymentType)) {
 					isSetupRequired=true;
 				}
@@ -3686,7 +3692,7 @@ namespace OpenDental {
 				if(form.DialogResult!=DialogResult.OK) {
 					return false;
 				}
-				//The user could have corrected the PayConnect bridge, recursively try again.
+				//The user could have corrected the PaySimple bridge, recursively try again.
 				return HasPaySimple();
 			}
 			return true;
@@ -3764,19 +3770,19 @@ namespace OpenDental {
 				MessageBox.Show(Lan.g(this,"Error:")+" "+ex.Message);
 				return;
 			}
-			string[] arrayTrans=originalReceipt.Replace("\r\n","\n").Replace("\r","\n").Split(new string[] { "\n" },StringSplitOptions.RemoveEmptyEntries);
+			string[] arrayReceiptFields=originalReceipt.Replace("\r\n","\n").Replace("\r","\n").Split(new string[] { "\n" },StringSplitOptions.RemoveEmptyEntries);
 			string ccNum="";
 			string expDateStr="";
 			string nameOnCard="";
-			for(int i=0;i<arrayTrans.Length;i++) {
-				if(arrayTrans[i].StartsWith("Name")) {
-					nameOnCard=arrayTrans[i].Substring(4).Replace(".","");
+			for(int i=0;i<arrayReceiptFields.Length;i++) {
+				if(arrayReceiptFields[i].StartsWith("Name")) {
+					nameOnCard=arrayReceiptFields[i].Substring(4).Replace(".","");
 				}
-				if(arrayTrans[i].StartsWith("Account")) {
-					ccNum=arrayTrans[i].Substring(7).Replace(".","");
+				if(arrayReceiptFields[i].StartsWith("Account")) {
+					ccNum=arrayReceiptFields[i].Substring(7).Replace(".","");
 				}
-				if(arrayTrans[i].StartsWith("Exp Date")) {
-					expDateStr=arrayTrans[i].Substring(8).Replace(".","");
+				if(arrayReceiptFields[i].StartsWith("Exp Date")) {
+					expDateStr=arrayReceiptFields[i].Substring(8).Replace(".","");
 				}
 			}
 			response.BuildReceiptString(ccNum,PIn.Int(expDateStr.Substring(0,2)),PIn.Int(expDateStr.Substring(2)),nameOnCard,_paymentCur.ClinicNum);
@@ -4831,25 +4837,25 @@ namespace OpenDental {
 			string transactionID="";
 			string paySimplePaymentId="";
 			bool isDebit=false;
-			string[] arrayTrans=textNote.Text.Replace("\r\n","\n").Replace("\r","\n").Split(new string[] { "\n" },StringSplitOptions.RemoveEmptyEntries);
-			for(int i=0;i<arrayTrans.Length;i++) {
-				if(arrayTrans[i].StartsWith("Amount: ")) {
-					amount=arrayTrans[i].Substring(8);
+			string[] arrayNoteFields=textNote.Text.Replace("\r\n","\n").Replace("\r","\n").Split(new string[] { "\n" },StringSplitOptions.RemoveEmptyEntries);
+			for(int i=0;i<arrayNoteFields.Length;i++) {
+				if(arrayNoteFields[i].StartsWith("Amount: ")) {
+					amount=arrayNoteFields[i].Substring(8);
 				}
-				if(arrayTrans[i].StartsWith("Ref Number: ")) {
-					refNum=arrayTrans[i].Substring(12);
+				if(arrayNoteFields[i].StartsWith("Ref Number: ")) {
+					refNum=arrayNoteFields[i].Substring(12);
 				}
-				if(arrayTrans[i].StartsWith("XCTRANSACTIONID=")) {
-					transactionID=arrayTrans[i].Substring(16);
+				if(arrayNoteFields[i].StartsWith("XCTRANSACTIONID=")) {
+					transactionID=arrayNoteFields[i].Substring(16);
 				}
-				if(arrayTrans[i].StartsWith("APPROVEDAMOUNT=")) {
-					amount=arrayTrans[i].Substring(15);
+				if(arrayNoteFields[i].StartsWith("APPROVEDAMOUNT=")) {
+					amount=arrayNoteFields[i].Substring(15);
 				}
-				if(arrayTrans[i].StartsWith("TYPE=") && arrayTrans[i].Substring(5)=="Debit Purchase") {
+				if(arrayNoteFields[i].StartsWith("TYPE=") && arrayNoteFields[i].Substring(5)=="Debit Purchase") {
 					isDebit=true;
 				}
-				if(arrayTrans[i].StartsWith(Lan.g("PaySimple","PaySimple Transaction Number"))) {
-					paySimplePaymentId=arrayTrans[i].Split(':')[1].Trim();//Lame, but better than substring 28 and a prayer to the Lans.g gods.  Alternatively we can remote Lans.g from paysimple receipts.
+				if(arrayNoteFields[i].StartsWith(Lan.g("PaySimple","PaySimple Transaction Number"))) {
+					paySimplePaymentId=arrayNoteFields[i].Split(':')[1].Trim();//Better than substring 28, because we do not know how long the translation will be.
 				}
 			}
 			if(refNum!="") {//Void the PayConnect transaction if there is one

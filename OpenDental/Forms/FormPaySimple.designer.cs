@@ -73,7 +73,7 @@ namespace OpenDental{
 			this.checkOneTimePayment.Name = "checkOneTimePayment";
 			this.checkOneTimePayment.Size = new System.Drawing.Size(150, 17);
 			this.checkOneTimePayment.TabIndex = 38;
-			this.checkOneTimePayment.Text = "One Time Payment";
+			this.checkOneTimePayment.Text = "One-Time Payment";
 			// 
 			// labelRefNumber
 			// 

@@ -99,7 +99,7 @@ namespace OpenDental{
 			// 
 			this.labelClinicEnable.Location = new System.Drawing.Point(39, 58);
 			this.labelClinicEnable.Name = "labelClinicEnable";
-			this.labelClinicEnable.Size = new System.Drawing.Size(288, 28);
+			this.labelClinicEnable.Size = new System.Drawing.Size(218, 40);
 			this.labelClinicEnable.TabIndex = 6;
 			this.labelClinicEnable.Text = "To enable PaySimple for a clinic, set the Username and Key for that clinic.";
 			this.labelClinicEnable.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;

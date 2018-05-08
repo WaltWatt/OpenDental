@@ -385,6 +385,7 @@ namespace OpenDental {
 						info.Arguments+="/AUTOPROCESS ";
 						info.Arguments+="/AUTOCLOSE ";
 						CreditCardCur.XChargeToken="";//Clear the XChargeToken in our db.
+						//To match PaySimple, this should be enhanced to validate the cc number and get a new token.
 					}
 					else {//We can only change exp date for X-Charge via ARCHIVEAULTUPDATE.
 						info.Arguments+="/TRANSACTIONTYPE:ARCHIVEVAULTUPDATE ";
@@ -449,6 +450,7 @@ namespace OpenDental {
 					//generated the next time a payment is processed using this card.
 					CreditCardCur.PayConnectToken="";
 					CreditCardCur.PayConnectTokenExp=DateTime.MinValue;
+					//To match PaySimple, this should be enhanced to validate the cc number and get a new token.
 				}
 				#endregion
 				#region PaySimple
@@ -461,6 +463,7 @@ namespace OpenDental {
 						|| _creditCardOld.CCExpiration.Year!=CreditCardCur.CCExpiration.Year
 						|| _creditCardOld.CCExpiration.Month!=CreditCardCur.CCExpiration.Month))
 				{
+					//TODO: Open form to have user enter the CC number.  Then make API call to update cc instead of wiping out token.
 					//If the billing zip or the expiration changes, the token is invalid and they need to get a new one.
 					CreditCardCur.PaySimpleToken="";
 				}
