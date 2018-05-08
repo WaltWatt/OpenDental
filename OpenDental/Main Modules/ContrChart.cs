@@ -3652,10 +3652,21 @@ namespace OpenDental {
 			List<Procedure> listEligibleProcs=Procedures.RefreshForStatus(PatCur.PatNum,ProcStat.TP)
 				.Where(x => !listExcludedCodes.Contains(ProcedureCodes.GetProcCode(x.CodeNum).ProcCode))
 				.ToList();
-			if(listEligibleProcs.Count==0//No eligible procs or 
-				|| listEligibleProcs.Any(x => x.PlannedAptNum!=0)//Already an existing planned appt.
-				|| !MsgBox.Show(this,MsgBoxButtons.YesNo,"Create Planned Appointment with highest priority planned treatment selected?"))
-			{
+			if(listEligibleProcs.Count==0 || listEligibleProcs.Any(x => x.PlannedAptNum!=0)) {//No eligible procs or already an existing planned appt
+				return;
+			}
+			if(!Procedures.RefreshForStatus(PatCur.PatNum,ProcStat.TP,false).Any(x => x.DateTP==DateTime.Now.Date)) {
+				return;//Patient does not have any work that was TP today
+			}
+			//Make sure patient has no future scheduled non-recall appointment
+			List<Appointment> listAppts=Appointments.GetFutureSchedApts(PatCur.PatNum).FindAll(x => x.AptDateTime.Date>DateTime.Now.Date);
+			foreach(Appointment apt in listAppts) {
+				List<Procedure> listProcsOnAppt = Procedures.GetProcsForSingle(apt.AptNum,false);
+				if(listProcsOnAppt.Any(x => !listExcludedCodes.Contains(ProcedureCodes.GetProcCode(x.CodeNum).ProcCode))) {
+					return;//Patient has a future scheduled appt that is not Diagnostic,Xray,or Preventative
+				}
+			}
+			if(!MsgBox.Show(this,MsgBoxButtons.YesNo,"Create Planned Appointment with highest priority planned treatment selected?")) {
 				return;
 			}
 			List<Def> treatPlanPriorities=Defs.GetDefsForCategory(DefCat.TxPriorities,true);
