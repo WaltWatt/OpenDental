@@ -209,12 +209,20 @@ namespace OpenDental {
 		private MenuItem menuItemIncomeTransfer;
 		private ContextMenu contextMenuAdj;
 		private MenuItem menuItemAddAdj;
-
 		///<summary>Used by FormRpProcNotBilledIns to determine how many claims were created.</summary>
 		public static int ClaimCreatedCount;
 		private decimal PPBalanceTotal;
 		private PatField[] _patFieldList;
 		private Def[] _acctProcQuickAddDefs;
+		///<summary>True if 'Entire Family' is selected in the Select Patient grid.</summary>
+		public bool _isSelectingFamily {
+			get {
+				if(DataSetMain==null) {
+					return false;
+				}
+				return gridAcctPat.GetSelectedIndex()==DataSetMain.Tables["patient"].Rows.Count-1;
+			}
+		}
 		#endregion UserVariables
 
 		///<summary></summary>
@@ -2754,7 +2762,7 @@ namespace OpenDental {
 			}
 			DataTable table=DataSetMain.Tables["payplan"];
 			if(table.Rows.OfType<DataRow>().Count(x => PIn.Long(x["Guarantor"].ToString())==PatCur.PatNum 
-				|| PIn.Long(x["PatNum"].ToString())==PatCur.PatNum) == 0) 
+				|| PIn.Long(x["PatNum"].ToString())==PatCur.PatNum)==0 && !_isSelectingFamily) //if we are looking at the entire family, show all the payplans 
 			{
 				gridPayPlan.Visible=false;
 				return;
