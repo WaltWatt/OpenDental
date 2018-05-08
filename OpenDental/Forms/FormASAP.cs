@@ -277,7 +277,7 @@ namespace OpenDental {
 			this.butClose.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
 			this.butClose.CornerRadius = 4F;
 			this.butClose.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.butClose.Location = new System.Drawing.Point(858, 606);
+			this.butClose.Location = new System.Drawing.Point(967, 543);
 			this.butClose.Name = "butClose";
 			this.butClose.Size = new System.Drawing.Size(87, 24);
 			this.butClose.TabIndex = 7;
@@ -370,7 +370,7 @@ namespace OpenDental {
 			this.butPrint.CornerRadius = 4F;
 			this.butPrint.Image = global::OpenDental.Properties.Resources.butPrintSmall;
 			this.butPrint.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.butPrint.Location = new System.Drawing.Point(858, 515);
+			this.butPrint.Location = new System.Drawing.Point(967, 452);
 			this.butPrint.Name = "butPrint";
 			this.butPrint.Size = new System.Drawing.Size(87, 24);
 			this.butPrint.TabIndex = 21;
@@ -444,7 +444,7 @@ namespace OpenDental {
 			this.butText.CornerRadius = 4F;
 			this.butText.Image = global::OpenDental.Properties.Resources.Text;
 			this.butText.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.butText.Location = new System.Drawing.Point(858, 171);
+			this.butText.Location = new System.Drawing.Point(967, 171);
 			this.butText.Name = "butText";
 			this.butText.Size = new System.Drawing.Size(87, 24);
 			this.butText.TabIndex = 62;
@@ -535,7 +535,7 @@ namespace OpenDental {
 			this.groupWebSched.Controls.Add(this.comboEnd);
 			this.groupWebSched.Controls.Add(this.comboStart);
 			this.groupWebSched.Controls.Add(this.labelStart);
-			this.groupWebSched.Location = new System.Drawing.Point(831, 228);
+			this.groupWebSched.Location = new System.Drawing.Point(940, 228);
 			this.groupWebSched.Name = "groupWebSched";
 			this.groupWebSched.Size = new System.Drawing.Size(140, 198);
 			this.groupWebSched.TabIndex = 69;
@@ -570,8 +570,8 @@ namespace OpenDental {
 			// 
 			this.splitContainer.Panel2.Controls.Add(this.gridWebSched);
 			this.splitContainer.Panel2MinSize = 0;
-			this.splitContainer.Size = new System.Drawing.Size(811, 598);
-			this.splitContainer.SplitterDistance = 450;
+			this.splitContainer.Size = new System.Drawing.Size(920, 535);
+			this.splitContainer.SplitterDistance = 402;
 			this.splitContainer.TabIndex = 70;
 			// 
 			// tabControl
@@ -584,7 +584,7 @@ namespace OpenDental {
 			this.tabControl.Location = new System.Drawing.Point(0, 3);
 			this.tabControl.Name = "tabControl";
 			this.tabControl.SelectedIndex = 0;
-			this.tabControl.Size = new System.Drawing.Size(811, 448);
+			this.tabControl.Size = new System.Drawing.Size(920, 400);
 			this.tabControl.TabIndex = 73;
 			this.tabControl.SelectedIndexChanged += new System.EventHandler(this.tabControl_SelectedIndexChanged);
 			// 
@@ -597,7 +597,7 @@ namespace OpenDental {
 			this.tabPageAppts.Location = new System.Drawing.Point(4, 22);
 			this.tabPageAppts.Name = "tabPageAppts";
 			this.tabPageAppts.Padding = new System.Windows.Forms.Padding(3);
-			this.tabPageAppts.Size = new System.Drawing.Size(803, 422);
+			this.tabPageAppts.Size = new System.Drawing.Size(912, 374);
 			this.tabPageAppts.TabIndex = 0;
 			this.tabPageAppts.Text = "Appointments";
 			// 
@@ -640,7 +640,7 @@ namespace OpenDental {
 			this.gridAppts.Name = "gridAppts";
 			this.gridAppts.ScrollValue = 0;
 			this.gridAppts.SelectionMode = OpenDental.UI.GridSelectionMode.MultiExtended;
-			this.gridAppts.Size = new System.Drawing.Size(796, 389);
+			this.gridAppts.Size = new System.Drawing.Size(905, 341);
 			this.gridAppts.TabIndex = 8;
 			this.gridAppts.Title = "Appointment ASAP List";
 			this.gridAppts.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
@@ -775,7 +775,7 @@ namespace OpenDental {
 			this.gridWebSched.Name = "gridWebSched";
 			this.gridWebSched.ScrollValue = 0;
 			this.gridWebSched.SelectionMode = OpenDental.UI.GridSelectionMode.None;
-			this.gridWebSched.Size = new System.Drawing.Size(796, 138);
+			this.gridWebSched.Size = new System.Drawing.Size(905, 123);
 			this.gridWebSched.TabIndex = 9;
 			this.gridWebSched.TabStop = false;
 			this.gridWebSched.Title = "Web Sched ASAP Messages";
@@ -797,11 +797,12 @@ namespace OpenDental {
 			// butRefresh
 			// 
 			this.butRefresh.AdjustImageLocation = new System.Drawing.Point(0, 0);
+			this.butRefresh.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this.butRefresh.Autosize = true;
 			this.butRefresh.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
 			this.butRefresh.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
 			this.butRefresh.CornerRadius = 4F;
-			this.butRefresh.Location = new System.Drawing.Point(857, 38);
+			this.butRefresh.Location = new System.Drawing.Point(966, 38);
 			this.butRefresh.Name = "butRefresh";
 			this.butRefresh.Size = new System.Drawing.Size(87, 23);
 			this.butRefresh.TabIndex = 71;
@@ -812,7 +813,7 @@ namespace OpenDental {
 			// FormASAP
 			// 
 			this.CancelButton = this.butClose;
-			this.ClientSize = new System.Drawing.Size(980, 654);
+			this.ClientSize = new System.Drawing.Size(1089, 591);
 			this.Controls.Add(this.butRefresh);
 			this.Controls.Add(this.groupWebSched);
 			this.Controls.Add(this.butText);
