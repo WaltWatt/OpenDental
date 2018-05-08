@@ -207,20 +207,21 @@ namespace OpenDentBusiness {
 						new List<long>{ repeatCharge.PatNum });
 					for(int j = listExistingProcs.Count-1;j>=0;j--) {//iterate backwards to remove elements
 						Procedure proc=listExistingProcs[j];
-						if((proc.RepeatChargeNum==repeatCharge.RepeatChargeNum) //Check the procedure's FK first
+						if(((proc.RepeatChargeNum==repeatCharge.RepeatChargeNum) //Check the procedure's FK first
 							//Use the old logic without matching FKs only if the procedure was added before updating to 16.1
 							//Match patnum, codenum, fee, year, and month (IsRepeatDateHelper uses special logic to determine correct month)
+							//Procedures with the ProcDate prior to the RepeatCharge.StartDate should not be considered as valid procedures 
+							//associated to the current repeat charge.
 							|| ((proc.ProcDate<startedUsingFKs || startedUsingFKs.Year<1880)
-							&& proc.PatNum==repeatCharge.PatNum
-							&& proc.CodeNum==codeNum
-							&& proc.ProcFee.IsEqual(repeatCharge.ChargeAmt))) 
+								&& proc.PatNum==repeatCharge.PatNum
+								&& proc.CodeNum==codeNum
+								&& proc.ProcFee.IsEqual(repeatCharge.ChargeAmt)))
+							&& (proc.ProcDate>=repeatCharge.DateStart //Consider procedures that fall on or after the repeat charge start date.
+								|| proc.ProcDate.Day!=repeatCharge.DateStart.Day)) //Consider procs only when days are not the same. Catches procs that have changed their billing date
 						{
-							//This is a match to an existing procedure.
-							continue;
+							continue;//This existing procedure needs to be counted for this repeat charge.
 						}
-						else {
-							listExistingProcs.RemoveAt(j);//Removing so that another repeat charge of the same code, date, and amount will be added.
-						}
+						listExistingProcs.RemoveAt(j);//Removing so that another repeat charge of the same code, date, and amount will be added.
 					}
 					List<DateTime> listBillingDates;//This list will have 1 or 2 dates where a repeating charge might be added
 					if(PrefC.GetBool(PrefName.BillingUseBillingCycleDay)) {
