@@ -426,7 +426,7 @@ namespace OpenDentBusiness{
 		///<summary>126 - Used to diagnose an error in statement creation. Audit Trail Permission Only</summary>
 		StatementPatNumMismatch,
 		///<summary>127 - User has access to Mobile Web.</summary>
-		[Description("Movile Web")]
+		[Description("Mobile Web")]
 		MobileWeb,
 		///<summary>128 - For logging purposes only.  Used when PatPlans are created and not otherwise logged.</summary>
 		PatPlanCreate,
