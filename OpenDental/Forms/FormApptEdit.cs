@@ -2877,7 +2877,7 @@ namespace OpenDental{
 				return false;
 			}
 			#endregion
-			List<Procedure> listProcs=Procedures.GetProcsForSingle(AptCur.AptNum,false);
+			List<Procedure> listProcs=gridProc.SelectedIndices.OfType<int>().Select(x => (Procedure)gridProc.Rows[x].Tag).ToList();
 			if(listProcs.Count > 0 && comboStatus.SelectedIndex==1 && AptCur.AptDateTime.Date > DateTime.Today.Date 
 				&& !PrefC.GetBool(PrefName.FutureTransDatesAllowed)) 
 			{
