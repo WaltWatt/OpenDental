@@ -1530,7 +1530,7 @@ namespace OpenDental{
 				query=report.AddQuery(dt,"","",SplitByKind.None,1,true);
 			}
 			// add columns to report
-			int provwidth=75;
+			int provwidth=110;
 			int productionwidth=90;
 			int adjwidth=90;
 			int writeoffestwidth=90;

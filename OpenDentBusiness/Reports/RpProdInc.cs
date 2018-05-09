@@ -308,7 +308,7 @@ namespace OpenDentBusiness {
 						else if(listClinics[it].ClinicNum!=0 && tableProduction.Rows[j]["Clinic"].ToString()!=POut.Long(listClinics[it].ClinicNum)) {
 							continue;
 						}
-						if(provCur.Abbr==PIn.String(tableProduction.Rows[j]["Abbr"].ToString())) {
+						if(provCur.ProvNum==PIn.Long(tableProduction.Rows[j]["ProvNum"].ToString())) {
 							production+=PIn.Decimal(tableProduction.Rows[j]["Production"].ToString());
 							hasData=true;
 						}
@@ -320,7 +320,7 @@ namespace OpenDentBusiness {
 						else if(listClinics[it].ClinicNum!=0 && tableAdj.Rows[j]["Clinic"].ToString()!=POut.Long(listClinics[it].ClinicNum)) {
 							continue;
 						}
-						if(provCur.Abbr==PIn.String(tableAdj.Rows[j]["Abbr"].ToString())) {
+						if(provCur.ProvNum==PIn.Long(tableAdj.Rows[j]["ProvNum"].ToString())) {
 							adjust+=PIn.Decimal(tableAdj.Rows[j]["AdjAmt"].ToString());
 							hasData=true;
 						}
@@ -332,7 +332,7 @@ namespace OpenDentBusiness {
 						else if(listClinics[it].ClinicNum!=0 && tableInsWriteoff.Rows[j]["Clinic"].ToString()!=POut.Long(listClinics[it].ClinicNum)) {
 							continue;
 						}
-						if(provCur.Abbr==PIn.String(tableInsWriteoff.Rows[j]["Abbr"].ToString())) {
+						if(provCur.ProvNum==PIn.Long(tableInsWriteoff.Rows[j]["ProvNum"].ToString())) {
 							if(hasChangeInWriteoff) {
 								inswriteoffest+=PIn.Decimal(tableInsWriteoff.Rows[j]["WriteOffEst"].ToString());
 							}
@@ -349,7 +349,7 @@ namespace OpenDentBusiness {
 						else if(listClinics[it].ClinicNum!=0 && tableWriteOffAdjustments.Rows[j]["Clinic"].ToString()!=POut.Long(listClinics[it].ClinicNum)) {
 							continue;
 						}
-						if(provCur.Abbr==PIn.String(tableWriteOffAdjustments.Rows[j]["Abbr"].ToString())) {
+						if(provCur.ProvNum==PIn.Long(tableWriteOffAdjustments.Rows[j]["ProvNum"].ToString())) {
 							inswriteoffadj+=PIn.Decimal(tableWriteOffAdjustments.Rows[j]["WriteOffEst"].ToString())+PIn.Decimal(tableWriteOffAdjustments.Rows[j]["WriteOff"].ToString());
 							hasData=true;
 						}
@@ -361,7 +361,7 @@ namespace OpenDentBusiness {
 						else if(listClinics[it].ClinicNum!=0 && tablePay.Rows[j]["Clinic"].ToString()!=POut.Long(listClinics[it].ClinicNum)) {
 							continue;
 						}
-						if(provCur.Abbr==PIn.String(tablePay.Rows[j]["Abbr"].ToString())) {
+						if(provCur.ProvNum==PIn.Long(tablePay.Rows[j]["ProvNum"].ToString())) {
 							ptincome+=PIn.Decimal(tablePay.Rows[j]["PayAmt"].ToString());
 							hasData=true;
 						}
@@ -373,7 +373,7 @@ namespace OpenDentBusiness {
 						else if(listClinics[it].ClinicNum!=0 && tableIns.Rows[j]["Clinic"].ToString()!=POut.Long(listClinics[it].ClinicNum)) {
 							continue;
 						}
-						if(provCur.Abbr==PIn.String(tableIns.Rows[j]["Abbr"].ToString())) {
+						if(provCur.ProvNum==PIn.Long(tableIns.Rows[j]["ProvNum"].ToString())) {
 							insincome+=PIn.Decimal(tableIns.Rows[j]["InsPayAmt"].ToString());
 							hasData=true;
 						}
@@ -420,19 +420,19 @@ namespace OpenDentBusiness {
 				insincome=0;
 				totalincome=0;
 				for(int j=0;j<tableProduction.Rows.Count;j++) {
-					if(provCur.Abbr==PIn.String(tableProduction.Rows[j]["Abbr"].ToString())) {
+					if(provCur.ProvNum==PIn.Long(tableProduction.Rows[j]["ProvNum"].ToString())) {
 						production+=PIn.Decimal(tableProduction.Rows[j]["Production"].ToString());
 						hasData=true;
 					}
 				}
 				for(int j=0;j<tableAdj.Rows.Count;j++) {
-					if(provCur.Abbr==PIn.String(tableAdj.Rows[j]["Abbr"].ToString())) {
+					if(provCur.ProvNum==PIn.Long(tableAdj.Rows[j]["ProvNum"].ToString())) {
 						adjust+=PIn.Decimal(tableAdj.Rows[j]["AdjAmt"].ToString());
 						hasData=true;
 					}
 				}
 				for(int j=0;j<tableInsWriteoff.Rows.Count;j++) {
-					if(provCur.Abbr==PIn.String(tableInsWriteoff.Rows[j]["Abbr"].ToString())) {
+					if(provCur.ProvNum==PIn.Long(tableInsWriteoff.Rows[j]["ProvNum"].ToString())) {
 						if(hasChangeInWriteoff) {
 							inswriteoffest+=PIn.Decimal(tableInsWriteoff.Rows[j]["WriteOffEst"].ToString());
 						}
@@ -443,19 +443,19 @@ namespace OpenDentBusiness {
 					}
 				}
 				for(int j=0;j<tableWriteOffAdjustments.Rows.Count;j++) {
-					if(provCur.Abbr==PIn.String(tableWriteOffAdjustments.Rows[j]["Abbr"].ToString())) {
+					if(provCur.ProvNum==PIn.Long(tableWriteOffAdjustments.Rows[j]["ProvNum"].ToString())) {
 						inswriteoffadj+=PIn.Decimal(tableWriteOffAdjustments.Rows[j]["WriteOffEst"].ToString())+PIn.Decimal(tableWriteOffAdjustments.Rows[j]["WriteOff"].ToString());
 						hasData=true;
 					}
 				}
 				for(int j=0;j<tablePay.Rows.Count;j++) {
-					if(provCur.Abbr==PIn.String(tablePay.Rows[j]["Abbr"].ToString())) {
+					if(provCur.ProvNum==PIn.Long(tablePay.Rows[j]["ProvNum"].ToString())) {
 						ptincome+=PIn.Decimal(tablePay.Rows[j]["PayAmt"].ToString());
 						hasData=true;
 					}
 				}
 				for(int j=0;j<tableIns.Rows.Count;j++) {
-					if(provCur.Abbr==PIn.String(tableIns.Rows[j]["Abbr"].ToString())) {
+					if(provCur.ProvNum==PIn.Long(tableIns.Rows[j]["ProvNum"].ToString())) {
 						insincome+=PIn.Decimal(tableIns.Rows[j]["InsPayAmt"].ToString());
 						hasData=true;
 					}
@@ -750,7 +750,8 @@ namespace OpenDentBusiness {
 				+"provider.Abbr, "
 				+"procedurelog.ClinicNum Clinic, "
 				+"procedurelog.ProcFee*(procedurelog.UnitQty+procedurelog.BaseUnits)-IFNULL(SUM(claimproc.WriteOff),0) Production, "
-				+"procedurelog.ProcNum "
+				+"procedurelog.ProcNum, "
+				+"provider.ProvNum "
 				+"FROM patient "
 				+"INNER JOIN procedurelog ON patient.PatNum=procedurelog.PatNum "
 					+"AND procedurelog.ProcStatus='2' "
@@ -783,7 +784,8 @@ namespace OpenDentBusiness {
 				+"provider.Abbr, "
 				+"adjustment.ClinicNum Clinic, "
 				+"adjustment.AdjAmt AdjAmt, "
-				+"adjustment.AdjNum "
+				+"adjustment.AdjNum, "
+				+"provider.ProvNum "
 				+"FROM adjustment "
 				+"INNER JOIN patient ON adjustment.PatNum=patient.PatNum "
 				+"INNER JOIN definition ON adjustment.AdjType=definition.DefNum "
@@ -817,7 +819,8 @@ namespace OpenDentBusiness {
 					+"claimproc.ClinicNum Clinic, "
 					+"-SUM(claimproc.WriteOff) WriteOff, "
 					+"claimproc.ClaimNum, "
-					+"claimproc.ClaimProcNum "
+					+"claimproc.ClaimProcNum, "
+					+"provider.ProvNum "
 					+"FROM claimproc "
 					+"LEFT JOIN patient ON claimproc.PatNum = patient.PatNum "
 					+"LEFT JOIN provider ON provider.ProvNum = claimproc.ProvNum "
@@ -847,7 +850,8 @@ namespace OpenDentBusiness {
 					+"CONCAT(CONCAT(CONCAT(CONCAT(patient.LName,', '),patient.FName),' '),patient.MiddleI) namelf, "
 					+"CONCAT(CONCAT(procedurecode.AbbrDesc,' '),COALESCE(carrier.CarrierName,'')) Description, "//CarrierName might be null, which is ok.
 					+"procedurelog.ClinicNum Clinic, "
-					+"claimproc.ClaimProcNum "
+					+"claimproc.ClaimProcNum, "
+					+"provider.ProvNum "
 					+"FROM procedurelog "
 					+"INNER JOIN procedurecode ON procedurelog.CodeNum=procedurecode.CodeNum "
 					+"INNER JOIN claimproc ON claimproc.ProcNum=procedurelog.ProcNum "
@@ -871,7 +875,8 @@ namespace OpenDentBusiness {
 					+"claimproc.ClinicNum Clinic,"
 					+"-SUM(claimproc.WriteOff) WriteOff,"
 					+"claimproc.ClaimNum, "
-					+"claimproc.ClaimProcNum "
+					+"claimproc.ClaimProcNum, "
+					+"provider.ProvNum "
 					+"FROM claimproc "
 					+"LEFT JOIN patient ON claimproc.PatNum = patient.PatNum "
 					+"LEFT JOIN provider ON provider.ProvNum = claimproc.ProvNum "
@@ -915,7 +920,8 @@ namespace OpenDentBusiness {
 				+"IFNULL(provider.Abbr,'Unearned') Abbr, "
 				+"paysplit.ClinicNum Clinic, "
 				+"SUM(paysplit.SplitAmt) PayAmt, "
-				+"payment.PayNum "
+				+"payment.PayNum, "
+				+"provider.ProvNum "
 				+"FROM paysplit "
 				+"LEFT JOIN payment ON payment.PayNum=paysplit.PayNum "
 				+"LEFT JOIN patient ON patient.PatNum=paysplit.PatNum "
@@ -949,7 +955,8 @@ namespace OpenDentBusiness {
 				+"provider.Abbr, "
 				+"claimproc.ClinicNum Clinic, "
 				+"SUM(claimproc.InsPayAmt) InsPayAmt, "
-				+"claimproc.ClaimNum "
+				+"claimproc.ClaimNum, "
+				+"provider.ProvNum "
 				+"FROM claimproc "
 				+"INNER JOIN patient ON claimproc.PatNum=patient.PatNum "
 				+"INNER JOIN insplan ON claimproc.PlanNum=insplan.PlanNum "
@@ -988,7 +995,8 @@ namespace OpenDentBusiness {
 					+"SUM("+DbHelper.IfNull("NULLIF(claimsnapshot.WriteOff, -1)","0",false)+") WriteOffEst, "
 					+"-SUM(claimproc.WriteOff) WriteOff, "
 					+"claimproc.ClaimNum, "
-					+"claimproc.ClaimProcNum "
+					+"claimproc.ClaimProcNum, "
+					+"provider.ProvNum "
 					+"FROM claimproc "
 					+"LEFT JOIN claimsnapshot ON claimsnapshot.ClaimProcNum=claimproc.ClaimProcNum "
 					+"LEFT JOIN patient ON claimproc.PatNum = patient.PatNum "
