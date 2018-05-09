@@ -1231,7 +1231,7 @@ namespace OpenDentBusiness{
 			}
 			//procDate;//was already calculated in the deductible section.
 			//Writeoff Estimate------------------------------------------------------------------------------------------
-			if(plan.CobRule==EnumCobRule.SecondaryMedicaid) {
+			if(plan.CobRule==EnumCobRule.SecondaryMedicaid && PatPlans.GetOrdinal(cp.InsSubNum,patPlanList)!=1) {
 				//If a plan is Secondary Medicaid, any amount that has not been written off by another insurance or paid will be written off. This should
 				//cause the patient portion to be 0.
 				cp.WriteOffEst=procFee-paidOtherInsTot-writeOffOtherIns-cp.InsEstTotal;
