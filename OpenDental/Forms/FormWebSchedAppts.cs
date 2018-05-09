@@ -19,9 +19,10 @@ namespace OpenDental {
 			Lan.F(this);
 		}
 
-		public FormWebSchedAppts(bool isNewPat,bool isRecall):this() {
+		public FormWebSchedAppts(bool isNewPat,bool isRecall,bool isASAP):this() {
 			checkWebSchedNewPat.Checked=isNewPat;
 			checkWebSchedRecall.Checked=isRecall;
+			checkASAP.Checked=isASAP;
 		}
 
 		///<summary></summary>

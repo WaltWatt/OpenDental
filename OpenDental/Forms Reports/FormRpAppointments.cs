@@ -37,6 +37,7 @@ namespace OpenDental
 		private RadioButton radioDateAptCreated;
 		private RadioButton radioAptDate;
 		private CheckBox checkShowNoteAppts;
+		private CheckBox checkWebSchedASAP;
 
 		/// <summary>
 		/// Required designer variable.
@@ -88,6 +89,7 @@ namespace OpenDental
 			this.butTomorrow = new OpenDental.UI.Button();
 			this.butToday = new OpenDental.UI.Button();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.checkShowNoteAppts = new System.Windows.Forms.CheckBox();
 			this.radioDateAptCreated = new System.Windows.Forms.RadioButton();
 			this.radioAptDate = new System.Windows.Forms.RadioButton();
 			this.listClinics = new System.Windows.Forms.ListBox();
@@ -95,8 +97,8 @@ namespace OpenDental
 			this.checkAllClinics = new System.Windows.Forms.CheckBox();
 			this.checkAllProvs = new System.Windows.Forms.CheckBox();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
+			this.checkWebSchedASAP = new System.Windows.Forms.CheckBox();
 			this.checkWebSchedNewPat = new System.Windows.Forms.CheckBox();
-			this.checkShowNoteAppts = new System.Windows.Forms.CheckBox();
 			this.groupBox1.SuspendLayout();
 			this.groupBox2.SuspendLayout();
 			this.SuspendLayout();
@@ -106,7 +108,7 @@ namespace OpenDental
 			this.listProvs.Location = new System.Drawing.Point(12, 57);
 			this.listProvs.Name = "listProvs";
 			this.listProvs.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-			this.listProvs.Size = new System.Drawing.Size(120, 212);
+			this.listProvs.Size = new System.Drawing.Size(120, 238);
 			this.listProvs.TabIndex = 33;
 			this.listProvs.Click += new System.EventHandler(this.listProvs_Click);
 			// 
@@ -157,7 +159,7 @@ namespace OpenDental
 			this.checkWebSchedRecall.Size = new System.Drawing.Size(224, 18);
 			this.checkWebSchedRecall.TabIndex = 46;
 			this.checkWebSchedRecall.Text = "Show Recall Appointments";
-			this.checkWebSchedRecall.CheckedChanged += new System.EventHandler(this.checkWebSchedRecall_CheckedChanged);
+			this.checkWebSchedRecall.CheckedChanged += new System.EventHandler(this.checkWebSched_CheckedChanged);
 			// 
 			// label2
 			// 
@@ -237,6 +239,15 @@ namespace OpenDental
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Date Range";
 			// 
+			// checkShowNoteAppts
+			// 
+			this.checkShowNoteAppts.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.checkShowNoteAppts.Location = new System.Drawing.Point(60, 115);
+			this.checkShowNoteAppts.Name = "checkShowNoteAppts";
+			this.checkShowNoteAppts.Size = new System.Drawing.Size(202, 18);
+			this.checkShowNoteAppts.TabIndex = 49;
+			this.checkShowNoteAppts.Text = "Show \"Note\" Appointments";
+			// 
 			// radioDateAptCreated
 			// 
 			this.radioDateAptCreated.Location = new System.Drawing.Point(60, 92);
@@ -262,7 +273,7 @@ namespace OpenDental
 			this.listClinics.Location = new System.Drawing.Point(138, 57);
 			this.listClinics.Name = "listClinics";
 			this.listClinics.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-			this.listClinics.Size = new System.Drawing.Size(120, 212);
+			this.listClinics.Size = new System.Drawing.Size(120, 238);
 			this.listClinics.TabIndex = 48;
 			this.listClinics.Click += new System.EventHandler(this.listClinics_Click);
 			// 
@@ -299,14 +310,24 @@ namespace OpenDental
 			// 
 			// groupBox2
 			// 
+			this.groupBox2.Controls.Add(this.checkWebSchedASAP);
 			this.groupBox2.Controls.Add(this.checkWebSchedNewPat);
 			this.groupBox2.Controls.Add(this.checkWebSchedRecall);
 			this.groupBox2.Location = new System.Drawing.Point(264, 200);
 			this.groupBox2.Name = "groupBox2";
-			this.groupBox2.Size = new System.Drawing.Size(322, 69);
+			this.groupBox2.Size = new System.Drawing.Size(322, 95);
 			this.groupBox2.TabIndex = 47;
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "Web Sched Appointments Only";
+			// 
+			// checkWebSchedASAP
+			// 
+			this.checkWebSchedASAP.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.checkWebSchedASAP.Location = new System.Drawing.Point(60, 69);
+			this.checkWebSchedASAP.Name = "checkWebSchedASAP";
+			this.checkWebSchedASAP.Size = new System.Drawing.Size(224, 18);
+			this.checkWebSchedASAP.TabIndex = 52;
+			this.checkWebSchedASAP.Text = "Show ASAP Appointments";
 			// 
 			// checkWebSchedNewPat
 			// 
@@ -316,16 +337,7 @@ namespace OpenDental
 			this.checkWebSchedNewPat.Size = new System.Drawing.Size(224, 18);
 			this.checkWebSchedNewPat.TabIndex = 48;
 			this.checkWebSchedNewPat.Text = "Show New Patient Appointments";
-			this.checkWebSchedNewPat.CheckedChanged += new System.EventHandler(this.checkWebSchedRecall_CheckedChanged);
-			// 
-			// checkShowNoteAppts
-			// 
-			this.checkShowNoteAppts.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.checkShowNoteAppts.Location = new System.Drawing.Point(60, 115);
-			this.checkShowNoteAppts.Name = "checkShowNoteAppts";
-			this.checkShowNoteAppts.Size = new System.Drawing.Size(202, 18);
-			this.checkShowNoteAppts.TabIndex = 49;
-			this.checkShowNoteAppts.Text = "Show \"Note\" Appointments";
+			this.checkWebSchedNewPat.CheckedChanged += new System.EventHandler(this.checkWebSched_CheckedChanged);
 			// 
 			// FormRpAppointments
 			// 
@@ -462,7 +474,7 @@ namespace OpenDental
 			SetTomorrow();
 		}
 
-		private void checkWebSchedRecall_CheckedChanged(object sender,EventArgs e) {
+		private void checkWebSched_CheckedChanged(object sender,EventArgs e) {
 			if(((CheckBox)sender).Checked) {
 				radioDateAptCreated.Checked=true;
 			}
@@ -507,8 +519,8 @@ namespace OpenDental
 				listStatuses.Add(ApptStatus.PtNoteCompleted);
 			}
 			RpAppointments.SortAndFilterBy sortBy=radioDateAptCreated.Checked ? RpAppointments.SortAndFilterBy.SecDateEntry : RpAppointments.SortAndFilterBy.AptDateTime;
-			table=RpAppointments.GetAppointmentTable(dateFrom,dateTo,listProvNums,listClinicNums,_hasClinicsEnabled,checkWebSchedRecall.Checked,checkWebSchedNewPat.Checked,false,
-				sortBy,listStatuses,new List<long>(),nameof(FormRpAppointments));
+			table=RpAppointments.GetAppointmentTable(dateFrom,dateTo,listProvNums,listClinicNums,_hasClinicsEnabled,checkWebSchedRecall.Checked,
+				checkWebSchedNewPat.Checked,checkWebSchedASAP.Checked,sortBy,listStatuses,new List<long>(),nameof(FormRpAppointments));
 			//create the report
 			Font font=new Font("Tahoma",9);
 			Font fontTitle=new Font("Tahoma",17,FontStyle.Bold);

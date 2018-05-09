@@ -8293,7 +8293,7 @@ namespace OpenDental{
 						break;
 					case FormType.FormWebSchedAppts:
 						FormWebSchedAppts FormWebSchedAppts=new FormWebSchedAppts(alertItem.Type==AlertType.WebSchedNewPatApptCreated,
-							alertItem.Type==AlertType.WebSchedRecallApptCreated);
+							alertItem.Type==AlertType.WebSchedRecallApptCreated,alertItem.Type==AlertType.WebSchedASAPApptCreated);
 						FormWebSchedAppts.Show();
 						break;
 					case FormType.FormPatientEdit:
@@ -8397,7 +8397,7 @@ namespace OpenDental{
 					FormCNS.Show();
 					break;
 				case ReportNonModalSelection.WebSchedAppointments:
-					FormWebSchedAppts formWSA=new FormWebSchedAppts(true,true);
+					FormWebSchedAppts formWSA=new FormWebSchedAppts(true,true,true);
 					formWSA.Show();
 					break;
 				case ReportNonModalSelection.CustomAging:
