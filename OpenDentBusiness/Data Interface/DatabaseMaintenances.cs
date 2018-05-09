@@ -1344,8 +1344,6 @@ namespace OpenDentBusiness {
 			long canadianNetworkNumTelusA=PIn.Long(Db.GetScalar(command));
 			command="SELECT CanadianNetworkNum FROM canadiannetwork WHERE Abbrev='MBC' LIMIT 1";
 			long canadianNetworkNumMBC=PIn.Long(Db.GetScalar(command));
-			command="SELECT CanadianNetworkNum FROM canadiannetwork WHERE Abbrev='PBC' LIMIT 1";
-			long canadianNetworkNumPBC=PIn.Long(Db.GetScalar(command));
 			command="SELECT CanadianNetworkNum FROM canadiannetwork WHERE Abbrev='ABC' LIMIT 1";
 			long canadianNetworkNumABC=PIn.Long(Db.GetScalar(command));
 			CanSupTransTypes claimTypes=CanSupTransTypes.ClaimAckEmbedded_11e|CanSupTransTypes.ClaimEobEmbedded_21e;//Claim 01, claim ack 11, and claim eob 21 are implied.
@@ -1466,7 +1464,7 @@ namespace OpenDentBusiness {
 				//ontario ironworkers
 				"000123",1,"04",claimTypes|predeterminationTypes|cobTypes,canadianNetworkNumCSI,
 				//pacific blue cross
-				"000064",1,"04",claimTypes|reversalTypes|predeterminationTypes,canadianNetworkNumPBC,
+				"000064",1,"04",claimTypes|reversalTypes|predeterminationTypes,canadianNetworkNumCSI,
 				//pbas
 				"610256",1,"04",claimTypes|predeterminationTypes|rotTypes,canadianNetworkNumCSI,
 				//quickcard
