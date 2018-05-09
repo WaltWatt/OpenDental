@@ -341,7 +341,9 @@ namespace OpenDentBusiness{
 			for(int i=0;i<sheet.SheetFields.Count;i++) {
 				sheetFieldsCopy.Add(sheet.SheetFields[i]);
 			}
-			sheetFieldsCopy.Sort(SheetFields.SortPrimaryKey);
+			if(sheetFieldsCopy.All(x => x.SheetFieldNum > 0)) {//the sheet has not been loaded into the db, so it has no primary keys to sort on
+				sheetFieldsCopy.Sort(SheetFields.SortPrimaryKey);
+			}
 			return UI.SigBox.GetSignatureKeySheets(sheetFieldsCopy);
 		}
 
