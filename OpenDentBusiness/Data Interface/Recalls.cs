@@ -74,18 +74,14 @@ namespace OpenDentBusiness {
 
 		///<summary>Gets all recalls for the supplied patients, usually a family or single pat.  Result might have a length of zero.  
 		///Each recall will also have the DateScheduled filled by pulling that info from other tables.</summary>
-		public static List<Recall> GetList(List<long> patNums) {
-			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				return Meth.GetObject<List<Recall>>(MethodBase.GetCurrentMethod(),patNums);
-			} 
-			string wherePats="";
-			for(int i=0;i<patNums.Count;i++){
-				if(i!=0){
-					wherePats+=" OR ";
-				}
-				wherePats+="PatNum="+patNums[i].ToString();
+		public static List<Recall> GetList(List<long> listPatNums) {
+			if(listPatNums==null || listPatNums.Count<=0) {
+				return new List<Recall>();
 			}
-			string command="SELECT * FROM recall WHERE "+wherePats;
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				return Meth.GetObject<List<Recall>>(MethodBase.GetCurrentMethod(),listPatNums);
+			}
+			string command="SELECT * FROM recall WHERE recall.PatNum IN ("+string.Join(",",listPatNums)+")";
 			return Crud.RecallCrud.SelectMany(command);
 		}
 
