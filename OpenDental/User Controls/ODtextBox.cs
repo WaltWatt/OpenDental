@@ -555,9 +555,13 @@ namespace OpenDental {
 					word.WordText=newWord;
 					DictCustoms.Insert(word);
 					DataValid.SetInvalid(InvalidType.DictCustoms);
-					ListIncorrect.Remove(ReplWord.Value);
-					ListCorrect.Add(ReplWord.Value);
-					timerSpellCheck.Start();
+					//removes all case versions of the word from incorrect list to avoid duplication
+					for(int i = ListIncorrect.Count-1;i>=0;i--) {
+						if(ListIncorrect[i].ToLower()==ReplWord.Value.ToLower()) {
+							ListCorrect.Add(ListIncorrect[i]);
+							ListIncorrect.Remove(ListIncorrect[i]);
+						}
+					}
 					break;
 				case 7://Disable spell check
 					if(!MsgBox.Show(this,MsgBoxButtons.OKCancel,"This will disable spell checking.  To re-enable, go to Setup | Spell Check and check the \"Spell Check Enabled\" box.")) {
@@ -855,9 +859,6 @@ namespace OpenDental {
 					if(HunspellGlobal.Spell(words[i].Value)) {
 						ListCorrect.Add(words[i].Value);//add to appropriate list with the casing as typed this time
 						continue;
-					}
-					else {
-						ListIncorrect.Add(words[i].Value);
 					}
 				}
 				bool correct=false;

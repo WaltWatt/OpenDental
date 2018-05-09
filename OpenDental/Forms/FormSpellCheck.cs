@@ -46,7 +46,7 @@ namespace OpenDental {
 			}
 			string newWord=Regex.Replace(textCustom.Text,"[\\s]|[\\p{P}\\p{S}-['-]]","");//don't allow words with spaces or punctuation except ' and - in them
 			for(int i=0;i<_listDictCustom.Count;i++) {//Make sure it's not already in the custom list
-				if(_listDictCustom[i].WordText==newWord) {
+				if(_listDictCustom[i].WordText.ToLower()==newWord.ToLower()) {
 					MsgBox.Show(this,"The word "+newWord+" is already in the custom word list.");
 					textCustom.Clear();
 					return;
