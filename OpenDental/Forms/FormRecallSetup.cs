@@ -780,8 +780,8 @@ namespace OpenDental{
 			row=new ODGridRow();
 			row.Cells.Add("1");
 			row.Cells.Add(Lan.g(this,"WebSched Text"));
-			row.Cells.Add(Lan.g(this,"Available variables")+": [URL], [NameFL], "+availableFields);
-			row.Cells.Add(PrefC.GetString(PrefName.WebSchedMessageText));
+            row.Cells.Add(Lan.g(this,"Available variables")+": [URL], "+availableFields);
+            row.Cells.Add(PrefC.GetString(PrefName.WebSchedMessageText));
 			row.Tag=PrefName.WebSchedMessageText.ToString();
 			gridMain.Rows.Add(row);
 			#endregion
@@ -847,8 +847,8 @@ namespace OpenDental{
 			row=new ODGridRow();
 			row.Cells.Add("2");
 			row.Cells.Add(Lan.g(this,"WebSched Text"));
-			row.Cells.Add(Lan.g(this,"Available variables")+": [URL], [NameFL], "+availableFields);
-			row.Cells.Add(PrefC.GetString(PrefName.WebSchedMessageText2));
+            row.Cells.Add(Lan.g(this,"Available variables")+": [URL], "+availableFields);
+            row.Cells.Add(PrefC.GetString(PrefName.WebSchedMessageText2));
 			row.Tag=PrefName.WebSchedMessageText2;
 			gridMain.Rows.Add(row);
 			#endregion
@@ -914,8 +914,8 @@ namespace OpenDental{
 			row=new ODGridRow();
 			row.Cells.Add("3");
 			row.Cells.Add(Lan.g(this,"WebSched Text"));
-			row.Cells.Add(Lan.g(this,"Available variables")+": [URL], [NameFL], "+availableFields);
-			row.Cells.Add(PrefC.GetString(PrefName.WebSchedMessageText3));
+            row.Cells.Add(Lan.g(this,"Available variables")+": [URL], "+availableFields);
+            row.Cells.Add(PrefC.GetString(PrefName.WebSchedMessageText3));
 			row.Tag=PrefName.WebSchedMessageText3.ToString();
 			gridMain.Rows.Add(row);
 			#endregion
