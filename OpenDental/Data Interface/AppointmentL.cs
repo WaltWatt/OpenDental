@@ -264,8 +264,8 @@ namespace OpenDental{
 		}*/
 
 		///<summary>Used by UI when it needs a recall appointment placed on the pinboard ready to schedule.  This method creates the appointment and attaches all appropriate procedures.  It's up to the calling class to then place the appointment on the pinboard.  If the appointment doesn't get scheduled, it's important to delete it.  If a recallNum is not 0 or -1, then it will create an appt of that recalltype.</summary>
-		public static Appointment CreateRecallApt(Patient patCur,List<Procedure> procList,List<InsPlan> planList,long recallNum,List<InsSub> subList,
-			DateTime aptDateTime=default(DateTime))
+		public static Appointment CreateRecallApt(Patient patCur,List<InsPlan> planList,long recallNum,List<InsSub> subList
+			,DateTime aptDateTime=default(DateTime))
 		{
 			List<Recall> recallList=Recalls.GetList(patCur.PatNum);
 			Recall recallCur=null;
@@ -282,8 +282,9 @@ namespace OpenDental{
 					}
 				}
 			}
-			if(recallCur==null){// || recallCur.DateDue.Year<1880){
-				throw new ApplicationException(Lan.g("AppointmentL","No special type recall is due."));//Typically never happens because everyone has a recall.  However, it can happen when patients have custom recalls due
+			if(recallCur==null){
+				//Typically never happens because everyone has a recall.  However, it can happen when patients have custom recalls due
+				throw new ApplicationException(Lan.g("AppointmentL","No special type recall is due."));
 			}
 			if(recallCur.DateScheduled.Date>DateTime.Today) {
 				throw new ApplicationException(Lan.g("AppointmentL","Recall has already been scheduled for ")+recallCur.DateScheduled.ToShortDateString());

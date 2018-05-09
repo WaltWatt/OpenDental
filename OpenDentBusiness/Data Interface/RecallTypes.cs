@@ -149,7 +149,7 @@ namespace OpenDentBusiness{
 		public static List<string> GetProcs(long recallTypeNum) {
 			//No need to check RemotingRole; no call to db.
 			RecallType recallType=GetFirstOrDefault(x => x.RecallTypeNum==recallTypeNum);
-			return (recallType==null ? new List<string>() : recallType.Procedures.Split(',').ToList());
+			return (recallType==null || string.IsNullOrEmpty(recallType.Procedures)?new List<string>():recallType.Procedures.Split(',').ToList());
 		}
 
 		///<summary>Also makes sure both types are defined as special types.</summary>

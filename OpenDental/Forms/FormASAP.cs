@@ -1283,11 +1283,10 @@ namespace OpenDental {
 					MsgBox.Show(this,"Appointments cannot be scheduled for "+patCur.PatStatus.ToString().ToLower()+" patients.");
 					return;
 				}
-				List<Procedure> procsList=Procedures.Refresh(patCur.PatNum);
 				Family fam=Patients.GetFamily(patCur.PatNum);
 				List<InsSub> subList=InsSubs.RefreshForFam(fam);
 				List<InsPlan> planList=InsPlans.RefreshForSubList(subList);
-				Appointment aptCur=AppointmentL.CreateRecallApt(patCur,procsList,planList,recall.RecallNum,subList);
+				Appointment aptCur=AppointmentL.CreateRecallApt(patCur,planList,recall.RecallNum,subList);
 				GotoModule.PinToAppt(new List<long>() { aptCur.AptNum },patCur.PatNum);
 			}
 			FillGridRecalls();

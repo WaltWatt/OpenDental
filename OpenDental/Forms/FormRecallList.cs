@@ -1356,14 +1356,12 @@ namespace OpenDental{
 			}
 			Family fam=Patients.GetFamily(SelectedPatNum);
 			Patient pat=fam.GetPatient(SelectedPatNum);
-			List<Procedure> procList;
 			Appointment apt=null;
-			procList=Procedures.Refresh(pat.PatNum);
 			List<InsSub> subList=InsSubs.RefreshForFam(fam);
 			List<InsPlan> planList=InsPlans.RefreshForSubList(subList);
 			long recallNum=PIn.Long(_tableRecalls.Rows[gridMain.SelectedIndices[0]]["RecallNum"].ToString());
 			try{
-				apt=AppointmentL.CreateRecallApt(pat,procList,planList,recallNum,subList);
+				apt=AppointmentL.CreateRecallApt(pat,planList,recallNum,subList);
 			}
 			catch(Exception ex){
 				MessageBox.Show(ex.Message);
@@ -1394,7 +1392,6 @@ namespace OpenDental{
 			}
 			SelectedPatNum=PIn.Long(_tableRecalls.Rows[gridMain.SelectedIndices[0]]["PatNum"].ToString());
 			Family fam=Patients.GetFamily(SelectedPatNum);
-			List<Procedure> procList;
 			List <InsPlan> planList;
 			List<InsSub> subList;
 			Appointment apt;
@@ -1406,11 +1403,10 @@ namespace OpenDental{
 					patsRestricted++;
 					continue;
 				}
-				procList=Procedures.Refresh(fam.ListPats[i].PatNum);
 				subList=InsSubs.RefreshForFam(fam);
 				planList=InsPlans.RefreshForSubList(subList);
 				try{
-					apt=AppointmentL.CreateRecallApt(fam.ListPats[i],procList,planList,-1,subList);
+					apt=AppointmentL.CreateRecallApt(fam.ListPats[i],planList,-1,subList);
 				}
 				catch{//(Exception ex){
 					continue;

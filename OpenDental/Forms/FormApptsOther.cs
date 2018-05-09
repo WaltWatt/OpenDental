@@ -698,7 +698,6 @@ namespace OpenDental{
 		}
 
 		public void MakeRecallAppointment(){
-			List<Procedure> procList=Procedures.Refresh(PatCur.PatNum);
 			//List<Recall> recallList=Recalls.GetList(PatCur.PatNum);//get the recall for this pt
 			//if(recallList.Count==0){
 			//	MsgBox.Show(this,"This patient does not have any recall due.");
@@ -722,7 +721,7 @@ namespace OpenDental{
 				aptDateTime=new DateTime(d.Year,d.Month,d.Day,ContrAppt.SheetClickedonHour,minutes,0);
 			}
 			try{
-				apt=AppointmentL.CreateRecallApt(PatCur,procList,planList,-1,subList,aptDateTime);
+				apt=AppointmentL.CreateRecallApt(PatCur,planList,-1,subList,aptDateTime);
 			}
 			catch(Exception ex){
 				MessageBox.Show(ex.Message);
@@ -785,7 +784,6 @@ namespace OpenDental{
 		}
 
 		public void MakeRecallFamily(){
-			List<Procedure> procList;
 			List<Recall> recallList;//=Recalls.GetList(FamCur.ListPats
 			List <InsPlan> planList;
 			List<InsSub> subList;
@@ -805,7 +803,6 @@ namespace OpenDental{
 					patsArchivedOrDeceased++;
 					continue;
 				}
-				procList=Procedures.Refresh(patCur.PatNum);
 				recallList=Recalls.GetList(patCur.PatNum);//get the recall for this pt
 				//Check to see if the special type recall is disabled or already scheduled.  This is also done in AppointmentL.CreateRecallApt() below so I'm
 				//	not sure why we do it here.
@@ -821,7 +818,7 @@ namespace OpenDental{
 				subList=InsSubs.RefreshForFam(FamCur);
 				planList=InsPlans.RefreshForSubList(subList);
 				try{
-					apt=AppointmentL.CreateRecallApt(patCur,procList,planList,-1,subList);
+					apt=AppointmentL.CreateRecallApt(patCur,planList,-1,subList);
 				}
 				catch{
 					//MessageBox.Show(ex.Message);
