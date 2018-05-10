@@ -73,15 +73,15 @@ namespace OpenDental.User_Controls {
 			gridOptions.BeginUpdate();
 			//Columns
 			gridOptions.Columns.Clear();
-			ODGridColumn col=new ODGridColumn(Lan.g(this,"Allow Children"),85,HorizontalAlignment.Center);
+			ODGridColumn col=new ODGridColumn(Lan.g(this,"Allow Children"),95,HorizontalAlignment.Center);
 			gridOptions.Columns.Add(col);
-			col=new ODGridColumn(Lan.g(this,"Show Pre-Screen Questions"),175,HorizontalAlignment.Center);
+			col=new ODGridColumn(Lan.g(this,"Show Pre-Screen Questions"),180,HorizontalAlignment.Center);
 			gridOptions.Columns.Add(col);
-			col=new ODGridColumn(Lan.g(this,"E-mail Verify"),80,HorizontalAlignment.Center);
+			col=new ODGridColumn(Lan.g(this,"E-mail Verify"),85,HorizontalAlignment.Center);
 			gridOptions.Columns.Add(col);
-			col=new ODGridColumn(Lan.g(this,"Text Verify"),80,HorizontalAlignment.Center);
+			col=new ODGridColumn(Lan.g(this,"Text Verify"),85,HorizontalAlignment.Center);
 			gridOptions.Columns.Add(col);
-			col=new ODGridColumn(Lan.g(this,"Launch WebForm on Complete"),175,HorizontalAlignment.Center);
+			col=new ODGridColumn(Lan.g(this,"Launch WebForm on Complete"),200,HorizontalAlignment.Center);
 			gridOptions.Columns.Add(col);
 			//Rows
 			gridOptions.Rows.Clear();

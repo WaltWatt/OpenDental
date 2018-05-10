@@ -1812,7 +1812,7 @@ namespace OpenDental{
 			// label38
 			// 
 			this.label38.Anchor = System.Windows.Forms.AnchorStyles.Top;
-			this.label38.Location = new System.Drawing.Point(136, 60);
+			this.label38.Location = new System.Drawing.Point(117, 60);
 			this.label38.Name = "label38";
 			this.label38.Size = new System.Drawing.Size(245, 15);
 			this.label38.TabIndex = 330;
@@ -1821,11 +1821,11 @@ namespace OpenDental{
 			// 
 			// groupBoxWSNPHostedURLs
 			// 
-			this.groupBoxWSNPHostedURLs.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
+			this.groupBoxWSNPHostedURLs.Anchor = System.Windows.Forms.AnchorStyles.Top;
 			this.groupBoxWSNPHostedURLs.Controls.Add(this.panelHostedURLs);
-			this.groupBoxWSNPHostedURLs.Location = new System.Drawing.Point(413, 226);
+			this.groupBoxWSNPHostedURLs.Location = new System.Drawing.Point(390, 226);
 			this.groupBoxWSNPHostedURLs.Name = "groupBoxWSNPHostedURLs";
-			this.groupBoxWSNPHostedURLs.Size = new System.Drawing.Size(635, 204);
+			this.groupBoxWSNPHostedURLs.Size = new System.Drawing.Size(675, 204);
 			this.groupBoxWSNPHostedURLs.TabIndex = 329;
 			this.groupBoxWSNPHostedURLs.TabStop = false;
 			this.groupBoxWSNPHostedURLs.Text = "Hosted URLs will be where new patients need to visit in order to create an appoin" +
@@ -1839,14 +1839,15 @@ namespace OpenDental{
 			this.panelHostedURLs.AutoScroll = true;
 			this.panelHostedURLs.Location = new System.Drawing.Point(0, 13);
 			this.panelHostedURLs.Name = "panelHostedURLs";
-			this.panelHostedURLs.Size = new System.Drawing.Size(635, 186);
+			this.panelHostedURLs.Size = new System.Drawing.Size(675, 186);
 			this.panelHostedURLs.TabIndex = 0;
 			// 
 			// checkNewPatAllowProvSelection
 			// 
+			this.checkNewPatAllowProvSelection.Anchor = System.Windows.Forms.AnchorStyles.Top;
 			this.checkNewPatAllowProvSelection.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
 			this.checkNewPatAllowProvSelection.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.checkNewPatAllowProvSelection.Location = new System.Drawing.Point(80, 479);
+			this.checkNewPatAllowProvSelection.Location = new System.Drawing.Point(61, 479);
 			this.checkNewPatAllowProvSelection.Name = "checkNewPatAllowProvSelection";
 			this.checkNewPatAllowProvSelection.Size = new System.Drawing.Size(216, 18);
 			this.checkNewPatAllowProvSelection.TabIndex = 328;
@@ -1855,8 +1856,9 @@ namespace OpenDental{
 			// 
 			// checkWebSchedNewPatForcePhoneFormatting
 			// 
+			this.checkWebSchedNewPatForcePhoneFormatting.Anchor = System.Windows.Forms.AnchorStyles.Top;
 			this.checkWebSchedNewPatForcePhoneFormatting.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-			this.checkWebSchedNewPatForcePhoneFormatting.Location = new System.Drawing.Point(574, 38);
+			this.checkWebSchedNewPatForcePhoneFormatting.Location = new System.Drawing.Point(555, 38);
 			this.checkWebSchedNewPatForcePhoneFormatting.Name = "checkWebSchedNewPatForcePhoneFormatting";
 			this.checkWebSchedNewPatForcePhoneFormatting.Size = new System.Drawing.Size(237, 19);
 			this.checkWebSchedNewPatForcePhoneFormatting.TabIndex = 327;
@@ -1867,15 +1869,17 @@ namespace OpenDental{
 			// 
 			// comboWSNPConfirmStatuses
 			// 
+			this.comboWSNPConfirmStatuses.Anchor = System.Windows.Forms.AnchorStyles.Top;
 			this.comboWSNPConfirmStatuses.FormattingEnabled = true;
-			this.comboWSNPConfirmStatuses.Location = new System.Drawing.Point(797, 11);
+			this.comboWSNPConfirmStatuses.Location = new System.Drawing.Point(774, 11);
 			this.comboWSNPConfirmStatuses.Name = "comboWSNPConfirmStatuses";
-			this.comboWSNPConfirmStatuses.Size = new System.Drawing.Size(251, 21);
+			this.comboWSNPConfirmStatuses.Size = new System.Drawing.Size(291, 21);
 			this.comboWSNPConfirmStatuses.TabIndex = 326;
 			// 
 			// labelWebSchedNewPatConfirmStatus
 			// 
-			this.labelWebSchedNewPatConfirmStatus.Location = new System.Drawing.Point(585, 12);
+			this.labelWebSchedNewPatConfirmStatus.Anchor = System.Windows.Forms.AnchorStyles.Top;
+			this.labelWebSchedNewPatConfirmStatus.Location = new System.Drawing.Point(562, 12);
 			this.labelWebSchedNewPatConfirmStatus.Name = "labelWebSchedNewPatConfirmStatus";
 			this.labelWebSchedNewPatConfirmStatus.Size = new System.Drawing.Size(206, 17);
 			this.labelWebSchedNewPatConfirmStatus.TabIndex = 325;
@@ -1884,11 +1888,11 @@ namespace OpenDental{
 			// 
 			// groupBox13
 			// 
-			this.groupBox13.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.groupBox13.Anchor = System.Windows.Forms.AnchorStyles.Top;
 			this.groupBox13.Controls.Add(this.textWebSchedNewPatApptMessage);
-			this.groupBox13.Location = new System.Drawing.Point(413, 431);
+			this.groupBox13.Location = new System.Drawing.Point(390, 431);
 			this.groupBox13.Name = "groupBox13";
-			this.groupBox13.Size = new System.Drawing.Size(277, 103);
+			this.groupBox13.Size = new System.Drawing.Size(304, 103);
 			this.groupBox13.TabIndex = 324;
 			this.groupBox13.TabStop = false;
 			this.groupBox13.Text = "Appointment Message";
@@ -1898,18 +1902,18 @@ namespace OpenDental{
 			this.textWebSchedNewPatApptMessage.Location = new System.Drawing.Point(6, 17);
 			this.textWebSchedNewPatApptMessage.Multiline = true;
 			this.textWebSchedNewPatApptMessage.Name = "textWebSchedNewPatApptMessage";
-			this.textWebSchedNewPatApptMessage.Size = new System.Drawing.Size(245, 80);
+			this.textWebSchedNewPatApptMessage.Size = new System.Drawing.Size(292, 80);
 			this.textWebSchedNewPatApptMessage.TabIndex = 313;
 			// 
 			// groupBox11
 			// 
-			this.groupBox11.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.groupBox11.Anchor = System.Windows.Forms.AnchorStyles.Top;
 			this.groupBox11.Controls.Add(this.listboxWebSchedNewPatIgnoreBlockoutTypes);
 			this.groupBox11.Controls.Add(this.label33);
 			this.groupBox11.Controls.Add(this.butWebSchedNewPatBlockouts);
-			this.groupBox11.Location = new System.Drawing.Point(693, 431);
+			this.groupBox11.Location = new System.Drawing.Point(700, 433);
 			this.groupBox11.Name = "groupBox11";
-			this.groupBox11.Size = new System.Drawing.Size(356, 103);
+			this.groupBox11.Size = new System.Drawing.Size(365, 103);
 			this.groupBox11.TabIndex = 323;
 			this.groupBox11.TabStop = false;
 			this.groupBox11.Text = "Ignore Blockout Types";
@@ -1920,7 +1924,7 @@ namespace OpenDental{
 			this.listboxWebSchedNewPatIgnoreBlockoutTypes.Location = new System.Drawing.Point(213, 13);
 			this.listboxWebSchedNewPatIgnoreBlockoutTypes.Name = "listboxWebSchedNewPatIgnoreBlockoutTypes";
 			this.listboxWebSchedNewPatIgnoreBlockoutTypes.SelectionMode = System.Windows.Forms.SelectionMode.None;
-			this.listboxWebSchedNewPatIgnoreBlockoutTypes.Size = new System.Drawing.Size(138, 82);
+			this.listboxWebSchedNewPatIgnoreBlockoutTypes.Size = new System.Drawing.Size(146, 82);
 			this.listboxWebSchedNewPatIgnoreBlockoutTypes.TabIndex = 197;
 			// 
 			// label33
@@ -1956,11 +1960,11 @@ namespace OpenDental{
 			this.gridWebSchedNewPatApptOps.HeaderFont = new System.Drawing.Font("Microsoft Sans Serif", 8.5F, System.Drawing.FontStyle.Bold);
 			this.gridWebSchedNewPatApptOps.HeaderHeight = 15;
 			this.gridWebSchedNewPatApptOps.HScrollVisible = false;
-			this.gridWebSchedNewPatApptOps.Location = new System.Drawing.Point(409, 78);
+			this.gridWebSchedNewPatApptOps.Location = new System.Drawing.Point(390, 78);
 			this.gridWebSchedNewPatApptOps.Name = "gridWebSchedNewPatApptOps";
 			this.gridWebSchedNewPatApptOps.ScrollValue = 0;
 			this.gridWebSchedNewPatApptOps.SelectionMode = OpenDental.UI.GridSelectionMode.None;
-			this.gridWebSchedNewPatApptOps.Size = new System.Drawing.Size(635, 142);
+			this.gridWebSchedNewPatApptOps.Size = new System.Drawing.Size(675, 142);
 			this.gridWebSchedNewPatApptOps.TabIndex = 309;
 			this.gridWebSchedNewPatApptOps.Title = "Operatories Considered";
 			this.gridWebSchedNewPatApptOps.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
@@ -1972,7 +1976,7 @@ namespace OpenDental{
 			// label42
 			// 
 			this.label42.Anchor = System.Windows.Forms.AnchorStyles.Top;
-			this.label42.Location = new System.Drawing.Point(804, 60);
+			this.label42.Location = new System.Drawing.Point(820, 60);
 			this.label42.Name = "label42";
 			this.label42.Size = new System.Drawing.Size(245, 15);
 			this.label42.TabIndex = 308;
@@ -1990,7 +1994,7 @@ namespace OpenDental{
 			this.groupBox7.Controls.Add(this.butWebSchedNewPatApptsToday);
 			this.groupBox7.Controls.Add(this.gridWebSchedNewPatApptTimeSlots);
 			this.groupBox7.Controls.Add(this.textWebSchedNewPatApptsDateStart);
-			this.groupBox7.Location = new System.Drawing.Point(80, 226);
+			this.groupBox7.Location = new System.Drawing.Point(61, 226);
 			this.groupBox7.Name = "groupBox7";
 			this.groupBox7.Size = new System.Drawing.Size(301, 228);
 			this.groupBox7.TabIndex = 304;
@@ -2105,7 +2109,7 @@ namespace OpenDental{
 			this.gridWSNPAReasons.HeaderFont = new System.Drawing.Font("Microsoft Sans Serif", 8.5F, System.Drawing.FontStyle.Bold);
 			this.gridWSNPAReasons.HeaderHeight = 15;
 			this.gridWSNPAReasons.HScrollVisible = false;
-			this.gridWSNPAReasons.Location = new System.Drawing.Point(80, 78);
+			this.gridWSNPAReasons.Location = new System.Drawing.Point(61, 78);
 			this.gridWSNPAReasons.Name = "gridWSNPAReasons";
 			this.gridWSNPAReasons.ScrollValue = 0;
 			this.gridWSNPAReasons.Size = new System.Drawing.Size(301, 142);
@@ -2119,7 +2123,7 @@ namespace OpenDental{
 			// label41
 			// 
 			this.label41.Anchor = System.Windows.Forms.AnchorStyles.Top;
-			this.label41.Location = new System.Drawing.Point(289, 12);
+			this.label41.Location = new System.Drawing.Point(270, 12);
 			this.label41.Name = "label41";
 			this.label41.Size = new System.Drawing.Size(252, 17);
 			this.label41.TabIndex = 244;
@@ -2129,7 +2133,7 @@ namespace OpenDental{
 			// textWebSchedNewPatApptSearchDays
 			// 
 			this.textWebSchedNewPatApptSearchDays.Anchor = System.Windows.Forms.AnchorStyles.Top;
-			this.textWebSchedNewPatApptSearchDays.Location = new System.Drawing.Point(248, 11);
+			this.textWebSchedNewPatApptSearchDays.Location = new System.Drawing.Point(229, 11);
 			this.textWebSchedNewPatApptSearchDays.MaxVal = 365;
 			this.textWebSchedNewPatApptSearchDays.MinVal = 0;
 			this.textWebSchedNewPatApptSearchDays.Name = "textWebSchedNewPatApptSearchDays";
@@ -2141,7 +2145,7 @@ namespace OpenDental{
 			// label40
 			// 
 			this.label40.Anchor = System.Windows.Forms.AnchorStyles.Top;
-			this.label40.Location = new System.Drawing.Point(75, 12);
+			this.label40.Location = new System.Drawing.Point(56, 12);
 			this.label40.Name = "label40";
 			this.label40.Size = new System.Drawing.Size(167, 17);
 			this.label40.TabIndex = 242;
@@ -3562,8 +3566,6 @@ namespace OpenDental{
 		private System.Windows.Forms.ListBox listboxWebSchedRecallIgnoreBlockoutTypes;
 		private System.Windows.Forms.Label label32;
 		private UI.Button butWebSchedRecallBlockouts;
-		private System.Windows.Forms.GroupBox groupBox13;
-		private System.Windows.Forms.TextBox textWebSchedNewPatApptMessage;
 		private System.Windows.Forms.GroupBox groupBox11;
 		private System.Windows.Forms.ListBox listboxWebSchedNewPatIgnoreBlockoutTypes;
 		private System.Windows.Forms.Label label33;
@@ -3670,5 +3672,7 @@ namespace OpenDental{
 		private System.Windows.Forms.Label labelWSNPClinic;
 		private System.Windows.Forms.ComboBox comboWSNPClinics;
 		private System.Windows.Forms.Label label38;
+		private System.Windows.Forms.GroupBox groupBox13;
+		private System.Windows.Forms.TextBox textWebSchedNewPatApptMessage;
 	}
 }

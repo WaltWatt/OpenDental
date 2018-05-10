@@ -83,7 +83,7 @@
 			this.panel1.Controls.Add(this.textWebFormToLaunch);
 			this.panel1.Location = new System.Drawing.Point(2, 25);
 			this.panel1.Name = "panel1";
-			this.panel1.Size = new System.Drawing.Size(596, 148);
+			this.panel1.Size = new System.Drawing.Size(645, 148);
 			this.panel1.TabIndex = 9;
 			// 
 			// textSchedulingURL
@@ -111,7 +111,7 @@
 			this.gridOptions.Location = new System.Drawing.Point(0, 0);
 			this.gridOptions.Name = "gridOptions";
 			this.gridOptions.ScrollValue = 0;
-			this.gridOptions.Size = new System.Drawing.Size(596, 59);
+			this.gridOptions.Size = new System.Drawing.Size(645, 59);
 			this.gridOptions.TabIndex = 318;
 			this.gridOptions.Title = "Options";
 			this.gridOptions.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
@@ -169,7 +169,7 @@
 			// 
 			this.labelEnabled.Location = new System.Drawing.Point(362, 2);
 			this.labelEnabled.Name = "labelEnabled";
-			this.labelEnabled.Size = new System.Drawing.Size(236, 21);
+			this.labelEnabled.Size = new System.Drawing.Size(285, 21);
 			this.labelEnabled.TabIndex = 11;
 			this.labelEnabled.Text = "Enabled";
 			this.labelEnabled.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -183,7 +183,7 @@
 			this.Controls.Add(this.panel1);
 			this.Controls.Add(this.butExpander);
 			this.Name = "ContrNewPatHostedURL";
-			this.Size = new System.Drawing.Size(600, 175);
+			this.Size = new System.Drawing.Size(650, 175);
 			this.panel1.ResumeLayout(false);
 			this.panel1.PerformLayout();
 			this.ResumeLayout(false);
