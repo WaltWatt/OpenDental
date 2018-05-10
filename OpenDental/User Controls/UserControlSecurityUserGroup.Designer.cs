@@ -383,11 +383,11 @@
 			// 
 			this.listAssociatedUsers.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.listAssociatedUsers.Enabled = false;
 			this.listAssociatedUsers.FormattingEnabled = true;
 			this.listAssociatedUsers.IntegralHeight = false;
 			this.listAssociatedUsers.Location = new System.Drawing.Point(639, 19);
 			this.listAssociatedUsers.Name = "listAssociatedUsers";
+			this.listAssociatedUsers.SelectionMode = System.Windows.Forms.SelectionMode.None;
 			this.listAssociatedUsers.Size = new System.Drawing.Size(207, 589);
 			this.listAssociatedUsers.TabIndex = 22;
 			// 
