@@ -18,6 +18,154 @@ namespace OpenDentBusiness{
 	///<summary></summary>
 	public class CentralConnections {
 		#region Get Methods
+
+		///<summary>Gets all of the connection setting information from the FreeDentalConfig.xml
+		///Throws exceptions.</summary>
+		public static void GetChooseDatabaseConnectionSettings(out CentralConnection centralConnection,out string connectionString,out YN noShow
+			,out DatabaseType dbType,out List<string> listAdminCompNames) 
+		{
+			//No remoting role check; out parameters are used.
+			centralConnection=new CentralConnection();
+			connectionString="";
+			noShow=YN.Unknown;
+			dbType=DatabaseType.MySql;
+			listAdminCompNames=new List<string>();
+			string xmlPath=ODFileUtils.CombinePaths(Application.StartupPath,"FreeDentalConfig.xml");
+			#region Permission Check
+			//Improvement should be made here to avoid requiring admin priv.
+			//Search path should be something like this:
+			//1. /home/username/.opendental/config.xml (or corresponding user path in Windows)
+			//2. /etc/opendental/config.xml (or corresponding machine path in Windows) (should be default for new installs) 
+			//3. Application Directory/FreeDentalConfig.xml (read-only if user is not admin)
+			if(!File.Exists(xmlPath)) {
+				FileStream fs;
+				try {
+					fs=File.Create(xmlPath);
+				}
+				catch(Exception) {
+					//No translation right here because we typically do not have a database connection yet.
+					throw new ODException("The very first time that the program is run, it must be run as an Admin.  "
+						+"If using Vista, right click, run as Admin.");
+				}
+				fs.Close();
+			}
+			#endregion
+			XmlDocument document=new XmlDocument();
+			try {
+				document.Load(xmlPath);
+				XPathNavigator Navigator=document.CreateNavigator();
+				XPathNavigator nav;
+				#region Nodes with No UI
+				//Always look for these settings first in order to always preserve them correctly.
+				nav=Navigator.SelectSingleNode("//AdminCompNames");
+				if(nav!=null) {
+					listAdminCompNames.Clear(); //this method gets called more than once
+					XPathNodeIterator navIterator=nav.SelectChildren(XPathNodeType.All);
+					for(int i=0;i<navIterator.Count;i++) {
+						navIterator.MoveNext();
+						listAdminCompNames.Add(navIterator.Current.Value);//Add this computer name to the list.
+					}
+				}
+				//See if there's a UseXWebTestGateway
+				nav=Navigator.SelectSingleNode("//UseXWebTestGateway");
+				if(nav!=null) {
+					OpenDentBusiness.WebTypes.Shared.XWeb.XWebs.UseXWebTestGateway=nav.Value.ToLower()=="true";
+				}
+				#endregion
+				#region Nodes from Choose Database Window
+				#region Nodes with No Group Box
+				//Database Type
+				nav=Navigator.SelectSingleNode("//DatabaseType");
+				dbType=DatabaseType.MySql;
+				if(nav!=null && nav.Value=="Oracle") {
+					dbType=DatabaseType.Oracle;
+				}
+				//ConnectionString
+				nav=Navigator.SelectSingleNode("//ConnectionString");
+				if(nav!=null) {
+					//If there is a ConnectionString, then use it.
+					connectionString=nav.Value;
+				}
+				#endregion
+				#region Connection Settings Group Box
+				//See if there's a DatabaseConnection
+				nav=Navigator.SelectSingleNode("//DatabaseConnection");
+				if(nav!=null) {
+					//If there is a DatabaseConnection, then use it.
+					centralConnection.ServerName=nav.SelectSingleNode("ComputerName").Value;
+					centralConnection.DatabaseName=nav.SelectSingleNode("Database").Value;
+					centralConnection.MySqlUser=nav.SelectSingleNode("User").Value;
+					centralConnection.MySqlPassword=nav.SelectSingleNode("Password").Value;
+					XPathNavigator encryptedPwdNode=nav.SelectSingleNode("MySQLPassHash");
+					//If the Password node is empty, but there is a value in the MySQLPassHash node, decrypt the node value and use that instead
+					string _decryptedPwd;
+					if(centralConnection.MySqlPassword==""
+						&& encryptedPwdNode!=null
+						&& encryptedPwdNode.Value!=""
+						&& CDT.Class1.Decrypt(encryptedPwdNode.Value,out _decryptedPwd))
+					{
+						//decrypted value could be an empty string, which means they don't have a password set, so textPassword will be an empty string
+						centralConnection.MySqlPassword=_decryptedPwd;
+					}
+					XPathNavigator noshownav=nav.SelectSingleNode("NoShowOnStartup");
+					if(noshownav!=null) {
+						if(noshownav.Value=="True") {
+							noShow=YN.Yes;
+						}
+						else {
+							noShow=YN.No;
+						}
+					}
+				}
+				#endregion
+				#region Connect to Middle Tier Group Box
+				nav=Navigator.SelectSingleNode("//ServerConnection");
+				/* example:
+				<ServerConnection>
+					<URI>http://server/OpenDentalServer/ServiceMain.asmx</URI>
+					<UsingEcw>True</UsingEcw>
+				</ServerConnection>
+				*/
+				if(nav!=null) {
+					//If there is a ServerConnection, then use it.
+					centralConnection.ServiceURI=nav.SelectSingleNode("URI").Value;
+					XPathNavigator ecwnav=nav.SelectSingleNode("UsingEcw");
+					if(ecwnav!=null && ecwnav.Value=="True") {
+						noShow=YN.Yes;
+						centralConnection.WebServiceIsEcw=true;
+					}
+					XPathNavigator autoLoginNav=nav.SelectSingleNode("UsingAutoLogin");
+					//Auto login the user using their windows credentials
+					if(autoLoginNav!=null && autoLoginNav.Value=="True") {
+						centralConnection.OdUser=nav.SelectSingleNode("User").Value;
+						//Get the user's password from Windows Credential Manager
+						try {
+							centralConnection.OdPassword=
+								PasswordVaultWrapper.RetrievePassword(centralConnection.ServiceURI,centralConnection.OdUser);
+							//Must set this so FormChooseDatabase() does not launch
+							noShow=YN.Yes;
+							centralConnection.IsAutomaticLogin=true;
+						}
+						catch(Exception ex) {
+							ex.DoNothing();//We still want to display the server URI and the user name if getting the password fails.
+						}
+					}
+				}
+				#endregion
+				#endregion
+			}
+			catch(Exception) {
+				//Common error: root element is missing
+				centralConnection.ServerName="localhost";
+#if(TRIALONLY)
+				centralConnection.ServerName="demo";
+#else
+				centralConnection.DatabaseName="opendental";
+#endif
+				centralConnection.MySqlUser="root";
+			}
+		}
+
 		#endregion
 
 		#region Modification Methods
@@ -125,7 +273,7 @@ namespace OpenDentBusiness{
 
 		///<summary>Throws an exception to display to the user if anything goes wrong.</summary>
 		public static void TryToConnect(CentralConnection centralConnection,DatabaseType dbType,string connectionString="",bool noShowOnStartup=false
-			,List<string> listAdminCompNames=null,bool saveOnSuccess=false) 
+			,List<string> listAdminCompNames=null,bool isCommandLineArgs=false) 
 		{
 			if(!string.IsNullOrEmpty(centralConnection.ServiceURI)) {
 				LoadMiddleTierProxySettings();
@@ -177,9 +325,7 @@ namespace OpenDentBusiness{
 				//a direct connection does not utilize lower privileges.
 				RemotingClient.RemotingRole=RemotingRole.ClientDirect;
 			}
-			if(saveOnSuccess) {
-				TrySaveConnectionSettings(centralConnection,dbType,connectionString,noShowOnStartup,listAdminCompNames);
-			}
+			TrySaveConnectionSettings(centralConnection,dbType,connectionString,noShowOnStartup,listAdminCompNames,isCommandLineArgs);
 		}
 
 		///<summary>If MiddleTierProxyConfix.xml is present, this loads the three variables from that file into memory.
@@ -196,11 +342,42 @@ namespace OpenDentBusiness{
 			RemotingClient.MidTierProxyPassword=doc.SelectSingleNode("//Password").InnerText;
 		}
 
-		///<summary>Returns true if the connection settings were successfully saved to the FreeDentalConfig file.  Otherwise, false.</summary>
+		///<summary>Returns true if the connection settings were successfully saved to the FreeDentalConfig file.  Otherwise, false.
+		///Set isCommandLineArgs to true in order to preserve settings within FreeDentalConfig.xml that are not command line args.
+		///E.g. the current value within the FreeDentalConfig.xml for NoShowOnStartup will be preserved instead of the value passed in.</summary>
 		public static bool TrySaveConnectionSettings(CentralConnection centralConnection,DatabaseType dbType,string connectionString=""
-			,bool noShowOnStartup=false,List<string> listAdminCompNames=null) 
+			,bool noShowOnStartup=false,List<string> listAdminCompNames=null,bool isCommandLineArgs=false) 
 		{
 			try {
+				//The parameters passed in might have misleading information (like noShowOnStartup) if they were comprised from command line arguments.
+				//Non-command line settings within the FreeDentalConfig.xml need to be preserved when command line arguments are used.
+				if(isCommandLineArgs) {
+					//Override all variables that are NOT valid command line arguments with their current values within the FreeDentalConfig.xml
+					//This will preserve the values that should stay the same (e.g. noShowOnStartup is NOT a command line arg and will always be true).
+					CentralConnection centralConnectionFile;
+					string connectionStringFile;
+					YN noShowFile;
+					DatabaseType dbTypeFile;
+					List<string> listAdminCompNamesFile;
+					GetChooseDatabaseConnectionSettings(out centralConnectionFile,out connectionStringFile,out noShowFile,out dbTypeFile
+						,out listAdminCompNamesFile);
+					//Since command line args are being used, override any variables that are NOT allowed to be passed in via the command line.
+					#region FreeDentalConfig Nodes That Do Not Have a Corresponding Command Line Arg
+					switch(noShowFile) {//config node: <NoShowOnStartup>
+						case YN.Yes:
+							noShowOnStartup=true;
+							break;
+						case YN.No:
+						case YN.Unknown:
+							//Either NoShowOnStartup was not found or was explicitly set to no.
+							noShowOnStartup=false;
+							break;
+					}
+					listAdminCompNames=listAdminCompNamesFile;//config node: <AdminCompNames>
+					connectionString=connectionStringFile;//config node: <ConnectionString>
+					centralConnection.IsAutomaticLogin=centralConnectionFile.IsAutomaticLogin;//config node: <UsingAutoLogin>
+					#endregion
+				}
 				XmlWriterSettings settings=new XmlWriterSettings();
 				settings.Indent=true;
 				settings.IndentChars=("    ");

@@ -36,7 +36,7 @@ namespace OpenDental {
 			_view.TryGetModelFromView(out chooseDatabaseModel);
 			try {
 				CentralConnections.TryToConnect(chooseDatabaseModel.CentralConnectionCur,chooseDatabaseModel.DbType,chooseDatabaseModel.ConnectionString
-					,(chooseDatabaseModel.NoShow==YN.Yes),chooseDatabaseModel.ListAdminCompNames,true);
+					,(chooseDatabaseModel.NoShow==YN.Yes),chooseDatabaseModel.ListAdminCompNames);
 			}
 			catch(Exception ex) {
 				MessageBox.Show(ex.Message);

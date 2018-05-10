@@ -2645,7 +2645,7 @@ namespace OpenDental{
 				if(chooseDatabaseModel.NoShow==YN.Yes) {
 					try {
 						CentralConnections.TryToConnect(chooseDatabaseModel.CentralConnectionCur,chooseDatabaseModel.DbType,chooseDatabaseModel.ConnectionString
-							,(chooseDatabaseModel.NoShow==YN.Yes),chooseDatabaseModel.ListAdminCompNames);
+							,(chooseDatabaseModel.NoShow==YN.Yes),chooseDatabaseModel.ListAdminCompNames,(CommandLineArgs.Length!=0));
 					}
 					catch(Exception) {
 						if(isSilentUpdate) {
