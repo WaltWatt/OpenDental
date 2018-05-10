@@ -2404,27 +2404,15 @@ namespace OpenDental{
 			textTime.Text=(strBTime.Length*ApptDrawing.MinPerIncr).ToString();
 		}
 
-		private void CalculateTime(bool ignoreTimeLocked = false) {
-			if(!ignoreTimeLocked && checkTimeLocked.Checked) {
-				return;
-			}
-			//We are using the providers selected for the appt rather than the providers for the procs.
-			//Providers for the procs get reset when closing this form.
-			long provDent=Patients.GetProvNum(pat);
-			long provHyg=Patients.GetProvNum(pat);
-			if(_selectedProvNum!=0){
-				provDent=_selectedProvNum;
-				provHyg=_selectedProvNum;
-			}
-			if(_selectedProvHygNum!=0) {
-				provHyg=_selectedProvHygNum;
-			}
-			List<long> codeNums=new List<long>();
+		private void CalculateTime(bool ignoreTimeLocked=false) {
+			List<Procedure> listProcs=new List<Procedure>();
 			foreach(int i in gridProc.SelectedIndices) {
-				codeNums.Add(((Procedure)gridProc.Rows[i].Tag).CodeNum);
+				listProcs.Add((Procedure)gridProc.Rows[i].Tag);
 			}
-			strBTime=new StringBuilder(Appointments.CalculatePattern(provDent,provHyg,codeNums,false));
-			//Plugins.HookAddCode(this,"FormApptEdit.CalculateTime_end",strBTime,provDent,provHyg,codeNums);//set strBTime, but without using the 'new' keyword.--Hook removed.
+			string apptPattern=Appointments.CalculatePattern(pat,_selectedProvNum,_selectedProvHygNum,listProcs,checkTimeLocked.Checked,ignoreTimeLocked);
+			if(apptPattern!=null) {
+				strBTime=new StringBuilder(apptPattern);
+			}
 		}
 
 		private void checkTimeLocked_Click(object sender,EventArgs e) {

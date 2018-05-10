@@ -2781,6 +2781,29 @@ namespace OpenDentBusiness{
 			return pattern;
 		}
 
+		public static string CalculatePattern(Patient pat,long aptProvNum,long aptProvHygNum,List<Procedure> listProcs,bool isTimeLocked=false,bool ignoreTimeLocked=false,bool isMake5Minute=false) {
+			if(!ignoreTimeLocked && isTimeLocked) {
+				return null;
+			}
+			//We are using the providers selected for the appt rather than the providers for the procs.
+			//Providers for the procs get reset when closing this form.
+			long provDent=Patients.GetProvNum(pat);
+			long provHyg=Patients.GetProvNum(pat);
+			if(aptProvNum!=0){
+				provDent=aptProvNum;
+				provHyg=aptProvNum;
+			}
+			if(aptProvHygNum!=0) {
+				provHyg=aptProvHygNum;
+			}
+			List<long> codeNums=new List<long>();
+			foreach(Procedure proc in listProcs) {
+				codeNums.Add(proc.CodeNum);
+			}
+			return CalculatePattern(provDent,provHyg,codeNums,isMake5Minute);
+			//Plugins.HookAddCode(this,"FormApptEdit.CalculateTime_end",strBTime,provDent,provHyg,codeNums);//set strBTime, but without using the 'new' keyword.--Hook removed.
+		}
+
 		///<summary>Zeros securitylog FKey column for rows that are using the matching aptNum as FKey and are related to Appointment.
 		///Permtypes are generated from the AuditPerms property of the CrudTableAttribute within the Appointment table type.</summary>
 		public static void ClearFkey(long aptNum) {

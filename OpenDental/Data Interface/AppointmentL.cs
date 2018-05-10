@@ -692,7 +692,10 @@ namespace OpenDental{
 			AptCur.ClinicNum=pat.ClinicNum;
 			AptCur.AptStatus=ApptStatus.Planned;
 			AptCur.AptDateTime=DateTimeOD.Today;
-			AptCur.Pattern="/X/";
+			List<Procedure> listProcs=Procedures.GetManyProc(listPreSelectedProcNums,false);//Returns empty list if null.
+			//If listProcs is empty then AptCur.Pattern defaults to PrefName.AppointmentWithoutProcsDefaultLength value.
+			//See Appointments.GetApptTimePatternForNoProcs().
+			AptCur.Pattern=Appointments.CalculatePattern(pat,AptCur.ProvNum,AptCur.ProvHyg,listProcs,isMake5Minute:true);
 			AptCur.TimeLocked=PrefC.GetBool(PrefName.AppointmentTimeIsLocked);
 			Appointments.Insert(AptCur);
 			PlannedAppt plannedAppt=new PlannedAppt();
