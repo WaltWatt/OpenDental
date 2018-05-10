@@ -6363,11 +6363,10 @@ namespace OpenDental{
 
 		private void gridStatusHistory_CellDoubleClick(object sender,ODGridClickEventArgs e) {
 			ClaimTracking claimTrack=(ClaimTracking)gridStatusHistory.Rows[e.Row].Tag;
-			Claim curClaim=Claims.GetClaim(claimTrack.ClaimNum);
 			if(Security.IsAuthorized(Permissions.ClaimHistoryEdit,claimTrack.DateTimeEntry)){
-				FormClaimCustomTrackingUpdate claimCustTrackUpdate=new FormClaimCustomTrackingUpdate(curClaim,claimTrack);
-				claimCustTrackUpdate.ShowDialog();
-				if(claimCustTrackUpdate.DialogResult==DialogResult.OK) {
+				FormClaimCustomTrackingUpdate FormCCTU=new FormClaimCustomTrackingUpdate(ClaimCur,claimTrack);
+				FormCCTU.ShowDialog();
+				if(FormCCTU.DialogResult==DialogResult.OK) {
 					FillStatusHistory();//Refresh grid
 				}
 			}
