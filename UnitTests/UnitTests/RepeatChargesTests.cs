@@ -18,7 +18,7 @@ namespace UnitTests.UnitTests {
 			Patient patOld=pat.Copy();
 			pat.BillingCycleDay=billingCycleDay;
 			Patients.Update(pat,patOld);
-			Prefs.UpdateBool(PrefName.BillingUseBillingCycleDay,true);
+			PrefT.UpdateBool(PrefName.BillingUseBillingCycleDay,true);
 			UpdateHistoryT.CreateUpdateHistory("16.1.1.0");
 			Prefs.RefreshCache();
 			List<RepeatCharge> listRepeatingCharges=RepeatCharges.Refresh(0).ToList();
@@ -554,54 +554,54 @@ namespace UnitTests.UnitTests {
 		[TestMethod]
 		public void RepeatCharges_RunRepeatingCharges_ChangeRepeatChargeStartDate() {
 			Patient pat=CreatePatForRepeatCharge("RepeatCharge",15);
-			//add a repeat charge with start 01/15/2018
+			//add a repeat charge with start 01/15/2017
 			RepeatCharge rc=new RepeatCharge();
 			rc.ChargeAmt=99;
 			rc.PatNum=pat.PatNum;
 			rc.ProcCode="D2750";
 			rc.IsEnabled=true;
-			rc.DateStart=new DateTime(2018,01,pat.BillingCycleDay);
+			rc.DateStart=new DateTime(2017,01,pat.BillingCycleDay);
 			rc.RepeatChargeNum=RepeatCharges.Insert(rc);
-			//add a procedures with procdate 01/15/2018
+			//add a procedures with procdate 01/15/2017
 			Procedure p=new Procedure();
 			p.PatNum=pat.PatNum;
 			p.ProcStatus=ProcStat.C;
-			p.ProcDate=new DateTime(2018,01,pat.BillingCycleDay);
+			p.ProcDate=new DateTime(2017,01,pat.BillingCycleDay);
 			p.ProcFee=99;
 			p.CodeNum=ProcedureCodes.GetCodeNum("D2750");
 			p.RepeatChargeNum=rc.RepeatChargeNum;
 			Procedures.Insert(p);
-			//add a procedures with procdate 02/15/2018
+			//add a procedures with procdate 02/15/2017
 			p=new Procedure();
 			p.PatNum=pat.PatNum;
 			p.ProcStatus=ProcStat.C;
-			p.ProcDate=new DateTime(2018,02,pat.BillingCycleDay);
+			p.ProcDate=new DateTime(2017,02,pat.BillingCycleDay);
 			p.ProcFee=99;
 			p.CodeNum=ProcedureCodes.GetCodeNum("D2750");
 			p.RepeatChargeNum=rc.RepeatChargeNum;
 			Procedures.Insert(p);
-			//add a procedures with procdate 03/15/2018
+			//add a procedures with procdate 03/15/2017
 			p=new Procedure();
 			p.PatNum=pat.PatNum;
 			p.ProcStatus=ProcStat.C;
-			p.ProcDate=new DateTime(2018,03,pat.BillingCycleDay);
+			p.ProcDate=new DateTime(2017,03,pat.BillingCycleDay);
 			p.ProcFee=99;
 			p.CodeNum=ProcedureCodes.GetCodeNum("D2750");
 			p.RepeatChargeNum=rc.RepeatChargeNum;
 			Procedures.Insert(p);
-			//add a procedures with procdate 04/15/2018
+			//add a procedures with procdate 04/15/2017
 			p=new Procedure();
 			p.PatNum=pat.PatNum;
 			p.ProcStatus=ProcStat.C;
-			p.ProcDate=new DateTime(2018,04,pat.BillingCycleDay);
+			p.ProcDate=new DateTime(2017,04,pat.BillingCycleDay);
 			p.ProcFee=99;
 			p.CodeNum=ProcedureCodes.GetCodeNum("D2750");
 			p.RepeatChargeNum=rc.RepeatChargeNum;
 			Procedures.Insert(p);
-			//change the repeatcharge start date to 05/15/2018
-			rc.DateStart=new DateTime(2018,05,pat.BillingCycleDay);
+			//change the repeatcharge start date to 05/15/2017
+			rc.DateStart=new DateTime(2017,05,pat.BillingCycleDay);
 			RepeatCharges.Update(rc);
-			DateTime dateRun=new DateTime(2018,05,pat.BillingCycleDay);
+			DateTime dateRun=new DateTime(2017,05,pat.BillingCycleDay);
 			RepeatCharges.RunRepeatingCharges(dateRun);
 			List<Procedure> listProcs=Procedures.Refresh(pat.PatNum);
 			Assert.AreEqual(5,listProcs.Count);
