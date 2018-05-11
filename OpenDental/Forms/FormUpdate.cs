@@ -14,6 +14,8 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using System.Xml;
+using System.Linq;
+using System.Xml.Serialization;
 
 namespace OpenDental{
 	/// <summary>
@@ -750,7 +752,9 @@ namespace OpenDental{
 			}
 		}
 
-		private static string SendAndReceiveXml(){
+		private static string SendAndReceiveXml(){ 
+			List<string> listProgramsEnabled=Programs.GetWhere(x => x.Enabled && !string.IsNullOrWhiteSpace(x.ProgName))
+				.Select(x => x.ProgName).ToList();
 			//prepare the xml document to send--------------------------------------------------------------------------------------
 			XmlWriterSettings settings = new XmlWriterSettings();
 			settings.Indent = true;
@@ -773,7 +777,10 @@ namespace OpenDental{
 				writer.WriteStartElement("ClinicCount");
 				writer.WriteString(PrefC.HasClinicsEnabled ? Clinics.GetCount(true).ToString() : "0");
 				writer.WriteEndElement();
+				writer.WriteStartElement("ListProgramsEnabled");
+				new XmlSerializer(typeof(List<string>)).Serialize(writer,listProgramsEnabled);
 				writer.WriteEndElement();
+				writer.WriteEndElement();//UpdateRequest
 			}
 			return CustomerUpdatesProxy.GetWebServiceInstance().RequestUpdate(strbuild.ToString());
 		}
