@@ -15,6 +15,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using CodeBase;
 using System.IO;
+using System.Net.Mail;
 
 namespace OpenDental.UI {
 	///<summary></summary>
@@ -3202,6 +3203,13 @@ namespace OpenDental.UI {
 					Regex rgx = new Regex(@"[\\]{1}");
 					if(rgx.IsMatch(match)) {
 						continue;
+					}
+					try {
+						MailAddress emailAddress=new MailAddress(match);
+						continue;//'match' is a valid email address, which at this time we don't want to create a ContextMenu Web link for.
+					}
+					catch(FormatException fe) {
+						fe.DoNothing();//Not a valid email address format, so it should be a web link.  Carry on to creating the item in the ContextMenu.
 					}
 					string title=match;
 					if(title.Length>=25) {
