@@ -128,13 +128,13 @@ namespace OpenDental{
 			// 
 			// linkLabel1
 			// 
-			this.linkLabel1.LinkArea = new System.Windows.Forms.LinkArea(27, 38);
+			this.linkLabel1.LinkArea = new System.Windows.Forms.LinkArea(27, 40);
 			this.linkLabel1.Location = new System.Drawing.Point(24, 13);
 			this.linkLabel1.Name = "linkLabel1";
 			this.linkLabel1.Size = new System.Drawing.Size(436, 16);
 			this.linkLabel1.TabIndex = 1;
 			this.linkLabel1.TabStop = true;
-			this.linkLabel1.Text = "The X-Charge website is at http://xchargepayments.com/opendental/";
+			this.linkLabel1.Text = "The X-Charge website is at https://openedgepayments.com/opendental/";
 			this.linkLabel1.TextAlign = System.Drawing.ContentAlignment.TopCenter;
 			this.linkLabel1.UseCompatibleTextRendering = true;
 			this.linkLabel1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel1_LinkClicked);
@@ -647,7 +647,7 @@ namespace OpenDental{
 		}
 
 		private void linkLabel1_LinkClicked(object sender,LinkLabelLinkClickedEventArgs e) {
-			Process.Start("http://xchargepayments.com/opendental/");
+			Process.Start("https://openedgepayments.com/opendental/");
 		}
 
 		///<summary>Validate XWebID, AuthKey, and TerminalID.  XWebID and TerminalID must be numbers only, 12 digits and 8 digits long respectively.
