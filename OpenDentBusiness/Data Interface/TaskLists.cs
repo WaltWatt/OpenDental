@@ -425,7 +425,7 @@ namespace OpenDentBusiness{
 			//No need to check RemotingRole; no call to db.
 			StringBuilder taskListPath=new StringBuilder();
 			TaskList curTaskList=null;
-			if(listTaskLists!=null) {
+			if(listTaskLists!=null && listTaskLists.Count>0) {
 				curTaskList=listTaskLists.FirstOrDefault(x => x.TaskListNum==tasklistNum);
 			}
 			else {
