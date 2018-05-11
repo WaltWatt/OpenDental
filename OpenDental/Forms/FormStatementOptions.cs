@@ -281,7 +281,7 @@ namespace OpenDental{
 			this.butToday.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
 			this.butToday.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
 			this.butToday.CornerRadius = 4F;
-			this.butToday.Location = new System.Drawing.Point(75, 64);
+			this.butToday.Location = new System.Drawing.Point(156, 15);
 			this.butToday.Name = "butToday";
 			this.butToday.Size = new System.Drawing.Size(77, 24);
 			this.butToday.TabIndex = 2;
@@ -295,7 +295,7 @@ namespace OpenDental{
 			this.butDatesAll.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
 			this.butDatesAll.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
 			this.butDatesAll.CornerRadius = 4F;
-			this.butDatesAll.Location = new System.Drawing.Point(75, 142);
+			this.butDatesAll.Location = new System.Drawing.Point(234, 40);
 			this.butDatesAll.Name = "butDatesAll";
 			this.butDatesAll.Size = new System.Drawing.Size(77, 24);
 			this.butDatesAll.TabIndex = 5;
@@ -309,7 +309,7 @@ namespace OpenDental{
 			this.but90days.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
 			this.but90days.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
 			this.but90days.CornerRadius = 4F;
-			this.but90days.Location = new System.Drawing.Point(75, 116);
+			this.but90days.Location = new System.Drawing.Point(234, 15);
 			this.but90days.Name = "but90days";
 			this.but90days.Size = new System.Drawing.Size(77, 24);
 			this.but90days.TabIndex = 4;
@@ -323,7 +323,7 @@ namespace OpenDental{
 			this.but45days.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
 			this.but45days.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
 			this.but45days.CornerRadius = 4F;
-			this.but45days.Location = new System.Drawing.Point(75, 90);
+			this.but45days.Location = new System.Drawing.Point(156, 40);
 			this.but45days.Name = "but45days";
 			this.but45days.Size = new System.Drawing.Size(77, 24);
 			this.but45days.TabIndex = 3;
@@ -332,7 +332,7 @@ namespace OpenDental{
 			// 
 			// labelEndDate
 			// 
-			this.labelEndDate.Location = new System.Drawing.Point(3, 44);
+			this.labelEndDate.Location = new System.Drawing.Point(5, 44);
 			this.labelEndDate.Name = "labelEndDate";
 			this.labelEndDate.Size = new System.Drawing.Size(69, 14);
 			this.labelEndDate.TabIndex = 0;
@@ -341,7 +341,7 @@ namespace OpenDental{
 			// 
 			// labelStartDate
 			// 
-			this.labelStartDate.Location = new System.Drawing.Point(3, 21);
+			this.labelStartDate.Location = new System.Drawing.Point(5, 21);
 			this.labelStartDate.Name = "labelStartDate";
 			this.labelStartDate.Size = new System.Drawing.Size(69, 14);
 			this.labelStartDate.TabIndex = 0;
@@ -419,22 +419,23 @@ namespace OpenDental{
 			// 
 			this.groupDateRange.Controls.Add(this.textDateEnd);
 			this.groupDateRange.Controls.Add(this.labelStartDate);
+			this.groupDateRange.Controls.Add(this.checkBoxBillShowTransSinceZero);
 			this.groupDateRange.Controls.Add(this.textDateStart);
 			this.groupDateRange.Controls.Add(this.labelEndDate);
 			this.groupDateRange.Controls.Add(this.but45days);
 			this.groupDateRange.Controls.Add(this.but90days);
 			this.groupDateRange.Controls.Add(this.butDatesAll);
 			this.groupDateRange.Controls.Add(this.butToday);
-			this.groupDateRange.Location = new System.Drawing.Point(446, 12);
+			this.groupDateRange.Location = new System.Drawing.Point(326, 12);
 			this.groupDateRange.Name = "groupDateRange";
-			this.groupDateRange.Size = new System.Drawing.Size(162, 174);
+			this.groupDateRange.Size = new System.Drawing.Size(324, 90);
 			this.groupDateRange.TabIndex = 11;
 			this.groupDateRange.TabStop = false;
 			this.groupDateRange.Text = "Date Range";
 			// 
 			// textDateEnd
 			// 
-			this.textDateEnd.Location = new System.Drawing.Point(75, 41);
+			this.textDateEnd.Location = new System.Drawing.Point(77, 41);
 			this.textDateEnd.Name = "textDateEnd";
 			this.textDateEnd.Size = new System.Drawing.Size(77, 20);
 			this.textDateEnd.TabIndex = 1;
@@ -444,7 +445,7 @@ namespace OpenDental{
 			// 
 			// textDateStart
 			// 
-			this.textDateStart.Location = new System.Drawing.Point(75, 18);
+			this.textDateStart.Location = new System.Drawing.Point(77, 18);
 			this.textDateStart.Name = "textDateStart";
 			this.textDateStart.Size = new System.Drawing.Size(77, 20);
 			this.textDateStart.TabIndex = 0;
@@ -617,7 +618,7 @@ namespace OpenDental{
 			this.checkSuperStatement.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
 			this.checkSuperStatement.Enabled = false;
 			this.checkSuperStatement.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.checkSuperStatement.Location = new System.Drawing.Point(253, 154);
+			this.checkSuperStatement.Location = new System.Drawing.Point(253, 137);
 			this.checkSuperStatement.Name = "checkSuperStatement";
 			this.checkSuperStatement.Size = new System.Drawing.Size(158, 17);
 			this.checkSuperStatement.TabIndex = 7;
@@ -630,7 +631,7 @@ namespace OpenDental{
 			this.checkLimited.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
 			this.checkLimited.Enabled = false;
 			this.checkLimited.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.checkLimited.Location = new System.Drawing.Point(253, 137);
+			this.checkLimited.Location = new System.Drawing.Point(253, 119);
 			this.checkLimited.Name = "checkLimited";
 			this.checkLimited.Size = new System.Drawing.Size(158, 17);
 			this.checkLimited.TabIndex = 8;
@@ -656,20 +657,19 @@ namespace OpenDental{
 			// checkBoxBillShowTransSinceZero
 			// 
 			this.checkBoxBillShowTransSinceZero.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.checkBoxBillShowTransSinceZero.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
 			this.checkBoxBillShowTransSinceZero.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.checkBoxBillShowTransSinceZero.Location = new System.Drawing.Point(165, 119);
+			this.checkBoxBillShowTransSinceZero.Location = new System.Drawing.Point(78,67);
 			this.checkBoxBillShowTransSinceZero.Name = "checkBoxBillShowTransSinceZero";
-			this.checkBoxBillShowTransSinceZero.Size = new System.Drawing.Size(246, 18);
+			this.checkBoxBillShowTransSinceZero.Size = new System.Drawing.Size(240,18);
 			this.checkBoxBillShowTransSinceZero.TabIndex = 253;
-			this.checkBoxBillShowTransSinceZero.Text = "Only show transactions since zero balance";
-			this.checkBoxBillShowTransSinceZero.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.checkBoxBillShowTransSinceZero.Text = "Show all transactions since zero balance";
+			this.checkBoxBillShowTransSinceZero.CheckedChanged += new System.EventHandler(this.checkBoxBillShowTransSinceZero_CheckedChanged);
 			// 
 			// checkShowLName
 			// 
 			this.checkShowLName.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
 			this.checkShowLName.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.checkShowLName.Location = new System.Drawing.Point(253, 171);
+			this.checkShowLName.Location = new System.Drawing.Point(253, 154);
 			this.checkShowLName.Name = "checkShowLName";
 			this.checkShowLName.Size = new System.Drawing.Size(158, 17);
 			this.checkShowLName.TabIndex = 254;
@@ -693,7 +693,6 @@ namespace OpenDental{
 			this.ClientSize = new System.Drawing.Size(709, 584);
 			this.Controls.Add(this.checkSendSms);
 			this.Controls.Add(this.checkShowLName);
-			this.Controls.Add(this.checkBoxBillShowTransSinceZero);
 			this.Controls.Add(this.butPatPortal);
 			this.Controls.Add(this.checkLimited);
 			this.Controls.Add(this.groupInvoice);
@@ -997,23 +996,42 @@ namespace OpenDental{
 		}
 
 		private void butToday_Click(object sender,EventArgs e) {
+			SetAccountHistoryControl();
 			textDateStart.Text=DateTime.Today.ToShortDateString();
 			textDateEnd.Text=DateTime.Today.ToShortDateString();
 		}
 
 		private void but45days_Click(object sender,EventArgs e) {
+			SetAccountHistoryControl();
 			textDateStart.Text=DateTime.Today.AddDays(-45).ToShortDateString();
 			textDateEnd.Text=DateTime.Today.ToShortDateString();
 		}
 
 		private void but90days_Click(object sender,EventArgs e) {
+			SetAccountHistoryControl();
 			textDateStart.Text=DateTime.Today.AddDays(-90).ToShortDateString();
 			textDateEnd.Text=DateTime.Today.ToShortDateString();
 		}
 
 		private void butDatesAll_Click(object sender,EventArgs e) {
+			SetAccountHistoryControl();
 			textDateStart.Text="";
 			textDateEnd.Text=DateTime.Today.ToShortDateString();
+		}
+
+		private void SetAccountHistoryControl() {
+			checkBoxBillShowTransSinceZero.Checked=false;
+		}
+
+		private void checkBoxBillShowTransSinceZero_CheckedChanged(object sender,EventArgs e) {
+			if(checkBoxBillShowTransSinceZero.Checked) {
+				textDateStart.Enabled=false;
+				textDateEnd.Enabled=false;
+			}
+			else {
+				textDateStart.Enabled=true;
+				textDateEnd.Enabled=true;
+			}
 		}
 
 		private void buttonFuchs1_Click(object sender,EventArgs e) {

@@ -35,6 +35,7 @@ namespace OpenDental {
 			checkSinglePatient.Checked=PrefC.GetBool(PrefName.BillingDefaultsSinglePatient);
 			textNote.Text=PrefC.GetString(PrefName.BillingDefaultsNote);
 			checkCreatePDF.Checked=PrefC.GetBool(PrefName.BillingElectCreatePDF);
+			checkBoxBillShowTransSinceZero.Checked=PrefC.GetBool(PrefName.BillingShowTransSinceBalZero);
 			listElectBilling.SelectedIndex=0;
 			int billingUseElectronicIdx=PrefC.GetInt(PrefName.BillingUseElectronic);
 			if(billingUseElectronicIdx==1) {
@@ -363,7 +364,8 @@ namespace OpenDental {
 				| (listElectBilling.SelectedIndex==4 && Prefs.UpdateString(PrefName.BillingElectStmtOutputPathEds,textStatementURL.Text))
 				| Prefs.UpdateBool(PrefName.BillingDefaultsSinglePatient,checkSinglePatient.Checked)
 				| Prefs.UpdateString(PrefName.BillingDefaultsModesToText,modesToText)
-				| Prefs.UpdateString(PrefName.BillingDefaultsSmsTemplate,textSmsTemplate.Text))
+				| Prefs.UpdateString(PrefName.BillingDefaultsSmsTemplate,textSmsTemplate.Text)
+				| Prefs.UpdateBool(PrefName.BillingShowTransSinceBalZero,checkBoxBillShowTransSinceZero.Checked))
 			{
 				DataValid.SetInvalid(InvalidType.Prefs);
 			}

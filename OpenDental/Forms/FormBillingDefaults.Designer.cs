@@ -74,6 +74,7 @@ namespace OpenDental{
 			this.label4 = new System.Windows.Forms.Label();
 			this.butOK = new OpenDental.UI.Button();
 			this.butCancel = new OpenDental.UI.Button();
+			this.checkBoxBillShowTransSinceZero = new System.Windows.Forms.CheckBox();
 			this.groupBox1.SuspendLayout();
 			this.groupBox3.SuspendLayout();
 			this.groupBoxBilling.SuspendLayout();
@@ -638,10 +639,21 @@ namespace OpenDental{
 			this.butCancel.Text = "&Cancel";
 			this.butCancel.Click += new System.EventHandler(this.butCancel_Click);
 			// 
+			// checkBoxBillShowTransSinceZero
+			// 
+			this.checkBoxBillShowTransSinceZero.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.checkBoxBillShowTransSinceZero.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.checkBoxBillShowTransSinceZero.Location = new System.Drawing.Point(312, 30);
+			this.checkBoxBillShowTransSinceZero.Name = "checkBoxBillShowTransSinceZero";
+			this.checkBoxBillShowTransSinceZero.Size = new System.Drawing.Size(274, 18);
+			this.checkBoxBillShowTransSinceZero.TabIndex = 253;
+			this.checkBoxBillShowTransSinceZero.Text = "Show all transactions since zero balance";
+			// 
 			// FormBillingDefaults
 			// 
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
 			this.ClientSize = new System.Drawing.Size(657, 864);
+			this.Controls.Add(this.checkBoxBillShowTransSinceZero);
 			this.Controls.Add(this.groupBox1);
 			this.Controls.Add(this.checkSinglePatient);
 			this.Controls.Add(this.textInvoiceNote);
@@ -724,5 +736,6 @@ namespace OpenDental{
 		private System.Windows.Forms.Label label7;
 		private System.Windows.Forms.ListBox listModesToText;
 		private System.Windows.Forms.Label label6;
+		private System.Windows.Forms.CheckBox checkBoxBillShowTransSinceZero;
 	}
 }

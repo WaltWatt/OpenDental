@@ -228,7 +228,6 @@ namespace OpenDental{
 			// 
 			this.groupBox2.Controls.Add(this.butPickClinic);
 			this.groupBox2.Controls.Add(this.comboClinic);
-			this.groupBox2.Controls.Add(this.checkBoxBillShowTransSinceZero);
 			this.groupBox2.Controls.Add(this.checkUseClinicDefaults);
 			this.groupBox2.Controls.Add(this.labelClinic);
 			this.groupBox2.Controls.Add(this.checkExcludeIfProcs);
@@ -288,14 +287,13 @@ namespace OpenDental{
 			// checkBoxBillShowTransSinceZero
 			// 
 			this.checkBoxBillShowTransSinceZero.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.checkBoxBillShowTransSinceZero.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
 			this.checkBoxBillShowTransSinceZero.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.checkBoxBillShowTransSinceZero.Location = new System.Drawing.Point(2, 248);
+			this.checkBoxBillShowTransSinceZero.Location = new System.Drawing.Point(75,62);
 			this.checkBoxBillShowTransSinceZero.Name = "checkBoxBillShowTransSinceZero";
-			this.checkBoxBillShowTransSinceZero.Size = new System.Drawing.Size(274, 18);
+			this.checkBoxBillShowTransSinceZero.Size = new System.Drawing.Size(238,18);
 			this.checkBoxBillShowTransSinceZero.TabIndex = 252;
-			this.checkBoxBillShowTransSinceZero.Text = "Only show transactions since zero balance";
-			this.checkBoxBillShowTransSinceZero.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.checkBoxBillShowTransSinceZero.Text = "Show all transactions since zero balance";
+			this.checkBoxBillShowTransSinceZero.CheckedChanged += new System.EventHandler(this.checkBoxBillShowTransSinceZero_CheckedChanged);
 			// 
 			// checkUseClinicDefaults
 			// 
@@ -483,7 +481,6 @@ namespace OpenDental{
 			// butDunningSetup
 			// 
 			this.butDunningSetup.AdjustImageLocation = new System.Drawing.Point(0, 0);
-			this.butDunningSetup.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this.butDunningSetup.Autosize = true;
 			this.butDunningSetup.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
 			this.butDunningSetup.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
@@ -507,7 +504,7 @@ namespace OpenDental{
 			// 
 			// label4
 			// 
-			this.label4.Location = new System.Drawing.Point(328, 547);
+			this.label4.Location = new System.Drawing.Point(328, 549);
 			this.label4.Name = "label4";
 			this.label4.Size = new System.Drawing.Size(564, 16);
 			this.label4.TabIndex = 26;
@@ -521,7 +518,7 @@ namespace OpenDental{
 			this.textNote.BackColor = System.Drawing.SystemColors.Window;
 			this.textNote.DetectLinksEnabled = false;
 			this.textNote.DetectUrls = false;
-			this.textNote.Location = new System.Drawing.Point(331, 566);
+			this.textNote.Location = new System.Drawing.Point(331, 568);
 			this.textNote.Name = "textNote";
 			this.textNote.QuickPasteType = OpenDentBusiness.QuickPasteType.Statement;
 			this.textNote.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
@@ -533,6 +530,7 @@ namespace OpenDental{
 			// 
 			this.groupDateRange.Controls.Add(this.but30days);
 			this.groupDateRange.Controls.Add(this.textDateStart);
+			this.groupDateRange.Controls.Add(this.checkBoxBillShowTransSinceZero);
 			this.groupDateRange.Controls.Add(this.labelStartDate);
 			this.groupDateRange.Controls.Add(this.labelEndDate);
 			this.groupDateRange.Controls.Add(this.textDateEnd);
@@ -541,7 +539,7 @@ namespace OpenDental{
 			this.groupDateRange.Controls.Add(this.butDatesAll);
 			this.groupDateRange.Location = new System.Drawing.Point(331, 403);
 			this.groupDateRange.Name = "groupDateRange";
-			this.groupDateRange.Size = new System.Drawing.Size(319, 69);
+			this.groupDateRange.Size = new System.Drawing.Size(319, 86);
 			this.groupDateRange.TabIndex = 3;
 			this.groupDateRange.TabStop = false;
 			this.groupDateRange.Text = "Account History Date Range";
@@ -639,7 +637,7 @@ namespace OpenDental{
 			// checkIntermingled
 			// 
 			this.checkIntermingled.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.checkIntermingled.Location = new System.Drawing.Point(331, 478);
+			this.checkIntermingled.Location = new System.Drawing.Point(331, 493);
 			this.checkIntermingled.Name = "checkIntermingled";
 			this.checkIntermingled.Size = new System.Drawing.Size(231, 20);
 			this.checkIntermingled.TabIndex = 5;
@@ -677,7 +675,7 @@ namespace OpenDental{
 			// checkSuperFam
 			// 
 			this.checkSuperFam.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.checkSuperFam.Location = new System.Drawing.Point(331, 499);
+			this.checkSuperFam.Location = new System.Drawing.Point(331, 512);
 			this.checkSuperFam.Name = "checkSuperFam";
 			this.checkSuperFam.Size = new System.Drawing.Size(258, 20);
 			this.checkSuperFam.TabIndex = 6;
@@ -689,7 +687,7 @@ namespace OpenDental{
 			// 
 			this.checkSinglePatient.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
 			this.checkSinglePatient.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.checkSinglePatient.Location = new System.Drawing.Point(331, 523);
+			this.checkSinglePatient.Location = new System.Drawing.Point(331, 531);
 			this.checkSinglePatient.Name = "checkSinglePatient";
 			this.checkSinglePatient.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
 			this.checkSinglePatient.Size = new System.Drawing.Size(219, 20);
@@ -700,8 +698,7 @@ namespace OpenDental{
 			// 
 			// labelModesToText
 			// 
-			this.labelModesToText.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.labelModesToText.Location = new System.Drawing.Point(563, 482);
+			this.labelModesToText.Location = new System.Drawing.Point(563, 492);
 			this.labelModesToText.Name = "labelModesToText";
 			this.labelModesToText.Size = new System.Drawing.Size(195, 16);
 			this.labelModesToText.TabIndex = 254;
@@ -711,7 +708,7 @@ namespace OpenDental{
 			// listModeToText
 			// 
 			this.listModeToText.FormattingEnabled = true;
-			this.listModeToText.Location = new System.Drawing.Point(760, 482);
+			this.listModeToText.Location = new System.Drawing.Point(760, 492);
 			this.listModeToText.Name = "listModeToText";
 			this.listModeToText.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
 			this.listModeToText.Size = new System.Drawing.Size(113, 56);
@@ -753,6 +750,7 @@ namespace OpenDental{
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
+			this.MinimumSize = new System.Drawing.Size(914,750);
 			this.Name = "FormBillingOptions";
 			this.ShowInTaskbar = false;
 			this.Text = "Billing Options";
@@ -1013,7 +1011,6 @@ namespace OpenDental{
 					|Prefs.UpdateBool(PrefName.BillingExcludeIfUnsentProcs,checkExcludeIfProcs.Checked)
 					|Prefs.UpdateString(PrefName.BillingExcludeLessThan,textExcludeLessThan.Text)
 					|Prefs.UpdateBool(PrefName.BillingIgnoreInPerson,checkIgnoreInPerson.Checked)
-					|Prefs.UpdateBool(PrefName.BillingShowTransSinceBalZero,checkBoxBillShowTransSinceZero.Checked)
 					|Prefs.UpdateString(PrefName.BillingDefaultsNote,textNote.Text))
 				{
 					DataValid.SetInvalid(InvalidType.Prefs);
@@ -1225,24 +1222,43 @@ namespace OpenDental{
 			}
 		}
 
+		private void checkBoxBillShowTransSinceZero_CheckedChanged(object sender,EventArgs e) {
+			if(checkBoxBillShowTransSinceZero.Checked) {
+				textDateStart.Enabled=false;
+				textDateEnd.Enabled=false;
+			}
+			else {
+				textDateStart.Enabled=true;
+				textDateEnd.Enabled=true;
+			}
+		}
+
 		private void but30days_Click(object sender,EventArgs e) {
+			SetAccountHistoryControl();
 			textDateStart.Text=DateTime.Today.AddDays(-30).ToShortDateString();
 			textDateEnd.Text=DateTime.Today.ToShortDateString();
 		}
 
 		private void but45days_Click(object sender,EventArgs e) {
+			SetAccountHistoryControl();
 			textDateStart.Text=DateTime.Today.AddDays(-45).ToShortDateString();
 			textDateEnd.Text=DateTime.Today.ToShortDateString();
 		}
 
 		private void but90days_Click(object sender,EventArgs e) {
+			SetAccountHistoryControl();
 			textDateStart.Text=DateTime.Today.AddDays(-90).ToShortDateString();
 			textDateEnd.Text=DateTime.Today.ToShortDateString();
 		}
 
 		private void butDatesAll_Click(object sender,EventArgs e) {
+			SetAccountHistoryControl();
 			textDateStart.Text="";
 			textDateEnd.Text=DateTime.Today.ToShortDateString();
+		}
+
+		private void SetAccountHistoryControl() {
+			checkBoxBillShowTransSinceZero.Checked=false;
 		}
 
 		private void butUndo_Click(object sender,EventArgs e) {
