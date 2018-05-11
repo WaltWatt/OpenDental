@@ -353,6 +353,7 @@ namespace OpenDental{
 				"P1CodeMod3",
 				"P1CodeMod4",
 				//"P1UnitCode",
+				"P1UnitQty",
 				"P1UnitQtyOrCount",
 				"P1CodeAndMods",
 				//2
@@ -379,6 +380,7 @@ namespace OpenDental{
 				"P2CodeMod3",
 				"P2CodeMod4",
 				//"P2UnitCode",
+				"P2UnitQty",
 				"P2UnitQtyOrCount",
 				"P2CodeAndMods",
 				//3
@@ -405,6 +407,7 @@ namespace OpenDental{
 				"P3CodeMod3",
 				"P3CodeMod4",
 				//"P3UnitCode",
+				"P3UnitQty",
 				"P3UnitQtyOrCount",
 				"P3CodeAndMods",
 				//4
@@ -431,6 +434,7 @@ namespace OpenDental{
 				"P4CodeMod3",
 				"P4CodeMod4",
 				//"P4UnitCode",
+				"P4UnitQty",
 				"P4UnitQtyOrCount",
 				"P4CodeAndMods",
 				//5
@@ -457,6 +461,7 @@ namespace OpenDental{
 				"P5CodeMod3",
 				"P5CodeMod4",
 				//"P5UnitCode",
+				"P5UnitQty",
 				"P5UnitQtyOrCount",
 				"P5CodeAndMods",
 				//6
@@ -483,6 +488,7 @@ namespace OpenDental{
 				"P6CodeMod3",
 				"P6CodeMod4",
 				//"P6UnitCode",
+				"P6UnitQty",
 				"P6UnitQtyOrCount",
 				"P6CodeAndMods",
 				//7

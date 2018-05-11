@@ -2093,8 +2093,7 @@ namespace OpenDental{
 		/// <param name="totProcs">The number of procedures that can be displayed or printed per claim form.  Depends on the individual claim format. For example, 10 on the ADA2002</param>
 		private void FillProcStrings(int startProc,int totProcs){
 			int qty;
-			string toothRange;
-			string systemAndTeethField;
+			int toothCount;
 			for(int i=0;i<ClaimFormCur.Items.Count;i++){
 				if(ClaimFormCur.Items[i]==null){//Renaissance does not use [0]
 					continue;
@@ -2104,13 +2103,7 @@ namespace OpenDental{
 				switch(ClaimFormCur.Items[i].FieldName){
 					//there is no default, because any non-matches will remain as ""
 					case "P1SystemAndTeeth":
-						systemAndTeethField=GenerateSystemAndTeethField(1,startProc);
-						if(systemAndTeethField!=null) {//Proc had a toothNum/toothRange specified
-							displayStrings[i]=systemAndTeethField;
-						}
-						else {//No toothNum on Proc
-							displayStrings[i]=CalculateUnitQtyField(1,startProc,planCur);
-						}
+						displayStrings[i]=GenerateSystemAndTeethField(1,startProc);
 						break;
 					case "P1Date":
 						displayStrings[i]=GetProcInfo("Date",1+startProc,ClaimFormCur.Items[i].FormatString);
@@ -2178,26 +2171,41 @@ namespace OpenDental{
 					//case "P1UnitCode":
 					//	displayStrings[i]=GetProcInfo("UnitCode",1+startProc);
 					//	break;
-					case "P1UnitQtyOrCount":
-						toothRange=GetToothRangeCount(GetProcInfo("ToothNum",1+startProc));
-						if(toothRange!=null) {
-							displayStrings[i]=toothRange;
+					case "P1UnitQty":
+						if(planCur.ShowBaseUnits) {
+							short bunit;
+							System.Int16.TryParse(GetProcInfo("BaseUnits",1+startProc),out bunit);
+							short uqty;
+							System.Int16.TryParse(GetProcInfo("UnitQty",1+startProc),out uqty);
+							qty=bunit+uqty;
 						}
-						else {//No toothrange specified
+						else if(GetProcInfo("UnitQty",1+startProc)!="") {
+							qty=Int16.Parse(GetProcInfo("UnitQty",1+startProc));
+						}
+						else {
+							qty=0;
+						}
+						if(qty==0) {
+							displayStrings[i]="";
+						}
+						else {
+							displayStrings[i]=qty.ToString();
+						}
+						break;
+					case "P1UnitQtyOrCount":
+						toothCount=GetToothRangeCount(GetProcInfo("ToothNum",1+startProc));
+						if(toothCount==-1) {//No toothrange specified
 							displayStrings[i]=CalculateUnitQtyField(1,startProc,planCur);
+						}
+						else {
+							displayStrings[i]=toothCount.ToString();
 						}
 						break;
 					case "P1CodeAndMods":
 						displayStrings[i]=GetProcInfo("Code",1+startProc) + GetProcInfo("CodeMod1",1+startProc) + GetProcInfo("CodeMod2",1+startProc) + GetProcInfo("CodeMod3",1+startProc) + GetProcInfo("CodeMod4",1+startProc);
 						break;
 					case "P2SystemAndTeeth":
-						systemAndTeethField=GenerateSystemAndTeethField(2,startProc);
-						if(systemAndTeethField!=null) {//Proc had a toothNum/toothRange specified
-							displayStrings[i]=systemAndTeethField;
-						}
-						else {//No toothNum on Proc
-							displayStrings[i]=CalculateUnitQtyField(1,startProc,planCur);
-						}
+						displayStrings[i]=GenerateSystemAndTeethField(2,startProc);
 						break;
 					case "P2Date":
 						displayStrings[i]=GetProcInfo("Date",2+startProc,ClaimFormCur.Items[i].FormatString);
@@ -2265,13 +2273,34 @@ namespace OpenDental{
 					//case "P2UnitCode":
 					//	displayStrings[i]=GetProcInfo("UnitCode",2+startProc);
 					//	break;
-					case "P2UnitQtyOrCount":
-						toothRange=GetToothRangeCount(GetProcInfo("ToothNum",2+startProc));
-						if(toothRange!=null) {
-							displayStrings[i]=toothRange;
+					case "P2UnitQty":
+						if(planCur.ShowBaseUnits) {
+							short bunit;
+							System.Int16.TryParse(GetProcInfo("BaseUnits",2+startProc),out bunit);
+							short uqty;
+							System.Int16.TryParse(GetProcInfo("UnitQty",2+startProc),out uqty);
+							qty=bunit+uqty;
 						}
-						else {//No toothrange specified
+						else if(GetProcInfo("UnitQty",2+startProc)!="") {
+							qty=Int16.Parse(GetProcInfo("UnitQty",2+startProc));
+						}
+						else {
+							qty=0;
+						}
+						if(qty==0) {
+							displayStrings[i]="";
+						}
+						else {
+							displayStrings[i]=qty.ToString();
+						}
+						break;
+					case "P2UnitQtyOrCount":
+						toothCount=GetToothRangeCount(GetProcInfo("ToothNum",2+startProc));
+						if(toothCount==-1) {//No toothrange specified
 							displayStrings[i]=CalculateUnitQtyField(2,startProc,planCur);
+						}
+						else {
+							displayStrings[i]=toothCount.ToString();
 						}
 						break;
 					case "P2CodeAndMods":
@@ -2282,13 +2311,7 @@ namespace OpenDental{
 							+ GetProcInfo("CodeMod4",2+startProc);
 						break;
 					case "P3SystemAndTeeth":
-						systemAndTeethField=GenerateSystemAndTeethField(3,startProc);
-						if(systemAndTeethField!=null) {//Proc had a toothNum/toothRange specified
-							displayStrings[i]=systemAndTeethField;
-						}
-						else {//No toothNum on Proc
-							displayStrings[i]=CalculateUnitQtyField(1,startProc,planCur);
-						}
+						displayStrings[i]=GenerateSystemAndTeethField(3,startProc);
 						break;
 					case "P3Date":
 						displayStrings[i]=GetProcInfo("Date",3+startProc,ClaimFormCur.Items[i].FormatString);
@@ -2356,13 +2379,34 @@ namespace OpenDental{
 					//case "P3UnitCode":
 					//	displayStrings[i]=GetProcInfo("UnitCode",3+startProc);
 					//	break;
-					case "P3UnitQtyOrCount":
-						toothRange=GetToothRangeCount(GetProcInfo("ToothNum",3+startProc));
-						if(toothRange!=null) {
-							displayStrings[i]=toothRange;
+					case "P3UnitQty":
+						if(planCur.ShowBaseUnits) {
+							short bunit;
+							System.Int16.TryParse(GetProcInfo("BaseUnits",3+startProc),out bunit);
+							short uqty;
+							System.Int16.TryParse(GetProcInfo("UnitQty",3+startProc),out uqty);
+							qty=bunit+uqty;
 						}
-						else {//No toothrange specified
+						else if(GetProcInfo("UnitQty",3+startProc)!="") {
+							qty=Int16.Parse(GetProcInfo("UnitQty",3+startProc));
+						}
+						else {
+							qty=0;
+						}
+						if(qty==0) {
+							displayStrings[i]="";
+						}
+						else {
+							displayStrings[i]=qty.ToString();
+						}
+						break;
+					case "P3UnitQtyOrCount":
+						toothCount=GetToothRangeCount(GetProcInfo("ToothNum",3+startProc));
+						if(toothCount==-1) {//No toothrange specified
 							displayStrings[i]=CalculateUnitQtyField(3,startProc,planCur);
+						}
+						else {
+							displayStrings[i]=toothCount.ToString();
 						}
 						break;
 					case "P3CodeAndMods":
@@ -2373,13 +2417,7 @@ namespace OpenDental{
 							+ GetProcInfo("CodeMod4",3+startProc);
 						break;
 					case "P4SystemAndTeeth":
-						systemAndTeethField=GenerateSystemAndTeethField(4,startProc);
-						if(systemAndTeethField!=null) {//Proc had a toothNum/toothRange specified
-							displayStrings[i]=systemAndTeethField;
-						}
-						else {//No toothNum on Proc
-							displayStrings[i]=CalculateUnitQtyField(1,startProc,planCur);
-						}
+						displayStrings[i]=GenerateSystemAndTeethField(4,startProc);
 						break;
 					case "P4Date":
 						displayStrings[i]=GetProcInfo("Date",4+startProc,ClaimFormCur.Items[i].FormatString);
@@ -2447,13 +2485,34 @@ namespace OpenDental{
 					//case "P4UnitCode":
 					//	displayStrings[i]=GetProcInfo("UnitCode",4+startProc);
 					//	break;
-					case "P4UnitQtyOrCount":
-						toothRange=GetToothRangeCount(GetProcInfo("ToothNum",4+startProc));
-						if(toothRange!=null) {
-							displayStrings[i]=toothRange;
+					case "P4UnitQty":
+						if(planCur.ShowBaseUnits) {
+							short bunit;
+							System.Int16.TryParse(GetProcInfo("BaseUnits",4+startProc),out bunit);
+							short uqty;
+							System.Int16.TryParse(GetProcInfo("UnitQty",4+startProc),out uqty);
+							qty=bunit+uqty;
 						}
-						else {//No toothrange specified
+						else if(GetProcInfo("UnitQty",4+startProc)!="") {
+							qty=Int16.Parse(GetProcInfo("UnitQty",4+startProc));
+						}
+						else {
+							qty=0;
+						}
+						if(qty==0) {
+							displayStrings[i]="";
+						}
+						else {
+							displayStrings[i]=qty.ToString();
+						}
+						break;
+					case "P4UnitQtyOrCount":
+						toothCount=GetToothRangeCount(GetProcInfo("ToothNum",4+startProc));
+						if(toothCount==-1) {//No toothrange specified
 							displayStrings[i]=CalculateUnitQtyField(4,startProc,planCur);
+						}
+						else {
+							displayStrings[i]=toothCount.ToString();
 						}
 						break;
 					case "P4CodeAndMods":
@@ -2464,13 +2523,7 @@ namespace OpenDental{
 							+ GetProcInfo("CodeMod4",4+startProc);
 						break;
 					case "P5SystemAndTeeth":
-						systemAndTeethField=GenerateSystemAndTeethField(5,startProc);
-						if(systemAndTeethField!=null) {//Proc had a toothNum/toothRange specified
-							displayStrings[i]=systemAndTeethField;
-						}
-						else {//No toothNum on Proc
-							displayStrings[i]=CalculateUnitQtyField(1,startProc,planCur);
-						}
+						displayStrings[i]=GenerateSystemAndTeethField(5,startProc);
 						break;
 					case "P5Date":
 						displayStrings[i]=GetProcInfo("Date",5+startProc,ClaimFormCur.Items[i].FormatString);
@@ -2538,13 +2591,34 @@ namespace OpenDental{
 					//case "P5UnitCode":
 					//	displayStrings[i]=GetProcInfo("UnitCode",5+startProc);
 					//	break;
-					case "P5UnitQtyOrCount":
-						toothRange=GetToothRangeCount(GetProcInfo("ToothNum",5+startProc));
-						if(toothRange!=null) {
-							displayStrings[i]=toothRange;
+					case "P5UnitQty":
+						if(planCur.ShowBaseUnits) {
+							short bunit;
+							System.Int16.TryParse(GetProcInfo("BaseUnits",5+startProc),out bunit);
+							short uqty;
+							System.Int16.TryParse(GetProcInfo("UnitQty",5+startProc),out uqty);
+							qty=bunit+uqty;
 						}
-						else {//No toothrange specified
+						else if(GetProcInfo("UnitQty",5+startProc)!="") {
+							qty=Int16.Parse(GetProcInfo("UnitQty",5+startProc));
+						}
+						else {
+							qty=0;
+						}
+						if(qty==0) {
+							displayStrings[i]="";
+						}
+						else {
+							displayStrings[i]=qty.ToString();
+						}
+						break;
+					case "P5UnitQtyOrCount":
+						toothCount=GetToothRangeCount(GetProcInfo("ToothNum",5+startProc));
+						if(toothCount==-1) {//No toothrange specified
 							displayStrings[i]=CalculateUnitQtyField(5,startProc,planCur);
+						}
+						else {
+							displayStrings[i]=toothCount.ToString();
 						}
 						break;
 					case "P5CodeAndMods":
@@ -2555,13 +2629,7 @@ namespace OpenDental{
 							+ GetProcInfo("CodeMod4",5+startProc);
 						break;
 					case "P6SystemAndTeeth":
-						systemAndTeethField=GenerateSystemAndTeethField(6,startProc);
-						if(systemAndTeethField!=null) {//Proc had a toothNum/toothRange specified
-							displayStrings[i]=systemAndTeethField;
-						}
-						else {//No toothNum on Proc
-							displayStrings[i]=CalculateUnitQtyField(1,startProc,planCur);
-						}
+						displayStrings[i]=GenerateSystemAndTeethField(6,startProc);
 						break;
 					case "P6Date":
 						displayStrings[i]=GetProcInfo("Date",6+startProc,ClaimFormCur.Items[i].FormatString);
@@ -2629,13 +2697,34 @@ namespace OpenDental{
 					//case "P6UnitCode":
 					//	displayStrings[i]=GetProcInfo("UnitCode",6+startProc);
 					//	break;
-					case "P6UnitQtyOrCount":
-						toothRange=GetToothRangeCount(GetProcInfo("ToothNum",6+startProc));
-						if(toothRange!=null) {
-							displayStrings[i]=toothRange;
+					case "P6UnitQty":
+						if(planCur.ShowBaseUnits) {
+							short bunit;
+							System.Int16.TryParse(GetProcInfo("BaseUnits",6+startProc),out bunit);
+							short uqty;
+							System.Int16.TryParse(GetProcInfo("UnitQty",6+startProc),out uqty);
+							qty=bunit+uqty;
 						}
-						else {//No toothrange specified
+						else if(GetProcInfo("UnitQty",6+startProc)!="") {
+							qty=Int16.Parse(GetProcInfo("UnitQty",6+startProc));
+						}
+						else {
+							qty=0;
+						}
+						if(qty==0) {
+							displayStrings[i]="";
+						}
+						else {
+							displayStrings[i]=qty.ToString();
+						}
+						break;
+					case "P6UnitQtyOrCount":
+						toothCount=GetToothRangeCount(GetProcInfo("ToothNum",6+startProc));
+						if(toothCount==-1) {//No toothrange specified
 							displayStrings[i]=CalculateUnitQtyField(6,startProc,planCur);
+						}
+						else {
+							displayStrings[i]=toothCount.ToString();
 						}
 						break;
 					case "P6CodeAndMods":
@@ -4307,19 +4396,19 @@ namespace OpenDental{
 			FormCP.ShowDialog();
 		}
 
-		///<summary>This method returns null if a toothrange was not specified, otherwise returns the count of teeth in the toothrange.</summary>
-		private string GetToothRangeCount(string toothNums) {
+		///<summary>This method returns -1 if a toothrange was not specified, otherwise returns the count of teeth in the toothrange.</summary>
+		private int GetToothRangeCount(string toothNums) {
 			List<string> listToothNums=RemoveToothRangeFormat(toothNums);
-			if(listToothNums.Count==1) {//Proc had 0 or 1 toothNum specified
-				return null;
+			if(listToothNums.Count<=1) {//Proc had 0 or 1 toothNum specified
+				return -1;
 			}
 			else {//The procedure has a toothrange, return the number of teeth.
-				return listToothNums.Count.ToString();
+				return listToothNums.Count;
 			}
 		}
 
 		///<summary>Returns the procedures UnitQty fields.</summary>
-		private string CalculateUnitQtyField(int index, int startProc, InsPlan insPlan) {
+		private string CalculateUnitQtyField(int index,int startProc,InsPlan insPlan) {
 			int qty;
 			if(insPlan.ShowBaseUnits) {
 				short bunit;
@@ -4341,33 +4430,29 @@ namespace OpenDental{
 		}
 
 		///<summary>Constructs the SystemAndTeeth field as specified by the 1500 claim form manual.
-		///Returns a null string if the procedure did not specify a toothNum.
-		///Callers of this method should consider this scenario.</summary>
-		private string GenerateSystemAndTeethField(int index, int startProc) {
-			string toothNum=GetProcInfo("ToothNum",index+startProc);
+		///Returns an empty string if the procedure did not specify a toothNum or tooth range.</summary>
+		private string GenerateSystemAndTeethField(int index,int startProc) {
+			string toothNum = GetProcInfo("ToothNum",index+startProc);
 			if(String.IsNullOrEmpty(toothNum)) {
-				return null;//Procedure did not specify a toothnum
+				return "";//Procedure did not specify a toothnum
 			}
 			List<string> listToothNums=RemoveToothRangeFormat(toothNum);
 			//loop through the list and construct the field
-			string field="JP"+listToothNums[0].ToString();//Like JP1 2 3 ... 
-			for(int i=1;i<listToothNums.Count;i++) {
-				field+=" "+listToothNums[i];
-			}
-			return field;
+			return "JP"+String.Join(" ",listToothNums);
 		}
 
-		///<summary>In GetProcInfo() if the treament area is a ToothRange, the resulting string is formatted with a '-'. This format will not work with
-		///the 1500 claim form per the instruction manual. "Do not enter a space between the qualifier and the number/code/information. Do not enter hyphens or spaces within the number/code".
-		///To avoid breaking existing functionality this helper class reverts the formatting back to a comma delimited list of toothnums. E.g.- Input:"1-7", returns "1,2,3,4,5,6,7" in an array.
+		///<summary>In GetProcInfo() if the treament area is a ToothRange, the resulting string is formatted with a '-'.
+		///E.g.- Input:"1-7", returns "1,2,3,4,5,6,7" in a list.
+		///This format will not work with the 1500 claim form per the instruction manual.
+		///"Do not enter a space between the qualifier and the number/code/information. Do not enter hyphens or spaces within the number/code".
 		///Obligatory "Beware ye who enter here".</summary>
 		private List<string> RemoveToothRangeFormat(string toothRange) {
 			//There may be multiple toothranges formatted with a '-'. E.g. 1-5,20-25
 			//Each must be broken apart and added to the return value
-			string[] arraytoothRanges=toothRange.Split(',');
+			string[] arrayToothRanges=toothRange.Split(',');
 			//List of toothNums
 			List<string> retVal=new List<string>();
-			foreach(string toothRangeVal in arraytoothRanges) {
+			foreach(string toothRangeVal in arrayToothRanges) {
 				if(toothRangeVal.Contains("-")) {
 					string[] arrayRange=toothRangeVal.Split('-');
 					int start=PIn.Int(arrayRange[0]);
@@ -4375,7 +4460,7 @@ namespace OpenDental{
 					//Create a list of ints given the starting number and total count of ints needed. Then comma delimit the list and add it to the return value.
 					retVal.AddRange(Enumerable.Range(start,(end-start)+1).Select(x => x.ToString()));
 				}
-				else {
+				else if(toothRangeVal.Trim()!="") {
 					retVal.Add(toothRangeVal);
 				}
 			}
