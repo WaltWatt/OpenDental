@@ -3845,6 +3845,7 @@ namespace OpenDental{
 			if(isRefreshCurModule) {
 				RefreshCurrentModule(false,isApptRefreshDataPat);
 			}
+			userControlTasks1.RefreshPatTicketsIfNeeded();
 			FillPatientButton(pat);
 		}
 
