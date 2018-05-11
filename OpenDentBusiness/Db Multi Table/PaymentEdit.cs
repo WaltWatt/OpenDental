@@ -311,8 +311,11 @@ namespace OpenDentBusiness {
 			//No remoting role check; no call to db
 			//use negative paysplits to counteract inspaytotals/paysplits/adjustments for same prov/pat/clinic-Accounts for income transfers and prevents using thetransferred money.
 			PayResults implicitCredits=new PayResults();
-			List<PaySplit> listSplitsCopied=new List<PaySplit>(listPaySplits.Where(x => x.ProcNum==0).Select(x => x.Copy()).ToList());
+			//only get splits that have not yet been explicitly allocated, not attached to procs or payplan.
+			List<PaySplit> listSplitsCopied=new List<PaySplit>(listPaySplits.Where(x => x.ProcNum==0 && x.PayPlanNum==0).Select(x => x.Copy()).ToList());
 			List<Adjustment> listNegAdjustCopied=new List<Adjustment>(listAdjustments.Where(x => x.ProcNum==0 && x.AdjAmt<0).Select(x => x.Clone()).ToList());
+			//use negative paysplits to counteract inspaytotals/paysplits/adjustments for same prov/pat/clinic.  
+			//Accounts for income transfers and prevents using the transferred money.
 			List<PaySplit> listNegSplits=listSplitsCopied.FindAll(x => x.SplitAmt<0);
 			foreach(PaySplit negSplit in listNegSplits) {
 				List<PaySplit> posSplits=listSplitsCopied.FindAll(x => x.SplitAmt>0 && x.PatNum==negSplit.PatNum && x.ProvNum==negSplit.ProvNum &&x.ClinicNum==negSplit.ClinicNum);
