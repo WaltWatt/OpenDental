@@ -4098,9 +4098,7 @@ namespace OpenDental{
 					//butCheckAdd.Enabled=false; //button was removed.
 				}
 			}
-			if(!IsNew && ((ClaimCur.ClaimType!="PreAuth" && !Security.IsAuthorized(Permissions.ClaimDelete,ClaimCur.SecDateEntry,true))
-				|| (ClaimCur.ClaimType=="PreAuth" && !Security.IsAuthorized(Permissions.PreAuthSentEdit,ClaimCur.SecDateEntry,true)))) 
-			{ 
+			if(!IsNew && ((ClaimCur.ClaimType!="PreAuth" && !Security.IsAuthorized(Permissions.ClaimDelete,ClaimCur.SecDateEntry,true)))) { 
 				butDelete.Enabled=false;
 			}
 			if(ClaimCur.ClaimType=="PreAuth"){
