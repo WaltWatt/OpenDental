@@ -159,6 +159,7 @@ namespace OpenDental {
 			this.MinimizeBox = false;
 			this.Name = "FormTerminal";
 			this.ShowInTaskbar = false;
+			this.Text = "";
 			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
 			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FormTerminal_FormClosing);
