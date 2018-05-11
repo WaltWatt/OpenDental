@@ -82,11 +82,14 @@ namespace OpenDental.UI{
 		/// </summary>
 		private void InitializeComponent()
 		{
+			this.SuspendLayout();
 			// 
 			// ODToolBar
 			// 
+			this.DoubleBuffered = true;
 			this.Name = "ODToolBar";
 			this.Load += new System.EventHandler(this.ODToolBar_Load);
+			this.ResumeLayout(false);
 
 		}
 		#endregion
