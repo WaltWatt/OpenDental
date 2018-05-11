@@ -77,6 +77,7 @@ namespace OpenDental{
 		private List<Procedure> ProcList;
 		///<summary>This is a filtered list containing only TP procedures.  It's also already sorted by priority and tooth number.</summary>
 		private Procedure[] ProcListTP;
+		///<summary>List of ClaimProcs with status of Estimate or CapEstimate for the patient.</summary>
 		private List<ClaimProc> ClaimProcList;
 		private Family FamCur;
 		private Patient PatCur;
@@ -2896,7 +2897,9 @@ namespace OpenDental{
 				return;
 			}
 			List<long> listOrigLabClaimProcNums=listClaimProcs.Where(x => listLabProcNums.Contains(x.ProcNum)).Select(x => x.ClaimProcNum).ToList();
-			List<ClaimProc> listDbLabClaimProcs=ClaimProcs.RefreshForProcs(listLabProcNums);//Contains CPs we want to refresh and any that were added.
+			//Contains CPs we want to refresh and any that were added. Only look at estimates and cap estimates, see ClaimProcs.RefreshForTP(...)
+			List<ClaimProc> listDbLabClaimProcs=ClaimProcs.RefreshForProcs(listLabProcNums)
+				.Where(x => x.Status.In(ClaimProcStatus.Estimate,ClaimProcStatus.CapEstimate)).ToList();
 			for(int i=0;i<listClaimProcs.Count;i++) {
 				long claimProcNum=listClaimProcs[i].ClaimProcNum;
 				if(!listOrigLabClaimProcNums.Contains(claimProcNum)) {

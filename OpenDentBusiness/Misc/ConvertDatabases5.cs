@@ -8328,5 +8328,37 @@ No Action Required in many cases, check your new patient Web Sched on your web s
 				//Oracle allows up to 4 gigs in CLOB, not conver needed.
 			}
 		}
+
+		private static void To18_1_7() {
+			string command;
+			if(DataConnection.DBtype==DatabaseType.MySql && CultureInfo.CurrentCulture.Name.EndsWith("CA")) {//Canada only.
+				//A bug in 17.4.50.0 caused Canadian preauths with labs to duplicate preauth lab claim procs when visiting the TP module.
+				//Below we delete duplicate Canadian Lab Fee PreAuth claim procs, preserving one instance.
+				//This will allow the preauths to maintain a single claim proc to display correctly.
+				//All identified issue claim procs should be identical, so we pick the lowest numbered ClaimProcNum to preserve.
+				try {
+					//Get a list of duplicate Canadian labs for preauths.
+					command="SELECT SUBSTRING_INDEX("
+							+"GROUP_CONCAT(claimproc.ClaimProcNum ORDER BY claimproc.ClaimProcNum DESC),',',COUNT(claimproc.ClaimProcNum)-1"
+						+") AS DuplicateClaimProcNum "//Duplicate claimproc.ClaimProcNum minus the lowest numbered instance.
+						+"FROM claimproc "
+						+"INNER JOIN procedurelog ON procedurelog.ProcNum=claimproc.ProcNum "
+						+"AND procedurelog.ProcNumLab!=0 "//Canadian Lab Fees.
+						+"WHERE claimproc.Status=2 "//Preauth.
+						+"GROUP BY claimproc.ProcNum,claimproc.ClaimNum "
+						+"HAVING COUNT(*)>1 ";
+					List<string> listDuplicateCanadianClaimProcNums=Db.GetListString(command);//Query returns list of strings containing comma delimited list of ClaimProcNums.
+					if(listDuplicateCanadianClaimProcNums.Count>0) {
+						command="DELETE "
+						+"FROM claimproc "
+						+"WHERE claimproc.ClaimProcNum IN("+string.Join(",",listDuplicateCanadianClaimProcNums)+")";//Canadian lab preauth claim procs
+						Db.NonQ(command);
+					}
+				}
+				catch(Exception ex) {
+					ex.DoNothing();//no duplicates found
+				}
+			}
+		}
 	}
 }
