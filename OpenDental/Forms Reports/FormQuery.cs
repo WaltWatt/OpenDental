@@ -1108,11 +1108,17 @@ namespace OpenDental{
 							if(_dictPatientNames==null) {
 								_dictPatientNames=Patients.GetAllPatientNames();
 							}
-							if(_dictPatientNames.ContainsKey(PIn.Long(tableOut.Rows[i][j].ToString()))) {
-								tableOut.Rows[i][j]=_dictPatientNames[PIn.Long(tableOut.Rows[i][j].ToString())];
+							long patNum=PIn.Long(tableOut.Rows[i][j].ToString());
+							if(_dictPatientNames.ContainsKey(patNum)) {
+								tableOut.Rows[i][j]=_dictPatientNames[patNum];
 							}
 							else {
 								tableOut.Rows[i][j]="";
+								Patient patNew=Patients.GetLim(patNum);
+								if(patNew!=null) {		
+									_dictPatientNames[patNew.PatNum]=patNew.GetNameLF();
+									tableOut.Rows[i][j]=_dictPatientNames[patNum];
+								}
 							}
 							break;
 						//plannums:
