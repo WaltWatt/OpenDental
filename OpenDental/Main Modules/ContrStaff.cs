@@ -1305,8 +1305,8 @@ namespace OpenDental{
 			}
 			if(PrefC.GetBool(PrefName.TimecardSecurityEnabled)){
 				if(Security.CurUser.EmployeeNum!=_listEmployees[e.Row].EmployeeNum) {
-					if(!Security.IsAuthorized(Permissions.TimecardsEditAll)){
-						SelectEmpI(-1);
+					if(!Security.IsAuthorized(Permissions.TimecardsEditAll,true)){
+						SelectEmpI(-1,false);
 						return;
 					}
 				}
