@@ -225,7 +225,7 @@ namespace OpenDental{
 				_listUsers=Userods.GetUsers(true);
 			}
 			else if(checkShowCEMTUsers.Checked) {//Only show list of CEMT users.
-				_listUsers=Userods.GetUsersForCEMT();
+				_listUsers=Userods.GetUsersForCEMT().Where(x => !x.IsHidden).ToList();
 			}
 			else {//This will be the most common way to fill the user list.  Only includes non-hidden, non-CEMT users.
 				_listUsers=Userods.GetUsers();
