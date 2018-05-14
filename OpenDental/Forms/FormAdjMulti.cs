@@ -141,7 +141,8 @@ namespace OpenDental {
 		}
 
 		private void FillListBoxAdjTypes() {
-			List<Def> adjCat=Defs.GetCatList((int)DefCat.AdjTypes).ToList();
+			//Remove hidden adjustment types
+			List<Def> adjCat=Defs.GetCatList((int)DefCat.AdjTypes).ToList().FindAll(x => !x.IsHidden);
 			//Positive adjustment types
 			_listAdjPosCats=adjCat.FindAll(x => x.ItemValue=="+");
 			_listAdjPosCats.ForEach(x => listTypePos.Items.Add(x.ItemName));
