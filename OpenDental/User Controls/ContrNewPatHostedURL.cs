@@ -77,9 +77,9 @@ namespace OpenDental.User_Controls {
 			gridOptions.Columns.Add(col);
 			col=new ODGridColumn(Lan.g(this,"Show Pre-Screen Questions"),180,HorizontalAlignment.Center);
 			gridOptions.Columns.Add(col);
-			col=new ODGridColumn(Lan.g(this,"E-mail Verify"),85,HorizontalAlignment.Center);
+			col=new ODGridColumn(Lan.g(this,"Verify Email"),85,HorizontalAlignment.Center);
 			gridOptions.Columns.Add(col);
-			col=new ODGridColumn(Lan.g(this,"Text Verify"),85,HorizontalAlignment.Center);
+			col=new ODGridColumn(Lan.g(this,"Verify Text"),85,HorizontalAlignment.Center);
 			gridOptions.Columns.Add(col);
 			col=new ODGridColumn(Lan.g(this,"Launch WebForm on Complete"),200,HorizontalAlignment.Center);
 			gridOptions.Columns.Add(col);

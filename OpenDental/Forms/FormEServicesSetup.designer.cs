@@ -2167,7 +2167,7 @@ namespace OpenDental{
 			this.tabWebSchedVerify.Padding = new System.Windows.Forms.Padding(3);
 			this.tabWebSchedVerify.Size = new System.Drawing.Size(1140, 542);
 			this.tabWebSchedVerify.TabIndex = 2;
-			this.tabWebSchedVerify.Text = "Verify";
+			this.tabWebSchedVerify.Text = "Notify";
 			this.tabWebSchedVerify.UseVisualStyleBackColor = true;
 			// 
 			// butRestoreWebSchedVerify
