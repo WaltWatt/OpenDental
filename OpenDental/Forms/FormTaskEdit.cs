@@ -2462,9 +2462,11 @@ namespace OpenDental {
 					MessageBox.Show(ex.Message);
 					return false;
 				}
-				if(PrefC.GetBool(PrefName.TasksNewTrackedByUser)) {
-					TaskUnreads.SetUnread(Security.CurUser.UserNum,taskCopy.TaskNum);
-				}
+				//tg:I don't know why this was here.  You just copied the task, you don't want it to be marked new for you.
+				//Other users get Unreads in SetInvalidTask.
+				//if(PrefC.GetBool(PrefName.TasksNewTrackedByUser)) {
+				//	TaskUnreads.SetUnread(Security.CurUser.UserNum,taskCopy.TaskNum);
+				//}
 				DataValid.SetInvalidTask(taskCopy.TaskNum,true);//popup
 			}
 			return true;
