@@ -112,7 +112,8 @@ namespace OpenDentBusiness.WebTypes.WebSched.TimeSlot {
 			,List<Operatory> listOperatories,List<Schedule> listSchedules,Clinic clinic,long defNumApptType=0)
 		{
 			//No need to check RemotingRole; no call to db.
-			List<long> listOpNums=listOperatories.Select(x => x.OperatoryNum).Distinct().ToList();
+			//Order the operatories passed in by their ItemOrder just in case they were passed in all jumbled up.
+			List<long> listOpNums=listOperatories.OrderBy(x => x.ItemOrder).Select(x => x.OperatoryNum).Distinct().ToList();
 			//Remove all schedules that fall outside of the date range passed in.  Only consider the date right now, the time portion is handled later.
 			listSchedules.RemoveAll(x => !x.SchedDate.Date.Between(dateStart.Date,dateEnd.Date));
 			List<Schedule> listProviderSchedules=listSchedules.FindAll(x => x.BlockoutType==0);
@@ -134,14 +135,29 @@ namespace OpenDentBusiness.WebTypes.WebSched.TimeSlot {
 			listProviderSchedulesAll=listProviderSchedulesAll.OrderBy(x => x.SchedDate).ToList();
 			List<TimeSlot> listAvailableTimeSlots=new List<TimeSlot>();
 			List<DateTime> listUniqueDays=new List<DateTime>();
+			int timeIncrement=PrefC.GetInt(PrefName.AppointmentTimeIncrement);
 			//Loop through all schedules five minutes at a time to find time slots large enough that have no appointments and no blockouts within them.
 			foreach(Schedule schedule in listProviderSchedulesAll) {
 				DateTime dateSched=schedule.SchedDate;
+				//Straight up ignore schedules in the past.  This should not be possible but this is just in case.
+				if(dateSched.Date < DateTime.Today) {
+					continue;
+				}
 				if(!listUniqueDays.Contains(dateSched)) {
 					listUniqueDays.Add(dateSched);
 				}
 				TimeSpan timeSchedStart=schedule.StartTime;
 				TimeSpan timeSchedStop=schedule.StopTime;
+				//Now, make sure that the start time is set to a starting time that makes sense with the appointment time increment preference.
+				int minsOver=(timeSchedStart.Minutes)%timeIncrement;
+				if(minsOver>0) {
+					int minsToAdd=timeIncrement-minsOver;
+					timeSchedStart=timeSchedStart.Add(new TimeSpan(0,minsToAdd,0));
+				}
+				//Double check that we haven't pushed the start time past the stop time.
+				if(timeSchedStart>=timeSchedStop) {
+					continue;
+				}
 				//Figure out all possible operatories for this particular schedule.
 				List<Operatory> listOpsForSchedule=new List<Operatory>();
 				if(schedule.Ops.Count > 0) {
@@ -165,42 +181,21 @@ namespace OpenDentBusiness.WebTypes.WebSched.TimeSlot {
 				if(listOpsForSchedule.Count==0) {
 					continue;//No valid operatories for this schedule.
 				}
-				//Straight up ignore schedules in the past.  This should not be possible but is just in case.
-				if(dateSched.Date < DateTime.Today) {
-					continue;
-				}
-				int timeIncrement=PrefC.GetInt(PrefName.AppointmentTimeIncrement);
-				//Check to see if we are currently looking at today's date. 
-				if(dateSched.Date==DateTime.Now.Date) {
-					//We need to make sure that we are looking for openings AFTER right now.
-					//First, check the stop time of this schedule to make sure that right now isn't past the stop time of the schedule.
-					if(DateTime.Now.TimeOfDay>=timeSchedStop) {
-						continue;//The current time is or has passed the ending time for the schedule.
-					}
-					//Next, make sure that the start time is after right now.  If it isn't, set timeSchedStart to right now.
-					if(DateTime.Now.TimeOfDay > timeSchedStart) {
-						timeSchedStart=DateTime.Now.TimeOfDay;
-					}
-				}
-				//Now, make sure that the start time is set to a starting time that makes sense with the appointment time increment preference.
-				int minsOver=(timeSchedStart.Minutes)%timeIncrement;
-				if(minsOver>0) {
-					int minsToAdd=timeIncrement-minsOver;
-					timeSchedStart=timeSchedStart.Add(new TimeSpan(0,minsToAdd,0));
-				}
-				//Double check that we haven't pushed the start time past the stop time.
-				if(timeSchedStart>=timeSchedStop) {
-					continue;
-				}
 				//The list of operatories has been filtered above so we need to find ALL available time slots for this schedule in all operatories.
 				foreach(Operatory op in listOpsForSchedule) {
 					AddTimeSlotsFromSchedule(listAvailableTimeSlots,schedule,op.OperatoryNum,timeSchedStart,timeSchedStop
 						,listBlockoutSchedules,dictProvSchedules,listApptsForOps,timePattern,defNumApptType);
 				}
 			}
+			//Remove any time slots that start before right now (just in case the consuming method is looking for slots for today).
+			listAvailableTimeSlots.RemoveAll(x => x.DateTimeStart.Date==DateTime.Now.Date && x.DateTimeStart.TimeOfDay < DateTime.Now.TimeOfDay);
 			//Order the entire list of available time slots so that they are displayed to the user in sequential order.
 			//We need to do this because we loop through each provider's schedule one at a time and add openings as we find them.
-			return listAvailableTimeSlots.OrderBy(x => x.DateTimeStart).ToList();
+			//Then order by operatory.ItemOrder in order to preserve old behavior (filling up the schedule via operatories from the left to the right).
+			return listAvailableTimeSlots.OrderBy(x => x.DateTimeStart)
+				//listOpNums was ordered by ItemOrder at the top of this method so we can trust that it is in the correct order.
+				.ThenBy(x => listOpNums.IndexOf(x.OperatoryNum))
+				.ToList();
 		}
 
 		///<summary>Adds valid time slots to listAvailableTimeSlots if the time slot found does NOT already exist within the list.
