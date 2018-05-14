@@ -232,10 +232,10 @@ namespace OpenDental {
 			if(!tabContr.TabPages.Contains(tabPatientTickets)) {
 				return;
 			}
-			if(countSet==-1) {
+			if(countSet==-1 && FormOpenDental.CurPatNum!=0) {
 				countSet=Tasks.GetCountPatientTickets(FormOpenDental.CurPatNum);
 			}
-			tabPatientTickets.Text=Lan.g(this,"Patient Tasks")+" ("+countSet.ToString()+")";
+			tabPatientTickets.Text=Lan.g(this,"Patient Tasks")+" ("+(countSet==-1?"0":countSet.ToString())+")";
 		}
 
 		public void ClearLogOff() {
@@ -839,7 +839,10 @@ namespace OpenDental {
 			}
 			else if(tabContr.SelectedTab==tabPatientTickets) {
 				_listTaskLists=new List<TaskList>();
-				_listTasks=Tasks.RefreshPatientTickets(FormOpenDental.CurPatNum);
+				_listTasks=new List<Task>();
+				if(FormOpenDental.CurPatNum!=0) {
+					_listTasks=Tasks.RefreshPatientTickets(FormOpenDental.CurPatNum);
+				}
 			}
 			else if(tabContr.SelectedTab==tabMain) {
 				_listTaskLists=TaskLists.RefreshMainTrunk(Security.CurUser.UserNum,TaskType.Normal);
