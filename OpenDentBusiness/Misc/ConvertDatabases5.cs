@@ -8331,7 +8331,7 @@ No Action Required in many cases, check your new patient Web Sched on your web s
 
 		private static void To18_1_7() {
 			string command;
-			//Commenting this bug fix out due to SUBSTRING_INDEX(...) truncating the GROUP_CONCAT(...) string to 1024 characters.
+			//Commenting this bug fix out due to GROUP_CONCAT(...) truncating the result string to 1024 characters.
 			//if(DataConnection.DBtype==DatabaseType.MySql && CultureInfo.CurrentCulture.Name.EndsWith("CA")) {//Canada only.
 			//	//A bug in 17.4.50.0 caused Canadian preauths with labs to duplicate preauth lab claim procs when visiting the TP module.
 			//	//Below we delete duplicate Canadian Lab Fee PreAuth claim procs, preserving one instance.
