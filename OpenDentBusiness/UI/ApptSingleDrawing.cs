@@ -53,9 +53,8 @@ namespace OpenDentBusiness.UI {
 			//Check to see if the patient is late for their appointment.  This 
 			DateTime aptDateTime=PIn.DateT(dataRoww["AptDateTime"].ToString());
 			DateTime aptDateTimeArrived=PIn.DateT(dataRoww["AptDateTimeArrived"].ToString());
-			//If the appointment is scheduled or ASAP and the patient was late for the appointment.
-			if((PIn.Long(dataRoww["AptStatus"].ToString())==(int)ApptStatus.Scheduled
-				|| PIn.Long(dataRoww["AptStatus"].ToString())==(int)ApptStatus.Complete)
+			//If the appointment is scheduled and the patient was late for the appointment.
+			if((PIn.Long(dataRoww["AptStatus"].ToString())==(int)ApptStatus.Scheduled)
 				&& ((aptDateTimeArrived.TimeOfDay==TimeSpan.FromHours(0) && DateTime.Now>aptDateTime) 
 					|| (aptDateTimeArrived.TimeOfDay>TimeSpan.FromHours(0) && aptDateTimeArrived>aptDateTime))) 
 			{
