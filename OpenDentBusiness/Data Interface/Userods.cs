@@ -608,7 +608,7 @@ namespace OpenDentBusiness {
 			}
 			//This should never happen, but is a failsafe to prevent the overwriting of all non-CEMT users in the remote database.
 			if(userod.UserNumCEMT == 0) {
-				throw new Exception(userod.UserName + " has a UserNumCEMT of 0 and cannot be synced.");
+				return;
 			}
 			//Validate(false,userod,false);//Can't use this validate. it's for normal updating only.
 			string command="UPDATE userod SET "
