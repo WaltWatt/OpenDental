@@ -1343,9 +1343,11 @@ namespace OpenDentBusiness{
 			}
 			string note="";
 			double estAmt=procLab.ProcFee*percentage/100d;
+			bool isPreauth=(claimProcParent.Status==ClaimProcStatus.Preauth);
 			List<ClaimProc> listClaimProcs=ClaimProcs.RefreshForProc(procLab.ProcNum)//Get all claimProcs for this lab (0, 1 or 2).
-				.FindAll(x => x.InsSubNum==claimProcParent.InsSubNum && x.PlanNum==claimProcParent.PlanNum
-					&& x.Status==claimProcParent.Status);//Limit down to estimate claimProcs for current claim.
+				.FindAll(x => x.InsSubNum==claimProcParent.InsSubNum && x.PlanNum==claimProcParent.PlanNum//Same subscriber and insurance.
+					&& x.Status==claimProcParent.Status//Ensure parent proc and lab proc have same status.
+					&& (isPreauth?x.ClaimNum==claimProcParent.ClaimNum:true));//Preauths claimProcs can be sent to same insurance many times, claim specific.
 			if(listClaimProcs.Count > 0) {//There exists 1 or 2 estimates for the current lab proc.
 				listClaimProcs.ForEach(x => { 
 					x.BaseEst=estAmt;
