@@ -2687,7 +2687,7 @@ namespace OpenDental{
 				if(PatPlanList.Count>0) { //Primary
 					claimproc=ClaimProcs.GetEstimate(ClaimProcList,listProcForTP[i].ProcNum,priPlanCur.PlanNum,PatPlanList[0].InsSubNum);
 					if(claimproc==null || claimproc.EstimateNote.Contains("Frequency Limitation")) {
-						if(claimproc.InsEstTotalOverride!=-1) {
+						if(claimproc!=null && claimproc.InsEstTotalOverride!=-1) {
 							priIns=(decimal)claimproc.InsEstTotalOverride;
 						}
 						else { 
