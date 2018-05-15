@@ -5691,6 +5691,10 @@ namespace OpenDental{
 					return;
 				}
 			}
+			double sumPaySplits=0;
+			for(int i = 0;i<PaySplitsForProc.Count;i++) {
+				sumPaySplits+=((PaySplit)PaySplitsForProc[i]).SplitAmt;
+			}
 			if(ProcOld.ProcStatus!=ProcStat.C && ProcCur.ProcStatus==ProcStat.C){//Proc set complete.
 				ProcCur.DateEntryC=DateTime.Now;//this triggers it to set to server time NOW().
 				if(ProcCur.DiagnosticCode=="") {
@@ -5703,7 +5707,7 @@ namespace OpenDental{
 			{
 				return;
 			}
-			else if(ProcOld.ProcStatus==ProcStat.C && ProcCur.ProcStatus!=ProcStat.C && PaySplitsForProc.Count!=0) {
+			else if(ProcOld.ProcStatus==ProcStat.C && ProcCur.ProcStatus!=ProcStat.C && sumPaySplits!=0) {
 				MsgBox.Show(this,"Not allowed to modify the status of a procedure that has payments attached to it. Detach payments from the procedure first.");
 				return;
 			}
