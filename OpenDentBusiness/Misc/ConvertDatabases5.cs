@@ -39,6 +39,54 @@ namespace OpenDentBusiness {
 				Db.NonQ(command);
 			}
 		}
+
+		///<summary>Canada only and for MySQL only.  Aborts silently on failure, because user can delete the duplicates manually.</summary>
+		private static void CanadaDeleteDuplicatePreauthClaimprocs() {
+			if(DataConnection.DBtype!=DatabaseType.MySql || !CultureInfo.CurrentCulture.Name.EndsWith("CA")) {//Canada only.
+				return;
+			}
+			//A bug in 17.4.50.0 caused Canadian preauths with labs to duplicate preauth lab claim procs when visiting the TP module.
+			//Below we delete duplicate Canadian Lab Fee PreAuth claim procs, preserving one instance.
+			//This will allow the preauths to maintain a single claim proc to display correctly.
+			//All identified issue claim procs should be identical, so we pick the lowest numbered ClaimProcNum to preserve.
+			try {
+				//Get a list of duplicate Canadian labs for preauths.
+				string command="SELECT claimproc.ClaimProcNum,claimproc.ProcNum,ClaimProc.ClaimNum,claimproc.PatNum "
+					+"FROM claimproc "
+					+"INNER JOIN procedurelog ON procedurelog.ProcNum=claimproc.ProcNum "
+					+"AND procedurelog.ProcNumLab!=0 "//Canadian Lab Fees.
+					+"WHERE claimproc.Status=2 "//Preauth.
+					+"ORDER BY ProcNum,ClaimNum";
+				DataTable table=Db.GetTable(command);
+				List<long> listDuplicateCanadianClaimProcNums=new List<long>();
+				for(int i=1;i<table.Rows.Count;i++) {
+					ClaimProc claimProcPrev=new OpenDentBusiness.ClaimProc() {
+						ProcNum=PIn.Long(table.Rows[i-1]["ProcNum"].ToString()),
+						ClaimProcNum=PIn.Long(table.Rows[i-1]["ClaimProcNum"].ToString()),
+						ClaimNum=PIn.Long(table.Rows[i-1]["ClaimNum"].ToString()),
+						PatNum=PIn.Long(table.Rows[i-1]["PatNum"].ToString())
+					};
+					ClaimProc claimProcCur=new OpenDentBusiness.ClaimProc() {
+						ProcNum=PIn.Long(table.Rows[i]["ProcNum"].ToString()),
+						ClaimProcNum=PIn.Long(table.Rows[i]["ClaimProcNum"].ToString()),
+						ClaimNum=PIn.Long(table.Rows[i]["ClaimNum"].ToString()),
+						PatNum=PIn.Long(table.Rows[i]["PatNum"].ToString())
+					};
+					if(claimProcPrev.ProcNum==claimProcCur.ProcNum && claimProcPrev.ClaimNum==claimProcCur.ClaimNum) {
+						listDuplicateCanadianClaimProcNums.Add(claimProcCur.ClaimProcNum);
+					}
+				}
+				if(listDuplicateCanadianClaimProcNums.Count>0) {
+					command="DELETE "
+					+"FROM claimproc "
+					+"WHERE claimproc.ClaimProcNum IN("+string.Join(",",listDuplicateCanadianClaimProcNums)+")";//Canadian lab preauth claim procs
+					Db.NonQ(command);
+				}
+			}
+			catch(Exception ex) {
+				ex.DoNothing();//The user can fix the duplicates manually.
+			}
+		}
 	
 		///<summary>This is the start of our new ConvertDatabases pattern where engineers do not need to worry about versioning info.
 		///From this point on, the only version that engineers need to know about is the version within the method name.</summary>
@@ -7009,6 +7057,15 @@ No Action Required in many cases, check your new patient Web Sched on your web s
 			}
 		}
 
+		private static void To17_4_66() {
+			//Rewritten in 17.4.68 to correctly delete the entire set of duplicate claimprocs. Helper function created.
+			CanadaDeleteDuplicatePreauthClaimprocs();
+		}
+
+		private static void To17_4_68() {
+			CanadaDeleteDuplicatePreauthClaimprocs();
+		}
+
 		private static void To18_1_1() {
 			string command;
 			DataTable table;
@@ -8330,36 +8387,13 @@ No Action Required in many cases, check your new patient Web Sched on your web s
 		}
 
 		private static void To18_1_7() {
-			string command;
-			//Commenting this bug fix out due to GROUP_CONCAT(...) truncating the result string to 1024 characters.
-			//if(DataConnection.DBtype==DatabaseType.MySql && CultureInfo.CurrentCulture.Name.EndsWith("CA")) {//Canada only.
-			//	//A bug in 17.4.50.0 caused Canadian preauths with labs to duplicate preauth lab claim procs when visiting the TP module.
-			//	//Below we delete duplicate Canadian Lab Fee PreAuth claim procs, preserving one instance.
-			//	//This will allow the preauths to maintain a single claim proc to display correctly.
-			//	//All identified issue claim procs should be identical, so we pick the lowest numbered ClaimProcNum to preserve.
-			//	try {
-			//		//Get a list of duplicate Canadian labs for preauths.
-			//		command="SELECT SUBSTRING_INDEX("
-			//				+"GROUP_CONCAT(claimproc.ClaimProcNum ORDER BY claimproc.ClaimProcNum DESC),',',COUNT(claimproc.ClaimProcNum)-1"
-			//			+") AS DuplicateClaimProcNum "//Duplicate claimproc.ClaimProcNum minus the lowest numbered instance.
-			//			+"FROM claimproc "
-			//			+"INNER JOIN procedurelog ON procedurelog.ProcNum=claimproc.ProcNum "
-			//			+"AND procedurelog.ProcNumLab!=0 "//Canadian Lab Fees.
-			//			+"WHERE claimproc.Status=2 "//Preauth.
-			//			+"GROUP BY claimproc.ProcNum,claimproc.ClaimNum "
-			//			+"HAVING COUNT(*)>1 ";
-			//		List<string> listDuplicateCanadianClaimProcNums=Db.GetListString(command);//Query returns list of strings containing comma delimited list of ClaimProcNums.
-			//		if(listDuplicateCanadianClaimProcNums.Count>0) {
-			//			command="DELETE "
-			//			+"FROM claimproc "
-			//			+"WHERE claimproc.ClaimProcNum IN("+string.Join(",",listDuplicateCanadianClaimProcNums)+")";//Canadian lab preauth claim procs
-			//			Db.NonQ(command);
-			//		}
-			//	}
-			//	catch(Exception ex) {
-			//		ex.DoNothing();//no duplicates found
-			//	}
-			//}
+			//Rewritten in 18.1.9 to correctly delete the entire set of duplicate claimprocs. Helper function created.
+			CanadaDeleteDuplicatePreauthClaimprocs();
 		}
+
+		private static void To18_1_9() {
+			CanadaDeleteDuplicatePreauthClaimprocs();
+		}
+
 	}
 }
