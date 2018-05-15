@@ -2917,6 +2917,18 @@ namespace OpenDental{
 				//benefitList=new ArrayList();
 				FillBenefits();
 			}
+			else if(comboPlanType.SelectedIndex==(int)InsPlanTypeComboItem.PPOFixedBenefit) {
+				if(!MsgBox.Show(this,true,"This will set all percentages to 100%. Continue?")) {
+					comboPlanType.SelectedIndex=(int)_selectedPlanType;//Undo the selection change.
+					return;
+				}
+				foreach(Benefit benefit in benefitList) {
+					if(benefit.BenefitType==InsBenefitType.CoInsurance) {
+						benefit.Percent=100;
+					}
+				}
+				FillBenefits();
+			}
 			InsPlanTypeComboItem prevSelection=_selectedPlanType;
 			_selectedPlanType=PIn.Enum<InsPlanTypeComboItem>(comboPlanType.SelectedIndex);
 			switch(_selectedPlanType) {
