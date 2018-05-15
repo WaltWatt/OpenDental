@@ -544,8 +544,10 @@ namespace OpenDentBusiness{
 						amtAvail-=procSplit.SplitAmt;
 						entryProc.SplitCollection.Add(procSplit);
 						payPlanEntry.AmountEnd-=(decimal)procSplit.SplitAmt;
-						payPlanEntry.SplitCollection.Add(procSplit);
-						listSplits.Add(procSplit);
+						if(procSplit.SplitAmt.IsGreaterThan(0)) {
+							payPlanEntry.SplitCollection.Add(procSplit);
+							listSplits.Add(procSplit);
+						}
 					}
 					//if they have a mix of attached and unattached credits: (if there are payplan charges not linked to a procedure)
 					bool doCreateUnattachedSplit=payPlanEntry.AmountEnd > 0 && ((isAutoSplit && Math.Min(amtAvail,(double)paymentCurPayAmt) > 0) 
