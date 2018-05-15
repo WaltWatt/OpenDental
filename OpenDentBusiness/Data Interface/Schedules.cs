@@ -5,6 +5,7 @@ using System.Data;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using CodeBase;
 
 namespace OpenDentBusiness{
 	///<summary></summary>
@@ -777,10 +778,10 @@ namespace OpenDentBusiness{
 		///<summary>Gets all schedules and blockouts that meet the Web Sched requirements.  Set isRecall to false to get New Pat Appt ops.
 		///Setting clinicNum to 0 will only consider unassigned operatories.</summary>
 		public static List<Schedule> GetSchedulesAndBlockoutsForWebSched(List<long> listProvNums,DateTime dateStart,DateTime dateEnd,bool isRecall
-			,long clinicNum) 
+			,long clinicNum,Logger.IWriteLine log=null) 
 		{
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				return Meth.GetObject<List<Schedule>>(MethodBase.GetCurrentMethod(),listProvNums,dateStart,dateEnd,isRecall,clinicNum);
+				return Meth.GetObject<List<Schedule>>(MethodBase.GetCurrentMethod(),listProvNums,dateStart,dateEnd,isRecall,clinicNum,log);
 			}
 			List<long> listProvNumsWithZero=new List<long>();
 			if(listProvNums!=null) {
@@ -836,6 +837,7 @@ namespace OpenDentBusiness{
 					AND "+DbHelper.DtimeToDate("schedule.SchedDate")+"<="+POut.Date(dateEnd)+@"
 					AND schedule.SchedType IN("+POut.Int((int)ScheduleType.Provider)+","+POut.Int((int)ScheduleType.Blockout)+@")) 
 				ORDER BY SchedDate";//Order the entire result set by SchedDate.
+			log?.WriteLine("command: "+command,LogLevel.Verbose);
 			return RefreshAndFill(command);
 		}
 

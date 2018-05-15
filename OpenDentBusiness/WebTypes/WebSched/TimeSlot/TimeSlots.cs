@@ -15,7 +15,7 @@ namespace OpenDentBusiness.WebTypes.WebSched.TimeSlot {
 		///The amount of time required to be considered "available" is dictated by the RecallType associated to the recall passed in.
 		///Throws exceptions.</summary>
 		public static List<TimeSlot> GetAvailableWebSchedTimeSlots(long recallNum,DateTime dateStart,DateTime dateEnd,long provNum=0,
-			bool allowOtherProv=true) 
+			bool allowOtherProv=true,Logger.IWriteLine log=null) 
 		{
 			//No need to check RemotingRole; no call to db.
 			Clinic clinic=Clinics.GetClinicForRecall(recallNum);
@@ -28,8 +28,9 @@ namespace OpenDentBusiness.WebTypes.WebSched.TimeSlot {
 			if(provNum > 0 && !allowOtherProv) {
 				listProviders=listProviders.FindAll(x => x.ProvNum==provNum);
 			}
+			log?.WriteLine("listProviders:\r\n\t"+string.Join(",\r\n\t",listProviders.Select(x => x.ProvNum+" - "+x.Abbr)),LogLevel.Verbose);
 			RecallType recallType=RecallTypes.GetFirstOrDefault(x => x.RecallTypeNum==recall.RecallTypeNum);
-			return GetAvailableWebSchedTimeSlots(recallType,listProviders,clinic,dateStart,dateEnd,recall);
+			return GetAvailableWebSchedTimeSlots(recallType,listProviders,clinic,dateStart,dateEnd,recall,log);
 		}
 
 		///<summary>Gets up to 30 days of open time slots based on the RecallType passed in.
@@ -41,7 +42,7 @@ namespace OpenDentBusiness.WebTypes.WebSched.TimeSlot {
 		///Optionally pass in a recall object in order to consider all other recalls due for the patient.  This will potentially affect the time pattern.
 		///Throws exceptions.</summary>
 		public static List<TimeSlot> GetAvailableWebSchedTimeSlots(RecallType recallType,List<Provider> listProviders,Clinic clinic
-			,DateTime dateStart,DateTime dateEnd,Recall recallCur=null) 
+			,DateTime dateStart,DateTime dateEnd,Recall recallCur=null,Logger.IWriteLine log=null) 
 		{
 			//No need to check RemotingRole; no call to db.
 			if(recallType==null) {//Validate that recallType is not null.
@@ -54,9 +55,12 @@ namespace OpenDentBusiness.WebTypes.WebSched.TimeSlot {
 				throw new ODException(Lans.g("WebSched","There are no operatories set up for Web Sched.")+"\r\n"
 					+Lans.g("WebSched","Please call us to schedule your appointment."),ODException.ErrorCodes.NoOperatoriesSetup);
 			}
+			log?.WriteLine("listOperatories:\r\n\t"+string.Join(",\r\n\t",listOperatories.Select(x => x.OperatoryNum+" - "+x.Abbrev)),LogLevel.Verbose);
 			List<long> listProvNums=listProviders.Select(x => x.ProvNum).Distinct().ToList();
 			List<Schedule> listSchedules=Schedules.GetSchedulesAndBlockoutsForWebSched(listProvNums,dateStart,dateEnd,true
-				,(clinic==null) ? 0 : clinic.ClinicNum);
+				,(clinic==null) ? 0 : clinic.ClinicNum,log);
+			log?.WriteLine("listSchedules:\r\n\t"+string.Join(",\r\n\t",listSchedules.Select(x => x.ScheduleNum+" - "+x.SchedDate+" "+x.StartTime))
+				,LogLevel.Verbose);
 			string timePatternRecall=recallType.TimePattern;
 			//Apparently scheduling this one recall can potentially schedule a bunch of other recalls at the same time.
 			//We need to potentially bloat our time pattern based on the other recalls that are due for this specific patient.
@@ -66,7 +70,7 @@ namespace OpenDentBusiness.WebTypes.WebSched.TimeSlot {
 				timePatternRecall=Recalls.GetRecallTimePattern(recallCur,listRecalls,patCur,new List<string>());
 			}
 			string timePatternAppointment=RecallTypes.ConvertTimePattern(timePatternRecall);
-			return GetTimeSlotsForRange(dateStart,dateEnd,timePatternAppointment,listProvNums,listOperatories,listSchedules,clinic);
+			return GetTimeSlotsForRange(dateStart,dateEnd,timePatternAppointment,listProvNums,listOperatories,listSchedules,clinic,log:log);
 		}
 
 		///<summary>Gets up to 30 days of open time slots for New Patient Appointments based on the timePattern passed in.
@@ -109,7 +113,7 @@ namespace OpenDentBusiness.WebTypes.WebSched.TimeSlot {
 		///Optionally set defNumApptType if looking for time slots for New Pat Appt which will apply the DefNum to all time slots found.
 		///Throws exceptions.</summary>
 		public static List<TimeSlot> GetTimeSlotsForRange(DateTime dateStart,DateTime dateEnd,string timePattern,List<long> listProvNums
-			,List<Operatory> listOperatories,List<Schedule> listSchedules,Clinic clinic,long defNumApptType=0)
+			,List<Operatory> listOperatories,List<Schedule> listSchedules,Clinic clinic,long defNumApptType=0,Logger.IWriteLine log=null)
 		{
 			//No need to check RemotingRole; no call to db.
 			//Order the operatories passed in by their ItemOrder just in case they were passed in all jumbled up.
@@ -120,7 +124,13 @@ namespace OpenDentBusiness.WebTypes.WebSched.TimeSlot {
 			List<Schedule> listBlockoutSchedules=listSchedules.FindAll(x => x.BlockoutType > 0);
 			//Get every single appointment for all operatories within our start and end dates for double booking and overlapping consideration.
 			List<Appointment> listApptsForOps=Appointments.GetAppointmentsForOpsByPeriod(Operatories.GetDeepCopy(true).Select(x => x.OperatoryNum).ToList()
-				,dateStart,dateEnd);
+				,dateStart,dateEnd,log);
+			log?.WriteLine("listProviderSchedules:\r\n\t"+string.Join(",\r\n\t",
+				listProviderSchedules.Select(x => x.ScheduleNum+" - "+x.SchedDate.ToShortDateString()+" "+x.StartTime)),LogLevel.Verbose);
+			log?.WriteLine("listBlockoutSchedules:\r\n\t"+string.Join(",\r\n\t",
+				listBlockoutSchedules.Select(x => x.ScheduleNum+" - "+x.SchedDate.ToShortDateString()+" "+x.StartTime)),LogLevel.Verbose);
+			log?.WriteLine("listApptsForOps:\r\n\t"
+				+string.Join(",\r\n\t",listApptsForOps.Select(x => x.AptNum+" - "+x.AptDateTime+" OpNum: "+x.Op)),LogLevel.Verbose);
 			//We need to be conscious of double booking possibilities.  Go get provider schedule information for the date range passed in.
 			Dictionary<DateTime,List<ApptSearchProviderSchedule>> dictProvSchedules=Appointments.GetApptSearchProviderScheduleForProvidersAndDate(
 				listProvNums,dateStart,dateEnd,listProviderSchedules,listApptsForOps);
@@ -181,6 +191,8 @@ namespace OpenDentBusiness.WebTypes.WebSched.TimeSlot {
 				if(listOpsForSchedule.Count==0) {
 					continue;//No valid operatories for this schedule.
 				}
+				log?.WriteLine("schedule: "+schedule.ScheduleNum+"\tlistOpsForSchedule:\r\n\t"
+					+string.Join(",\r\n\t",listOpsForSchedule.Select(x => x.OperatoryNum+" - "+x.Abbrev)),LogLevel.Verbose);
 				//The list of operatories has been filtered above so we need to find ALL available time slots for this schedule in all operatories.
 				foreach(Operatory op in listOpsForSchedule) {
 					AddTimeSlotsFromSchedule(listAvailableTimeSlots,schedule,op.OperatoryNum,timeSchedStart,timeSchedStop

@@ -176,9 +176,11 @@ namespace OpenDentBusiness{
 
 		///<summary>Gets all appointments scheduled in the operatories passed in that fall within the start and end dates.
 		///Does not currently consider the time portion of the DateTimes passed in.</summary>
-		public static List<Appointment> GetAppointmentsForOpsByPeriod(List<long> opNums,DateTime dateStart,DateTime dateEnd=new DateTime()) {
+		public static List<Appointment> GetAppointmentsForOpsByPeriod(List<long> opNums,DateTime dateStart,DateTime dateEnd=new DateTime(),
+			Logger.IWriteLine log=null) 
+		{
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				return Meth.GetObject<List<Appointment>>(MethodBase.GetCurrentMethod(),opNums,dateStart,dateEnd);
+				return Meth.GetObject<List<Appointment>>(MethodBase.GetCurrentMethod(),opNums,dateStart,dateEnd,log);
 			}
 			string command="SELECT * FROM appointment WHERE Op > 0 ";
 			if(opNums!=null && opNums.Count > 0) {
@@ -190,6 +192,7 @@ namespace OpenDentBusiness{
 				command+="AND "+DbHelper.DtimeToDate("AptDateTime")+"<="+POut.Date(dateEnd)+" ";
 			}
 			command+="ORDER BY AptDateTime,Op";//Ordering by AptDateTime then Op is important for speed when checking for collisions in Web Sched.
+			log?.WriteLine("command: "+command,LogLevel.Verbose);
 			return Crud.AppointmentCrud.SelectMany(command);
 		}
 

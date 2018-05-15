@@ -627,6 +627,59 @@ namespace CodeBase {
 			}
 		};
 		#endregion
+
+		public interface IWriteLine {
+			void WriteLine(string data,LogLevel logLevel,string subDirectory = "");
+		}
+	}
+
+	///<summary>Class that writes to the specified logger directory.</summary>
+	public class LogWriter:Logger.IWriteLine {
+		public LogLevel LogLevel;
+		public string BaseDirectory;
+
+		public LogWriter(LogLevel logLevel,string baseDirectory) {
+			LogLevel=logLevel;
+			BaseDirectory=baseDirectory;
+		}
+
+		public virtual void WriteLine(string data,LogLevel logLevel,string subDirectory = "") {
+			if(logLevel>LogLevel) {
+				return;
+			}
+			Logger.WriteLine(data,ODFileUtils.CombinePaths(BaseDirectory,subDirectory));
+		}
+	}
+
+	///<summary>Class that generates a unique ID and includes it in every line it logs.</summary>
+	public class LogRequest:LogWriter {
+		private string _requestId;
+
+		public LogRequest(LogLevel logLevel,string baseDirectory) : base(logLevel,baseDirectory) {
+			_requestId=Guid.NewGuid().ToString();
+		}
+
+		public override void WriteLine(string data,LogLevel logLevel,string subDirectory = "") {
+			base.WriteLine("Request ID: "+_requestId+"\tMethod: "+GetCallingMethod()+"\t"+data,logLevel,subDirectory);
+		}
+
+		///<summary>Gets the name of the method that is calling WriteLine().</summary>
+		private string GetCallingMethod() {
+			try {
+				for(int i=1;i<4;i++) {//Start at stackframe(1) because 0 is the parent of this method.		
+					StackFrame frame=new StackFrame(i);
+					System.Reflection.MethodBase method=frame.GetMethod();
+					if(!method.Name.ToLower().Contains("writeline")) {
+						return method.ReflectedType.FullName+"."+method.Name;
+					}
+				}
+			}
+			catch(Exception e) {
+				e.DoNothing();
+			}
+			//Return blank if we couldn't find a method name that wasn't ourself in the first 5 frames
+			return "";
+		}
 	}
 
 	///<summary>0=Error, 1=Information, 2=Verbose</summary>
