@@ -449,7 +449,7 @@ namespace OpenDental {
 						|| (payPlanVer==PayPlanVersions.AgeCreditsAndDebits && !PayPlans.GetOne(((PayPlanCharge)charge.Tag).PayPlanNum).IsClosed)) 
 					{ 
 						decimal payAmtCur;
-						ListSplitsCur.AddRange(PaySplits.CreateSplitForPayPlan(PaymentCur,charge,
+						ListSplitsCur.AddRange(PaySplits.CreateSplitForPayPlan(PaymentCur.PayNum,(double)PaymentAmt,charge,
 							listPayPlanCharges.Where(x => x.ChargeType==PayPlanChargeType.Credit).ToList(),_listAccountCharges,0,true,out payAmtCur));
 						PaymentAmt=payAmtCur;
 					}
@@ -538,7 +538,7 @@ namespace OpenDental {
 					return;
 				}
 				decimal payAmtCur;
-				ListSplitsCur.AddRange(PaySplits.CreateSplitForPayPlan(PaymentCur,charge,
+				ListSplitsCur.AddRange(PaySplits.CreateSplitForPayPlan(PaymentCur.PayNum,PaymentCur.PayAmt,charge,
 					PayPlanCharges.GetChargesForPayPlanChargeType(ppChargeCur.PayPlanNum,PayPlanChargeType.Credit),
 					_listAccountCharges,
 					payAmt,

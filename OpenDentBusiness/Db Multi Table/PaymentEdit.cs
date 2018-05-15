@@ -602,8 +602,8 @@ namespace OpenDentBusiness {
 				PayPlanCharge ppChargeCur=(PayPlanCharge)charge.Tag;
 				decimal payAmtCur;
 				createdSplit.ListSplitsCur.AddRange(
-					PaySplits.CreateSplitForPayPlan(payCur,charge,PayPlanCharges.GetChargesForPayPlanChargeType(ppChargeCur.PayPlanNum,PayPlanChargeType.Credit)
-						,listCharges,payAmt,false,out payAmtCur));
+					PaySplits.CreateSplitForPayPlan(payCur.PayNum,payCur.PayAmt,charge
+					,PayPlanCharges.GetChargesForPayPlanChargeType(ppChargeCur.PayPlanNum,PayPlanChargeType.Credit),listCharges,payAmt,false,out payAmtCur));
 				payCur.PayAmt=(double)payAmtCur;
 				return createdSplit;
 			}
@@ -663,7 +663,8 @@ namespace OpenDentBusiness {
 				return autoSplitData;
 			}
 			#region Auto-Split Current Payment
-			double payAmt=autoSplitData.Payment.PayAmt;
+			double payAmt=autoSplitData.Payment.PayAmt;//keep track of the money that can be allocated for this payment. 
+			long payNum=autoSplitData.Payment.PayNum;
 			//At this point we have a list of procs, positive adjustments, and payplancharges that require payment if the Amount>0.   
 			//Create and associate new paysplits to their respective charge items.
 			PaySplit split;
@@ -688,7 +689,7 @@ namespace OpenDentBusiness {
 						|| (payPlanVer==PayPlanVersions.AgeCreditsAndDebits && !PayPlans.GetOne(((PayPlanCharge)charge.Tag).PayPlanNum).IsClosed))
 					{ 
 						decimal payAmtCur;
-						autoSplitData.ListSplitsCur.AddRange(PaySplits.CreateSplitForPayPlan(autoSplitData.Payment,charge,
+						autoSplitData.ListSplitsCur.AddRange(PaySplits.CreateSplitForPayPlan(payNum,payAmt,charge,
 							listPayPlanCharges.Where(x => x.ChargeType==PayPlanChargeType.Credit).ToList(),autoSplitData.ListAccountCharges,0,true,out payAmtCur));
 						payAmt=(double)payAmtCur;
 					}

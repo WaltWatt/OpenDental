@@ -432,11 +432,16 @@ namespace OpenDentBusiness{
 			return true;
 		}
 
-		public static List<PaySplit> CreateSplitForPayPlan(Payment paymentCur, AccountEntry payPlanEntry,List<PayPlanCharge> listPayPlanCredits, 
-			List<AccountEntry> listAccountCharges, decimal payAmt, bool isAutoSplit,out decimal paymentCurPayAmt) 
+		///<summary>This method takes care of creating all splits for payment plan charges whether they be Auto, Manual, or Partial splits.
+		///For AutoSplits, set isAutoSplit to true and pass 0 into payAmt. The method will take into account the classwide PaymentAmt variable.
+		///For manual and partial splits, set isAutoSplit=false and pass the amount that the user typed into the Payment window into the method as payAmt.
+		///For manual and partial splits, if payAmt != 0, then only pay up to payAmt for that charge. Otherwise, pay the entire charge.
+		///This also takes care of splitting to procedures, only paying up to the amount that the procedure is attached to the payment plan.</summary>
+		public static List<PaySplit> CreateSplitForPayPlan(long payNum,double payAmtAvail,AccountEntry payPlanEntry,List<PayPlanCharge> listPayPlanCredits, 
+			List<AccountEntry> listAccountCharges,decimal payAmt,bool isAutoSplit,out decimal paymentCurPayAmt) 
 		{
 			//No remoting role check; no call to db. Plus this method has an out parameter.
-			paymentCurPayAmt=(decimal)paymentCur.PayAmt;
+			paymentCurPayAmt=(decimal)payAmtAvail;//begins as original payment amount and gets decremented as paysplits get applied.
 			List<PaySplit> listSplits=new List<PaySplit>();
 			DateTime today=new DateTime(DateTime.Today.Year,DateTime.Today.Month,DateTime.Today.Day,0,0,0,DateTimeKind.Unspecified);
 			//if the payAmt is > 0 and it's NOT an autosplit, we only want to pay up to the payAmt.
@@ -460,7 +465,7 @@ namespace OpenDentBusiness{
 					interest.ClinicNum=payPlanChargeCur.ClinicNum;
 				}
 				interest.PayPlanNum=payPlanChargeCur.PayPlanNum;
-				interest.PayNum=paymentCur.PayNum;
+				interest.PayNum=payNum;
 				//if it's an autoSplit, then only use up to the global PaymentAmt.
 				//else if it's a partial split, then only use up to payAmt.
 				//else it's a manual split, so just add a split for the entire charge.
@@ -516,7 +521,7 @@ namespace OpenDentBusiness{
 						//the payment should always go to the account of the payplancharge's guarantor.
 						procSplit.PatNum=payPlanChargeCur.Guarantor;
 						procSplit.PayPlanNum=payPlanChargeCur.PayPlanNum;
-						procSplit.PayNum=paymentCur.PayNum;
+						procSplit.PayNum=payNum;
 						if(isAutoSplit) {
 							//make a split for the procedure for no more than the sum of all the credits on the payment plan for that procedure.
 							procSplit.SplitAmt=Math.Min(maxSplitForCurrentProc,Math.Min(amtAvail,(double)paymentCurPayAmt));
@@ -551,7 +556,7 @@ namespace OpenDentBusiness{
 						//the payment should always go to the account of the payplancharge's guarantor.
 						unattachedSplit.PatNum=payPlanChargeCur.Guarantor;
 						unattachedSplit.PayPlanNum=payPlanChargeCur.PayPlanNum;
-						unattachedSplit.PayNum=paymentCur.PayNum;
+						unattachedSplit.PayNum=payNum;
 						if(isAutoSplit) {
 							unattachedSplit.SplitAmt=Math.Min(amtAvail,(double)paymentCurPayAmt);
 							paymentCurPayAmt-=(decimal)unattachedSplit.SplitAmt;
@@ -582,7 +587,7 @@ namespace OpenDentBusiness{
 					//the payment should always go to the account of the payplancharge's guarantor.
 					unattachedSplit.PatNum=payPlanChargeCur.Guarantor;
 					unattachedSplit.PayPlanNum=payPlanChargeCur.PayPlanNum;
-					unattachedSplit.PayNum=paymentCur.PayNum;
+					unattachedSplit.PayNum=payNum;
 					if(isAutoSplit) {
 						unattachedSplit.SplitAmt=Math.Min((double)paymentCurPayAmt,payPlanChargeCur.Principal-amtAttachedAlreadyPaid);
 						paymentCurPayAmt-=(decimal)unattachedSplit.SplitAmt;
