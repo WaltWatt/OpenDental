@@ -8135,7 +8135,9 @@ namespace OpenDental {
 				return;
 			}
 			//Get from DB to get updated timestamps for permission checks and to initialize nullable variables, like strings, before filling FormProcEdit.
+			bool isAdditionalProc=ProcCur.IsAdditional;
 			ProcCur=Procedures.GetOneProc(ProcCur.ProcNum,true);//This breaks the reference to the original Procedure object in the calling method.
+			ProcCur.IsAdditional=isAdditionalProc;
 			FormProcEdit FormPE=new FormProcEdit(ProcCur,PatCur.Copy(),FamCur);
 			FormPE.IsNew=true;
 			FormPE.ShowDialog();
@@ -8842,7 +8844,6 @@ namespace OpenDental {
 				}//n selected teeth
 			}//end Part 1 checking for ProcCodes, now will check for AutoCodes
 			string toothNum;
-			bool isAdditional;
 			//long orionProvNum=0;
 			for(int i=0;i<autoCodeList.Length;i++){
 				for(int n=0;n==0 || n<toothChart.SelectedTeeth.Count;n++) {
@@ -8853,7 +8854,6 @@ namespace OpenDental {
 					else {
 						toothNum="";
 					}
-					isAdditional= n!=0;
 					ProcCur=new Procedure();//this will be an insert, so no need to set CurOld
 					//Clean to db
 					string surf="";
@@ -8867,7 +8867,8 @@ namespace OpenDental {
 					else {
 						surf=Tooth.SurfTidyForClaims(textSurf.Text,toothNum);
 					}
-					ProcCur.CodeNum=AutoCodeItems.GetCodeNum(autoCodeList[i],toothNum,surf,isAdditional,PatCur.PatNum,PatCur.Age);
+					ProcCur.IsAdditional=n>0;	//This is used for determining the correct autocode in a little bit.
+					ProcCur.CodeNum=AutoCodeItems.GetCodeNum(autoCodeList[i],toothNum,surf,ProcCur.IsAdditional,PatCur.PatNum,PatCur.Age);
 					tArea=ProcedureCodes.GetProcCode(ProcCur.CodeNum).TreatArea;
 					if((tArea==TreatmentArea.Arch
 						|| tArea==TreatmentArea.Mouth

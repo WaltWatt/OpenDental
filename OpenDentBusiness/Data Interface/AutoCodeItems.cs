@@ -221,19 +221,19 @@ namespace OpenDentBusiness{
 					return false;
 				}
 				if(proc.Surf=="U") {
-					verifyCode=AutoCodeItems.VerifyCode(procCode.CodeNum,"1","",false,pat.PatNum,pat.Age,out AutoCodeCur);//max
+					verifyCode=AutoCodeItems.VerifyCode(procCode.CodeNum,"1","",proc.IsAdditional,pat.PatNum,pat.Age,out AutoCodeCur);//max
 				}
 				else {
-					verifyCode=AutoCodeItems.VerifyCode(procCode.CodeNum,"32","",false,pat.PatNum,pat.Age,out AutoCodeCur);//mand
+					verifyCode=AutoCodeItems.VerifyCode(procCode.CodeNum,"32","",proc.IsAdditional,pat.PatNum,pat.Age,out AutoCodeCur);//mand
 				}
 			}
 			else if(procCode.TreatArea==TreatmentArea.ToothRange) {
 				//test for max or mand.
-				verifyCode=AutoCodeItems.VerifyCode(procCode.CodeNum,(isMandibular) ? "32" : "1","",false,pat.PatNum,pat.Age,out AutoCodeCur);
+				verifyCode=AutoCodeItems.VerifyCode(procCode.CodeNum,(isMandibular) ? "32" : "1","",proc.IsAdditional,pat.PatNum,pat.Age,out AutoCodeCur);
 			}
 			else {//surf or tooth
 				string claimSurf=Tooth.SurfTidyForClaims(proc.Surf,proc.ToothNum);
-				verifyCode=AutoCodeItems.VerifyCode(procCode.CodeNum,proc.ToothNum,claimSurf,false,pat.PatNum,pat.Age,out AutoCodeCur);
+				verifyCode=AutoCodeItems.VerifyCode(procCode.CodeNum,proc.ToothNum,claimSurf,proc.IsAdditional,pat.PatNum,pat.Age,out AutoCodeCur);
 			}
 			return procCode.CodeNum!=verifyCode;
 		}

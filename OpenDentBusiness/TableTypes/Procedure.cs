@@ -169,6 +169,10 @@ namespace OpenDentBusiness {
 		///<summary>Not a database column.</summary>
 		[CrudColumn(IsNotDbColumn=true)]
 		public bool SigIsTopaz;
+		/// <summary>Not a database column.  This variable is set to true if the procedure is part of a set several procedures. It is used when 
+		/// calculating auto codes to correctly determine the right procedure code for the "first" and "eachAdditional" auto code rules.</summary>
+		[CrudColumn(IsNotDbColumn=true)]
+		public bool IsAdditional;
 
 		private int _priorityOrder=int.MinValue;
 
