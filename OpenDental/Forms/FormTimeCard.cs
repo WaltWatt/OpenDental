@@ -61,7 +61,6 @@ namespace OpenDental{
 		private GroupBox groupEmployee;
 		private UI.Button butPrevEmp;
 		private UI.Button butNextEmp;
-		private bool cannotEdit;
 		///<summary>Used to determine the order to advance through employee timecards in this window.</summary>
 		public bool IsByLastName;
 		///<summary>Cached list of employees sorted based on IsByLastName</summary>
@@ -69,6 +68,17 @@ namespace OpenDental{
 		///<summary>Filled when FillMain is called and fromDB=true.  If fromDB is false, we used this stored value from before instead to reduce calls to DB.  Because fillgrid does math on weekspan, this is a temporary cache of the last time we calculated it from the database.</summary>
 		private TimeSpan storedWeekSpan;
 		private List<PayPeriod> _listPayPeriods;
+
+		///<summary>If true, the current employee cannot edit their own time card.</summary>
+		private bool _cannotEdit {
+			get {
+				return Security.CurUser!=null &&
+					Security.CurUser.EmployeeNum==EmployeeCur.EmployeeNum &&
+					PrefC.GetBool(PrefName.TimecardSecurityEnabled) &&
+					PrefC.GetBool(PrefName.TimecardUsersDontEditOwnCard);
+			}
+		}
+
 
 		///<summary></summary>
 		public FormTimeCard(List<Employee> listEmployees)
@@ -568,16 +578,12 @@ namespace OpenDental{
 
 		public void Initialize(DateTime dateInitial){
 			//Check to see if the employee currently logged in can edit this time-card.
-			cannotEdit=Security.CurUser!=null &&
-				Security.CurUser.EmployeeNum==EmployeeCur.EmployeeNum &&
-				PrefC.GetBool(PrefName.TimecardSecurityEnabled) &&
-				PrefC.GetBool(PrefName.TimecardUsersDontEditOwnCard);
-			if(cannotEdit) {
+			if(_cannotEdit) {
 				butAdj.Enabled=false;
 				butCalcWeekOT.Enabled=false;//butCompute.Enabled=false;
 			}
 			Text=Lan.g(this,"Time Card for")+" "+EmployeeCur.FName+" "+EmployeeCur.LName
-				+(cannotEdit?" - You cannot modify your timecard":"");
+				+(_cannotEdit ? " - You cannot modify your timecard":"");
 			TimeDelta=MiscData.GetNowDateTime()-DateTime.Now;
 			if(SelectedPayPeriod==0) {
 				SelectedPayPeriod=PayPeriods.GetForDate(dateInitial);
@@ -1034,7 +1040,7 @@ namespace OpenDental{
 		}
 
 		private void gridMain_CellDoubleClick(object sender,ODGridClickEventArgs e) {
-			if(cannotEdit) {
+			if(_cannotEdit) {
 				return;
 			}
 			timer1.Enabled=false;
@@ -1273,7 +1279,7 @@ namespace OpenDental{
 			}
 			EmployeeCur=_listEmp[empIndex];
 			Text=Lan.g(this,"Time Card for")+" "+EmployeeCur.FName+" "+EmployeeCur.LName
-				+(cannotEdit?" - You cannot modify your timecard":"");
+				+(_cannotEdit? " - You cannot modify your timecard":"");
 			FillPayPeriod();
 			FillMain(true);
 		}
