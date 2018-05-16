@@ -148,7 +148,13 @@ namespace OpenDental {
 		
 
 		private void gridMain_CellLeave(object sender,ODGridClickEventArgs e) {
-			QuerySetStmtObject qObjCur = (QuerySetStmtObject)gridMain.SelectedGridRows[0].Tag;
+			QuerySetStmtObject qObjCur;
+			try {
+				qObjCur=(QuerySetStmtObject)gridMain.SelectedGridRows[0].Tag;
+			}
+			catch {//Has occurend when user types SHIFT+ENTER on the keyboard.
+				return;
+			}
 			string stmtOld = qObjCur.Stmt;
 			string varOld = qObjCur.Variable;
 			string valOld = qObjCur.Value;
