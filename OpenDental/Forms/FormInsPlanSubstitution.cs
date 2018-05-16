@@ -24,17 +24,17 @@ namespace OpenDental {
 			_listAllProcCodes=ProcedureCodes.GetAllCodes();
 			_listSubstProcCodes=_listAllProcCodes.FindAll(x => !String.IsNullOrEmpty(x.SubstitutionCode));
 			_listDbSubstLinks=SubstitutionLinks.GetAllForPlans(_insPlan.PlanNum);
-			FillGridSubstituionInclude();
-			FillGridSubstituionExclude();
+			FillGridSubstitutionInclude();
+			FillGridSubstitutionExclude();
 		}
 
-		private void FillGridSubstituionInclude() {
+		private void FillGridSubstitutionInclude() {
 			gridInsPlanSubstInc.BeginUpdate();
 			gridInsPlanSubstInc.Rows.Clear();
 			if(gridInsPlanSubstInc.Columns.Count==0) {
 				gridInsPlanSubstInc.Columns.Add(new UI.ODGridColumn(Lan.g(gridInsPlanSubstInc.TranslationName,"ProcCode"),70));
 				gridInsPlanSubstInc.Columns.Add(new UI.ODGridColumn(Lan.g(gridInsPlanSubstInc.TranslationName,"AbbrDesc"),80));
-				gridInsPlanSubstInc.Columns.Add(new UI.ODGridColumn(Lan.g(gridInsPlanSubstInc.TranslationName,"SusbstOnlyIf"),80));
+				gridInsPlanSubstInc.Columns.Add(new UI.ODGridColumn(Lan.g(gridInsPlanSubstInc.TranslationName,"SubstOnlyIf"),80));
 				gridInsPlanSubstInc.Columns.Add(new UI.ODGridColumn(Lan.g(gridInsPlanSubstInc.TranslationName,"SubstCode"),70));
 				gridInsPlanSubstInc.Columns.Add(new UI.ODGridColumn(Lan.g(gridInsPlanSubstInc.TranslationName,"SubstDesc"),0));				
 			}
@@ -47,12 +47,12 @@ namespace OpenDental {
 			gridInsPlanSubstInc.EndUpdate();
 		}
 
-		private void FillGridSubstituionExclude() {
+		private void FillGridSubstitutionExclude() {
 			gridInsPlanSubstExc.BeginUpdate();
 			if(gridInsPlanSubstExc.Columns.Count==0) {
 				gridInsPlanSubstExc.Columns.Add(new UI.ODGridColumn(Lan.g(gridInsPlanSubstExc.TranslationName,"ProcCode"),70));
 				gridInsPlanSubstExc.Columns.Add(new UI.ODGridColumn(Lan.g(gridInsPlanSubstExc.TranslationName,"AbbrDesc"),80));
-				gridInsPlanSubstExc.Columns.Add(new UI.ODGridColumn(Lan.g(gridInsPlanSubstExc.TranslationName,"SusbstOnlyIf"),80));
+				gridInsPlanSubstExc.Columns.Add(new UI.ODGridColumn(Lan.g(gridInsPlanSubstExc.TranslationName,"SubstOnlyIf"),80));
 				gridInsPlanSubstExc.Columns.Add(new UI.ODGridColumn(Lan.g(gridInsPlanSubstExc.TranslationName,"SubstCode"),70));
 				gridInsPlanSubstExc.Columns.Add(new UI.ODGridColumn(Lan.g(gridInsPlanSubstExc.TranslationName,"SubstDesc"),0));
 			}
