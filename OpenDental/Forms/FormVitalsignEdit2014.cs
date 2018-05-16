@@ -1342,7 +1342,9 @@ Do you want to remove the pregnancy diagnosis?"))
 			//validate pulse
 			int pulse=0;
 			try {
-				pulse=int.Parse(textPulse.Text);
+				if(textPulse.Text!="") {
+					pulse=int.Parse(textPulse.Text);
+				}
 			}
 			catch {
 				MsgBox.Show(this,"Please fix Pulse first.");
