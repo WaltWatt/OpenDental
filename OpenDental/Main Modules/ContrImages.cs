@@ -2077,7 +2077,13 @@ namespace OpenDental {
 			double xdpi=EZTwain.DIB_XResolution(hdib);
 			double ydpi=EZTwain.DIB_XResolution(hdib);
 			IntPtr hbitmap=EZTwain.DIB_ToDibSection(hdib);
-			bitmapScanned=Bitmap.FromHbitmap(hbitmap);
+			try {
+				bitmapScanned=Bitmap.FromHbitmap(hbitmap);//Sometimes throws 'A generic error occurred in GDI+.'
+			}
+			catch(Exception ex) {
+				FriendlyException.Show(Lan.g(this,"Error importing eob")+": "+ex.Message,ex);
+				return;
+			}
 			bitmapScanned.SetResolution((float)xdpi,(float)ydpi);
 			try {
 				Clipboard.SetImage(bitmapScanned);//We do this because a customer requested it, and some customers probably use it.
