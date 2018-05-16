@@ -3708,6 +3708,10 @@ namespace OpenDental{
 				//Just signing the TP, there is no way to print a Treat' Plan from the Sign TP window so suppress the printer dialogs.
 				//Users will click the Print TP button from the Treat' Plan module when they want to print.
 				FormT.Document=SheetPrinting.Print(FormT.SheetTP,isPrintDocument:false);
+				if(FormT.Document==null) {
+					//We have already told the user that they probably don't have any printers installed.
+					return;
+				}
 				FormT.TotalPages=Sheets.CalculatePageCount(FormT.SheetTP,SheetPrinting.PrintMargin);
 			}
 			else {//Classic TPs
