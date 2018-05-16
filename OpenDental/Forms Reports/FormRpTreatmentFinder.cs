@@ -795,6 +795,9 @@ namespace OpenDental{
 		}
 
 		private void gridMain_CellClick(object sender,ODGridClickEventArgs e) {
+			if(gridMain.SelectedGridRows.Count==0) {//When deselecting with CTR+Click.
+				return;
+			}
 			GotoModule.GotoChart(PIn.Long(gridMain.SelectedTag<DataRow>()["PatNum"].ToString()));
 		}
 
