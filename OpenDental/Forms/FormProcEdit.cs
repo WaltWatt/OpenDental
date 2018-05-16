@@ -4251,7 +4251,10 @@ namespace OpenDental{
 
 		private void gridAdj_CellDoubleClick(object sender,ODGridClickEventArgs e) {
 			FormAdjust FormA=new FormAdjust(PatCur,(Adjustment)AdjustmentsForProc[e.Row]);
-			FormA.ShowDialog();
+			if(FormA.ShowDialog()!=DialogResult.OK) {
+				return;
+			}
+			_loadData.ArrAdjustments=Adjustments.GetForProcs(new List<long>() { ProcCur.ProcNum }).ToArray();
 			FillAdj();
 		}
 
@@ -4274,7 +4277,10 @@ namespace OpenDental{
 			adj.ClinicNum=ProcCur.ClinicNum;
 			FormAdjust FormA=new FormAdjust(PatCur,adj,isTsiAdj);
 			FormA.IsNew=true;
-			FormA.ShowDialog();
+			if(FormA.ShowDialog()!=DialogResult.OK) {
+				return;
+			}
+			_loadData.ArrAdjustments=Adjustments.GetForProcs(new List<long>() { ProcCur.ProcNum }).ToArray();
 			FillAdj();
 		}
 
@@ -4296,6 +4302,7 @@ namespace OpenDental{
 			FormAP.SelectedAdjustment.ProcNum=ProcCur.ProcNum;
 			FormAP.SelectedAdjustment.ProcDate=ProcCur.ProcDate;
 			Adjustments.Update(FormAP.SelectedAdjustment);
+			_loadData.ArrAdjustments=Adjustments.GetForProcs(new List<long>() { ProcCur.ProcNum }).ToArray();
 			FillAdj();
 		}
 
