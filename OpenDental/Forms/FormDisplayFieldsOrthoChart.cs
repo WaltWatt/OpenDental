@@ -409,8 +409,8 @@ namespace OpenDental{
 			_listTabDisplayFields=new List<OrthoChartTabFields>();
 			//The tab order may have changed.  Also new tabs may have been added.  Tabs were not removed, because they can only be hidden not deleted.
 			//If orthocharttabs order changed or new tabs were added, then the cache was updated in FormOrthoChartSetup in OK click.
-			for(int i=0;i<_listOrthoChartTabs.Count;i++) {
-				OrthoChartTab orthoChartTab=_listOrthoChartTabs[i];
+			_listOrthoChartTabs=OrthoChartTabs.GetDeepCopy(true);
+			foreach(OrthoChartTab orthoChartTab in _listOrthoChartTabs) {
 				OrthoChartTabFields orthoChartTabFieldsOld=listOldTabDisplayFields.FirstOrDefault(
 					x => x.OrthoChartTab!=null && x.OrthoChartTab.OrthoChartTabNum==orthoChartTab.OrthoChartTabNum);
 				OrthoChartTabFields orthoChartTabFields=new OrthoChartTabFields();
@@ -418,7 +418,7 @@ namespace OpenDental{
 				if(orthoChartTabFieldsOld==null) {//Either a new tab was added or a hidden tab was un-hidden.
 					orthoChartTabFields.ListDisplayFields=new List<DisplayField>();
 					List<OrthoChartTabLink> listOrthoChartTabLinks=OrthoChartTabLinks.GetWhere(
-						x => x.OrthoChartTabNum==_listOrthoChartTabs[i].OrthoChartTabNum);
+						x => x.OrthoChartTabNum==orthoChartTab.OrthoChartTabNum);
 					foreach(OrthoChartTabLink orthoChartTabLink in listOrthoChartTabLinks) {
 						orthoChartTabFields.ListDisplayFields.AddRange(_listAllDisplayFields.FindAll(x => x.DisplayFieldNum==orthoChartTabLink.DisplayFieldNum));
 					}
