@@ -531,6 +531,7 @@ namespace OpenDental{
 				return;
 			}
 			LetterMerge letterCur=ListForCat[listLetters.SelectedIndex];
+			letterCur.ImageFolder=comboImageCategory.SelectedTag<Def>().DefNum;
 			string templateFile=ODFileUtils.CombinePaths(PrefC.GetString(PrefName.LetterMergePath),letterCur.TemplateName);
 			string dataFile=ODFileUtils.CombinePaths(PrefC.GetString(PrefName.LetterMergePath),letterCur.DataFileName);
 			if(!File.Exists(templateFile)){
@@ -615,6 +616,7 @@ namespace OpenDental{
 				return;
 			}
 			LetterMerge letterCur=ListForCat[listLetters.SelectedIndex];
+			letterCur.ImageFolder=comboImageCategory.SelectedTag<Def>().DefNum;
 			string templateFile=ODFileUtils.CombinePaths(PrefC.GetString(PrefName.LetterMergePath),letterCur.TemplateName);
 			string dataFile=ODFileUtils.CombinePaths(PrefC.GetString(PrefName.LetterMergePath),letterCur.DataFileName);
 			if(!File.Exists(templateFile)){
@@ -663,21 +665,20 @@ namespace OpenDental{
 				return;
 			}
 			if(letterCur.ImageFolder!=0) {//if image folder exist for this letter, save to AtoZ folder
-				wrdDoc.Select();
-				//Attach the data file.
+				//Open document from the atoz folder.
 				try {
-					wrdMailMerge=wrdDoc.MailMerge;
-					wrdDoc.MailMerge.OpenDataSource(dataFile,ref oMissing,ref oMissing,ref oMissing,
-						ref oMissing,ref oMissing,ref oMissing,ref oMissing,ref oMissing,ref oMissing,
-						ref oMissing,ref oMissing,ref oMissing,ref oMissing,ref oMissing,ref oMissing);
-					wrdMailMerge.Destination = Word.WdMailMergeDestination.wdSendToNewDocument;
-					wrdMailMerge.Execute(ref oFalse);
 					WrdApp.Activate();
 					string tempFilePath=ODFileUtils.CreateRandomFile(Path.GetTempPath(),".doc");
 					Object oFileName=tempFilePath;
 					WrdApp.ActiveDocument.SaveAs(oFileName);//save the document to temp location
+					Document doc=SaveToImageFolder(tempFilePath,letterCur);
+					string patFolder=ImageStore.GetPatientFolder(PatCur,ImageStore.GetPreferredAtoZpath());
+					string fileName=ImageStore.GetFilePath(doc,patFolder);
+					if(!FileAtoZ.Exists(fileName)) {
+						throw new ApplicationException(Lans.g("LetterMerge","Error opening document"+" "+doc.FileName));
+					}
+					FileAtoZ.StartProcess(fileName);
 					WrdApp.ActiveDocument.Close();//Necessary since we created an extra document
-					SaveToImageFolder(tempFilePath,letterCur);
 					try {
 						File.Delete(tempFilePath);//Clean up the temp file
 					}
@@ -729,9 +730,9 @@ namespace OpenDental{
 			DialogResult=DialogResult.OK;
 		}
 
-		private void SaveToImageFolder(string fileSourcePath,LetterMerge letterCur) {
+		private Document SaveToImageFolder(string fileSourcePath,LetterMerge letterCur) {
 			if(letterCur.ImageFolder==0) {//This shouldn't happen
-				return;
+				return new Document();
 			}
 			string rawBase64="";
 			if(PrefC.AtoZfolderUsed==DataStorageType.InDatabase) {
@@ -750,6 +751,7 @@ namespace OpenDental{
 			docSave.FileName=fileName+".doc";//file extension used for both DB images and AtoZ images
 			FileAtoZ.Copy(fileSourcePath,fileDestPath,FileAtoZSourceDestination.LocalToAtoZ);
 			Documents.Update(docSave);
+			return docSave;
 		}
 
 		private void butEditTemplate_Click(object sender, System.EventArgs e) {
