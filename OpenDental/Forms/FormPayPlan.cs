@@ -2162,12 +2162,12 @@ namespace OpenDental{
 				query.GetColumnHeader("ChargeDate").StaticText="Date";
 				query.AddColumn("Provider",75,FieldValueType.String,font);
 				query.AddColumn("Description",130,FieldValueType.String,font);
-				query.AddColumn("Principal",60,FieldValueType.Number,font);
+				query.AddColumn("Principal",70,FieldValueType.Number,font);
 				query.AddColumn("Interest",52,FieldValueType.Number,font);
-				query.AddColumn("Due",60,FieldValueType.Number,font);
-				query.AddColumn("Payment",60,FieldValueType.Number,font);
+				query.AddColumn("Due",70,FieldValueType.Number,font);
+				query.AddColumn("Payment",70,FieldValueType.Number,font);
 				query.AddColumn("Adjustment",75,FieldValueType.Number,font);
-				query.AddColumn("Balance",60,FieldValueType.String,font);
+				query.AddColumn("Balance",70,FieldValueType.String,font);
 				query.GetColumnHeader("Balance").ContentAlignment=ContentAlignment.MiddleRight;
 				query.GetColumnDetail("Balance").ContentAlignment=ContentAlignment.MiddleRight;
 				report.ReportObjects.Add(new ReportObject("Note",AreaSectionType.ReportFooter,new Point(x1,20),new Size(500,200),textNote.Text,font,ContentAlignment.TopLeft));
