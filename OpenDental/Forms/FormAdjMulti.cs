@@ -89,6 +89,12 @@ namespace OpenDental {
 			#endregion
 			List<AccountEntry> listAccountCharges=AccountModules.GetListUnpaidAccountCharges(listProcedures, listAdjustments
 				,listPaySplits, listClaimProcs, listPayPlanCharges, listInsPayAsTotal, calc, new List<PaySplit>());
+			List<AccountEntry> listAccountChargesIncludeAll=null;
+			if(calc==CreditCalcType.ExcludeAll) {
+				//We need to get all credits so that our AmtRemBefore can reflect what has truly been allocated to the procedure.
+				listAccountChargesIncludeAll=AccountModules.GetListUnpaidAccountCharges(listProcedures,listAdjustments
+				,listPaySplits,listClaimProcs,listPayPlanCharges,listInsPayAsTotal,CreditCalcType.IncludeAll,new List<PaySplit>());
+			}
 			MultiAdjEntry multiEntry=null;
 			foreach(AccountEntry entry in listAccountCharges) {
 				//We only want AccountEntries that are completed procedures.
@@ -99,7 +105,9 @@ namespace OpenDental {
 				if((_listSelectedProcs!=null && _listSelectedProcs.Any(x => x.ProcNum==procEntry.Proc.ProcNum))//Allow selected procs to show if paid off
 					|| entry.AmountEnd!=0)//All unpaid procedures should always show up per Nathan
 				{
-					multiEntry=new MultiAdjEntry(procEntry.Proc,(double)entry.AmountStart,(double)entry.AmountEnd);
+					double amtRemBefore=(double)(listAccountChargesIncludeAll?.FirstOrDefault(x =>x.Tag.GetType()==typeof(ProcExtended)
+						&& ((ProcExtended)x.Tag).Proc.ProcNum==procEntry.Proc.ProcNum)??entry).AmountStart;
+					multiEntry=new MultiAdjEntry(procEntry.Proc,(double)entry.AmountStart,(double)entry.AmountEnd,amtRemBefore);
 					retVal.Add(multiEntry);
 				}
 			}
@@ -195,7 +203,7 @@ namespace OpenDental {
 				return;
 			}
 			//We are just adding a dummy row header to help the UI look a little cleaner.
-			_listGridEntries.Add(new MultiAdjEntry(null,null,0));
+			_listGridEntries.Add(new MultiAdjEntry(null,null,0,0));
 		}
 
 		private AdjAmtType SetAdjAmtType() {
@@ -470,7 +478,7 @@ namespace OpenDental {
 					Adjustment adj=adjCur.Clone();
 					adj.ProcDate=procRow.Proc.ProcDate;
 					adj.ProcNum=procRow.Proc.ProcNum;
-					MultiAdjEntry adjRow=new MultiAdjEntry(procRow.Proc,adj,procRow.RemAfter);
+					MultiAdjEntry adjRow=new MultiAdjEntry(procRow.Proc,adj,procRow.RemAfter,procRow.AmtRemBefore);
 					adjRow=UpdateAdjValues(adjRow);//This will set all of the important values from UI selections
 					adjRow.AdjAmtType=SetAdjAmtType();
 					adjRow.AdjAmtOrPerc=PIn.Double(textAmt.Text);
@@ -528,9 +536,18 @@ namespace OpenDental {
 		}
 
 		private void butOK_Click(object sender,EventArgs e) {
-			if(_listGridEntries.Any(x => x.RemAfter.IsLessThan(0))
-				&& !MsgBox.Show(this,MsgBoxButtons.OKCancel,"Remaining amount on a procedure is negative.  Continue?","Overpaid Procedure Warning"))
-			{
+			bool hasNegAmt=false;
+			foreach(MultiAdjEntry mae in _listGridEntries) {
+				if(mae.Adj==null) {
+					continue;//Procedures
+				}
+				decimal remAfter=(decimal)mae.AmtRemBefore+(decimal)mae.Adj.AdjAmt;
+				if(remAfter.IsLessThanZero()) {
+					hasNegAmt=true;
+					break;
+				}
+			}
+			if(hasNegAmt && !MsgBox.Show(this,MsgBoxButtons.OKCancel,"Remaining amount on a procedure is negative.  Continue?","Overpaid Procedure Warning")){
 				return;
 			}
 			foreach(MultiAdjEntry row in _listGridEntries) {
@@ -550,6 +567,8 @@ namespace OpenDental {
 		///<summary>This is a private class used to simplify grid logic in this form. 
 		///This class represents either a procedure row, an adjustment row, or an unattached adjustment row.</summary>
 		private class MultiAdjEntry {
+			///<summary>The amount remaining before any adjustments in the form are made. This amount does not change.</summary>
+			public readonly double AmtRemBefore;
 			//Should always have a procedure unless the user creates an unattached adjustment. In that case the proc will be null.
 			#region Procedure Fields
 			//The associated procedure. Null if the adjustment is unattached.
@@ -572,19 +591,21 @@ namespace OpenDental {
 			#endregion
 
 			///<summary>This constructor should be called for procedure rows.</summary>
-			public MultiAdjEntry(Procedure proc, double remBefore, double remAfter) {
+			public MultiAdjEntry(Procedure proc, double remBefore, double remAfter,double amtRemBefore) {
 				Proc=proc;
 				Adj=null;
 				RemBefore=remBefore;
 				RemAfter=remAfter;
+				AmtRemBefore=amtRemBefore;
 			}
 
 			///<summary>This constructor should be called for attached adjustment rows.</summary>
-			public MultiAdjEntry(Procedure proc, Adjustment adj, double procFeeAfter) {
+			public MultiAdjEntry(Procedure proc, Adjustment adj, double procFeeAfter,double amtRemBefore) {
 				Proc=proc;
 				Adj=adj;
 				RemBefore=-1;
 				RemAfter=procFeeAfter;
+				AmtRemBefore=amtRemBefore;
 			}
 
 			///<summary>This constructor should only be used for unattached adjustments.</summary>
