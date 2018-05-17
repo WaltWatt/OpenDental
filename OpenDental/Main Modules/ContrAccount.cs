@@ -4564,7 +4564,7 @@ namespace OpenDental {
 			repeat=new RepeatCharge();
 			repeat.PatNum=PatCur.PatNum;
 			repeat.ProcCode="001";
-			repeat.ChargeAmt=99;
+			repeat.ChargeAmt=119;
 			repeat.DateStart=DateTimeOD.Today.AddYears(1);
 			repeat.IsEnabled=true;
 			RepeatCharges.Insert(repeat);
@@ -4602,7 +4602,7 @@ namespace OpenDental {
 			repeat=new RepeatCharge();
 			repeat.PatNum=PatCur.PatNum;
 			repeat.ProcCode="001";
-			repeat.ChargeAmt=99;
+			repeat.ChargeAmt=119;
 			repeat.DateStart=DateTimeOD.Today.AddYears(1);
 			repeat.IsEnabled=true;
 			RepeatCharges.Insert(repeat);
