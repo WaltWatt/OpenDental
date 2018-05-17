@@ -33,9 +33,10 @@ namespace OpenDentBusiness {
 						FROM claimproc
 						INNER JOIN insplan ON insplan.PlanNum=claimproc.PlanNum
 						INNER JOIN carrier ON carrier.CarrierNum=insplan.CarrierNum	
-							AND carrier.CarrierName LIKE '%"+POut.String(carrierName.Trim())+"%' "+@"
-						WHERE claimproc.ClaimPaymentNum = 0
-						AND (claimproc.InsPayAmt != 0 "+((dateClaimPayZero.Year>1880)?("OR ProcDate >= "+POut.Date(dateClaimPayZero)):"")+")"+
+							AND carrier.CarrierName LIKE '%"+POut.String(carrierName.Trim())+"%' "
+						//Filter logic here mimics ClaimProcs.AttachAllOutstandingToPayment().
+						+@"WHERE claimproc.ClaimPaymentNum = 0
+						AND (claimproc.InsPayAmt != 0 "+((dateClaimPayZero.Year>1880)?("OR DateCP >= "+POut.Date(dateClaimPayZero)):"")+")"+
 						@"AND claimproc.Status IN("+POut.Int((int)ClaimProcStatus.Received)+","
 							+POut.Int((int)ClaimProcStatus.Supplemental)+","+POut.Int((int)ClaimProcStatus.CapClaim)+@") 
 						GROUP BY claimproc.ClaimNum	

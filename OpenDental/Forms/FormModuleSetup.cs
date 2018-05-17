@@ -3226,12 +3226,13 @@ namespace OpenDental{
 			// 
 			// labelUnpaidClaimDate
 			// 
-			this.labelUnpaidClaimDate.Location = new System.Drawing.Point(81, 376);
+			this.labelUnpaidClaimDate.Location = new System.Drawing.Point(83, 375);
 			this.labelUnpaidClaimDate.MaximumSize = new System.Drawing.Size(1000, 300);
 			this.labelUnpaidClaimDate.Name = "labelUnpaidClaimDate";
-			this.labelUnpaidClaimDate.Size = new System.Drawing.Size(267, 16);
+			this.labelUnpaidClaimDate.Size = new System.Drawing.Size(267, 18);
 			this.labelUnpaidClaimDate.TabIndex = 203;
-			this.labelUnpaidClaimDate.Text = "Batch Insurance Payments: Show received claims after\r\n";
+			this.labelUnpaidClaimDate.Text = "Show claims received after\r\n";
+			this.labelUnpaidClaimDate.TextAlign = System.Drawing.ContentAlignment.BottomRight;
 			// 
 			// checkScheduleProvEmpSelectAll
 			// 

@@ -1971,10 +1971,17 @@ namespace OpenDentBusiness{
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
 				return Meth.GetObject<double>(MethodBase.GetCurrentMethod(),claimPaymentNum,dateClaimPayZero);
 			}
+			//See job #7423.
+			//The claimproc.DateCP is essentially the same as the claim.DateReceived.
+			//We used to use the claimproc.ProcDate, which is essentially the same as the claim.DateService.
+			//In the near future, we will use a rolling date preference for the "claimPayDate" which will be a number of days from today to look into
+			//the past to include $0 claimprocs.  Since the service date could be weeks or months in the past, it makes more sense to use the 
+			//received date, which will be more recent.  Additionally, users found using the date of service to be unintuitive.
+			//STRONG CAUTION not to use the claimproc.ProcDate here in the future.
 			string command="UPDATE claimproc SET ClaimPaymentNum="+POut.Long(claimPaymentNum)+" "
 				+"WHERE ClaimPaymentNum=0 "
 				+"AND (claimproc.Status = '1' OR claimproc.Status = '4' OR claimproc.Status='5') "//received or supplemental or capclaim
-				+"AND (InsPayAmt != 0 "+((dateClaimPayZero.Year>1880)?("OR ProcDate >= "+POut.Date(dateClaimPayZero)):"")+")";
+				+"AND (InsPayAmt != 0 "+((dateClaimPayZero.Year>1880)?("OR DateCP >= "+POut.Date(dateClaimPayZero)):"")+")";
 			Db.NonQ(command);
 			command="SELECT SUM(InsPayAmt) FROM claimproc WHERE ClaimPaymentNum="+POut.Long(claimPaymentNum);
 			return PIn.Double(Db.GetScalar(command));
@@ -1986,11 +1993,18 @@ namespace OpenDentBusiness{
 				Meth.GetVoid(MethodBase.GetCurrentMethod(),claimPaymentNum,dateClaimPayZero);
 				return;
 			}
+			//See job #7423.
+			//The claimproc.DateCP is essentially the same as the claim.DateReceived.
+			//We used to use the claimproc.ProcDate, which is essentially the same as the claim.DateService.
+			//In the near future, we will use a rolling date preference for the "claimPayDate" which will be a number of days from today to look into
+			//the past to include $0 claimprocs.  Since the service date could be weeks or months in the past, it makes more sense to use the 
+			//received date, which will be more recent.  Additionally, users found using the date of service to be unintuitive.
+			//STRONG CAUTION not to use the claimproc.ProcDate here in the future.
 			string command="UPDATE claimproc SET "
 				+"DateInsFinalized = (CASE DateInsFinalized WHEN '0001-01-01' THEN "+DbHelper.Now()+" ELSE DateInsFinalized END) "
 				+"WHERE ClaimPaymentNum="+POut.Long(claimPaymentNum)+" "
 				+"AND (claimproc.Status = '1' OR claimproc.Status = '4' OR claimproc.Status='5') "//received or supplemental or capclaim
-				+"AND (InsPayAmt != 0 "+((dateClaimPayZero.Year>1880)?("OR ProcDate >= "+POut.Date(dateClaimPayZero)):"")+")";
+				+"AND (InsPayAmt != 0 "+((dateClaimPayZero.Year>1880)?("OR DateCP >= "+POut.Date(dateClaimPayZero)):"")+")";
 			Db.NonQ(command);
 			return;
 		}

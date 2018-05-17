@@ -84,6 +84,8 @@ namespace OpenDentBusiness{
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
 				return Meth.GetObject<List<ClaimPaySplit>>(MethodBase.GetCurrentMethod(),carrierName,Name,claimPayDate,claimID);
 			}
+			//Per Nathan, it is OK to return the DateService in the query result to display in the batch insurance window,
+			//because that is the date which will be displayed in the Account module when you use the GoTo feature from batch insurance window.
 			string command="SELECT * FROM ("
 				+"SELECT claim.DateService,claim.ProvTreat,'' AS patName_,carrierA.CarrierName,claim.ClaimFee feeBilled_,claim.ClaimStatus,"
 				+"SUM(claimproc.InsPayAmt) insPayAmt_,claim.ClaimNum,0 AS ClaimPaymentNum,claim.ClinicNum,'' AS Description,claim.PatNum,0 AS PaymentRow,"
@@ -99,8 +101,16 @@ namespace OpenDentBusiness{
 			if(claimID!="") {
 				command+=" AND claim.ClaimIdentifier LIKE '%"+POut.String(claimID)+"%' ";
 			}
+			//See job #7423.
+			//The claimproc.DateCP is essentially the same as the claim.DateReceived.
+			//We used to use the claimproc.ProcDate, which is essentially the same as the claim.DateService.
+			//In the near future, we will use a rolling date preference for the "claimPayDate" which will be a number of days from today to look into
+			//the past to include $0 claimprocs.  Since the service date could be weeks or months in the past, it makes more sense to use the 
+			//received date, which will be more recent.  Additionally, users found using the date of service to be unintuitive.
+			//STRONG CAUTION not to use the claimproc.ProcDate here in the future.
 			command+="INNER JOIN claimproc ON claimproc.ClaimNum=claim.ClaimNum "
-				+"WHERE (claim.ClaimStatus='S' OR (claim.ClaimStatus='R' AND (claimproc.InsPayAmt!=0 OR claimproc.ProcDate>="+POut.Date(claimPayDate)+"))) ";
+				+"WHERE (claim.ClaimStatus='S' OR "
+				+"(claim.ClaimStatus='R' AND (claimproc.InsPayAmt!=0 "+((claimPayDate.Year>1880)?("OR claimproc.DateCP>="+POut.Date(claimPayDate)):"")+"))) ";
 			if(DataConnection.DBtype==DatabaseType.MySql) {
 				command+="GROUP BY claim.ClaimNum";
 			}
@@ -197,7 +207,7 @@ namespace OpenDentBusiness{
 			if(table.Rows.Count==0) {
 				return new DataTable();//No procedures are attached to these claims.  This frequently happens in conversions.  No need to look for related secondary claims.
 			}
-			command="SELECT claimproc.PatNum,claimproc.ProcDate"
+			command="SELECT claimproc.PatNum,claimproc.DateCP"
 				+" FROM claimproc"
 				+" JOIN claim ON claimproc.ClaimNum=claim.ClaimNum"
 				+" WHERE ProcNum IN (";
@@ -209,7 +219,7 @@ namespace OpenDentBusiness{
 			}
 			command+=") AND claimproc.ClaimNum NOT IN ("+claimNums+")"
 				+" AND ClaimType = 'S'"
-				+" GROUP BY claimproc.ClaimNum,claimproc.PatNum,claimproc.ProcDate";
+				+" GROUP BY claimproc.ClaimNum,claimproc.PatNum,claimproc.DateCP";
 			DataTable secondaryClaims=Db.GetTable(command);
 			return secondaryClaims;
 		}
