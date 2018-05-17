@@ -28,6 +28,7 @@ namespace OpenDental{
 			this.butCancel = new OpenDental.UI.Button();
 			this.textStack = new OpenDental.ODtextBox();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
+			this.butCompare = new OpenDental.UI.Button();
 			this.butBugTask = new OpenDental.UI.Button();
 			this.labelLastCall = new System.Windows.Forms.Label();
 			this.label12 = new System.Windows.Forms.Label();
@@ -107,6 +108,7 @@ namespace OpenDental{
 			// groupBox2
 			// 
 			this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.groupBox2.Controls.Add(this.butCompare);
 			this.groupBox2.Controls.Add(this.butBugTask);
 			this.groupBox2.Controls.Add(this.labelLastCall);
 			this.groupBox2.Controls.Add(this.label12);
@@ -128,6 +130,20 @@ namespace OpenDental{
 			this.groupBox2.TabIndex = 17;
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "Submitter Info.";
+			// 
+			// butCompare
+			// 
+			this.butCompare.AdjustImageLocation = new System.Drawing.Point(0, 0);
+			this.butCompare.Autosize = true;
+			this.butCompare.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
+			this.butCompare.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
+			this.butCompare.CornerRadius = 4F;
+			this.butCompare.Location = new System.Drawing.Point(225, 122);
+			this.butCompare.Name = "butCompare";
+			this.butCompare.Size = new System.Drawing.Size(104, 24);
+			this.butCompare.TabIndex = 31;
+			this.butCompare.Text = "&Compare";
+			this.butCompare.Click += new System.EventHandler(this.butCompare_Click);
 			// 
 			// butBugTask
 			// 
@@ -421,5 +437,6 @@ namespace OpenDental{
 		private System.Windows.Forms.Label labelVersion;
 		private System.Windows.Forms.Label label3;
 		private UI.Button butAddViewBug;
+		private UI.Button butCompare;
 	}
 }

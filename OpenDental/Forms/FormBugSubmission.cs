@@ -126,6 +126,15 @@ namespace OpenDental {
 			BugSubmissionL.CreateTask(_patCur,_sub);
 		}
 		
+		private void butCompare_Click(object sender,EventArgs e) {
+			InputBox input=new InputBox("Please copy/paste your stack trace to compare to this bug.",true);
+			if(input.ShowDialog()!=DialogResult.OK) {
+				return;
+			}
+			string perct=POut.Double(BugSubmissionL.CalculateSimilarity(textStack.Text,input.textResult.Text));
+			MsgBox.Show(this,perct+"%");
+		}
+
 		private void butAddViewBug_Click(object sender,EventArgs e) {
 			if(butAddViewBug.Text=="View Bug") {
 				OpenBug(_sub);

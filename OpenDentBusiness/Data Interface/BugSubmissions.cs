@@ -34,6 +34,50 @@ namespace OpenDentBusiness {
 			return listBugSubs;
 		}
 
+		///<summary>Returns a list of bug submissions and any associated bugs.
+		///If a bugSubmission is not associated to a bug then bug entry will be null.</summary>
+		public static List<Tuple<BugSubmission,Bug>> GetBugSubsForRegKeys(List<string> listRegKeys,DateTime dateFrom,DateTime dateTo) {
+			if(listRegKeys==null || listRegKeys.Count==0) {
+				return new List<Tuple<BugSubmission,Bug>>();//No point in going through middle tier.
+			}
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				return Meth.GetObject<List<Tuple<BugSubmission,Bug>>>(MethodBase.GetCurrentMethod(),listRegKeys,dateFrom,dateTo);
+			}
+			List<long> listBugIDs=new List<long>();
+			List<Tuple<BugSubmission,Bug>> listSubBugs=new List<Tuple<BugSubmission,Bug>>();
+			DataAction.RunBugsHQ(() => { 
+				string command="SELECT * FROM bugsubmission "
+					+"LEFT JOIN bug ON bug.BugId=bugsubmission.BugId "
+					+"WHERE bugsubmission.RegKey IN("+string.Join(",",listRegKeys.Select(x => "'"+POut.String(x)+"'"))+") "
+					+"AND "+DbHelper.BetweenDates("SubmissionDateTime",dateFrom,dateTo)+" "
+					+"ORDER BY bug.CreationDate DESC, bugsubmission.SubmissionDateTime DESC";
+				DataTable table=DataCore.GetTable(command);
+				DataTable tableBugs=table.Clone();//Clones structure, not row data.
+				foreach(DataRow row in table.Rows) {
+					if(PIn.Long(row["BugId"].ToString(),false)==0) {
+						continue;//Do not import rows that do not have bugs, LEFT JOIN bug must be successful.
+					}
+					tableBugs.ImportRow(row);
+				}
+				List<Bug> listBugs=Crud.BugCrud.TableToList(tableBugs);
+				List<BugSubmission> listBugSubs=Crud.BugSubmissionCrud.TableToList(table);
+				foreach(BugSubmission sub in listBugSubs) {
+					if(sub.TagOD!=null) {
+						continue;//Already handled.
+					}
+					//Grouping mimics FormBugSubmissions.cs
+					List<BugSubmission> listGroupedSubs=listBugSubs.FindAll(x => x.RegKey==sub.RegKey
+						&& x.ExceptionStackTrace==sub.ExceptionStackTrace
+						&& x.BugId==sub.BugId);
+					listGroupedSubs.ForEach(x => x.TagOD=true);//Used to skip already considered bug submissions via grouping logic.
+					BugSubmission subMax=listGroupedSubs.OrderByDescending(x => new Version(x.Info.DictPrefValues[PrefName.ProgramVersion])).First();
+					Bug bug=listBugs.FirstOrDefault(x => x.BugId==subMax.BugId);//Can be null.
+					listSubBugs.Add(new Tuple<BugSubmission, Bug>(subMax,bug));
+				}
+			},false);
+			return listSubBugs;
+		}
+
 		///<summary></summary>
 		public static List<BugSubmission> GetAllInRange(DateTime dateFrom,DateTime dateTo) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {

@@ -11,7 +11,7 @@ namespace OpenDentBusiness{
 	///<summary></summary>
 	public class Bugs{
 		private const int THREAD_TIMEOUT=5000;
-		
+
 		///<summary>Returns a list of bugs for given bugIds.</summary>
 		public static List<Bug> GetMany(List<long> listBugIds) {
 			if(listBugIds==null || listBugIds.Count==0) {
@@ -198,6 +198,22 @@ namespace OpenDentBusiness{
 				return "";
 			}
 			return odThread.Tag.ToString();
+		}
+
+		///<Summary>Gets name from database.  Not very efficient.</Summary>
+		public static SerializableDictionary<long,string> GetDictSubmitterNames(List<long> listSubmitterNums){
+			if(listSubmitterNums==null || listSubmitterNums.Count==0) {
+				return new SerializableDictionary<long, string>();
+			}
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				return Meth.GetObject<SerializableDictionary<long,string>>(MethodBase.GetCurrentMethod(),listSubmitterNums);
+			}
+			SerializableDictionary<long,string> dictSubmitterNames=new SerializableDictionary<long, string>();
+			DataAction.RunBugsHQ(() => {
+				dictSubmitterNames=Db.GetTable("SELECT BugUserId,UserName from buguser WHERE BugUserId IN ("+string.Join(",",listSubmitterNums)+")").Select()
+					.ToSerializableDictionary(x => PIn.Long(x["BugUserId"].ToString()),x => PIn.String(x["UserName"].ToString()));
+			},false);
+			return dictSubmitterNames;
 		}
 
 		///<Summary>Checks bugIDs in list for incompletes. Returns false if incomplete exists.</Summary>
