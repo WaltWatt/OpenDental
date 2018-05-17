@@ -124,6 +124,7 @@ namespace OpenDental {
 		private void FillGrid(bool isRefreshNeeded,List<string> listSelectedStatuses,List<long> listSelectedClinicNums,
 			string carrierName,string checkTraceNum,string amountMin,string amountMax)
 		{
+			Cursor=Cursors.WaitCursor;
 			Action actionCloseProgress=null;
 			if(isRefreshNeeded) {
 				actionCloseProgress=ODProgressOld.ShowProgressStatus("Etrans835",this,Lan.g(this,"Gathering data")+"...",false);
@@ -278,7 +279,13 @@ namespace OpenDental {
 				gridMain.Rows.Add(row);
 			}
 			gridMain.EndUpdate();
-			actionCloseProgress?.Invoke();
+			try {
+				actionCloseProgress?.Invoke();//When this function executes quickly this can fail rarely, fail silently because of WaitCursor.
+			}
+			catch(Exception ex) {
+				ex.DoNothing();
+			}
+			Cursor=Cursors.Default;
 		}
 
 		private string GetStringStatus(long etransNum) {
