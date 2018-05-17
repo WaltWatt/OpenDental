@@ -9089,7 +9089,7 @@ namespace OpenDental{
 						_isReplicationSlaveStopped=true;
 						MessageBox.Show(Lan.g(this,"Warning: Replication data receive is off at server ")+ReplicationServers.GetForLocalComputer().Descript+".\r\n"
 							+Lan.g(this,"The server will not receive updates until the slave is started again.")+"\r\n"
-							+Lan.g(this,"Contact your IT admin to run the SQL command SLAVE START.")
+							+Lan.g(this,"Contact your IT admin to run the SQL command START SLAVE.")
 							);
 					}
 					return;
