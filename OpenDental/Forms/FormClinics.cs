@@ -282,7 +282,7 @@ namespace OpenDental {
 			this.gridMain.Name = "gridMain";
 			this.gridMain.ScrollValue = 0;
 			this.gridMain.Size = new System.Drawing.Size(624, 562);
-			this.gridMain.TabIndex = 12;
+			this.gridMain.TabIndex = 0;
 			this.gridMain.Title = "Clinics";
 			this.gridMain.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
 			this.gridMain.TitleHeight = 18;
@@ -326,7 +326,7 @@ namespace OpenDental {
 			this.butClose.Location = new System.Drawing.Point(833, 573);
 			this.butClose.Name = "butClose";
 			this.butClose.Size = new System.Drawing.Size(75, 26);
-			this.butClose.TabIndex = 0;
+			this.butClose.TabIndex = 1;
 			this.butClose.Text = "&Close";
 			this.butClose.Click += new System.EventHandler(this.butClose_Click);
 			// 
@@ -699,6 +699,7 @@ namespace OpenDental {
 
 		private void butSelectAll_Click(object sender,EventArgs e) {
 			gridMain.SetSelected(true);
+			gridMain.Focus();//Allows user to use ODGrid CTRL functionality.
 		}
 
 		private void butSelectNone_Click(object sender,EventArgs e) {
