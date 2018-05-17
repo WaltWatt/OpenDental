@@ -23,6 +23,11 @@ namespace OpenDental {
 		}
 
 		private void FormPhoneGraphDateEdit_Load(object sender,EventArgs e) {
+			textPeak.Text=PrefC.GetRaw("GraphEmployeeTimesPeak");
+			textSuperPeak.Text=PrefC.GetRaw("GraphEmployeeTimesSuperPeak");
+			if(!Security.IsAuthorized(Permissions.SecurityAdmin,true)) {
+				groupGraphPrefs.Visible=false;
+			}
 			gridGraph.Title=DateEdit.ToShortDateString();			
 			FillGrid();
 		}
@@ -117,6 +122,13 @@ namespace OpenDental {
 			pg.IsGraphed=!uiGraphStatus; //flip the bit
 			PhoneGraphs.InsertOrUpdate(pg); //update the db	
 			FillGrid();
+		}
+
+		private void butPrefUpdate_Click(object sender,EventArgs e) {
+			Prefs.UpdateRaw("GraphEmployeeTimesPeak",textPeak.Text);
+			Prefs.UpdateRaw("GraphEmployeeTimesSuperPeak",textSuperPeak.Text);
+			labelSave.Visible=true;
+			Signalods.SetInvalid(InvalidType.Prefs);
 		}
 		
 		private void butEditSchedule_Click(object sender,EventArgs e) {
