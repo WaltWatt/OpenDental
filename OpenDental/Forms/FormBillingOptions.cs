@@ -780,9 +780,9 @@ namespace OpenDental{
 				if(!Security.CurUser.ClinicIsRestricted) {
 					_listClinics.Insert(0,new Clinic() { ClinicNum = 0,Abbr = "Unassigned",Description = "Unassigned" });
 				}
-				for(int i = 0;i<_listClinics.Count;i++) {
-					comboClinic.Items.Add(new ODBoxItem<Clinic>(_listClinics[i].Abbr,_listClinics[i]));
-					if(_listClinics[i].ClinicNum==ClinicNum) {
+			foreach(Clinic clinic in _listClinics) {
+					comboClinic.Items.Add(new ODBoxItem<Clinic>(clinic.Abbr,clinic));
+					if(ClinicNum!=0 && clinic.ClinicNum==ClinicNum) {//If ClinicNum=0 then maintain default All selection rather than Unassigned.
 						comboClinic.SetSelected(false);
 						comboClinic.SetSelected(comboClinic.Items.Count-1,true);
 					}
