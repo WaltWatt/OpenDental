@@ -138,6 +138,9 @@ namespace OpenDentBusiness{
 		public static string Substitute(string text,QuickPasteType type) {
 			//No need to check RemotingRole; no call to db.
 			int typeIndex=QuickPasteCats.GetDefaultType(type);
+			if(typeIndex < 0) {
+				return text;
+			}
 			QuickPasteCat quickPasteCatDefault=QuickPasteCats.GetDeepCopy()[typeIndex];
 			List<QuickPasteNote> listQuickPasteCats=GetDeepCopy();
 			for(int i=0;i<listQuickPasteCats.Count;i++) {
