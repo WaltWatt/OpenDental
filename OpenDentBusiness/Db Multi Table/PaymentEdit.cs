@@ -8,9 +8,9 @@ namespace OpenDentBusiness {
 	public class PaymentEdit {
 
 		///<summary>Gets most all the data needed to load FormPayment.</summary>
-		public static LoadData GetLoadData(Patient patCur,Payment paymentCur,List<long> listPatNumsFamily,bool isNew) {
+		public static LoadData GetLoadData(Patient patCur,Payment paymentCur,List<long> listPatNumsFamily,bool isNew,bool isIncomeTxfr) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				return Meth.GetObject<LoadData>(MethodBase.GetCurrentMethod(),patCur,paymentCur,listPatNumsFamily,isNew);
+				return Meth.GetObject<LoadData>(MethodBase.GetCurrentMethod(),patCur,paymentCur,listPatNumsFamily,isNew,isIncomeTxfr);
 			}
 			LoadData data=new LoadData();
 			data.SuperFam=new Family(Patients.GetBySuperFamily(patCur.SuperFamily));
@@ -34,7 +34,7 @@ namespace OpenDentBusiness {
 			data.ListAssociatedPatients=Patients.GetAssociatedPatients(patCur.PatNum);
 			data.ListPrePaysForPayment=PaySplits.GetSplitsLinked(data.ListSplits);
 			data.ListProcsForSplits=Procedures.GetManyProc(data.ListSplits.Select(x => x.ProcNum).ToList(),false);
-			data.ConstructChargesData=GetConstructChargesData(listPatNumsFamily,patCur.PatNum,data.ListSplits,paymentCur.PayNum);
+			data.ConstructChargesData=GetConstructChargesData(listPatNumsFamily,patCur.PatNum,data.ListSplits,paymentCur.PayNum,isIncomeTxfr);
 			return data;
 		}
 
@@ -83,9 +83,9 @@ namespace OpenDentBusiness {
 
 		#region constructing and linking charges and credits
 		///<summary>Gets the data needed to construct a list of charges on FormPayment.</summary>
-		public static ConstructChargesData GetConstructChargesData(List<long> listPatNums,long patNum,List<PaySplit> listSplitsCur,long payCurNum) {
+		public static ConstructChargesData GetConstructChargesData(List<long> listPatNums,long patNum,List<PaySplit> listSplitsCur,long payCurNum,bool isIncomeTransfer) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				return Meth.GetObject<ConstructChargesData>(MethodBase.GetCurrentMethod(),listPatNums,patNum,listSplitsCur,payCurNum);
+				return Meth.GetObject<ConstructChargesData>(MethodBase.GetCurrentMethod(),listPatNums,patNum,listSplitsCur,payCurNum,isIncomeTransfer);
 			}
 			ConstructChargesData data=new ConstructChargesData();
 			data.ListProcsCompleted=Procedures.GetCompleteForPats(listPatNums);
@@ -117,9 +117,11 @@ namespace OpenDentBusiness {
 			}
 			data.ListClaimProcs=ClaimProcs.Refresh(listPatNums);
 			//Calculated using writeoffs, inspayest, inspayamt.  Done the same way ContrAcct does it.				
-			for(int i=0;i<data.ListProcsCompleted.Count;i++) {
-				double patPortion=ClaimProcs.GetPatPortion(data.ListProcsCompleted[i],data.ListClaimProcs,data.ListAdjustments);
-				data.ListProcsCompleted[i].ProcFee=patPortion;
+			if(!isIncomeTransfer) {
+				for(int i=0;i<data.ListProcsCompleted.Count;i++) {
+					double patPortion=ClaimProcs.GetPatPortion(data.ListProcsCompleted[i],data.ListClaimProcs,data.ListAdjustments);
+					data.ListProcsCompleted[i].ProcFee=patPortion;
+				}
 			}
 			return data;
 		}
@@ -134,11 +136,14 @@ namespace OpenDentBusiness {
 			#region Get data
 			//Get the lists of items we'll be using to calculate with.
 			PaymentEdit.ConstructChargesData constructChargesData=loadData?.ConstructChargesData
-				??PaymentEdit.GetConstructChargesData(listPatNums,patCurNum,listSplitsCur,retVal.Payment.PayNum);
+				??PaymentEdit.GetConstructChargesData(listPatNums,patCurNum,listSplitsCur,retVal.Payment.PayNum,isIncomeTxfr);
 			List<Procedure> listAcctProcs=listSelectedProcs;//filled from the public ListProcs. List of procs selected in account grid before loading.
 			List<Procedure> listProcs=constructChargesData.ListProcsCompleted;//filled from db. List of completed procs for patient(s).
 			List<Adjustment> listAdjustments=constructChargesData.ListAdjustments;
 			List<ClaimProc> listInsPayAsTotal=constructChargesData.ListInsPayAsTotal;//Claimprocs paid as total, might contain ins payplan payments.
+			if(isIncomeTxfr) {
+				listInsPayAsTotal.AddRange(ClaimProcs.GetForProcs(listProcs.Select(x => x.ProcNum).ToList()));//Add claimprocs for the completed procedures if in income xfer mode.
+			}
 			//Used to figure out how much we need to pay off procs with, also contains insurance payplans.
 			List<PayPlan> listPayPlans=constructChargesData.ListPayPlans;
 			List<PayPlanCharge> listPayPlanCharges=constructChargesData.ListPayPlanCharges;
@@ -212,7 +217,7 @@ namespace OpenDentBusiness {
 				}
 			}
 			for(int i=0;i<listAdjustments.Count;i++) {
-				if(listAdjustments[i].ProcNum==0 && (listAdjustments[i].AdjAmt>0 || hasPayTypeNone)) {//If there is no procnum on the adjustment, add it to charges if it's charge adjustment, or if it's income transfer mode add them all regardless.
+				if((listAdjustments[i].ProcNum==0 && listAdjustments[i].AdjAmt>0) || hasPayTypeNone) {//If there is no procnum on the adjustment, add it to charges if it's charge adjustment, or if it's income transfer mode add them all regardless.
 					listCharges.Add(new AccountEntry(listAdjustments[i]));
 				}
 			}

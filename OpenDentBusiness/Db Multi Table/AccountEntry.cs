@@ -30,7 +30,7 @@ namespace OpenDentBusiness {
 
 		public AccountEntry(ClaimProc claimProc) {
 				Tag=claimProc;
-				Date=claimProc.DateInsFinalized;
+				Date=claimProc.DateCP;
 				PriKey=claimProc.ClaimProcNum;
 				AmountOriginal=0-(decimal)(claimProc.InsPayAmt+claimProc.WriteOff);
 				AmountStart=AmountOriginal;

@@ -23,7 +23,7 @@ namespace UnitTests.UnitTests {
 			Procedure proc1=ProcedureT.CreateProcedure(pat,"D1110",ProcStat.C,"",40);
 			Procedure proc2=ProcedureT.CreateProcedure(pat,"D0120",ProcStat.C,"",40);
 			Payment pay=PaymentT.MakePaymentNoSplits(pat.PatNum,50);
-			PaymentEdit.LoadData loadData=PaymentEdit.GetLoadData(pat,pay,new List<long> { pat.PatNum },true);
+			PaymentEdit.LoadData loadData=PaymentEdit.GetLoadData(pat,pay,new List<long> { pat.PatNum },true,false);
 			PaymentEdit.ConstructResults chargeResult=PaymentEdit.ConstructAndLinkChargeCredits(new List<long> {pat.PatNum },pat.PatNum
 				,loadData.ConstructChargesData.ListPaySplits,pay,new List<Procedure>());
 			PaymentEdit.AutoSplit autoSplit=PaymentEdit.AutoSplitForPayment(chargeResult);
@@ -44,9 +44,9 @@ namespace UnitTests.UnitTests {
 			//attempt to make another payment. Auto splits should not suggest a negative split.
 			Payment newPayment=PaymentT.MakePaymentNoSplits(pat.PatNum,2,payDate,isNew:true,
 				payType:Defs.GetDefsForCategory(DefCat.PaymentTypes,true)[0].DefNum);//current payment we're trying to make
-			PaymentEdit.LoadData loadData=PaymentEdit.GetLoadData(pat,newPayment,new List<long>() {pat.PatNum },true);
+			PaymentEdit.LoadData loadData=PaymentEdit.GetLoadData(pat,newPayment,new List<long>() {pat.PatNum },true,false);
 			PaymentEdit.ConstructChargesData chargeData=PaymentEdit.GetConstructChargesData(new List<long> {pat.PatNum },pat.PatNum,
-				PaySplits.GetForPayment(pay.PayNum),pay.PayNum);
+				PaySplits.GetForPayment(pay.PayNum),pay.PayNum,false);
 			PaymentEdit.ConstructResults constructResults=PaymentEdit.ConstructAndLinkChargeCredits(new List<long> {pat.PatNum },pat.PatNum
 				,chargeData.ListPaySplits,newPayment,new List<Procedure> ());
 			PaymentEdit.AutoSplit autoSplits=PaymentEdit.AutoSplitForPayment(constructResults);
@@ -232,7 +232,7 @@ namespace UnitTests.UnitTests {
 			Procedure proc2=ProcedureT.CreateProcedure(pat,"D0120",ProcStat.C,"",135,DateTime.Today.AddMonths(-1).AddDays(1),provNum:provNum);
 			Adjustment adjustment=AdjustmentT.MakeAdjustment(pat.PatNum,20,DateTime.Today.AddDays(-15),provNum:provNum);
 			Payment payCur=PaymentT.MakePaymentNoSplits(pat.PatNum,20);
-			PaymentEdit.LoadData loadData=PaymentEdit.GetLoadData(pat,payCur,new List<long>{pat.PatNum},true);
+			PaymentEdit.LoadData loadData=PaymentEdit.GetLoadData(pat,payCur,new List<long>{pat.PatNum},true,false);
 			PaymentEdit.InitData initData=PaymentEdit.Init(loadData.ListAssociatedPatients,Patients.GetFamily(pat.PatNum),new Family { },payCur
 					,loadData.ListSplits,new List<Procedure>(),pat.PatNum,loadData:loadData);
 			//Verify the logic pays starts to pay off the first procedure
@@ -248,7 +248,7 @@ namespace UnitTests.UnitTests {
 			Procedure proc2=ProcedureT.CreateProcedure(pat,"D0120",ProcStat.C,"",135,DateTime.Today.AddMonths(-1).AddDays(1),provNum:provNum);
 			Adjustment adjustment=AdjustmentT.MakeAdjustment(pat.PatNum,20,DateTime.Today.AddDays(-15),provNum:provNum);
 			Payment payCur=PaymentT.MakePaymentNoSplits(pat.PatNum,20);
-			PaymentEdit.LoadData loadData=PaymentEdit.GetLoadData(pat,payCur,new List<long>{pat.PatNum},true);
+			PaymentEdit.LoadData loadData=PaymentEdit.GetLoadData(pat,payCur,new List<long>{pat.PatNum},true,false);
 			PaymentEdit.InitData initData=PaymentEdit.Init(loadData.ListAssociatedPatients,Patients.GetFamily(pat.PatNum),new Family { },payCur
 					,loadData.ListSplits,new List<Procedure>(),pat.PatNum,loadData:loadData);
 			//Verify the logic chooses to pay off the adjustment first
@@ -264,7 +264,7 @@ namespace UnitTests.UnitTests {
 			PayPlan payplan=PayPlanT.CreatePayPlanWithCredits(pat.PatNum,30,DateTime.Today.AddMonths(-3),0,totalAmt:195);
 			//Go to make a payment for the charges due
 			Payment pay=PaymentT.MakePaymentNoSplits(pat.PatNum,60,DateTime.Today);
-			PaymentEdit.LoadData loadData=PaymentEdit.GetLoadData(pat,pay,new List<long> {pat.PatNum},true);
+			PaymentEdit.LoadData loadData=PaymentEdit.GetLoadData(pat,pay,new List<long> {pat.PatNum},true,false);
 			PaymentEdit.ConstructResults constructResults=PaymentEdit.ConstructAndLinkChargeCredits(new List<long> {pat.PatNum },pat.PatNum
 				,loadData.ConstructChargesData.ListPaySplits,pay,new List<Procedure> (),loadData:loadData);
 			Assert.AreEqual(6,constructResults.ListAccountCharges.Count);//2 procedures and 4 months of charges since unattached credits.
@@ -281,7 +281,7 @@ namespace UnitTests.UnitTests {
 			PayPlan payplan=PayPlanT.CreatePayPlanWithCredits(pat.PatNum,30,DateTime.Today.AddMonths(-3),0,new List<Procedure>() {proc1,proc2});
 			//Go to make a payment for the charges that are due
 			Payment pay=PaymentT.MakePaymentNoSplits(pat.PatNum,60,DateTime.Today);
-			PaymentEdit.LoadData loadData=PaymentEdit.GetLoadData(pat,pay,new List<long>{pat.PatNum},true);
+			PaymentEdit.LoadData loadData=PaymentEdit.GetLoadData(pat,pay,new List<long>{pat.PatNum},true,false);
 			PaymentEdit.ConstructResults constructResults=PaymentEdit.ConstructAndLinkChargeCredits(new List<long> {pat.PatNum },pat.PatNum
 				,loadData.ConstructChargesData.ListPaySplits,pay,new List<Procedure> (),loadData:loadData);
 			Assert.AreEqual(4,constructResults.ListAccountCharges.FindAll(x => x.AmountStart>0).Count);//Procs shouldn't show - only the 4 pay plan charges
@@ -301,7 +301,7 @@ namespace UnitTests.UnitTests {
 			PaymentT.MakePayment(pat.PatNum,30,DateTime.Today.AddMonths(-1),payplan.PayPlanNum,prov,0,1);
 			//Go to make another payment. 2 pay plan charges should have been "removed" (amtStart to 0) from being paid. 
 			Payment pay=PaymentT.MakePaymentNoSplits(pat.PatNum,30,DateTime.Today);
-			PaymentEdit.LoadData loadData=PaymentEdit.GetLoadData(pat,pay,new List<long>{pat.PatNum},true);
+			PaymentEdit.LoadData loadData=PaymentEdit.GetLoadData(pat,pay,new List<long>{pat.PatNum},true,false);
 			PaymentEdit.InitData initData=PaymentEdit.Init(loadData.ListAssociatedPatients,Patients.GetFamily(pat.PatNum),new Family { },pay
 					,loadData.ListSplits,new List<Procedure>(),pat.PatNum,loadData:loadData);
 			//2 procs and 2 pp charges
@@ -322,7 +322,7 @@ namespace UnitTests.UnitTests {
 			PaymentT.MakePayment(pat.PatNum,30,DateTime.Today.AddMonths(-1),payplan.PayPlanNum,procNum:proc1.ProcNum);
 			//2 pay plan charges should have been removed from being paid. Make a new payment. 
 			Payment pay=PaymentT.MakePaymentNoSplits(pat.PatNum,30,DateTime.Today,isNew:true,payType:1);
-			PaymentEdit.LoadData loadData=PaymentEdit.GetLoadData(pat,pay,new List<long>{pat.PatNum},true);
+			PaymentEdit.LoadData loadData=PaymentEdit.GetLoadData(pat,pay,new List<long>{pat.PatNum},true,false);
 			PaymentEdit.InitData initData=PaymentEdit.Init(loadData.ListAssociatedPatients,Patients.GetFamily(pat.PatNum),new Family { },pay
 					,loadData.ListSplits,new List<Procedure>(),pat.PatNum,loadData:loadData);
 			//should only see 2 pay plan charges that have not been paid, along with 2 pay plan charges that have been paid. 
@@ -337,7 +337,7 @@ namespace UnitTests.UnitTests {
 			Procedure proc=ProcedureT.CreateProcedure(pat,"D0120",ProcStat.C,"",135,DateTime.Today.AddMonths(-1).AddDays(1),provNum:provNum);
 			Adjustment adjustment=AdjustmentT.MakeAdjustment(pat.PatNum,20,DateTime.Today.AddDays(-15),provNum:provNum,procNum:proc.ProcNum);
 			Payment payCur=PaymentT.MakePaymentNoSplits(pat.PatNum,20);
-			PaymentEdit.LoadData loadData=PaymentEdit.GetLoadData(pat,payCur,new List<long>{pat.PatNum},true);
+			PaymentEdit.LoadData loadData=PaymentEdit.GetLoadData(pat,payCur,new List<long>{pat.PatNum},true,false);
 			PaymentEdit.InitData initData=PaymentEdit.Init(loadData.ListAssociatedPatients,Patients.GetFamily(pat.PatNum),new Family { },payCur
 					,loadData.ListSplits,new List<Procedure>(),pat.PatNum,loadData:loadData);
 			//Verify there is only one charge (the procedure's charge + the adjustment for the amount original)
@@ -355,7 +355,7 @@ namespace UnitTests.UnitTests {
 			Payment existingPayment1=PaymentT.MakePayment(pat.PatNum,35,DateTime.Today.AddDays(-1));//no prov or proc because it's unattached.
 			Payment existingPayment2=PaymentT.MakePayment(pat.PatNum,20,DateTime.Today.AddDays(-1));
 			Payment payCur=PaymentT.MakePaymentNoSplits(pat.PatNum,100);
-			PaymentEdit.LoadData loadData=PaymentEdit.GetLoadData(pat,payCur,new List<long>{pat.PatNum},true);
+			PaymentEdit.LoadData loadData=PaymentEdit.GetLoadData(pat,payCur,new List<long>{pat.PatNum},true,false);
 			PaymentEdit.InitData initData=PaymentEdit.Init(loadData.ListAssociatedPatients,Patients.GetFamily(pat.PatNum),new Family { },payCur
 					,loadData.ListSplits,new List<Procedure>(),pat.PatNum,loadData:loadData);
 			//Verify there is only one charge (the procedure's charge + the adjustment for the amount original)

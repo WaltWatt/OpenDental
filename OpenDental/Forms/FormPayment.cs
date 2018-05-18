@@ -1534,7 +1534,7 @@ namespace OpenDental {
 		#endregion
 
 		private void FormPayment_Load(object sender,System.EventArgs e) {
-			_loadData=PaymentEdit.GetLoadData(_patCur,_paymentCur,_listPatNums,IsNew);
+			_loadData=PaymentEdit.GetLoadData(_patCur,_paymentCur,_listPatNums,IsNew,(IsIncomeTransfer || _paymentCur.PayType==0));
 			_superFamCur=_loadData.SuperFam;
 			if(IsNew) {
 				checkPayTypeNone.Enabled=true;
