@@ -37,6 +37,9 @@ namespace OpenDentBusiness {
 
 		/// <summary>Returns mysql variable "AUTO_INCREMENT_OFFSET", or -1 if variable not found.</summary>
 		public static int GetAutoIncrementOffset() {
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				return Meth.GetObject<int>(MethodBase.GetCurrentMethod());
+			}
 			string command="SHOW VARIABLES LIKE 'auto_increment_offset'";
 			DataTable table=GetTable(command);
 			if(table.Rows.Count>0) {
