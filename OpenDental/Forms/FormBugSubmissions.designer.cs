@@ -36,8 +36,8 @@ namespace OpenDental{
 			this.textStackFilter = new OpenDental.ODtextBox();
 			this.label4 = new System.Windows.Forms.Label();
 			this.groupFilters = new System.Windows.Forms.GroupBox();
-			this.comboGrouping = new System.Windows.Forms.ComboBox();
-			this.label13 = new System.Windows.Forms.Label();
+			this.textDevNoteFilter = new OpenDental.ODtextBox();
+			this.label15 = new System.Windows.Forms.Label();
 			this.textPatNums = new OpenDental.ODtextBox();
 			this.checkExcludeHQ = new System.Windows.Forms.CheckBox();
 			this.comboRegKeys = new OpenDental.UI.ComboBoxMulti();
@@ -59,16 +59,26 @@ namespace OpenDental{
 			this.label9 = new System.Windows.Forms.Label();
 			this.labelCustomerState = new System.Windows.Forms.Label();
 			this.label8 = new System.Windows.Forms.Label();
-			this.labelCustomerName = new System.Windows.Forms.Label();
+			this.labelRegKey = new System.Windows.Forms.Label();
 			this.label6 = new System.Windows.Forms.Label();
 			this.gridCustomerSubs = new OpenDental.UI.ODGrid();
 			this.gridOfficeInfo = new OpenDental.UI.ODGrid();
 			this.menuOptions = new System.Windows.Forms.MenuStrip();
 			this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.findPreviouslyFixedSubmisisonsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.comboSortBy = new System.Windows.Forms.ComboBox();
+			this.label14 = new System.Windows.Forms.Label();
+			this.comboGrouping = new System.Windows.Forms.ComboBox();
+			this.label13 = new System.Windows.Forms.Label();
+			this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+			this.textDevNote = new OpenDental.ODtextBox();
 			this.groupFilters.SuspendLayout();
 			this.groupBox2.SuspendLayout();
 			this.menuOptions.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
+			this.splitContainer1.Panel1.SuspendLayout();
+			this.splitContainer1.Panel2.SuspendLayout();
+			this.splitContainer1.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// butAddBug
@@ -113,11 +123,11 @@ namespace OpenDental{
 			this.gridSubs.HeaderFont = new System.Drawing.Font("Microsoft Sans Serif", 8.5F, System.Drawing.FontStyle.Bold);
 			this.gridSubs.HeaderHeight = 15;
 			this.gridSubs.HScrollVisible = false;
-			this.gridSubs.Location = new System.Drawing.Point(12, 110);
+			this.gridSubs.Location = new System.Drawing.Point(12, 127);
 			this.gridSubs.Name = "gridSubs";
 			this.gridSubs.ScrollValue = 0;
 			this.gridSubs.SelectionMode = OpenDental.UI.GridSelectionMode.MultiExtended;
-			this.gridSubs.Size = new System.Drawing.Size(532, 638);
+			this.gridSubs.Size = new System.Drawing.Size(532, 619);
 			this.gridSubs.TabIndex = 4;
 			this.gridSubs.Title = "Submissions";
 			this.gridSubs.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
@@ -135,11 +145,11 @@ namespace OpenDental{
 			this.textStack.BackColor = System.Drawing.SystemColors.Window;
 			this.textStack.DetectLinksEnabled = false;
 			this.textStack.DetectUrls = false;
-			this.textStack.Location = new System.Drawing.Point(548, 127);
+			this.textStack.Location = new System.Drawing.Point(0, 0);
 			this.textStack.Name = "textStack";
 			this.textStack.QuickPasteType = OpenDentBusiness.QuickPasteType.JobManager;
 			this.textStack.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-			this.textStack.Size = new System.Drawing.Size(411, 491);
+			this.textStack.Size = new System.Drawing.Size(406, 417);
 			this.textStack.SpellCheckIsEnabled = false;
 			this.textStack.TabIndex = 5;
 			this.textStack.Text = "";
@@ -190,6 +200,7 @@ namespace OpenDental{
 			this.textMsgText.DetectLinksEnabled = false;
 			this.textMsgText.DetectUrls = false;
 			this.textMsgText.Location = new System.Drawing.Point(83, 13);
+			this.textMsgText.Multiline = false;
 			this.textMsgText.Name = "textMsgText";
 			this.textMsgText.QuickPasteType = OpenDentBusiness.QuickPasteType.JobManager;
 			this.textMsgText.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
@@ -205,6 +216,7 @@ namespace OpenDental{
 			this.textStackFilter.DetectLinksEnabled = false;
 			this.textStackFilter.DetectUrls = false;
 			this.textStackFilter.Location = new System.Drawing.Point(666, 48);
+			this.textStackFilter.Multiline = false;
 			this.textStackFilter.Name = "textStackFilter";
 			this.textStackFilter.QuickPasteType = OpenDentBusiness.QuickPasteType.JobManager;
 			this.textStackFilter.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
@@ -226,8 +238,8 @@ namespace OpenDental{
 			// 
 			this.groupFilters.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.groupFilters.Controls.Add(this.comboGrouping);
-			this.groupFilters.Controls.Add(this.label13);
+			this.groupFilters.Controls.Add(this.textDevNoteFilter);
+			this.groupFilters.Controls.Add(this.label15);
 			this.groupFilters.Controls.Add(this.textPatNums);
 			this.groupFilters.Controls.Add(this.checkExcludeHQ);
 			this.groupFilters.Controls.Add(this.comboRegKeys);
@@ -249,23 +261,30 @@ namespace OpenDental{
 			this.groupFilters.TabStop = false;
 			this.groupFilters.Text = "Filters";
 			// 
-			// comboGrouping
+			// textDevNoteFilter
 			// 
-			this.comboGrouping.FormattingEnabled = true;
-			this.comboGrouping.Location = new System.Drawing.Point(903, 48);
-			this.comboGrouping.Name = "comboGrouping";
-			this.comboGrouping.Size = new System.Drawing.Size(102, 21);
-			this.comboGrouping.TabIndex = 32;
-			this.comboGrouping.SelectionChangeCommitted += new System.EventHandler(this.comboVersions_SelectionChangeCommitted);
+			this.textDevNoteFilter.AcceptsTab = true;
+			this.textDevNoteFilter.BackColor = System.Drawing.SystemColors.Window;
+			this.textDevNoteFilter.DetectLinksEnabled = false;
+			this.textDevNoteFilter.DetectUrls = false;
+			this.textDevNoteFilter.Location = new System.Drawing.Point(903, 47);
+			this.textDevNoteFilter.Multiline = false;
+			this.textDevNoteFilter.Name = "textDevNoteFilter";
+			this.textDevNoteFilter.QuickPasteType = OpenDentBusiness.QuickPasteType.JobManager;
+			this.textDevNoteFilter.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
+			this.textDevNoteFilter.Size = new System.Drawing.Size(102, 22);
+			this.textDevNoteFilter.TabIndex = 31;
+			this.textDevNoteFilter.Text = "";
+			this.textDevNoteFilter.TextChanged += new System.EventHandler(this.Filters_TextChanged);
 			// 
-			// label13
+			// label15
 			// 
-			this.label13.AutoSize = true;
-			this.label13.Location = new System.Drawing.Point(849, 53);
-			this.label13.Name = "label13";
-			this.label13.Size = new System.Drawing.Size(54, 13);
-			this.label13.TabIndex = 31;
-			this.label13.Text = "Group By:";
+			this.label15.AutoSize = true;
+			this.label15.Location = new System.Drawing.Point(849, 52);
+			this.label15.Name = "label15";
+			this.label15.Size = new System.Drawing.Size(50, 13);
+			this.label15.TabIndex = 32;
+			this.label15.Text = "DevNote";
 			// 
 			// textPatNums
 			// 
@@ -274,6 +293,7 @@ namespace OpenDental{
 			this.textPatNums.DetectLinksEnabled = false;
 			this.textPatNums.DetectUrls = false;
 			this.textPatNums.Location = new System.Drawing.Point(903, 12);
+			this.textPatNums.Multiline = false;
 			this.textPatNums.Name = "textPatNums";
 			this.textPatNums.QuickPasteType = OpenDentBusiness.QuickPasteType.JobManager;
 			this.textPatNums.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
@@ -378,7 +398,7 @@ namespace OpenDental{
 			this.groupBox2.Controls.Add(this.label9);
 			this.groupBox2.Controls.Add(this.labelCustomerState);
 			this.groupBox2.Controls.Add(this.label8);
-			this.groupBox2.Controls.Add(this.labelCustomerName);
+			this.groupBox2.Controls.Add(this.labelRegKey);
 			this.groupBox2.Controls.Add(this.label6);
 			this.groupBox2.Location = new System.Drawing.Point(548, 600);
 			this.groupBox2.Name = "groupBox2";
@@ -510,14 +530,14 @@ namespace OpenDental{
 			this.label8.Text = "State:";
 			this.label8.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
-			// labelCustomerName
+			// labelRegKey
 			// 
-			this.labelCustomerName.Location = new System.Drawing.Point(78, 34);
-			this.labelCustomerName.Name = "labelCustomerName";
-			this.labelCustomerName.Size = new System.Drawing.Size(215, 13);
-			this.labelCustomerName.TabIndex = 19;
-			this.labelCustomerName.Text = "John Doe";
-			this.labelCustomerName.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			this.labelRegKey.Location = new System.Drawing.Point(78, 34);
+			this.labelRegKey.Name = "labelRegKey";
+			this.labelRegKey.Size = new System.Drawing.Size(215, 13);
+			this.labelRegKey.TabIndex = 19;
+			this.labelRegKey.Text = "XXXX XXXX XXXX XXXX";
+			this.labelRegKey.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
 			// label6
 			// 
@@ -526,7 +546,7 @@ namespace OpenDental{
 			this.label6.Name = "label6";
 			this.label6.Size = new System.Drawing.Size(65, 13);
 			this.label6.TabIndex = 18;
-			this.label6.Text = "Name:";
+			this.label6.Text = "RegKey:";
 			this.label6.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
 			// gridCustomerSubs
@@ -567,7 +587,7 @@ namespace OpenDental{
 			this.gridOfficeInfo.Name = "gridOfficeInfo";
 			this.gridOfficeInfo.ScrollValue = 0;
 			this.gridOfficeInfo.SelectionMode = OpenDental.UI.GridSelectionMode.MultiExtended;
-			this.gridOfficeInfo.Size = new System.Drawing.Size(255, 491);
+			this.gridOfficeInfo.Size = new System.Drawing.Size(255, 467);
 			this.gridOfficeInfo.TabIndex = 20;
 			this.gridOfficeInfo.Title = "Office Info";
 			this.gridOfficeInfo.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
@@ -599,18 +619,99 @@ namespace OpenDental{
 			this.findPreviouslyFixedSubmisisonsToolStripMenuItem.Text = "Find Similar Submisisons";
 			this.findPreviouslyFixedSubmisisonsToolStripMenuItem.Click += new System.EventHandler(this.findPreviouslyFixedSubmisisonsToolStripMenuItem_Click);
 			// 
+			// comboSortBy
+			// 
+			this.comboSortBy.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.comboSortBy.FormattingEnabled = true;
+			this.comboSortBy.Location = new System.Drawing.Point(219, 104);
+			this.comboSortBy.Name = "comboSortBy";
+			this.comboSortBy.Size = new System.Drawing.Size(102, 21);
+			this.comboSortBy.TabIndex = 38;
+			this.comboSortBy.SelectionChangeCommitted += new System.EventHandler(this.comboVersions_SelectionChangeCommitted);
+			// 
+			// label14
+			// 
+			this.label14.AutoSize = true;
+			this.label14.Location = new System.Drawing.Point(175, 109);
+			this.label14.Name = "label14";
+			this.label14.Size = new System.Drawing.Size(44, 13);
+			this.label14.TabIndex = 37;
+			this.label14.Text = "Sort By:";
+			// 
+			// comboGrouping
+			// 
+			this.comboGrouping.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.comboGrouping.FormattingEnabled = true;
+			this.comboGrouping.Location = new System.Drawing.Point(65, 104);
+			this.comboGrouping.Name = "comboGrouping";
+			this.comboGrouping.Size = new System.Drawing.Size(102, 21);
+			this.comboGrouping.TabIndex = 36;
+			this.comboGrouping.SelectionChangeCommitted += new System.EventHandler(this.comboVersions_SelectionChangeCommitted);
+			// 
+			// label13
+			// 
+			this.label13.AutoSize = true;
+			this.label13.Location = new System.Drawing.Point(12, 109);
+			this.label13.Name = "label13";
+			this.label13.Size = new System.Drawing.Size(54, 13);
+			this.label13.TabIndex = 35;
+			this.label13.Text = "Group By:";
+			// 
+			// splitContainer1
+			// 
+			this.splitContainer1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.splitContainer1.Location = new System.Drawing.Point(550, 127);
+			this.splitContainer1.Name = "splitContainer1";
+			this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
+			// 
+			// splitContainer1.Panel1
+			// 
+			this.splitContainer1.Panel1.Controls.Add(this.textStack);
+			// 
+			// splitContainer1.Panel2
+			// 
+			this.splitContainer1.Panel2.Controls.Add(this.textDevNote);
+			this.splitContainer1.Size = new System.Drawing.Size(409, 467);
+			this.splitContainer1.SplitterDistance = 420;
+			this.splitContainer1.TabIndex = 39;
+			// 
+			// textDevNote
+			// 
+			this.textDevNote.AcceptsTab = true;
+			this.textDevNote.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.textDevNote.BackColor = System.Drawing.SystemColors.Window;
+			this.textDevNote.DetectLinksEnabled = false;
+			this.textDevNote.DetectUrls = false;
+			this.textDevNote.Location = new System.Drawing.Point(1, 0);
+			this.textDevNote.Name = "textDevNote";
+			this.textDevNote.QuickPasteType = OpenDentBusiness.QuickPasteType.JobManager;
+			this.textDevNote.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
+			this.textDevNote.Size = new System.Drawing.Size(406, 44);
+			this.textDevNote.SpellCheckIsEnabled = false;
+			this.textDevNote.TabIndex = 6;
+			this.textDevNote.Text = "";
+			this.textDevNote.Leave += new System.EventHandler(this.textDevNote_Leave);
+			// 
 			// FormBugSubmissions
 			// 
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
 			this.CancelButton = this.butCancel;
 			this.ClientSize = new System.Drawing.Size(1232, 760);
+			this.Controls.Add(this.splitContainer1);
+			this.Controls.Add(this.comboSortBy);
+			this.Controls.Add(this.label14);
+			this.Controls.Add(this.comboGrouping);
+			this.Controls.Add(this.label13);
 			this.Controls.Add(this.menuOptions);
 			this.Controls.Add(this.gridCustomerSubs);
 			this.Controls.Add(this.gridOfficeInfo);
 			this.Controls.Add(this.groupBox2);
 			this.Controls.Add(this.label5);
 			this.Controls.Add(this.groupFilters);
-			this.Controls.Add(this.textStack);
 			this.Controls.Add(this.gridSubs);
 			this.Controls.Add(this.butAddBug);
 			this.Controls.Add(this.butCancel);
@@ -625,6 +726,10 @@ namespace OpenDental{
 			this.groupBox2.ResumeLayout(false);
 			this.menuOptions.ResumeLayout(false);
 			this.menuOptions.PerformLayout();
+			this.splitContainer1.Panel1.ResumeLayout(false);
+			this.splitContainer1.Panel2.ResumeLayout(false);
+			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
+			this.splitContainer1.ResumeLayout(false);
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -649,7 +754,7 @@ namespace OpenDental{
 		private System.Windows.Forms.CheckBox checkShowAttached;
 		private System.Windows.Forms.GroupBox groupBox2;
 		private System.Windows.Forms.Label label6;
-		private System.Windows.Forms.Label labelCustomerName;
+		private System.Windows.Forms.Label labelRegKey;
 		private System.Windows.Forms.Label labelCustomerPhone;
 		private System.Windows.Forms.Label label9;
 		private System.Windows.Forms.Label labelCustomerState;
@@ -668,11 +773,17 @@ namespace OpenDental{
 		private System.Windows.Forms.CheckBox checkExcludeHQ;
 		private System.Windows.Forms.Label label7;
 		private UI.Button butBugTask;
-		private System.Windows.Forms.Label label13;
-		private System.Windows.Forms.ComboBox comboGrouping;
 		private ODtextBox textPatNums;
 		private System.Windows.Forms.MenuStrip menuOptions;
 		private System.Windows.Forms.ToolStripMenuItem toolsToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem findPreviouslyFixedSubmisisonsToolStripMenuItem;
+		private System.Windows.Forms.ComboBox comboSortBy;
+		private System.Windows.Forms.Label label14;
+		private System.Windows.Forms.ComboBox comboGrouping;
+		private System.Windows.Forms.Label label13;
+		private System.Windows.Forms.SplitContainer splitContainer1;
+		private ODtextBox textDevNote;
+		private ODtextBox textDevNoteFilter;
+		private System.Windows.Forms.Label label15;
 	}
 }

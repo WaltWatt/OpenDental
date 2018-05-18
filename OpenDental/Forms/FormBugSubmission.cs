@@ -9,7 +9,7 @@ using CodeBase;
 namespace OpenDental {
 	public partial class FormBugSubmission:ODForm {
 		///<summary></summary>
-		private BugSubmission _sub;
+		public BugSubmission Submission;
 		///<summary>Used to determine if a new bug should show (Enhancement) in the description.</summary>
 		private Job _jobCur;
 		///<summary>Null unless a bug is added  or alrady exists.</summary>
@@ -18,20 +18,29 @@ namespace OpenDental {
 		private Patient _patCur;
 		///<summary></summary>
 		private List<JobLink> _listLinks=new List<JobLink>();
+
 		public FormBugSubmission(BugSubmission bugSub,Job job=null) {
 			InitializeComponent();
 			Lan.F(this);
-			_sub=bugSub;
+			Submission=bugSub;
 			_jobCur=job;
 		}
 
 		private void FormBugSubmission_Load(object sender,EventArgs e) {
-			textStack.Text=_sub.ExceptionMessageText+"\r\n"+_sub.ExceptionStackTrace;
-			labelRegKey.Text=_sub.RegKey;
-			labelDateTime.Text=POut.DateT(_sub.SubmissionDateTime);
-			labelVersion.Text=_sub.Info.DictPrefValues[PrefName.ProgramVersion];
-			if(_sub.BugId!=0) {//Already associated to a bug
-				_bug=Bugs.GetOne(_sub.BugId);
+			textStack.Text=Submission.ExceptionMessageText+"\r\n"+Submission.ExceptionStackTrace;
+			textDevNote.Text=Submission.DevNote;
+			try {
+				RegistrationKey key=RegistrationKeys.GetByKey(Submission.RegKey);
+				_patCur=Patients.GetPat(key.PatNum);
+			}
+			catch(Exception ex) {
+				ex.DoNothing();
+			}
+			labelName.Text=_patCur?.GetNameLF()??"";
+			labelDateTime.Text=POut.DateT(Submission.SubmissionDateTime);
+			labelVersion.Text=Submission.Info.DictPrefValues[PrefName.ProgramVersion];
+			if(Submission.BugId!=0) {//Already associated to a bug
+				_bug=Bugs.GetOne(Submission.BugId);
 				butAddViewBug.Text="View Bug";
 			}
 			if(_bug!=null) {
@@ -40,8 +49,8 @@ namespace OpenDental {
 					butAddViewJob.Text="View Job";
 				}
 			}
-			FillOfficeInfoGrid(_sub);
-			SetCustomerInfo(_sub);
+			FillOfficeInfoGrid(Submission);
+			SetCustomerInfo(Submission);
 		}
 		
 		private void FillOfficeInfoGrid(BugSubmission sub){
@@ -85,7 +94,7 @@ namespace OpenDental {
 			if(sub==null) {
 				textStack.Text="";//Also clear any submission specific fields.
 				labelCustomerNum.Text="";
-				labelCustomerName.Text="";
+				labelRegKey.Text="";
 				labelCustomerState.Text="";
 				labelCustomerPhone.Text="";
 				labelSubNum.Text="";
@@ -93,22 +102,16 @@ namespace OpenDental {
 				FillOfficeInfoGrid(null);
 				butGoToAccount.Enabled=false;
 				butBugTask.Enabled=false;
+				textDevNote.Text="";
 				return;
 			}
 			try {
-				if(_patCur==null) {
-					RegistrationKey key=RegistrationKeys.GetByKey(sub.RegKey);
-					_patCur=Patients.GetPat(key.PatNum);
-					if(_patCur==null) {
-						return;//Should not happen.
-					}
-				}
-				labelCustomerNum.Text=_patCur.PatNum.ToString();
-				labelCustomerName.Text=_patCur.GetNameLF();
-				labelCustomerState.Text=_patCur.State;
-				labelCustomerPhone.Text=_patCur.WkPhone;
+				labelCustomerNum.Text=_patCur?.PatNum.ToString()??"";
+				labelRegKey.Text=sub.RegKey;
+				labelCustomerState.Text=_patCur?.State??"";
+				labelCustomerPhone.Text=_patCur?.WkPhone??"";
 				labelSubNum.Text=POut.Long(sub.BugSubmissionNum);
-				labelLastCall.Text=Commlogs.GetDateTimeOfLastEntryForPat(_patCur.PatNum).ToString();
+				labelLastCall.Text=Commlogs.GetDateTimeOfLastEntryForPat(_patCur?.PatNum??0).ToString();
 			}
 			catch(Exception ex) {
 				ex.DoNothing();
@@ -117,13 +120,27 @@ namespace OpenDental {
 			butBugTask.Enabled=true;
 		}
 		
+		private void textDevNote_Leave(object sender,EventArgs e) {
+			if(Submission.DevNote==textDevNote.Text) {
+				return;
+			}
+			Submission.DevNote=textDevNote.Text;
+			BugSubmissions.Update(Submission);
+		}
+
 		private void butGoToAccount_Click(object sender,EventArgs e) {
+			if(_patCur==null) {
+				return;
+			}
 			//Button is only enabled if _patCur is not null.
 			GotoModule.GotoAccount(_patCur.PatNum);
 		}
 
 		private void butBugTask_Click(object sender,EventArgs e) {
-			BugSubmissionL.CreateTask(_patCur,_sub);
+			if(_patCur==null) {
+				return;
+			}
+			BugSubmissionL.CreateTask(_patCur,Submission);
 		}
 		
 		private void butCompare_Click(object sender,EventArgs e) {
@@ -137,7 +154,7 @@ namespace OpenDental {
 
 		private void butAddViewBug_Click(object sender,EventArgs e) {
 			if(butAddViewBug.Text=="View Bug") {
-				OpenBug(_sub);
+				OpenBug(Submission);
 				return;
 			}
 			if(AddBug()) {//Bug added.
@@ -168,11 +185,14 @@ namespace OpenDental {
 				formBE.ShowDialog();
 				return false;
 			}
-			_bug=BugSubmissionL.AddBug(_sub,_jobCur);
+			_bug=BugSubmissionL.AddBug(Submission,_jobCur);
 			return (_bug==null);
 		}
 		
 		private void butAddViewJob_Click(object sender,EventArgs e) {
+			if(_patCur==null) {
+				return;
+			}
 			if(_bug!=null && _bug.BugId!=0) {//View Job mode
 				if(_listLinks.Count==1) {
 					JobLink link=_listLinks.First();	
@@ -183,7 +203,7 @@ namespace OpenDental {
 				}
 				return;
 			}
-			_bug=BugSubmissionL.AddBugAndJob(this,new List<BugSubmission>() { _sub },_patCur);
+			_bug=BugSubmissionL.AddBugAndJob(this,new List<BugSubmission>() { Submission },_patCur);
 			if(_bug==null) {
 				return;
 			}
@@ -192,7 +212,7 @@ namespace OpenDental {
 			}
 		}
 
-		private void butCancel_Click(object sender,EventArgs e) {
+		private void butClose_Click(object sender,EventArgs e) {
 			DialogResult=DialogResult.Cancel;
 			Close();
 		}

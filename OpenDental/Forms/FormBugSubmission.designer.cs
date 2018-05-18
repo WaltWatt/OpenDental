@@ -25,8 +25,7 @@ namespace OpenDental{
 		private void InitializeComponent() {
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormBugSubmission));
 			this.butAddViewJob = new OpenDental.UI.Button();
-			this.butCancel = new OpenDental.UI.Button();
-			this.textStack = new OpenDental.ODtextBox();
+			this.butClose = new OpenDental.UI.Button();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
 			this.butCompare = new OpenDental.UI.Button();
 			this.butBugTask = new OpenDental.UI.Button();
@@ -41,17 +40,24 @@ namespace OpenDental{
 			this.label9 = new System.Windows.Forms.Label();
 			this.labelCustomerState = new System.Windows.Forms.Label();
 			this.label8 = new System.Windows.Forms.Label();
-			this.labelCustomerName = new System.Windows.Forms.Label();
+			this.labelRegKey = new System.Windows.Forms.Label();
 			this.label6 = new System.Windows.Forms.Label();
 			this.gridOfficeInfo = new OpenDental.UI.ODGrid();
-			this.labelRegKey = new System.Windows.Forms.Label();
+			this.labelName = new System.Windows.Forms.Label();
 			this.label2 = new System.Windows.Forms.Label();
 			this.labelDateTime = new System.Windows.Forms.Label();
 			this.label4 = new System.Windows.Forms.Label();
 			this.labelVersion = new System.Windows.Forms.Label();
 			this.label3 = new System.Windows.Forms.Label();
 			this.butAddViewBug = new OpenDental.UI.Button();
+			this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+			this.textStack = new OpenDental.ODtextBox();
+			this.textDevNote = new OpenDental.ODtextBox();
 			this.groupBox2.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
+			this.splitContainer1.Panel1.SuspendLayout();
+			this.splitContainer1.Panel2.SuspendLayout();
+			this.splitContainer1.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// butAddViewJob
@@ -70,40 +76,22 @@ namespace OpenDental{
 			this.butAddViewJob.Text = "&Add Job";
 			this.butAddViewJob.Click += new System.EventHandler(this.butAddViewJob_Click);
 			// 
-			// butCancel
+			// butClose
 			// 
-			this.butCancel.AdjustImageLocation = new System.Drawing.Point(0, 0);
-			this.butCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.butCancel.Autosize = true;
-			this.butCancel.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
-			this.butCancel.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
-			this.butCancel.CornerRadius = 4F;
-			this.butCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.butCancel.Location = new System.Drawing.Point(604, 612);
-			this.butCancel.MinimumSize = new System.Drawing.Size(80, 24);
-			this.butCancel.Name = "butCancel";
-			this.butCancel.Size = new System.Drawing.Size(80, 24);
-			this.butCancel.TabIndex = 2;
-			this.butCancel.Text = "&Cancel";
-			this.butCancel.Click += new System.EventHandler(this.butCancel_Click);
-			// 
-			// textStack
-			// 
-			this.textStack.AcceptsTab = true;
-			this.textStack.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.textStack.BackColor = System.Drawing.SystemColors.Window;
-			this.textStack.DetectLinksEnabled = false;
-			this.textStack.DetectUrls = false;
-			this.textStack.Location = new System.Drawing.Point(12, 37);
-			this.textStack.Name = "textStack";
-			this.textStack.QuickPasteType = OpenDentBusiness.QuickPasteType.JobManager;
-			this.textStack.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-			this.textStack.Size = new System.Drawing.Size(411, 445);
-			this.textStack.SpellCheckIsEnabled = false;
-			this.textStack.TabIndex = 5;
-			this.textStack.Text = "";
+			this.butClose.AdjustImageLocation = new System.Drawing.Point(0, 0);
+			this.butClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this.butClose.Autosize = true;
+			this.butClose.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
+			this.butClose.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
+			this.butClose.CornerRadius = 4F;
+			this.butClose.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+			this.butClose.Location = new System.Drawing.Point(604, 612);
+			this.butClose.MinimumSize = new System.Drawing.Size(80, 24);
+			this.butClose.Name = "butClose";
+			this.butClose.Size = new System.Drawing.Size(80, 24);
+			this.butClose.TabIndex = 2;
+			this.butClose.Text = "&Close";
+			this.butClose.Click += new System.EventHandler(this.butClose_Click);
 			// 
 			// groupBox2
 			// 
@@ -121,7 +109,7 @@ namespace OpenDental{
 			this.groupBox2.Controls.Add(this.label9);
 			this.groupBox2.Controls.Add(this.labelCustomerState);
 			this.groupBox2.Controls.Add(this.label8);
-			this.groupBox2.Controls.Add(this.labelCustomerName);
+			this.groupBox2.Controls.Add(this.labelRegKey);
 			this.groupBox2.Controls.Add(this.label6);
 			this.groupBox2.Location = new System.Drawing.Point(12, 488);
 			this.groupBox2.MinimumSize = new System.Drawing.Size(411, 148);
@@ -268,14 +256,14 @@ namespace OpenDental{
 			this.label8.Text = "State:";
 			this.label8.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
-			// labelCustomerName
+			// labelRegKey
 			// 
-			this.labelCustomerName.Location = new System.Drawing.Point(78, 34);
-			this.labelCustomerName.Name = "labelCustomerName";
-			this.labelCustomerName.Size = new System.Drawing.Size(215, 13);
-			this.labelCustomerName.TabIndex = 19;
-			this.labelCustomerName.Text = "John Doe";
-			this.labelCustomerName.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			this.labelRegKey.Location = new System.Drawing.Point(78, 34);
+			this.labelRegKey.Name = "labelRegKey";
+			this.labelRegKey.Size = new System.Drawing.Size(215, 13);
+			this.labelRegKey.TabIndex = 19;
+			this.labelRegKey.Text = "XXXX XXXX XXXX XXXX";
+			this.labelRegKey.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
 			// label6
 			// 
@@ -284,7 +272,7 @@ namespace OpenDental{
 			this.label6.Name = "label6";
 			this.label6.Size = new System.Drawing.Size(65, 13);
 			this.label6.TabIndex = 18;
-			this.label6.Text = "Name:";
+			this.label6.Text = "RegKey:";
 			this.label6.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
 			// gridOfficeInfo
@@ -309,14 +297,14 @@ namespace OpenDental{
 			this.gridOfficeInfo.TitleHeight = 18;
 			this.gridOfficeInfo.TranslationName = "TableOfficeInfo";
 			// 
-			// labelRegKey
+			// labelName
 			// 
-			this.labelRegKey.Location = new System.Drawing.Point(81, 7);
-			this.labelRegKey.Name = "labelRegKey";
-			this.labelRegKey.Size = new System.Drawing.Size(215, 13);
-			this.labelRegKey.TabIndex = 32;
-			this.labelRegKey.Text = "XXXXX";
-			this.labelRegKey.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			this.labelName.Location = new System.Drawing.Point(81, 7);
+			this.labelName.Name = "labelName";
+			this.labelName.Size = new System.Drawing.Size(215, 13);
+			this.labelName.TabIndex = 32;
+			this.labelName.Text = "XXXXX";
+			this.labelName.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
 			// label2
 			// 
@@ -325,7 +313,7 @@ namespace OpenDental{
 			this.label2.Name = "label2";
 			this.label2.Size = new System.Drawing.Size(65, 13);
 			this.label2.TabIndex = 31;
-			this.label2.Text = "RegKey:";
+			this.label2.Text = "Name:";
 			this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
 			// labelDateTime
@@ -382,29 +370,90 @@ namespace OpenDental{
 			this.butAddViewBug.Text = "&Add Bug";
 			this.butAddViewBug.Click += new System.EventHandler(this.butAddViewBug_Click);
 			// 
+			// splitContainer1
+			// 
+			this.splitContainer1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.splitContainer1.Location = new System.Drawing.Point(8, 37);
+			this.splitContainer1.Name = "splitContainer1";
+			this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
+			// 
+			// splitContainer1.Panel1
+			// 
+			this.splitContainer1.Panel1.Controls.Add(this.textStack);
+			// 
+			// splitContainer1.Panel2
+			// 
+			this.splitContainer1.Panel2.Controls.Add(this.textDevNote);
+			this.splitContainer1.Size = new System.Drawing.Size(415, 445);
+			this.splitContainer1.SplitterDistance = 400;
+			this.splitContainer1.TabIndex = 40;
+			// 
+			// textStack
+			// 
+			this.textStack.AcceptsTab = true;
+			this.textStack.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.textStack.BackColor = System.Drawing.SystemColors.Window;
+			this.textStack.DetectLinksEnabled = false;
+			this.textStack.DetectUrls = false;
+			this.textStack.Location = new System.Drawing.Point(0, 0);
+			this.textStack.Name = "textStack";
+			this.textStack.QuickPasteType = OpenDentBusiness.QuickPasteType.JobManager;
+			this.textStack.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
+			this.textStack.Size = new System.Drawing.Size(412, 397);
+			this.textStack.SpellCheckIsEnabled = false;
+			this.textStack.TabIndex = 5;
+			this.textStack.Text = "";
+			// 
+			// textDevNote
+			// 
+			this.textDevNote.AcceptsTab = true;
+			this.textDevNote.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.textDevNote.BackColor = System.Drawing.SystemColors.Window;
+			this.textDevNote.DetectLinksEnabled = false;
+			this.textDevNote.DetectUrls = false;
+			this.textDevNote.Location = new System.Drawing.Point(1, 0);
+			this.textDevNote.Name = "textDevNote";
+			this.textDevNote.QuickPasteType = OpenDentBusiness.QuickPasteType.JobManager;
+			this.textDevNote.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
+			this.textDevNote.Size = new System.Drawing.Size(412, 42);
+			this.textDevNote.SpellCheckIsEnabled = false;
+			this.textDevNote.TabIndex = 6;
+			this.textDevNote.Text = "";
+			this.textDevNote.Leave += new System.EventHandler(this.textDevNote_Leave);
+			// 
 			// FormBugSubmission
 			// 
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
-			this.CancelButton = this.butCancel;
+			this.CancelButton = this.butClose;
 			this.ClientSize = new System.Drawing.Size(692, 642);
+			this.Controls.Add(this.splitContainer1);
 			this.Controls.Add(this.butAddViewBug);
 			this.Controls.Add(this.labelVersion);
 			this.Controls.Add(this.label3);
 			this.Controls.Add(this.labelDateTime);
 			this.Controls.Add(this.label4);
-			this.Controls.Add(this.labelRegKey);
+			this.Controls.Add(this.labelName);
 			this.Controls.Add(this.label2);
 			this.Controls.Add(this.gridOfficeInfo);
 			this.Controls.Add(this.groupBox2);
-			this.Controls.Add(this.textStack);
 			this.Controls.Add(this.butAddViewJob);
-			this.Controls.Add(this.butCancel);
+			this.Controls.Add(this.butClose);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MinimumSize = new System.Drawing.Size(708, 681);
 			this.Name = "FormBugSubmission";
 			this.Text = "Bug Submissions";
 			this.Load += new System.EventHandler(this.FormBugSubmission_Load);
 			this.groupBox2.ResumeLayout(false);
+			this.splitContainer1.Panel1.ResumeLayout(false);
+			this.splitContainer1.Panel2.ResumeLayout(false);
+			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
+			this.splitContainer1.ResumeLayout(false);
 			this.ResumeLayout(false);
 
 		}
@@ -412,11 +461,10 @@ namespace OpenDental{
 		#endregion
 
 		private OpenDental.UI.Button butAddViewJob;
-		private OpenDental.UI.Button butCancel;
-		private ODtextBox textStack;
+		private OpenDental.UI.Button butClose;
 		private System.Windows.Forms.GroupBox groupBox2;
 		private System.Windows.Forms.Label label6;
-		private System.Windows.Forms.Label labelCustomerName;
+		private System.Windows.Forms.Label labelRegKey;
 		private System.Windows.Forms.Label labelCustomerPhone;
 		private System.Windows.Forms.Label label9;
 		private System.Windows.Forms.Label labelCustomerState;
@@ -430,7 +478,7 @@ namespace OpenDental{
 		private System.Windows.Forms.Label labelLastCall;
 		private System.Windows.Forms.Label label12;
 		private UI.Button butBugTask;
-		private System.Windows.Forms.Label labelRegKey;
+		private System.Windows.Forms.Label labelName;
 		private System.Windows.Forms.Label label2;
 		private System.Windows.Forms.Label labelDateTime;
 		private System.Windows.Forms.Label label4;
@@ -438,5 +486,8 @@ namespace OpenDental{
 		private System.Windows.Forms.Label label3;
 		private UI.Button butAddViewBug;
 		private UI.Button butCompare;
+		private System.Windows.Forms.SplitContainer splitContainer1;
+		private ODtextBox textStack;
+		private ODtextBox textDevNote;
 	}
 }

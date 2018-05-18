@@ -38,6 +38,9 @@ namespace OpenDentBusiness {
 		///Automatically set in constructor.</summary>
 		[CrudColumn(SpecialType=CrudSpecialColType.TextIsClob)]
 		public string DbInfoJson;
+		///<summary>Used to add general notes to a submissions.</summary>
+		[CrudColumn(SpecialType=CrudSpecialColType.TextIsClob)]
+		public string DevNote;
 		
 		[XmlIgnore,JsonIgnore]
 		[CrudColumn(IsNotDbColumn=true)]
@@ -62,7 +65,7 @@ namespace OpenDentBusiness {
 
 		///<summary>This constructor utilizes the Open Dental preference cache.
 		///Only use this constructor from an Open Dental proper instance, never call from other entities (e.g. WebServiceMainHQ).</summary>
-		internal BugSubmission(Exception e,string threadName="",long patNum=-1,string moduleName="") : this() {
+		public BugSubmission(Exception e,string threadName="",long patNum=-1,string moduleName="") : this() {
 			ExceptionMessageText=e.Message;
 			ExceptionStackTrace=e.StackTrace;
 			DbInfoJson=GetDbInfoJSON(patNum,moduleName);
@@ -72,6 +75,10 @@ namespace OpenDentBusiness {
 			Info.ThreadName=threadName;
 		}
 	
+		public BugSubmission Copy() {
+			return (BugSubmission)this.MemberwiseClone();
+		}
+
 		///<summary>Returns serialized DbInfo object as JSON string of database info from both the preference table and non preferernce table info.</summary>
 		private string GetDbInfoJSON(long patNum,string moduleName) {
 			_info=new BugSubmission.SubmissionInfo();

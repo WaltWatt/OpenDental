@@ -54,6 +54,7 @@ namespace OpenDentBusiness.Crud{
 				bugSubmission.ExceptionMessageText= PIn.String(row["ExceptionMessageText"].ToString());
 				bugSubmission.ExceptionStackTrace = PIn.String(row["ExceptionStackTrace"].ToString());
 				bugSubmission.DbInfoJson          = PIn.String(row["DbInfoJson"].ToString());
+				bugSubmission.DevNote             = PIn.String(row["DevNote"].ToString());
 				retVal.Add(bugSubmission);
 			}
 			return retVal;
@@ -73,6 +74,7 @@ namespace OpenDentBusiness.Crud{
 			table.Columns.Add("ExceptionMessageText");
 			table.Columns.Add("ExceptionStackTrace");
 			table.Columns.Add("DbInfoJson");
+			table.Columns.Add("DevNote");
 			foreach(BugSubmission bugSubmission in listBugSubmissions) {
 				table.Rows.Add(new object[] {
 					POut.Long  (bugSubmission.BugSubmissionNum),
@@ -83,6 +85,7 @@ namespace OpenDentBusiness.Crud{
 					            bugSubmission.ExceptionMessageText,
 					            bugSubmission.ExceptionStackTrace,
 					            bugSubmission.DbInfoJson,
+					            bugSubmission.DevNote,
 				});
 			}
 			return table;
@@ -123,7 +126,7 @@ namespace OpenDentBusiness.Crud{
 			if(useExistingPK || PrefC.RandomKeys) {
 				command+="BugSubmissionNum,";
 			}
-			command+="SubmissionDateTime,BugId,RegKey,DbVersion,ExceptionMessageText,ExceptionStackTrace,DbInfoJson) VALUES(";
+			command+="SubmissionDateTime,BugId,RegKey,DbVersion,ExceptionMessageText,ExceptionStackTrace,DbInfoJson,DevNote) VALUES(";
 			if(useExistingPK || PrefC.RandomKeys) {
 				command+=POut.Long(bugSubmission.BugSubmissionNum)+",";
 			}
@@ -134,7 +137,8 @@ namespace OpenDentBusiness.Crud{
 				+"'"+POut.String(bugSubmission.DbVersion)+"',"
 				+"'"+POut.String(bugSubmission.ExceptionMessageText)+"',"
 				+    DbHelper.ParamChar+"paramExceptionStackTrace,"
-				+    DbHelper.ParamChar+"paramDbInfoJson)";
+				+    DbHelper.ParamChar+"paramDbInfoJson,"
+				+    DbHelper.ParamChar+"paramDevNote)";
 			if(bugSubmission.ExceptionStackTrace==null) {
 				bugSubmission.ExceptionStackTrace="";
 			}
@@ -143,11 +147,15 @@ namespace OpenDentBusiness.Crud{
 				bugSubmission.DbInfoJson="";
 			}
 			OdSqlParameter paramDbInfoJson=new OdSqlParameter("paramDbInfoJson",OdDbType.Text,POut.StringParam(bugSubmission.DbInfoJson));
+			if(bugSubmission.DevNote==null) {
+				bugSubmission.DevNote="";
+			}
+			OdSqlParameter paramDevNote=new OdSqlParameter("paramDevNote",OdDbType.Text,POut.StringParam(bugSubmission.DevNote));
 			if(useExistingPK || PrefC.RandomKeys) {
-				Db.NonQ(command,paramExceptionStackTrace,paramDbInfoJson);
+				Db.NonQ(command,paramExceptionStackTrace,paramDbInfoJson,paramDevNote);
 			}
 			else {
-				bugSubmission.BugSubmissionNum=Db.NonQ(command,true,"BugSubmissionNum","bugSubmission",paramExceptionStackTrace,paramDbInfoJson);
+				bugSubmission.BugSubmissionNum=Db.NonQ(command,true,"BugSubmissionNum","bugSubmission",paramExceptionStackTrace,paramDbInfoJson,paramDevNote);
 			}
 			return bugSubmission.BugSubmissionNum;
 		}
@@ -175,7 +183,7 @@ namespace OpenDentBusiness.Crud{
 			if(isRandomKeys || useExistingPK) {
 				command+="BugSubmissionNum,";
 			}
-			command+="SubmissionDateTime,BugId,RegKey,DbVersion,ExceptionMessageText,ExceptionStackTrace,DbInfoJson) VALUES(";
+			command+="SubmissionDateTime,BugId,RegKey,DbVersion,ExceptionMessageText,ExceptionStackTrace,DbInfoJson,DevNote) VALUES(";
 			if(isRandomKeys || useExistingPK) {
 				command+=POut.Long(bugSubmission.BugSubmissionNum)+",";
 			}
@@ -186,7 +194,8 @@ namespace OpenDentBusiness.Crud{
 				+"'"+POut.String(bugSubmission.DbVersion)+"',"
 				+"'"+POut.String(bugSubmission.ExceptionMessageText)+"',"
 				+    DbHelper.ParamChar+"paramExceptionStackTrace,"
-				+    DbHelper.ParamChar+"paramDbInfoJson)";
+				+    DbHelper.ParamChar+"paramDbInfoJson,"
+				+    DbHelper.ParamChar+"paramDevNote)";
 			if(bugSubmission.ExceptionStackTrace==null) {
 				bugSubmission.ExceptionStackTrace="";
 			}
@@ -195,11 +204,15 @@ namespace OpenDentBusiness.Crud{
 				bugSubmission.DbInfoJson="";
 			}
 			OdSqlParameter paramDbInfoJson=new OdSqlParameter("paramDbInfoJson",OdDbType.Text,POut.StringParam(bugSubmission.DbInfoJson));
+			if(bugSubmission.DevNote==null) {
+				bugSubmission.DevNote="";
+			}
+			OdSqlParameter paramDevNote=new OdSqlParameter("paramDevNote",OdDbType.Text,POut.StringParam(bugSubmission.DevNote));
 			if(useExistingPK || isRandomKeys) {
-				Db.NonQ(command,paramExceptionStackTrace,paramDbInfoJson);
+				Db.NonQ(command,paramExceptionStackTrace,paramDbInfoJson,paramDevNote);
 			}
 			else {
-				bugSubmission.BugSubmissionNum=Db.NonQ(command,true,"BugSubmissionNum","bugSubmission",paramExceptionStackTrace,paramDbInfoJson);
+				bugSubmission.BugSubmissionNum=Db.NonQ(command,true,"BugSubmissionNum","bugSubmission",paramExceptionStackTrace,paramDbInfoJson,paramDevNote);
 			}
 			return bugSubmission.BugSubmissionNum;
 		}
@@ -213,7 +226,8 @@ namespace OpenDentBusiness.Crud{
 				+"DbVersion           = '"+POut.String(bugSubmission.DbVersion)+"', "
 				+"ExceptionMessageText= '"+POut.String(bugSubmission.ExceptionMessageText)+"', "
 				+"ExceptionStackTrace =  "+DbHelper.ParamChar+"paramExceptionStackTrace, "
-				+"DbInfoJson          =  "+DbHelper.ParamChar+"paramDbInfoJson "
+				+"DbInfoJson          =  "+DbHelper.ParamChar+"paramDbInfoJson, "
+				+"DevNote             =  "+DbHelper.ParamChar+"paramDevNote "
 				+"WHERE BugSubmissionNum = "+POut.Long(bugSubmission.BugSubmissionNum);
 			if(bugSubmission.ExceptionStackTrace==null) {
 				bugSubmission.ExceptionStackTrace="";
@@ -223,7 +237,11 @@ namespace OpenDentBusiness.Crud{
 				bugSubmission.DbInfoJson="";
 			}
 			OdSqlParameter paramDbInfoJson=new OdSqlParameter("paramDbInfoJson",OdDbType.Text,POut.StringParam(bugSubmission.DbInfoJson));
-			Db.NonQ(command,paramExceptionStackTrace,paramDbInfoJson);
+			if(bugSubmission.DevNote==null) {
+				bugSubmission.DevNote="";
+			}
+			OdSqlParameter paramDevNote=new OdSqlParameter("paramDevNote",OdDbType.Text,POut.StringParam(bugSubmission.DevNote));
+			Db.NonQ(command,paramExceptionStackTrace,paramDbInfoJson,paramDevNote);
 		}
 
 		///<summary>Updates one BugSubmission in the database.  Uses an old object to compare to, and only alters changed fields.  This prevents collisions and concurrency problems in heavily used tables.  Returns true if an update occurred.</summary>
@@ -254,6 +272,10 @@ namespace OpenDentBusiness.Crud{
 				if(command!=""){ command+=",";}
 				command+="DbInfoJson = "+DbHelper.ParamChar+"paramDbInfoJson";
 			}
+			if(bugSubmission.DevNote != oldBugSubmission.DevNote) {
+				if(command!=""){ command+=",";}
+				command+="DevNote = "+DbHelper.ParamChar+"paramDevNote";
+			}
 			if(command==""){
 				return false;
 			}
@@ -265,9 +287,13 @@ namespace OpenDentBusiness.Crud{
 				bugSubmission.DbInfoJson="";
 			}
 			OdSqlParameter paramDbInfoJson=new OdSqlParameter("paramDbInfoJson",OdDbType.Text,POut.StringParam(bugSubmission.DbInfoJson));
+			if(bugSubmission.DevNote==null) {
+				bugSubmission.DevNote="";
+			}
+			OdSqlParameter paramDevNote=new OdSqlParameter("paramDevNote",OdDbType.Text,POut.StringParam(bugSubmission.DevNote));
 			command="UPDATE bugsubmission SET "+command
 				+" WHERE BugSubmissionNum = "+POut.Long(bugSubmission.BugSubmissionNum);
-			Db.NonQ(command,paramExceptionStackTrace,paramDbInfoJson);
+			Db.NonQ(command,paramExceptionStackTrace,paramDbInfoJson,paramDevNote);
 			return true;
 		}
 
@@ -291,6 +317,9 @@ namespace OpenDentBusiness.Crud{
 				return true;
 			}
 			if(bugSubmission.DbInfoJson != oldBugSubmission.DbInfoJson) {
+				return true;
+			}
+			if(bugSubmission.DevNote != oldBugSubmission.DevNote) {
 				return true;
 			}
 			return false;

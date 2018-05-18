@@ -29,6 +29,8 @@ namespace OpenDental {
 		private Dictionary<string,Patient> _dictPatients=new Dictionary<string, Patient>();
 		///<summary>The current patient associated to the selected bug submission row. Null if no row selected or if multiple rows selected.</summary>
 		private Patient _patCur;
+		///<summary>BugSubmission from the currently selected submission in either gridSubs or gridCustomerSubs if any, otherwise null.</summary>
+		private BugSubmission _subCur;
 		
 		///<summary>Set job if you would like to create a bug with (Enhancement) in the bug text.
 		///When isViewOnlyMode is true, you will not be able to create a bug.
@@ -48,7 +50,20 @@ namespace OpenDental {
 			comboGrouping.Items.Add("Customer");
 			comboGrouping.Items.Add("StackTrace");
 			//comboGrouping.Items.Add("95%");
-			comboGrouping.SelectedIndex=0;//Default to None.
+			switch(_viewMode) {
+				case FormBugSubmissionMode.AddBug:
+					comboGrouping.SelectedIndex=2;//Default to StackTrace.
+					break;
+				case FormBugSubmissionMode.SelectionMode:
+				case FormBugSubmissionMode.ValidationMode:
+				case FormBugSubmissionMode.ViewOnly:
+					comboGrouping.SelectedIndex=0;//Default to None.
+					break;
+			}
+			#endregion
+			#region comboSortBy
+			comboSortBy.Items.Add("Vers./Count");
+			comboSortBy.SelectedIndex=0;//Default to Vers./Count
 			#endregion
 			#region Right Click Menu
 			ContextMenu gridSubMenu=new ContextMenu();
@@ -112,8 +127,11 @@ namespace OpenDental {
 		}
 
 		private void FillSubGrid(bool isRefreshNeeded=false) {
+			Action loadingProgress=null;
 			SetCustomerInfo();
 			if(isRefreshNeeded) {
+				loadingProgress=ODProgressOld.ShowProgressStatus("FormBugSubmissions",this,Lan.g(this,"Refreshing Data")+"...",false);
+				#region Refresh Logic
 				if(_viewMode.In(FormBugSubmissionMode.ViewOnly,FormBugSubmissionMode.ValidationMode)) {
 					_listAllSubs=ListViewedSubs;
 				}
@@ -127,12 +145,14 @@ namespace OpenDental {
 					e.DoNothing();
 					_dictPatients=new Dictionary<string, Patient>();
 				}
+				#endregion
 			}
 			gridSubs.BeginUpdate();
+			#region gridSubs columns
 			gridSubs.Columns.Clear();
-			gridSubs.Columns.Add(new ODGridColumn("Reg Key",140));
+			gridSubs.Columns.Add(new ODGridColumn("Submitter",140));
 			gridSubs.Columns.Add(new ODGridColumn("Vers.",55,GridSortingStrategy.VersionNumber));
-			if(comboGrouping.SelectedIndex==0) {//None
+			if(comboGrouping.SelectedIndex==0) {//Group by 'None'
 				gridSubs.Columns.Add(new ODGridColumn("DateTime",75,GridSortingStrategy.DateParse));
 			}
 			else {
@@ -141,6 +161,9 @@ namespace OpenDental {
 			gridSubs.Columns.Add(new ODGridColumn("HasBug",50,HorizontalAlignment.Center));
 			gridSubs.Columns.Add(new ODGridColumn("Msg Text",300));
 			gridSubs.AllowSortingByColumn=true;
+			#endregion
+			#region Filter Logic
+			ODEvent.Fire(new ODEventArgs("FormBugSubmissions","Filtering Data"));
 			List<string> listSelectedVersions=comboVersions.ListSelectedItems.Select(x => (string)x).ToList();
 			if(listSelectedVersions.Contains("All")) {
 				listSelectedVersions.Clear();
@@ -155,106 +178,119 @@ namespace OpenDental {
 			List<string> listPatNumFilters=textPatNums.Text.Split(',')
 				.Where(x => !string.IsNullOrWhiteSpace(x))
 				.Select(x => x.ToLower()).ToList();
-			gridSubs.Rows.Clear();
 			_listAllSubs.ForEach(x => x.TagOD=null);
 			List<BugSubmission> listFilteredSubs=_listAllSubs.Where(x => 
 				PassesFilterValidation(x,listSelectedRegKeys,listStackFilters,listPatNumFilters,listSelectedVersions)
 			).ToList();
-			foreach(BugSubmission sub in listFilteredSubs){
-				ODGridRow row=new ODGridRow();
-				row.Cells.Add(sub.RegKey);
-				row.Cells.Add(sub.Info.DictPrefValues[PrefName.ProgramVersion]);
-				List<BugSubmission> listPreviousRows;
-				List<BugSubmission> listGroupedSubs;
-				List<string> listProgVersions;
+			if(isRefreshNeeded) {
+				FillVersionsFilter(listFilteredSubs);
+				FillRegKeyFilter(listFilteredSubs);
+			}
+			#endregion
+			#region Grouping Logic
+			List<BugSubmission> listGroupedSubs;
+			int index=0;
+			List<BugSubmission> listGridSubmissions=new List<BugSubmission>();
+			foreach(BugSubmission sub in listFilteredSubs) {
+				ODEvent.Fire(new ODEventArgs("FormBugSubmissions","Grouping Data: "+POut.Double(((double)index++/(double)listFilteredSubs.Count)*100)+"%"));
+				if(sub.TagOD!=null) {
+					continue;
+				}
 				switch(comboGrouping.SelectedIndex) {
 					case 0:
 						#region None
-						row.Cells.Add(sub.SubmissionDateTime.ToString().Replace('\r',' '));
-						row.Tag=new List<BugSubmission>() { sub };//Tag is a specific bugSubmission
+						sub.TagOD=new List<BugSubmission>() { sub };//Tag is a specific bugSubmission
+						listGridSubmissions.Add(sub.Copy());
 						#endregion
 						break;
 					case 1:
 						#region Customer
-						//Take previously proccessed rows and see if we have already handled the grouping.
-						listPreviousRows=listFilteredSubs.Take(listFilteredSubs.IndexOf(sub)).ToList();
-						if(listPreviousRows.Any(x => x.RegKey==sub.RegKey
-								&&x.Info.DictPrefValues[PrefName.ProgramVersion]==sub.Info.DictPrefValues[PrefName.ProgramVersion]
-								&&x.ExceptionStackTrace==sub.ExceptionStackTrace
-								&&x.BugId==sub.BugId)) {
-							//Skip adding rows that have already been added when grouping
+						listGroupedSubs=listFilteredSubs.FindAll(x => x.TagOD==null && x.RegKey==sub.RegKey
+							&& x.Info.DictPrefValues[PrefName.ProgramVersion]==sub.Info.DictPrefValues[PrefName.ProgramVersion]
+							&& x.ExceptionStackTrace==sub.ExceptionStackTrace
+							&& x.BugId==sub.BugId);
+						if(listGroupedSubs.Count==0) {
 							continue;
 						}
-						listGroupedSubs=listFilteredSubs.FindAll(x => x.RegKey==sub.RegKey
-							&&x.Info.DictPrefValues[PrefName.ProgramVersion]==sub.Info.DictPrefValues[PrefName.ProgramVersion]
-							&&x.ExceptionStackTrace==sub.ExceptionStackTrace
-							&&x.BugId==sub.BugId);
-						row.Cells.Add(listGroupedSubs.Count.ToString());
-						//row.Cells[1].Text=string.Join(",",listGroupedSubs.Select(x => x.Info.DictPrefValues[PrefName.ProgramVersion]).ToList());
-						listProgVersions=listGroupedSubs.Select(x => x.Info.DictPrefValues[PrefName.ProgramVersion]).Distinct().ToList();
-						if(listProgVersions.Count>1) {
-							row.Cells[1].Text=listProgVersions.Select(x => new Version(x)).Max().ToString();
-						}
-						else {
-							row.Cells[1].Text=listProgVersions.First();
-						}
-						row.Tag=listGroupedSubs;//Tag is a list of bugSubmissions
+						listGroupedSubs=listGroupedSubs.OrderByDescending(x => new Version(x.Info.DictPrefValues[PrefName.ProgramVersion]))
+							.ThenByDescending(x => x.SubmissionDateTime).ToList();
+						listGroupedSubs.ForEach(x => x.TagOD=true);//So we don't considered previously handled submissions.
+						listGroupedSubs.First().TagOD=listGroupedSubs;//First element is what is shown in grid, still wont be considered again.
+						listGridSubmissions.Add(listGroupedSubs.First().Copy());
 						#endregion
 						break;
 					case 2:
 						#region StackTrace
-						//Take previously proccessed rows and see if we have already handled the grouping.
-						listPreviousRows=listFilteredSubs.Take(listFilteredSubs.IndexOf(sub)).ToList();
-						if(listPreviousRows.Any(x => x.ExceptionStackTrace==sub.ExceptionStackTrace
-								&&x.BugId==sub.BugId)) {
-							//Skip adding rows that have already been added when grouping
+						listGroupedSubs=listFilteredSubs.FindAll(x => x.TagOD==null && x.ExceptionStackTrace==sub.ExceptionStackTrace && x.BugId==sub.BugId);
+						if(listGroupedSubs.Count==0) {
 							continue;
 						}
-						listGroupedSubs=listFilteredSubs.FindAll(x => x.ExceptionStackTrace==sub.ExceptionStackTrace
-							&&x.BugId==sub.BugId);
-						row.Cells.Add(listGroupedSubs.Count.ToString());
-						listProgVersions=listGroupedSubs.Select(x => x.Info.DictPrefValues[PrefName.ProgramVersion]).Distinct().ToList();
-						if(listProgVersions.Count>1) {
-							row.Cells[1].Text=listProgVersions.Select(x => new Version(x)).Max().ToString();
-						}
-						else {
-							row.Cells[1].Text=listProgVersions.First();
-						}
-						row.Tag=listGroupedSubs;//Tag is a list of bugSubmissions
+						listGroupedSubs=listGroupedSubs.OrderByDescending(x => new Version(x.Info.DictPrefValues[PrefName.ProgramVersion]))
+							.ThenByDescending(x => x.SubmissionDateTime).ToList();
+						listGroupedSubs.ForEach(x => x.TagOD=true);//So we don't considered previously handled submissions.
+						listGroupedSubs.First().TagOD=listGroupedSubs;//First element is what is shown in grid, still wont be considered again.
+						listGridSubmissions.Add(listGroupedSubs.First().Copy());
 						#endregion
 						break;
 					case 3:
 						#region 95%
-						//if(sub.TagOD!=null) {
+						//listGroupedSubs=listFilteredSubs.FindAll(x => x.TagOD==null && x.BugId==sub.BugId
+						//	&& x.ExceptionMessageText==sub.ExceptionMessageText
+						//	&& (x==sub||BugSubmissionL.CalculateSimilarity(x.ExceptionStackTrace,sub.ExceptionStackTrace)>95));
+						//if(listGroupedSubs.Count==0) {
 						//	continue;
 						//}
-						//listGroupedSubs=listFilteredSubs.FindAll(x => x.BugId==sub.BugId
-						//	&&x.TagOD==null
-						//	&&CalculateSimilarity(x.ExceptionMessageText,sub.ExceptionMessageText)>95
-						//	&&(x==sub||CalculateSimilarity(x.ExceptionStackTrace,sub.ExceptionStackTrace)>95));
-						//listGroupedSubs.ForEach(x => x.TagOD=true);
-						//row.Cells.Add(listGroupedSubs.Count.ToString());
-						//listProgVersions=listGroupedSubs.Select(x => x.Info.DictPrefValues[PrefName.ProgramVersion]).Distinct().ToList();
-						//if(listProgVersions.Count>1) {
-						//	row.Cells[1].Text=listProgVersions.Select(x => new Version(x)).Max().ToString();
-						//}
-						//else {
-						//	row.Cells[1].Text=listProgVersions.First();
-						//}
-						//row.Tag=listGroupedSubs;//Tag is a list of bugSubmissions
+						//listGroupedSubs=listGroupedSubs.OrderByDescending(x => new Version(x.Info.DictPrefValues[PrefName.ProgramVersion]))
+						//	.ThenByDescending(x => x.SubmissionDateTime).ToList();
+						//listGroupedSubs.ForEach(x => x.TagOD=true);//So we don't considered previously handled submissions.
+						//listGroupedSubs.First().TagOD=listGroupedSubs;//First element is what is shown in grid, still wont be considered again.
+						//listGridSubmissions.Add(listGroupedSubs.First().Copy());
 						#endregion
 						break;
 				}
-				row.Cells.Add(sub.BugId==0 ? "" : "X");
-				row.Cells.Add(sub.ExceptionMessageText);
-				gridSubs.Rows.Add(row);
+			}
+			#endregion
+			#region Sorting Logic
+			ODEvent.Fire(new ODEventArgs("FormBugSubmissions","Sorting Data"));
+			switch(comboSortBy.SelectedIndex) {
+				case 0:
+					listGridSubmissions=listGridSubmissions.OrderByDescending(x => new Version(x.Info.DictPrefValues[PrefName.ProgramVersion]))
+						.ThenByDescending(x => GetGroupCount(x))
+						.ThenByDescending(x => x.SubmissionDateTime).ToList();
+					break;
+			}
+			#endregion
+			#region Fill gridSubs
+			gridSubs.Rows.Clear();
+			index=0;
+			foreach(BugSubmission sub in listGridSubmissions){
+				ODEvent.Fire(new ODEventArgs("FormBugSubmissions","Filling Grid: "+POut.Double(((double)index++/(double)listFilteredSubs.Count)*100)+"%"));
+				gridSubs.Rows.Add(GetODGridRowForSub(sub));
 			}
 			gridSubs.EndUpdate();
-			gridSubs.SortForced(1,false);//Sort by Version column
-			if(isRefreshNeeded) {
-				FillVersionsFilter();
-				FillRegKeyFilter();
+			#endregion
+			loadingProgress?.Invoke();
+		}
+
+		private ODGridRow GetODGridRowForSub(BugSubmission sub) {
+			ODGridRow row=new ODGridRow();
+			row.Cells.Add(_dictPatients.ContainsKey(sub.RegKey)?_dictPatients[sub.RegKey].GetNameLF():sub.RegKey);
+			List<BugSubmission> listGroupedSubs=(sub.TagOD as List<BugSubmission>);
+			row.Cells.Add(listGroupedSubs.First().Info.DictPrefValues[PrefName.ProgramVersion]);
+			switch(comboGrouping.SelectedIndex) {
+				case 0://None
+					row.Cells.Add(sub.SubmissionDateTime.ToString().Replace('\r',' '));
+					break;
+				case 1://Customer
+				case 2://StackTrace
+				case 3://95%
+					row.Cells.Add(listGroupedSubs.Count.ToString());
+					break;
 			}
+			row.Cells.Add(sub.BugId==0 ? "" : "X");
+			row.Cells.Add(sub.ExceptionMessageText+(string.IsNullOrEmpty(sub.DevNote)?"":"\r\n\r\nDevNote: "+sub.DevNote));
+			row.Tag=listGroupedSubs;//Tag is a list of bugSubmissions, even if no grouping.
+			return row;
 		}
 
 		private bool PassesFilterValidation(BugSubmission sub,List<string> listSelectedRegKeys,
@@ -267,17 +303,22 @@ namespace OpenDental {
 					||(sub.BugId!=0 && !checkShowAttached.Checked)
 					||(checkExcludeHQ.Checked && (_dictPatients[sub.RegKey].BillingType==436||_dictPatients[sub.RegKey].PatNum==1486))//436 is "Internal Use" def, 1486 is HQ patNum.
 					||(listSelectedVersions.Count!=0 && !listSelectedVersions.Contains(sub.Info.DictPrefValues[PrefName.ProgramVersion]))
-					||(!sub.SubmissionDateTime.Between(dateRangePicker.GetDateTimeFrom(),dateRangePicker.GetDateTimeTo()))) 
+					||(!sub.SubmissionDateTime.Between(dateRangePicker.GetDateTimeFrom(),dateRangePicker.GetDateTimeTo()))
+					||(!string.IsNullOrWhiteSpace(textDevNoteFilter.Text)&&!sub.DevNote.ToLower().Contains(textDevNoteFilter.Text.ToLower())))
 			{
 				return false;
 			}
 			return true;
 		}
+
+		private int GetGroupCount(BugSubmission sub) {
+			return (sub.TagOD as List<BugSubmission>).Count;
+		}
 		
-		private void FillVersionsFilter() {
+		private void FillVersionsFilter(List<BugSubmission> listSubmissions) {
 			comboVersions.Items.Clear();
 			comboVersions.Items.Add("All");
-			List<string> listVersions=_listAllSubs.Select(x => x.Info.DictPrefValues[PrefName.ProgramVersion])
+			List<string> listVersions=listSubmissions.Select(x => x.Info.DictPrefValues[PrefName.ProgramVersion])
 				.Distinct()
 				.ToList();
 			listVersions.Sort((x,y) => new Version(y).CompareTo(new Version(x)));//descending
@@ -285,10 +326,10 @@ namespace OpenDental {
 			comboVersions.SetSelected(0,true);//Select 'All' by default
 		}
 		
-		private void FillRegKeyFilter() {
+		private void FillRegKeyFilter(List<BugSubmission> listSubmissions) {
 			comboRegKeys.Items.Clear();
 			comboRegKeys.Items.Add("All");
-			List<string> listVersions=_listAllSubs.Select(x => x.RegKey)
+			List<string> listVersions=listSubmissions.Select(x => x.RegKey)
 				.Distinct()
 				.ToList();
 			listVersions.Sort();
@@ -335,12 +376,17 @@ namespace OpenDental {
 		private void gridSubs_CellClick(object sender,UI.ODGridClickEventArgs e) {
 			if(e.Row==-1 || gridSubs.SelectedIndices.Length>1) {
 				SetCustomerInfo();//Clears customer info, stackTrace and info.
+				_subCur=null;
+				textDevNote.Enabled=false;
 				return;
 			}
+			textDevNote.Enabled=true;
 			BugSubmission sub=((List<BugSubmission>)gridSubs.Rows[e.Row].Tag)[0];
 			textStack.Text=sub.ExceptionMessageText+"\r\n"+sub.ExceptionStackTrace;
+			textDevNote.Text=sub.DevNote;
 			FillOfficeInfoGrid(sub);
 			SetCustomerInfo(sub);
+			_subCur=sub;
 		}
 		
 		///<summary>When sub is set, fills customer group box with various information.
@@ -349,7 +395,7 @@ namespace OpenDental {
 			if(sub==null) {
 				textStack.Text="";//Also clear any submission specific fields.
 				labelCustomerNum.Text="";
-				labelCustomerName.Text="";
+				labelRegKey.Text="";
 				labelCustomerState.Text="";
 				labelCustomerPhone.Text="";
 				labelSubNum.Text="";
@@ -360,6 +406,7 @@ namespace OpenDental {
 				gridCustomerSubs.EndUpdate();
 				butGoToAccount.Enabled=false;
 				butBugTask.Enabled=false;
+				textDevNote.Text="";
 				return;
 			}
 			try {
@@ -375,7 +422,7 @@ namespace OpenDental {
 					_dictPatients.Add(sub.RegKey,_patCur);
 				}
 				labelCustomerNum.Text=_patCur.PatNum.ToString();
-				labelCustomerName.Text=_patCur.GetNameLF();
+				labelRegKey.Text=sub.RegKey;
 				labelCustomerState.Text=_patCur.State;
 				labelCustomerPhone.Text=_patCur.WkPhone;
 				labelSubNum.Text=POut.Long(sub.BugSubmissionNum);
@@ -432,12 +479,15 @@ namespace OpenDental {
 		
 		private void gridCustomerSubs_CellClick(object sender,ODGridClickEventArgs e) {
 			if(e.Row==-1 || comboGrouping.SelectedIndex==0) {//0=None
+				_subCur=null;
 				return;
 			}
 			BugSubmission sub=(BugSubmission)gridCustomerSubs.Rows[e.Row].Tag;
 			textStack.Text=sub.ExceptionMessageText+"\r\n"+sub.ExceptionStackTrace;
+			textDevNote.Text=sub.DevNote;
 			FillOfficeInfoGrid(sub);
 			SetCustomerInfo(sub,false);
+			_subCur=sub;
 		}
 
 		private void gridCustomerSubs_CellDoubleClick(object sender,ODGridClickEventArgs e) {
@@ -494,6 +544,19 @@ namespace OpenDental {
 				gridOfficeInfo.Rows.Add(new ODGridRow("DatabaseName",sub.Info.DatabaseName?.ToString()));
 			}
 			gridOfficeInfo.EndUpdate();
+		}
+		
+		private void textDevNote_Leave(object sender,EventArgs e) {
+			if(_subCur==null || gridSubs.SelectedIndices.Length==0 || gridSubs.SelectedIndices.Length>1 || _subCur.DevNote==textDevNote.Text) {
+				return;
+			}
+			_subCur.DevNote=textDevNote.Text;
+			BugSubmissions.Update(_subCur);
+			if(_subCur.TagOD is List<BugSubmission>) {//If _subCur is set from gridCustomerSubs then do not update row because dev note is not shown.
+				gridSubs.BeginUpdate();
+				gridSubs.Rows[gridSubs.SelectedIndices[0]]=GetODGridRowForSub(_subCur);
+				gridSubs.EndUpdate();
+			}
 		}
 
 		private void dateRangePicker_CalendarClosed(object sender,EventArgs e) {
