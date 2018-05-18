@@ -1594,8 +1594,11 @@ namespace OpenDentBusiness {
 			public bool ShowTasks;
 			public bool ShowTreatPlan;
 
-		///<summary>Sets all Module Components to defaultStatus. Defaults to true.</summary>
-		public ChartModuleComponentsToLoad(bool isAllEnabled=true) {
+		///<summary>Serialization requires a parameterless constructor.</summary>
+		public ChartModuleComponentsToLoad() : this(true) { }
+
+		///<summary>Sets all Module Components to defaultStatus.</summary>
+		public ChartModuleComponentsToLoad(bool isAllEnabled) {
 			ShowAppointments=isAllEnabled;
 			ShowCommLog=isAllEnabled;
 			ShowCompleted=isAllEnabled;
