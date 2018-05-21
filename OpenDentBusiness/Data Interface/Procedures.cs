@@ -1772,9 +1772,9 @@ namespace OpenDentBusiness {
 			return Crud.ProcedureCrud.SelectMany(command);
 		}
 
-		///<summary>Gets patients treatment planned procedures associated to future scheduled appointments.  
+		///<summary>Gets patients treatment planned procedures associated to future scheduled appointments including today.
 		///Returns an empty list if listPatNum or listCodeNums is empty.</summary>
-		public static List<Procedure> GetProcsAttatchedToFutureAppt(List<long> listPatNums,List<long> listCodeNums) {
+		public static List<Procedure> GetProcsAttachedToFutureAppt(List<long> listPatNums,List<long> listCodeNums) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
 				return Meth.GetObject<List<Procedure>>(MethodBase.GetCurrentMethod(),listPatNums,listCodeNums);
 			}
@@ -1787,8 +1787,8 @@ namespace OpenDentBusiness {
 				+"WHERE appointment.PatNum IN ("+String.Join(",",listPatNums)+") "
 				+"AND procedurelog.CodeNum IN ("+String.Join(",",listCodeNums)+") "
 				+"AND procedurelog.ProcStatus="+POut.Int((int)ProcStat.TP)+" "
-				//All appts tomorrow or later
-				+"AND "+DbHelper.DateTConditionColumn("appointment.AptDateTime",ConditionOperator.GreaterThanOrEqual,MiscData.GetNowDateTime().AddDays(1))+" "
+				//All appts today or later
+				+"AND "+DbHelper.DateTConditionColumn("appointment.AptDateTime",ConditionOperator.GreaterThanOrEqual,MiscData.GetNowDateTime())+" "
 				+"AND appointment.AptStatus="+POut.Int((int)ApptStatus.Scheduled);
 			return Crud.ProcedureCrud.SelectMany(command);
 		}

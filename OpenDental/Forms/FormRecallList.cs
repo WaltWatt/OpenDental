@@ -1191,7 +1191,7 @@ namespace OpenDental{
 			List<ProcedureCode> listRecallProcsPractice=ProcedureCodes.GetFromCommaDelimitedList(
 				string.Join(",",listRecallTypePractice.Select(x=>x.Procedures).ToList()));
 			//List of practice recall TP procedures on future scheduled appointments for the listPatNums.
-			List<Procedure> listProcsOnFutureApts=Procedures.GetProcsAttatchedToFutureAppt(listPatNums,
+			List<Procedure> listProcsOnFutureApts=Procedures.GetProcsAttachedToFutureAppt(listPatNums,
 				listRecallProcsPractice.Select(x => x.CodeNum).ToList());
 			//Dictionary of PatNums and List of Procedures.
 			dictProcsOnFutureApts=listProcsOnFutureApts.GroupBy(x => x.PatNum)
