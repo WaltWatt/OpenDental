@@ -1167,14 +1167,27 @@ namespace OpenDental{
 		}
 
 		private void FillListBoxEraBehavior() {
+			/*
+			if(!ClearinghouseCur.CommBridge.In(EclaimsCommBridge.Claimstream,EclaimsCommBridge.ITRANS)) {
+				listBoxEraBehavior.SetBounds(0,0,0,30,BoundsSpecified.Height);
+			}
+			else {
+				listBoxEraBehavior.SetBounds(0,0,0,43,BoundsSpecified.Height);
+			}*/
 			listBoxEraBehavior.Items.Clear();
 			EraBehaviors[] arrayEraBehaviors=(EraBehaviors[])Enum.GetValues(typeof(EraBehaviors));
 			for(int i=0;i<arrayEraBehaviors.Length;i++) {
+				/*if(i==2 && !ClearinghouseCur.CommBridge.In(EclaimsCommBridge.Claimstream,EclaimsCommBridge.ITRANS)) {
+					continue;
+				}*/
 				string description=arrayEraBehaviors[i].GetDescription();
 				//use comboCommBridge selection to determine if ERA->EOB "translation" necessary
 				if(comboCommBridge.SelectedIndex.In((int)EclaimsCommBridge.Claimstream,(int)EclaimsCommBridge.ITRANS)) { 
 					description=Regex.Replace(description,"ERA","EOB"); 
 				}
+				/*else if(i==1) {
+					description="Download ERAs";
+				}*/
 				description=Lan.g("enumEraBehavior",description); //make sure the ERA->EOB replace gets run through translation
 				ODBoxItem<EraBehaviors> listBoxItem=new ODBoxItem<EraBehaviors>(description,arrayEraBehaviors[i]);
 				listBoxEraBehavior.Items.Add(listBoxItem);
