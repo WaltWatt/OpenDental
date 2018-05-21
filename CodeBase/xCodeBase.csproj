@@ -177,6 +177,7 @@
     <Compile Include="MVC\ODViewAbs.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Utilities\DateDefaultToday.cs" />
     <Compile Include="Utilities\IODProgress.cs" />
     <Compile Include="Utilities\ODNonNullable.cs" />
     <Compile Include="Utilities\DateSpan.cs" />
