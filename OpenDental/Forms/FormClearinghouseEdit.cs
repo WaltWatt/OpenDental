@@ -1045,7 +1045,8 @@ namespace OpenDental{
 				comboFormat.Items.Add(Lan.g("enumElectronicClaimFormat",Enum.GetNames(typeof(ElectronicClaimFormat))[i]));
 			}
 			for(int i=0;i<Enum.GetNames(typeof(EclaimsCommBridge)).Length;i++) {
-				comboCommBridge.Items.Add(Lan.g("enumEclaimsCommBridge",Enum.GetNames(typeof(EclaimsCommBridge))[i]));
+				string translatedCommBridgeName=Lan.g("enumEclaimsCommBridge",Enum.GetNames(typeof(EclaimsCommBridge))[i]);
+				comboCommBridge.Items.Add(new ODBoxItem<EclaimsCommBridge>(translatedCommBridgeName,(EclaimsCommBridge)i));
 			}
 			if(PrefC.HasClinicsEnabled) {
 				FillClinics();
@@ -1167,27 +1168,26 @@ namespace OpenDental{
 		}
 
 		private void FillListBoxEraBehavior() {
-			/*
-			if(!ClearinghouseCur.CommBridge.In(EclaimsCommBridge.Claimstream,EclaimsCommBridge.ITRANS)) {
+			if(!comboCommBridge.SelectedTag<EclaimsCommBridge>().In(EclaimsCommBridge.Claimstream,EclaimsCommBridge.ITRANS)) {//If US
 				listBoxEraBehavior.SetBounds(0,0,0,30,BoundsSpecified.Height);
 			}
 			else {
 				listBoxEraBehavior.SetBounds(0,0,0,43,BoundsSpecified.Height);
-			}*/
+			}
 			listBoxEraBehavior.Items.Clear();
 			EraBehaviors[] arrayEraBehaviors=(EraBehaviors[])Enum.GetValues(typeof(EraBehaviors));
 			for(int i=0;i<arrayEraBehaviors.Length;i++) {
-				/*if(i==2 && !ClearinghouseCur.CommBridge.In(EclaimsCommBridge.Claimstream,EclaimsCommBridge.ITRANS)) {
+				if(i==2 && !comboCommBridge.SelectedTag<EclaimsCommBridge>().In(EclaimsCommBridge.Claimstream,EclaimsCommBridge.ITRANS)) {//If US
 					continue;
-				}*/
+				}
 				string description=arrayEraBehaviors[i].GetDescription();
 				//use comboCommBridge selection to determine if ERA->EOB "translation" necessary
-				if(comboCommBridge.SelectedIndex.In((int)EclaimsCommBridge.Claimstream,(int)EclaimsCommBridge.ITRANS)) { 
-					description=Regex.Replace(description,"ERA","EOB"); 
+				if(comboCommBridge.SelectedTag<EclaimsCommBridge>().In(EclaimsCommBridge.Claimstream,EclaimsCommBridge.ITRANS)) {//If Canada
+					description=Regex.Replace(description,"ERA","EOB");
 				}
-				/*else if(i==1) {
+				else if(i==1) {
 					description="Download ERAs";
-				}*/
+				}
 				description=Lan.g("enumEraBehavior",description); //make sure the ERA->EOB replace gets run through translation
 				ODBoxItem<EraBehaviors> listBoxItem=new ODBoxItem<EraBehaviors>(description,arrayEraBehaviors[i]);
 				listBoxEraBehavior.Items.Add(listBoxItem);
@@ -1196,7 +1196,12 @@ namespace OpenDental{
 				}
 			}
 			if(listBoxEraBehavior.SelectedItems.Count==0) {//shouldn't happen because Clearinghouse.EraBehavior has a default in DB
-				listBoxEraBehavior.SelectedIndex=(int)EraBehaviors.DownloadAndReceive;//default 
+				if(!comboCommBridge.SelectedTag<EclaimsCommBridge>().In(EclaimsCommBridge.Claimstream,EclaimsCommBridge.ITRANS)) {//If US
+					listBoxEraBehavior.SelectedIndex=(int)EraBehaviors.DownloadDoNotReceive;
+				}
+				else {//Canada
+					listBoxEraBehavior.SelectedIndex=(int)EraBehaviors.DownloadAndReceive;//default
+				}
 			}
 		}
 
@@ -1491,8 +1496,10 @@ namespace OpenDental{
 		
 		private void comboCommBridge_SelectionChangeCommitted(object sender,EventArgs e) {
 			FillListBoxEraBehavior();//Update ERA/EOB list box, specifically for if we print ERA vs EOB.
-			listBoxEraBehavior.Enabled=(comboCommBridge.SelectedIndex.In((int)EclaimsCommBridge.EDS,(int)EclaimsCommBridge.Claimstream,(int)EclaimsCommBridge.ITRANS));
-			checkIsClaimExportAllowed.Enabled=(comboCommBridge.SelectedIndex==(int)EclaimsCommBridge.EDS);
+			bool hasEclaimsEnabled=comboCommBridge.SelectedTag<EclaimsCommBridge>().In(
+				EclaimsCommBridge.EDS,EclaimsCommBridge.Claimstream,EclaimsCommBridge.ITRANS);
+			listBoxEraBehavior.Enabled=hasEclaimsEnabled;
+			checkIsClaimExportAllowed.Enabled=hasEclaimsEnabled;
 		}
 
 		private void radio_Click(object sender,EventArgs e) {
