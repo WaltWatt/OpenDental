@@ -448,7 +448,7 @@ namespace OpenDental {
 		}
 
 		private void MapAreaRoomControl_MouseUp(object sender,MouseEventArgs e) {
-			if(!_allowClickOptions) {
+			if(!_allowClickOptions || _phoneCur==null) {
 				return;//disable click options in setup window.
 			}
 			if(e==null || e.Button!=MouseButtons.Right) {
