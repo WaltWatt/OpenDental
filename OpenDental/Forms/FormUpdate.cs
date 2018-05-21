@@ -1038,7 +1038,14 @@ namespace OpenDental{
 				Prefs.UpdateString(PrefName.UpdateInProgressOnComputerName,Environment.MachineName);
 			}
 			MiscData.LockWorkstationsForDbs(dblist);//lock workstations for other db's.
-			File.Delete(destinationPath);
+			try {
+				File.Delete(destinationPath);
+			}
+			catch(Exception ex) {
+				FriendlyException.Show(Lan.g("FormUpdate","Error deleting file:")+"\r\n"+ex.Message,ex);
+				MiscData.UnlockWorkstationsForDbs(dblist);//unlock workstations since nothing was actually done.
+				return;
+			}
 			WebRequest wr=WebRequest.Create(downloadUri);
 			WebResponse webResp=null;
 			try{
@@ -1071,7 +1078,14 @@ namespace OpenDental{
 			if(!CloudStorage.IsCloudStorage) {
 				if(destinationPath2!=null && destinationPath2!="") {
 					if(File.Exists(destinationPath2)) {
-						File.Delete(destinationPath2);
+						try {
+							File.Delete(destinationPath2);
+						}
+						catch(Exception ex) {
+							FriendlyException.Show(Lan.g("FormUpdate","Error deleting file:")+"\r\n"+ex.Message,ex);
+							MiscData.UnlockWorkstationsForDbs(dblist);//unlock workstations since nothing was actually done.
+							return;
+						}
 					}
 					File.Copy(destinationPath,destinationPath2);
 				}
