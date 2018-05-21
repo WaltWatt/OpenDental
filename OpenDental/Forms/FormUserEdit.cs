@@ -880,8 +880,7 @@ namespace OpenDental{
 					Userods.Update(UserCur,listUserGroup.SelectedItems.OfType<ODBoxItem<UserGroup>>().Select(x => x.Tag.UserGroupNum).ToList());
 					//if this is the current user, update the password
 					if(UserCur.UserName.ToLower()==Security.CurUser.UserName.ToLower()) {
-						Security.CurUser.Password=UserCur.Password;
-						Security.CurUser.PasswordIsStrong=UserCur.PasswordIsStrong;
+						Security.CurUser=UserCur.Copy();
 						if(_passwordTyped!=null) {
 							Security.PasswordTyped=_passwordTyped; //update the password typed for middle tier refresh
 						}
