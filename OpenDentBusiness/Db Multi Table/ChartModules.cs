@@ -1386,13 +1386,12 @@ namespace OpenDentBusiness {
 			//The query below was causing a max join error for big offices.  It's fixed now, 
 			//but a better option for next time would be to put SET SQL_BIG_SELECTS=1; before the query.
 			string command="SELECT plannedappt.AptNum,ItemOrder,PlannedApptNum,appointment.AptDateTime,"
-				+"appointment.Pattern,appointment.AptStatus,"//COUNT(procedurelog.ProcNum) someAreComplete "//The count won't be accurate, but it will tell us if not zero.
-				+"(SELECT COUNT(*) FROM procedurelog WHERE procedurelog.PlannedAptNum=plannedappt.AptNum AND procedurelog.ProcStatus=2) someAreComplete, "
+				+"appointment.Pattern,appointment.AptStatus,"
+				+"COUNT(DISTINCT procedurelog.ProcNum) someAreComplete, "
 				+"appointment.AptNum AS schedAptNum "
 				+"FROM plannedappt "
 				+"LEFT JOIN appointment ON appointment.NextAptNum=plannedappt.AptNum AND appointment.NextAptNum!=0 "
-				//+"LEFT JOIN procedurelog ON procedurelog.PlannedAptNum=plannedappt.AptNum "//grab all attached completed procs
-				//+"AND procedurelog.ProcStatus=2 "
+				+"LEFT JOIN procedurelog ON procedurelog.PlannedAptNum=plannedappt.AptNum	AND procedurelog.ProcStatus="+POut.Int((int)ProcStat.C)+" "
 				+"WHERE plannedappt.PatNum="+POut.Long(patNum)+" ";
 			if(DataConnection.DBtype==DatabaseType.MySql) {
 				command+="GROUP BY plannedappt.AptNum ";
