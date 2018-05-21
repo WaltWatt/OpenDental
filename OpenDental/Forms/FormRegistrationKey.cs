@@ -92,7 +92,7 @@ namespace OpenDental{
 			this.label2.Name = "label2";
 			this.label2.Size = new System.Drawing.Size(150,13);
 			this.label2.TabIndex = 6;
-			this.label2.Text = "Licence Agreement";
+			this.label2.Text = "License Agreement";
 			this.label2.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
 			// 
 			// checkAgree
