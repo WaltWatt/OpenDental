@@ -57,14 +57,17 @@ namespace OpenDentBusiness {
 		///<summary>Currently only for user queries.  The connection must already be opened before calling this method.
 		///Fills and returns a DataTable from the database.
 		///Throws an exception if a connection could not be found via the passed in server thread.</summary>
-		public static DataTable GetTableConAlreadyOpen(int serverThread,string command) {
+		public static DataTable GetTableConAlreadyOpen(int serverThread,string command,bool isSqlValidated) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				return Meth.GetTable(MethodBase.GetCurrentMethod(),serverThread,command);
+				return Meth.GetTable(MethodBase.GetCurrentMethod(),serverThread,command,isSqlValidated);
 			}
 			//If the dictionary does not contain the ServerThread key, then something went wrong. Just stop and throw.
 			MySqlConnection con;
 			if(!_dictCons.TryGetValue(serverThread,out con)) {
 				throw new ApplicationException("Critical error in GetTableConAlreadyOpen: A connection could not be found via the given server thread ID.");
+			}
+			if(!isSqlValidated && !Db.IsSqlAllowed(command)) {//Throws Exception if Sql is not allowed, which is handled by the ExceptionThreadHandler and output in a MsgBox
+				throw new ApplicationException("Error: Command is either not safe or user does not have permission.");
 			}
 			//At this point, we know that _dictCons contains the current connection's ServerThread ID.
 			DataTable table=new DataTable();

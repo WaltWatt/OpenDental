@@ -33,6 +33,8 @@ namespace OpenDental{
 		public string SummaryFont;
 		///<summary>If there are just too many columns for portrait.</summary>
 		public bool IsLandscape;
+		///<summary>Set to true if the Query on this object has already been validated.</summary>
+		public bool IsSqlValidated;
 
 		public ReportSimpleGrid() {
 			SubTitle=new List<string>();
