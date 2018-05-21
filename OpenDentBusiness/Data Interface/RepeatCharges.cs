@@ -161,22 +161,6 @@ namespace OpenDentBusiness {
 			return false;
 		}
 		
-		public static int MonthsActive(RepeatCharge rc,DateTime dateRun) {
-			DateTime stopDate;
-			if(rc.DateStop.Year < 1880 || rc.DateStop > dateRun) {
-				stopDate=dateRun;
-			}
-			else {
-				stopDate=rc.DateStop;
-			}
-			int months=0;
-			//calculate the number of months between the two dates. Will round up to the nearest month.
-			while(stopDate >= rc.DateStart.AddMonths(months)) { 
-				months++;
-			}			
-			return months;
-		}
-
 		/// <summary>Runs repeating charges for the date passed in, usually today. Can't use 'out' variables because this runs over Middle Tier.</summary>
 		public static RepeatChargeResult RunRepeatingCharges(DateTime dateRun) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
@@ -193,45 +177,47 @@ namespace OpenDentBusiness {
 					listRepeatingCharges.RemoveAll(x => listEServiceCodes.Contains(x.ProcCode));
 					result.ProceduresAddedCount+=EServiceBillings.AddEServiceRepeatingChargesHelper(dateRun).Count;
 				}
+				//Must contain all procedures that affect the date range, safe to contain too many, bad to contain too few.
+				List<Procedure> listExistingProcs=Procedures.GetCompletedForDateRange(dateRun.AddMonths(-3),dateRun.AddDays(1),
+					listRepeatingCharges.Select(x => x.ProcCode).Distinct().Select(x => ProcedureCodes.GetProcCode(x).CodeNum).ToList());
 				DateTime startedUsingFKs=UpdateHistories.GetDateForVersion(new Version("16.1.0.0"));//We started using FKs from procs to repeat charges in 16.1.
 				foreach(RepeatCharge repeatCharge in listRepeatingCharges) {
 					if(!repeatCharge.IsEnabled || (repeatCharge.DateStop.Year > 1880 && repeatCharge.DateStop.AddMonths(3) < dateRun)) {
 						continue;//This repeating charge is too old to possibly create a new charge. Not precise but greatly reduces calls to DB.
 										 //We will filter by more stringently on the DateStop later on.
 					}
-					long codeNum=ProcedureCodes.GetCodeNum(repeatCharge.ProcCode);
-					//Must contain all procedures that affect the date range.
-					DateTime procRangeStart=repeatCharge.DateStart.AddMonths(-1);//Minus 1 month to catch accounts that have changed their billing date
-					List<Procedure> listExistingProcs=Procedures.GetCompletedForDateRange(procRangeStart,dateRun,
-						new List<long>{ codeNum },
-						new List<long>{ repeatCharge.PatNum });
-					for(int j = listExistingProcs.Count-1;j>=0;j--) {//iterate backwards to remove elements
-						Procedure proc=listExistingProcs[j];
-						if(((proc.RepeatChargeNum==repeatCharge.RepeatChargeNum) //Check the procedure's FK first
-							//Use the old logic without matching FKs only if the procedure was added before updating to 16.1
-							//Match patnum, codenum, fee, year, and month (IsRepeatDateHelper uses special logic to determine correct month)
-							//Procedures with the ProcDate prior to the RepeatCharge.StartDate should not be considered as valid procedures 
-							//associated to the current repeat charge.
-							|| ((proc.ProcDate<startedUsingFKs || startedUsingFKs.Year<1880)
-								&& proc.PatNum==repeatCharge.PatNum
-								&& proc.CodeNum==codeNum
-								&& proc.ProcFee.IsEqual(repeatCharge.ChargeAmt)))
-							&& (proc.ProcDate>=repeatCharge.DateStart //Consider procedures that fall on or after the repeat charge start date.
-								|| proc.ProcDate.Day!=repeatCharge.DateStart.Day)) //Consider procs only when days are not the same. Catches procs that have changed their billing date
-						{
-							continue;//This existing procedure needs to be counted for this repeat charge.
-						}
-						listExistingProcs.RemoveAt(j);//Removing so that another repeat charge of the same code, date, and amount will be added.
-					}
+					Patient pat=null;
 					List<DateTime> listBillingDates;//This list will have 1 or 2 dates where a repeating charge might be added
 					if(PrefC.GetBool(PrefName.BillingUseBillingCycleDay)) {
-						listBillingDates=GetBillingDatesHelper(repeatCharge.DateStart,repeatCharge.DateStop,dateRun,listExistingProcs,repeatCharge,
-							Patients.GetPat(repeatCharge.PatNum).BillingCycleDay);
+						pat=Patients.GetPat(repeatCharge.PatNum);
+						listBillingDates=GetBillingDatesHelper(repeatCharge.DateStart,repeatCharge.DateStop,dateRun,pat.BillingCycleDay);
 					}
 					else {
-						listBillingDates=GetBillingDatesHelper(repeatCharge.DateStart,repeatCharge.DateStop,dateRun,listExistingProcs,repeatCharge);
+						listBillingDates=GetBillingDatesHelper(repeatCharge.DateStart,repeatCharge.DateStop,dateRun);
 					}
-					listBillingDates.RemoveAll(x => x.Date>DateTime.Today.Date && !PrefC.GetBool(PrefName.FutureTransDatesAllowed));
+					long codeNum=ProcedureCodes.GetCodeNum(repeatCharge.ProcCode);
+					//Remove billing dates if there is a procedure from this repeat charge in that month and year
+					for(int i=listBillingDates.Count-1;i>=0;i--) {//iterate backwards to remove elements
+						DateTime billingDate=listBillingDates[i];
+						for(int j=listExistingProcs.Count-1;j>=0;j--) {//iterate backwards to remove elements
+							Procedure proc=listExistingProcs[j];
+							if((proc.RepeatChargeNum==repeatCharge.RepeatChargeNum //Check the procedure's FK first
+								&& IsRepeatDateHelper(repeatCharge,billingDate,proc.ProcDate,pat))
+								//Use the old logic without matching FKs only if the procedure was added before updating to 16.1
+								//Match patnum, codenum, fee, year, and month (IsRepeatDateHelper uses special logic to determine correct month)
+								|| ((proc.ProcDate<startedUsingFKs || startedUsingFKs.Year<1880)
+								&& proc.PatNum==repeatCharge.PatNum
+								&& proc.CodeNum==codeNum
+								&& IsRepeatDateHelper(repeatCharge,billingDate,proc.ProcDate,pat)
+								&& proc.ProcFee.IsEqual(repeatCharge.ChargeAmt))) 
+							{
+								//This is a match to an existing procedure.
+								listBillingDates.RemoveAt(i);//Removing so that a procedure will not get added on this date.
+								listExistingProcs.RemoveAt(j);//Removing so that another repeat charge of the same code, date, and amount will be added.
+								break;//Go to the next billing date
+							}
+						}
+					}
 					//If any billing dates have not been filtered out, add a repeating charge on those dates
 					foreach(DateTime billingDate in listBillingDates) {
 						Procedure procAdded=AddRepeatingChargeHelper(repeatCharge,billingDate,dateRun);
@@ -295,18 +281,16 @@ namespace OpenDentBusiness {
 		}
 
 		///<summary>Returns 1 or 2 dates to be billed given the date range. Only filtering based on date range has been performed.</summary>
-		private static List<DateTime> GetBillingDatesHelper(DateTime dateStart,DateTime dateStop,DateTime dateRun,List<Procedure> listProcs, 
-			RepeatCharge rc,int billingCycleDay=0) 
-		{
+		private static List<DateTime> GetBillingDatesHelper(DateTime dateStart,DateTime dateStop,DateTime dateRun,int billingCycleDay=0) {
 			//No remoting role check; no call to db
 			List<DateTime> retVal=new List<DateTime>();
 			if(!PrefC.GetBool(PrefName.BillingUseBillingCycleDay)) {
 				billingCycleDay=dateStart.Day;
 			}
 			//Add dates on the first of each of the last three months
-			retVal.Add(new DateTime(dateRun.AddMonths(-2).Year,dateRun.AddMonths(-2).Month,1));//two months ago
-			retVal.Add(new DateTime(dateRun.AddMonths(-1).Year,dateRun.AddMonths(-1).Month,1));//last month
-			retVal.Add(new DateTime(dateRun.AddMonths(-0).Year,dateRun.AddMonths(-0).Month,1));//current month
+			retVal.Add(new DateTime(dateRun.AddMonths(-0).Year,dateRun.AddMonths(-0).Month,1));//current month -0
+			retVal.Add(new DateTime(dateRun.AddMonths(-1).Year,dateRun.AddMonths(-1).Month,1));//current month -1
+			retVal.Add(new DateTime(dateRun.AddMonths(-2).Year,dateRun.AddMonths(-2).Month,1));//current month -2
 			//This loop fixes day of month, taking into account billing day past the end of the month.
 			for(int i=0;i<retVal.Count;i++) {
 				int billingDay=Math.Min(retVal[i].AddMonths(1).AddDays(-1).Day, billingCycleDay);
@@ -318,24 +302,34 @@ namespace OpenDentBusiness {
 			retVal.RemoveAll(x => x < dateRun.AddMonths(-1).AddDays(-20));
 			//Remove any dates after today
 			retVal.RemoveAll(x => x > dateRun);
-			int monthAdd=0;
-			double monthsActive=MonthsActive(rc,dateRun);
 			//Remove billing dates past the end of the dateStop
-			if(monthsActive==listProcs.Count) {
-				monthAdd=0;
-			}
-			else {
-				monthAdd=1;
+			int monthAdd=0;
+			//To account for a partial month, add a charge after the repeat charge stop date in certain circumstances (for each of these scenarios, the 
+			//billingCycleDay will be 11):
+			//--Scenario #1: The start day is before the stop day which is before the billing day. Ex: Start: 12/08, Stop 12/09
+			//--Scenario #2: The start day is after the billing day which is after the stop day. Ex: Start: 11/25 Stop 12/01
+			//--Scenario #3: The start day is before the stop day but before the billing day. Ex: Start: 11/25, Stop 11/27
+			//--Scenario #4: The start day is the same as the stop day but after the billing day. Ex: Start: 10/13, Stop 11/13
+			//--Scenario #5: The start day is the same as the stop day but before the billing day. Ex: Start: 11/10, Stop 12/10
+			//Each of these repeat charges will post a charge on 12/11 even though it is after the stop date.
+			if(PrefC.GetBool(PrefName.BillingUseBillingCycleDay)) {
+				if(dateStart.Day<billingCycleDay) {
+					if((dateStop.Day < billingCycleDay && dateStart.Day < dateStop.Day)//Scenario #1
+						|| dateStart.Day==dateStop.Day)//Scenario #5
+					{
+						monthAdd=1;
+					}
+				}
+				else if(dateStart.Day>billingCycleDay) {
+					if(dateStart.Day <= dateStop.Day//Scenario #3 and #4
+						|| dateStop.Day < billingCycleDay)//Scenario #2
+					{
+						monthAdd=1;
+					}
+				}
 			}
 			if(dateStop.Year>1880) {
 				retVal.RemoveAll(x => x > dateStop.AddMonths(monthAdd));
-			}
-			foreach(Procedure proc in listProcs) {
-				retVal.RemoveAll(x => x==proc.ProcDate);
-			}
-			while(monthsActive < (listProcs.Count + retVal.Count) && retVal.Count > 0) {
-				//Remove the last charge date if it would cause an excess number of charges.
-				retVal.RemoveAt(retVal.Count-1);
 			}
 			return retVal;
 		}
@@ -568,9 +562,17 @@ namespace OpenDentBusiness {
 		}
 
 		///<summary>Returns true if the existing procedure was for the possibleBillingDate.</summary>
-		private static bool IsRepeatDateHelper(RepeatCharge repeatCharge,DateTime possibleBillingDate,DateTime existingProcedureDate) {
+		private static bool IsRepeatDateHelper(RepeatCharge repeatCharge,DateTime possibleBillingDate,DateTime existingProcedureDate,Patient pat) {
 			//No remoting role check; no call to db
 			if(PrefC.GetBool(PrefName.BillingUseBillingCycleDay)) {
+				pat=pat??Patients.GetPat(repeatCharge.PatNum);
+				if(pat.BillingCycleDay!=existingProcedureDate.Day
+					&& possibleBillingDate.AddMonths(-1).Month==existingProcedureDate.Month
+					&& possibleBillingDate.AddMonths(-1).Year==existingProcedureDate.Year) 
+				{
+					//This is needed in case the patient's billing day changed after procedures had been added for a repeat charge.
+					return true;
+				}
 				//Only match month and year to be equal
 				return (possibleBillingDate.Month==existingProcedureDate.Month && possibleBillingDate.Year==existingProcedureDate.Year);
 			}

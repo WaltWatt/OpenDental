@@ -452,7 +452,7 @@ namespace UnitTests.UnitTests {
 		//Ex: Start: 10/15, Stop 11/30,BillCycleDay:13 and charges posted 10/13 and 11/13. Run date on 12/15. Don't add a procedure for 12/13.</summary>
 		[TestMethod]
 		public void RepeatCharges_ExistingProcsOnBillingDate() {
-			Patient pat=CreatePatForRepeatCharge("RepeatCharge",13);
+			Patient pat=CreatePatForRepeatCharge("RepeatCharge",15);
 			RepeatCharge rc=new RepeatCharge();
 			rc.ChargeAmt=99;
 			rc.PatNum=pat.PatNum;
@@ -461,55 +461,24 @@ namespace UnitTests.UnitTests {
 			rc.DateStart=new DateTime(2017,10,15);
 			rc.DateStop=new DateTime(2017,11,30);
 			rc.RepeatChargeNum=RepeatCharges.Insert(rc);
-			DateTime dateRun=new DateTime(2017,12,15);
-			Procedure p=new Procedure();
-			p.PatNum=pat.PatNum;
-			p.ProcStatus=ProcStat.C;
-			p.ProcDate=new DateTime(2017,10,pat.BillingCycleDay);
-			p.ProcFee=99;
-			p.CodeNum=ProcedureCodes.GetCodeNum("D2750");
-			p.RepeatChargeNum=rc.RepeatChargeNum;
-			Procedures.Insert(p);
-			p=new Procedure();
-			p.PatNum=pat.PatNum;
-			p.ProcStatus=ProcStat.C;
-			p.ProcDate=new DateTime(2017,11,pat.BillingCycleDay);
-			p.ProcFee=99;
-			p.CodeNum=ProcedureCodes.GetCodeNum("D2750");
-			p.RepeatChargeNum=rc.RepeatChargeNum;
-			Procedures.Insert(p);
+			DateTime dateRun=new DateTime(2017,10,15);
 			RepeatCharges.RunRepeatingCharges(dateRun);
 			List<Procedure> listProcs=Procedures.Refresh(pat.PatNum);
-			Assert.AreEqual(2,listProcs.Count);
-		}
-
-		///<summary>There is a run date after the billing day but in the month following the month of a stop date.
-		///An existing procedure is on Billing day for month of prior month. A charge is posted on 10/13 but not 11/13. 
-		//Ex: Start: 10/15, Stop 11/30,BillCycleDay:13 and charges posted 10/13. Run date on 12/15. We should add a procedure on 11/13.</summary>
-		[TestMethod]
-		public void RepeatCharges_ExistingProcsOnStartDate() {
-			Patient pat=CreatePatForRepeatCharge("RepeatCharge",13);
-			RepeatCharge rc=new RepeatCharge();
-			rc.ChargeAmt=99;
-			rc.PatNum=pat.PatNum;
-			rc.ProcCode="D2750";
-			rc.IsEnabled=true;
-			rc.DateStart=new DateTime(2017,10,15);
-			rc.DateStop=new DateTime(2017,11,30);
-			rc.RepeatChargeNum=RepeatCharges.Insert(rc);
-			DateTime dateRun=new DateTime(2017,12,15);
-			Procedure p=new Procedure();
-			p.PatNum=pat.PatNum;
-			p.ProcStatus=ProcStat.C;
-			p.ProcDate=new DateTime(2017,10,15);
-			p.ProcFee=99;
-			p.CodeNum=ProcedureCodes.GetCodeNum("D2750");
-			p.RepeatChargeNum=rc.RepeatChargeNum;
-			Procedures.Insert(p);
+			Assert.AreEqual(1,listProcs.Count);
+			Assert.AreEqual(1,listProcs.Count(x => x.ProcDate==new DateTime(2017,10,15)));
+			dateRun=new DateTime(2017,11,15);
 			RepeatCharges.RunRepeatingCharges(dateRun);
-			List<Procedure> listProcs=Procedures.Refresh(pat.PatNum);
+			listProcs=Procedures.Refresh(pat.PatNum);
 			Assert.AreEqual(2,listProcs.Count);
-			Assert.AreEqual(1,listProcs.Count(x => x.ProcDate==new DateTime(2017,11,pat.BillingCycleDay)));
+			Assert.AreEqual(1,listProcs.Count(x => x.ProcDate==new DateTime(2017,10,15)));
+			Assert.AreEqual(1,listProcs.Count(x => x.ProcDate==new DateTime(2017,11,15)));
+			Patient patOld=pat.Copy();
+			pat.BillingCycleDay=13;
+			Patients.Update(pat,patOld);
+			dateRun=new DateTime(2017,12,15);
+			RepeatCharges.RunRepeatingCharges(dateRun);
+			listProcs=Procedures.Refresh(pat.PatNum);
+			Assert.AreEqual(2,listProcs.Count);
 		}
 
 		///<summary>Procedures with the ProcDate prior to the RepeatCharge.StartDate should not be considered as valid procedures 
