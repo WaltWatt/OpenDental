@@ -90,6 +90,7 @@
     <Compile Include="TableTypes\PaymentT.cs" />
     <Compile Include="TableTypes\PayPeriodT.cs" />
     <Compile Include="TableTypes\PayPlanT.cs" />
+    <Compile Include="TableTypes\PaySplitT.cs" />
     <Compile Include="TableTypes\PrefT.cs" />
     <Compile Include="TableTypes\ProcedureT.cs" />
     <Compile Include="TableTypes\ProviderT.cs" />

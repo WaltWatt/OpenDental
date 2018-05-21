@@ -520,6 +520,172 @@ namespace OpenDentBusiness {
 		}
 		#endregion
 
+		///<summary>This function takes a list of a patient's prepayments and first explicitly links prepayment then implicitly links them to the existing prepayments.</summary>
+		public static List<PaySplits.PaySplitAssociated> AllocateUnearned(List<Procedure> listProcs,ref List<PaySplit> listPaySplit,Payment payCur
+			,double unearnedAmt,Family fam) 
+		{
+			//No remoting role check; Method that uses ref parameters.
+			List<PaySplits.PaySplitAssociated> retVal=new List<PaySplits.PaySplitAssociated>();
+			if(unearnedAmt.IsLessThan(0)) {
+				return retVal;
+			}
+			List<PaySplit> listFamPrePaySplits=PaySplits.GetPrepayForFam(fam);
+			//Manipulate the original prepayments SplitAmt by subtracting counteracting SplitAmt.
+			foreach(PaySplit prePaySplit in listFamPrePaySplits.FindAll(x => x.SplitAmt.IsGreaterThan(0))) {
+				List<PaySplit> listSplitsForPrePay=PaySplits.GetSplitsForPrepay(new List<PaySplit>() { prePaySplit });//Find all splits for the pre-payment.
+				foreach(PaySplit splitForPrePay in listSplitsForPrePay) {
+					prePaySplit.SplitAmt+=splitForPrePay.SplitAmt;//Sum the amount of the pre-payment that's used. (balancing splits are negative usually)
+				}
+			}
+			//We will try our best to automatically link any prepayments that don't have an explicit counteracting paysplit.
+			//After all prepayments have been "linked", manipulate unearnedAmt accordingly.
+			ImplicitlyLinkPrepayments(ref listFamPrePaySplits,ref unearnedAmt);
+			//Get all claimprocs and adjustments for the proc
+			List<ClaimProc> listClaimProcs=ClaimProcs.GetForProcs(listProcs.Select(x => x.ProcNum).Distinct().ToList());
+			List<Adjustment> listAdjusts=Adjustments.GetForProcs(listProcs.Select(x => x.ProcNum).Distinct().ToList());
+			foreach(Procedure proc in listProcs) {//For each proc see how much of the Unearned we use per proc
+				if(unearnedAmt<=0) {
+					break;
+				}
+				//Calculate the amount remaining on the procedure so we can know how much of the remaining pre-payment amount we can use.
+				proc.ProcFee-=PaySplits.GetPaySplitsFromProc(proc.ProcNum).Sum(x => x.SplitAmt);//Figure out how much is due on this proc.
+				double patPortion=ClaimProcs.GetPatPortion(proc,listClaimProcs,listAdjusts);
+				foreach(PaySplit prePaySplit in listFamPrePaySplits) {
+					//First we need to decide how much of each pre-payment split we can use per proc.
+					if(patPortion<=0) {//Proc has been paid for, go to next proc
+						break;
+					}
+					if(prePaySplit.SplitAmt<=0) {//Split has been used, go to next split
+						continue;
+					}
+					if(patPortion<=0) {
+						break;
+					}
+					decimal splitTotal=0;
+					if(splitTotal<(decimal)prePaySplit.SplitAmt) {//If the sum indicates there's pre-payment amount left over, let's use it.
+						double amtToUse=0;
+						if(prePaySplit.SplitAmt<patPortion) {
+							amtToUse=prePaySplit.SplitAmt;
+						}
+						else {
+							amtToUse=patPortion;
+						}
+						unearnedAmt-=amtToUse;//Reflect the new unearned amount available for future proc use.
+						PaySplit splitNeg=new PaySplit();
+						splitNeg.PatNum=prePaySplit.PatNum;
+						splitNeg.PayNum=payCur.PayNum;
+						splitNeg.FSplitNum=prePaySplit.SplitNum;
+						splitNeg.ClinicNum=prePaySplit.ClinicNum;
+						splitNeg.ProvNum=prePaySplit.ProvNum;
+						splitNeg.SplitAmt=0-amtToUse;
+						splitNeg.UnearnedType=prePaySplit.UnearnedType;
+						splitNeg.DatePay=DateTime.Now;
+						listPaySplit.Add(splitNeg);
+						//Make a different paysplit attached to proc and prov they want to use it for.
+						PaySplit splitPos=new PaySplit();
+						splitPos.PatNum=prePaySplit.PatNum;
+						splitPos.PayNum=payCur.PayNum;
+						splitPos.FSplitNum=0;//The association will be done on form closing.
+						splitPos.ProvNum=proc.ProvNum;
+						splitPos.ClinicNum=proc.ClinicNum;
+						splitPos.SplitAmt=amtToUse;
+						splitPos.DatePay=DateTime.Now;
+						splitPos.ProcNum=proc.ProcNum;
+						listPaySplit.Add(splitPos);
+						//link negSplit to posSplit. 
+						retVal.Add(new PaySplits.PaySplitAssociated(splitNeg,splitPos));
+						//link original prepayment to neg split.
+						PaySplit paySplitPrePayOrig=PaySplits.GetOne(prePaySplit.SplitNum);
+						retVal.Add(new PaySplits.PaySplitAssociated(paySplitPrePayOrig,splitNeg));
+						prePaySplit.SplitAmt-=amtToUse;
+						patPortion-=amtToUse;
+					}
+				}
+			}
+			return retVal;
+		}
+
+		///<summary>This function takes a list of a patient's prepayments and implicitly links them to unlinked paysplits.  Lists are passed in by reference
+		///because the lists are used multiple times.</summary>
+		private static void ImplicitlyLinkPrepayments(ref List<PaySplit> listFamPrePaySplits,ref double unearnedAmt) {
+			//No remoting role check; private method that uses ref parameters.
+			List<PaySplit> listPosPrePay=listFamPrePaySplits.FindAll(x => x.SplitAmt.IsGreaterThan(0));
+			List<PaySplit> listNegPrePay=listFamPrePaySplits.FindAll(x => x.SplitAmt.IsLessThan(0));
+			//Logic check PatNum - match, ProvNum - match, ClinicNum - match
+			unearnedAmt=ImplicitlyLinkPrepaymentsHelper(listPosPrePay,listNegPrePay,unearnedAmt,isPatMatch: true,isProvNumMatch: true,isClinicNumMatch: true);
+			//Logic check PatNum - match, ProvNum - match, ClinicNum - zero
+			unearnedAmt=ImplicitlyLinkPrepaymentsHelper(listPosPrePay,listNegPrePay,unearnedAmt,isPatMatch: true,isProvNumMatch: true,isClinicNumZero: true);
+			//Logic check PatNum - match, ProvNum - match, ClinicNum - non zero & non match
+			unearnedAmt=ImplicitlyLinkPrepaymentsHelper(listPosPrePay,listNegPrePay,unearnedAmt,isPatMatch: true,isProvNumMatch: true,isClinicNonZeroNonMatch: true);
+			//Logic check PatNum - match, ProvNum - zero, ClinicNum - match
+			unearnedAmt=ImplicitlyLinkPrepaymentsHelper(listPosPrePay,listNegPrePay,unearnedAmt,isPatMatch: true,isProvNumZero: true,isClinicNumMatch: true);
+			//Logic check PatNum - match, ProvNum - zero, ClinicNum - zero
+			unearnedAmt=ImplicitlyLinkPrepaymentsHelper(listPosPrePay,listNegPrePay,unearnedAmt,isPatMatch: true,isProvNumZero: true,isClinicNumZero: true);
+			//Logic check PatNum - match, ProvNum - zero, ClinicNum - non zero & non match 
+			unearnedAmt=ImplicitlyLinkPrepaymentsHelper(listPosPrePay,listNegPrePay,unearnedAmt,isPatMatch: true,isProvNumZero: true,isClinicNonZeroNonMatch: true);
+			//Logic check PatNum - match, ProvNum - non zero & non match, ClinicNum - match 
+			unearnedAmt=ImplicitlyLinkPrepaymentsHelper(listPosPrePay,listNegPrePay,unearnedAmt,isPatMatch: true,isProvNonZeroNonMatch: true,isClinicNumMatch: true);
+			//Logic check PatNum - match, ProvNum - non zero & non match, ClinicNum - zero
+			unearnedAmt=ImplicitlyLinkPrepaymentsHelper(listPosPrePay,listNegPrePay,unearnedAmt,isPatMatch: true,isProvNonZeroNonMatch: true,isClinicNumZero: true);
+			//Logic check PatNum - match, ProvNum - non zero & non match, ClinicNum - non zero & non match
+			unearnedAmt=ImplicitlyLinkPrepaymentsHelper(listPosPrePay,listNegPrePay,unearnedAmt,isPatMatch: true,isProvNonZeroNonMatch: true,isClinicNonZeroNonMatch: true);
+			//Logic check PatNum - other family members, ProvNum - match, ClinicNum - match
+			unearnedAmt=ImplicitlyLinkPrepaymentsHelper(listPosPrePay,listNegPrePay,unearnedAmt,isFamMatch: true,isProvNumMatch: true,isClinicNumMatch: true);
+			//Logic check PatNum - other family members, ProvNum - match, ClinicNum - zero
+			unearnedAmt=ImplicitlyLinkPrepaymentsHelper(listPosPrePay,listNegPrePay,unearnedAmt,isFamMatch: true,isProvNumMatch: true,isClinicNumZero: true);
+			//Logic check PatNum - other family members, ProvNum - match, ClinicNum - non zero & non match
+			unearnedAmt=ImplicitlyLinkPrepaymentsHelper(listPosPrePay,listNegPrePay,unearnedAmt,isFamMatch: true,isProvNumMatch: true,isClinicNonZeroNonMatch: true);
+			//Logic check PatNum - other family members, ProvNum - zero, ClinicNum - match
+			unearnedAmt=ImplicitlyLinkPrepaymentsHelper(listPosPrePay,listNegPrePay,unearnedAmt,isFamMatch: true,isProvNumZero: true,isClinicNumMatch: true);
+			//Logic check PatNum - other family members, ProvNum - zero, ClinicNum - zero
+			unearnedAmt=ImplicitlyLinkPrepaymentsHelper(listPosPrePay,listNegPrePay,unearnedAmt,isFamMatch: true,isProvNumZero: true,isClinicNumZero: false);
+			//Logic checkPatNum - other family members, ProvNum - zero, ClinicNum - non zero & non match
+			unearnedAmt=ImplicitlyLinkPrepaymentsHelper(listPosPrePay,listNegPrePay,unearnedAmt,isFamMatch: true,isProvNumZero: true,isClinicNonZeroNonMatch: true);
+			//Logic checkPatNum - other family members, ProvNum - non zero & non match, ClinicNum - match
+			unearnedAmt=ImplicitlyLinkPrepaymentsHelper(listPosPrePay,listNegPrePay,unearnedAmt,isFamMatch: true,isProvNonZeroNonMatch: true,isClinicNumMatch: true);
+			//Logic check PatNum - other family members, ProvNum - non zero & non match, ClinicNum - zero
+			unearnedAmt=ImplicitlyLinkPrepaymentsHelper(listPosPrePay,listNegPrePay,unearnedAmt,isFamMatch: true,isProvNonZeroNonMatch: true,isClinicNumZero: true);
+			//Logic check PatNum - other family members, ProvNum - non zero & non match, ClinicNum - non zero & non match
+			unearnedAmt=ImplicitlyLinkPrepaymentsHelper(listPosPrePay,listNegPrePay,unearnedAmt,isFamMatch: true,isProvNonZeroNonMatch: true,isClinicNonZeroNonMatch: true);
+		}
+
+		/// <summary> Helpler method to allocate unearned implicitly. Returns amount remaining to be allocated after implicitly linking.</summary>
+		public static double ImplicitlyLinkPrepaymentsHelper(List<PaySplit> listPosPrePay,List<PaySplit> listNegPrePay,double unearnedAmt,bool isPatMatch = false
+			,bool isProvNumMatch = false,bool isClinicNumMatch = false,bool isFamMatch = false,bool isProvNumZero = false,bool isClinicNumZero = false
+			,bool isProvNonZeroNonMatch = false,bool isClinicNonZeroNonMatch = false) {
+			//No remoting role check; no call to db.
+			if(unearnedAmt.IsLessThan(0) || unearnedAmt.IsZero()) {
+				return 0;
+			}
+			//Manipulate the amounts (never letting them go into the negative) and then use whatever is left to represent the unearned amount.
+			foreach(PaySplit posSplit in listPosPrePay) {
+				if(posSplit.SplitAmt.IsEqual(0)) {
+					continue;
+				}
+				//Find all negative paysplits with the filters
+				List<PaySplit> filteredNegSplit=listNegPrePay
+					.Where(x => !isPatMatch               || x.PatNum==posSplit.PatNum)
+					.Where(x => !isFamMatch               || x.PatNum!=posSplit.PatNum)
+					.Where(x => !isProvNumMatch           || x.ProvNum==posSplit.ProvNum)
+					.Where(x => !isProvNumZero            || x.ProvNum==0)
+					.Where(x => !isProvNonZeroNonMatch    || (x.ProvNum!=0 && x.ProvNum!=posSplit.ProvNum))
+					.Where(x => !isClinicNumMatch         || x.ClinicNum==posSplit.ClinicNum)
+					.Where(x => !isClinicNumZero          || x.ClinicNum==0)
+					.Where(x => !isClinicNonZeroNonMatch  || (x.ClinicNum!=0 && x.ClinicNum!=posSplit.ClinicNum))
+					.ToList();
+				foreach(PaySplit negSplit in filteredNegSplit) {
+					if(negSplit.SplitAmt.IsEqual(0)) {
+						continue;
+					}
+					//Deduct split amount from the positive split for the amount of the negative split,or the postive split depending on which is smaller according to the absolute value. 
+					double amt=Math.Min(posSplit.SplitAmt,Math.Abs(negSplit.SplitAmt));
+					negSplit.SplitAmt+=amt;
+					posSplit.SplitAmt-=amt;
+				}
+			}
+			return listPosPrePay.Sum(x => x.SplitAmt);
+		}
+
 		/// <summary>Makes a payment from a passed in list of charges.</summary>
 		public static PayResults MakePayment(List<List<AccountEntry>> listSelectedCharges,List<PaySplit> listSplitsCur,bool isShowAll,Payment payCur,int groupIdx
 			,bool hasPayTypeNone,decimal textAmount,List<AccountEntry> listAllCharges) 

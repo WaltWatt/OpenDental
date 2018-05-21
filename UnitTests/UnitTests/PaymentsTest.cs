@@ -11,7 +11,11 @@ using System.Reflection;
 namespace UnitTests.UnitTests {
 	[TestClass]
 	public class PaymentsTest:TestBase {
-
+		#region Prepayment Test
+		private List<PaySplit> _listFamPrePaySplits;
+		private List<PaySplit> _listPosPrePay;
+		private List<PaySplit> _listNegPrePay;
+		#endregion
 		[ClassInitialize]
 		public static void SetUp(TestContext context) {
 
@@ -414,5 +418,208 @@ namespace UnitTests.UnitTests {
 
 		}
 
+		[TestMethod]
+		public void PaymentEdit_AllocateUnearned_LinkToOriginalPrepayment() {
+			Patient pat=PatientT.CreatePatient(MethodBase.GetCurrentMethod().Name);
+			//create prepayment of $100
+			long provNum=ProviderT.CreateProvider("SG");
+			Clinic clinic1=ClinicT.CreateClinic("Clinic1");
+			Family fam=Patients.GetFamily(pat.PatNum);
+			//create original prepayment.
+			PaySplit prePay=PaySplitT.CreatePrepayment(pat.PatNum,100,DateTime.Today.AddDays(-1),provNum,clinic1.ClinicNum);
+			//complete a procedure
+			Procedure proc1=ProcedureT.CreateProcedure(pat,"D1110",ProcStat.C,"",50,provNum:provNum);
+			//Setup to run the PaymentEdit.AllocateUnearned
+			List<PaySplit> listPaySplits=new List<PaySplit>();
+			List<PaySplit> listFamPrePaySplits=PaySplits.GetPrepayForFam(fam);
+			//Unearned amount should be $100.
+			double unearnedAmt=(double)PaySplits.GetUnearnedForFam(fam,listFamPrePaySplits);
+			Assert.AreEqual(100,unearnedAmt);
+			//Create the payment we will use to allocate some of the $100 prepayment.
+			Payment pay=PaymentT.MakePaymentForPrepayment(pat,clinic1);
+			//Run the AllocateUnearned method. This a list of paysplitAssociated.
+			//The ref list of paysplits should also have the new paysplits that are associated to the original prepayment.
+			List<PaySplits.PaySplitAssociated> listPaySplitAssociated=PaymentEdit.AllocateUnearned(new List<Procedure> { proc1 },ref listPaySplits,pay,unearnedAmt,fam);
+			//Insert the paysplits and link the prepayment paysplits. This is similar to what is done when a user creates a payment from FormPayment.cs.
+			PaySplitT.InsertPrepaymentSplits(listPaySplits,listPaySplitAssociated);
+			//The ref list of paysplits should have the correct allocated prepayment amount. 
+			Assert.AreEqual(-50,listPaySplits.Where(x => x.UnearnedType!=0).Sum(x => x.SplitAmt));
+			//Create new procedure
+			Procedure proc2=ProcedureT.CreateProcedure(pat,"D1110",ProcStat.C,"",100,provNum:provNum);
+			//Now do what we just did again for a new procedure. The unallocated amount should be $50.
+			listFamPrePaySplits=PaySplits.GetPrepayForFam(fam);
+			unearnedAmt=(double)PaySplits.GetUnearnedForFam(fam,listFamPrePaySplits);
+			Assert.AreEqual(50,unearnedAmt);
+			List<PaySplit> listPaySplitsUnearned=new List<PaySplit>();
+			pay=PaymentT.MakePaymentForPrepayment(pat,clinic1);
+			List<PaySplits.PaySplitAssociated> retVal=PaymentEdit.AllocateUnearned(new List<Procedure> { proc2 },ref listPaySplitsUnearned,pay,unearnedAmt,fam);
+			Assert.AreEqual(2,retVal.Count);
+			Assert.AreEqual(-50,listPaySplitsUnearned.Where(x => x.UnearnedType!=0).Sum(x => x.SplitAmt));
+		}
+
+		[TestMethod]
+		public void PaymentEdit_AllocateUnearned_NoLinkToOriginalPrepayment() {
+			Patient pat=PatientT.CreatePatient(MethodBase.GetCurrentMethod().Name);
+			//create prepayment of $100
+			long provNum=ProviderT.CreateProvider("SG");
+			Clinic clinic1=ClinicT.CreateClinic("Clinic1");
+			//create original prepayment.
+			PaySplit prePay=PaySplitT.CreatePrepayment(pat.PatNum,100,DateTime.Today.AddDays(-1),provNum,clinic1.ClinicNum);
+			//complete a procedure
+			Procedure proc1=ProcedureT.CreateProcedure(pat,"D1110",ProcStat.C,"",50,provNum:provNum);
+			//Manually allocate prepayment without linking to the original prepayment.
+			//We want to do it manually so we don't link this to the orginal prepayment correctly.
+			//Not linking correctly will test that the AllocateUnearned method is implicitly linking prepayments correctly.
+			PaySplitT.CreatePaySplitsForPrepayment(proc1,50,prov: provNum,clinic: clinic1);
+			//Create new procedure
+			Procedure proc2=ProcedureT.CreateProcedure(pat,"D1110",ProcStat.C,"",100,provNum:provNum);
+			//test the PaymentEdit.AllocateUnearned() method.
+			Family fam=Patients.GetFamily(pat.PatNum);
+			List<PaySplit> listFamPrePaySplits=PaySplits.GetPrepayForFam(fam);
+			//Should be $100
+			double unearnedAmt=(double)PaySplits.GetUnearnedForFam(fam,listFamPrePaySplits);
+			Assert.AreEqual(100,unearnedAmt);
+			List<PaySplit> listPaySplitsUnearned=new List<PaySplit>();
+			Payment pay=PaymentT.MakePaymentForPrepayment(pat,clinic1);
+			List<PaySplits.PaySplitAssociated> retVal=PaymentEdit.AllocateUnearned(new List<Procedure> { proc2 },ref listPaySplitsUnearned,pay,unearnedAmt,fam);
+			Assert.AreEqual(2,retVal.Count);
+			//After running the AllocateUnearned, we should implicitly link the incorrect prepayment made when we call CreatePaySplitsForPrepayment above.
+			Assert.AreEqual(-50,listPaySplitsUnearned.Where(x => x.UnearnedType!=0).Sum(x => x.SplitAmt));
+		}
+
+		[TestMethod]
+		public void PaymentEdit_ImplicitlyLinkPrepaymentsHelper() {
+			Patient pat=PatientT.CreatePatient(MethodBase.GetCurrentMethod().Name);
+			Patient patFam=PatientT.CreatePatient(MethodBase.GetCurrentMethod().Name);
+			Patient patFamOld=patFam.Copy();
+			patFam.Guarantor=pat.PatNum;
+			Patients.Update(patFam,patFamOld);
+			//create prepayment of $100
+			long provNum=ProviderT.CreateProvider("SG");
+			Clinic clinic1=ClinicT.CreateClinic("Clinic1");
+			//create original prepayment.
+			PaySplit prePay=PaySplitT.CreatePrepayment(pat.PatNum,100,DateTime.Today.AddDays(-1),provNum,clinic1.ClinicNum);
+			//complete a procedure
+			Procedure proc1=ProcedureT.CreateProcedure(pat,"D1110",ProcStat.C,"",50,provNum:provNum);
+			//Manually allocate prepayment without linking to the original prepayment.
+			List<PaySplit> listPaySplits=PaySplitT.CreatePaySplitsForPrepayment(proc1,50,prov:provNum,clinic:clinic1);
+			ResetPrepayments(pat);
+			long nonMatch=100000;
+			//test the PaymentEdit.AllocateUnearned() method.
+			double unearnedAmt=(double)PaySplits.GetUnearnedForFam(Patients.GetFamily(pat.PatNum),_listFamPrePaySplits);
+			//Logic check PatNum - match, ProvNum - match, ClinicNum - match
+			double retVal=PaymentEdit.ImplicitlyLinkPrepaymentsHelper(_listPosPrePay,_listNegPrePay,unearnedAmt,isPatMatch:true,isProvNumMatch:true,isClinicNumMatch:true);
+			Assert.AreEqual(50,retVal);
+			//Logic check PatNum - match, ProvNum - match, ClinicNum - zero
+			ResetPrepayments(pat);
+			//update the clinicnum to 0
+			_listFamPrePaySplits.ForEach(x => UpdatePaySplitHelper(x,pat.PatNum,provNum,0,_listNegPrePay.First().PayNum));
+			retVal=PaymentEdit.ImplicitlyLinkPrepaymentsHelper(_listPosPrePay,_listNegPrePay,unearnedAmt,isPatMatch:true,isProvNumMatch:true,isClinicNumZero:true);
+			Assert.AreEqual(50,retVal);
+			//previous Test one should be $100
+			ResetPrepayments(pat);
+			retVal=PaymentEdit.ImplicitlyLinkPrepaymentsHelper(_listPosPrePay,_listNegPrePay,unearnedAmt,isPatMatch:true,isProvNumMatch:true,isClinicNumMatch:true);
+			Assert.AreEqual(100,retVal);
+			//Logic check PatNum - match, ProvNum - match, ClinicNum - non zero & non match
+			ResetPrepayments(pat);
+			_listFamPrePaySplits.ForEach(x => UpdatePaySplitHelper(x,pat.PatNum,provNum,100000,_listNegPrePay.First().PayNum));
+			retVal=PaymentEdit.ImplicitlyLinkPrepaymentsHelper(_listPosPrePay,_listNegPrePay,unearnedAmt,isPatMatch: true,isProvNumMatch: true,isClinicNonZeroNonMatch: true);
+			Assert.AreEqual(50,retVal);
+			//Logic check PatNum - match, ProvNum - zero, ClinicNum - match
+			ResetPrepayments(pat);
+			_listFamPrePaySplits.ForEach(x => UpdatePaySplitHelper(x,pat.PatNum,0,clinic1.ClinicNum,_listNegPrePay.First().PayNum));
+			retVal=PaymentEdit.ImplicitlyLinkPrepaymentsHelper(_listPosPrePay,_listNegPrePay,unearnedAmt,isPatMatch: true,isProvNumZero:true,isClinicNumMatch:true);
+			Assert.AreEqual(50,retVal);
+			//Logic check PatNum - match, ProvNum - zero, ClinicNum - zero
+			ResetPrepayments(pat);
+			_listFamPrePaySplits.ForEach(x => UpdatePaySplitHelper(x,pat.PatNum,0,0,_listNegPrePay.First().PayNum));
+			retVal=PaymentEdit.ImplicitlyLinkPrepaymentsHelper(_listPosPrePay,_listNegPrePay,unearnedAmt,isPatMatch:true,isProvNumZero:true,isClinicNumZero:true);
+			Assert.AreEqual(50,retVal);
+			//Logic check PatNum - match, ProvNum - zero, ClinicNum - non zero & non match 
+			ResetPrepayments(pat);
+			_listFamPrePaySplits.ForEach(x => UpdatePaySplitHelper(x,pat.PatNum,0,nonMatch,_listNegPrePay.First().PayNum));
+			retVal=PaymentEdit.ImplicitlyLinkPrepaymentsHelper(_listPosPrePay,_listNegPrePay,unearnedAmt,isPatMatch:true,isProvNumZero:true,isClinicNonZeroNonMatch:true);
+			Assert.AreEqual(50,retVal);
+			//Logic check PatNum - match, ProvNum - non zero & non match, ClinicNum - match 
+			ResetPrepayments(pat);
+			_listFamPrePaySplits.ForEach(x => UpdatePaySplitHelper(x,pat.PatNum,nonMatch,clinic1.ClinicNum,_listNegPrePay.First().PayNum));
+			retVal=PaymentEdit.ImplicitlyLinkPrepaymentsHelper(_listPosPrePay,_listNegPrePay,unearnedAmt,isPatMatch:true,isProvNonZeroNonMatch:true,isClinicNumMatch:true);
+			Assert.AreEqual(50,retVal);
+			//Logic check PatNum - match, ProvNum - non zero & non match, ClinicNum - zero
+			ResetPrepayments(pat);
+			_listFamPrePaySplits.ForEach(x => UpdatePaySplitHelper(x,pat.PatNum,nonMatch,0,_listNegPrePay.First().PayNum));
+			retVal=PaymentEdit.ImplicitlyLinkPrepaymentsHelper(_listPosPrePay,_listNegPrePay,unearnedAmt,isPatMatch:true,isProvNonZeroNonMatch:true,isClinicNumZero:true);
+			Assert.AreEqual(50,retVal);
+			//Logic check PatNum - match, ProvNum - non zero & non match, ClinicNum - non zero & non match
+			ResetPrepayments(pat);
+			_listFamPrePaySplits.ForEach(x => UpdatePaySplitHelper(x,pat.PatNum,nonMatch,nonMatch,_listNegPrePay.First().PayNum));
+			retVal=PaymentEdit.ImplicitlyLinkPrepaymentsHelper(_listPosPrePay,_listNegPrePay,unearnedAmt,isPatMatch:true,isProvNonZeroNonMatch:true,isClinicNonZeroNonMatch:true);
+			Assert.AreEqual(50,retVal);
+			//Logic check PatNum - other family members, ProvNum - match, ClinicNum - match
+			ResetPrepayments(pat);
+			_listFamPrePaySplits.ForEach(x => UpdatePaySplitHelper(x,patFam.PatNum,provNum,clinic1.ClinicNum,_listNegPrePay.First().PayNum));
+			retVal=PaymentEdit.ImplicitlyLinkPrepaymentsHelper(_listPosPrePay,_listNegPrePay,unearnedAmt,isFamMatch:true,isProvNumMatch:true,isClinicNumMatch:true);
+			Assert.AreEqual(50,retVal);
+			//Logic check PatNum - other family members, ProvNum - match, ClinicNum - zero
+			ResetPrepayments(pat);
+			_listFamPrePaySplits.ForEach(x => UpdatePaySplitHelper(x,patFam.PatNum,provNum,0,_listNegPrePay.First().PayNum));
+			retVal=PaymentEdit.ImplicitlyLinkPrepaymentsHelper(_listPosPrePay,_listNegPrePay,unearnedAmt,isFamMatch:true,isProvNumMatch:true,isClinicNumZero:true);
+			Assert.AreEqual(50,retVal);
+			//Logic check PatNum - other family members, ProvNum - match, ClinicNum - non zero & non match
+			ResetPrepayments(pat);
+			_listFamPrePaySplits.ForEach(x => UpdatePaySplitHelper(x,patFam.PatNum,provNum,nonMatch,_listNegPrePay.First().PayNum));
+			retVal=PaymentEdit.ImplicitlyLinkPrepaymentsHelper(_listPosPrePay,_listNegPrePay,unearnedAmt,isFamMatch:true,isProvNumMatch:true,isClinicNonZeroNonMatch:true);
+			Assert.AreEqual(50,retVal);
+			//Logic check PatNum - other family members, ProvNum - zero, ClinicNum - match
+			ResetPrepayments(pat);
+			_listFamPrePaySplits.ForEach(x => UpdatePaySplitHelper(x,patFam.PatNum,0,clinic1.ClinicNum,_listNegPrePay.First().PayNum));
+			retVal=PaymentEdit.ImplicitlyLinkPrepaymentsHelper(_listPosPrePay,_listNegPrePay,unearnedAmt,isFamMatch:true,isProvNumZero:true,isClinicNumMatch:true);
+			Assert.AreEqual(50,retVal);
+			//Logic check PatNum - other family members, ProvNum - zero, ClinicNum - zero
+			ResetPrepayments(pat);
+			_listFamPrePaySplits.ForEach(x => UpdatePaySplitHelper(x,patFam.PatNum,0,0,_listNegPrePay.First().PayNum));
+			retVal=PaymentEdit.ImplicitlyLinkPrepaymentsHelper(_listPosPrePay,_listNegPrePay,unearnedAmt,isFamMatch:true,isProvNumZero:true,isClinicNumZero:true);
+			Assert.AreEqual(50,retVal);
+			//Logic checkPatNum - other family members, ProvNum - zero, ClinicNum - non zero & non match
+			ResetPrepayments(pat);
+			_listFamPrePaySplits.ForEach(x => UpdatePaySplitHelper(x,patFam.PatNum,0,nonMatch,_listNegPrePay.First().PayNum));
+			retVal=PaymentEdit.ImplicitlyLinkPrepaymentsHelper(_listPosPrePay,_listNegPrePay,unearnedAmt,isFamMatch:true,isProvNumZero:true,isClinicNonZeroNonMatch:true);
+			Assert.AreEqual(50,retVal);
+			//Old test from above
+			ResetPrepayments(pat);
+			retVal=PaymentEdit.ImplicitlyLinkPrepaymentsHelper(_listPosPrePay,_listNegPrePay,unearnedAmt,isPatMatch:true,isProvNumMatch:true,isClinicNumMatch:true);
+			Assert.AreEqual(100,retVal);
+			//Logic checkPatNum - other family members, ProvNum - non zero & non match, ClinicNum - match
+			ResetPrepayments(pat);
+			_listFamPrePaySplits.ForEach(x => UpdatePaySplitHelper(x,patFam.PatNum,nonMatch,clinic1.ClinicNum,_listNegPrePay.First().PayNum));
+			retVal=PaymentEdit.ImplicitlyLinkPrepaymentsHelper(_listPosPrePay,_listNegPrePay,unearnedAmt,isFamMatch:true,isProvNonZeroNonMatch:true,isClinicNumMatch:true);
+			Assert.AreEqual(50,retVal);
+			//Logic check PatNum - other family members, ProvNum - non zero & non match, ClinicNum - zero
+			ResetPrepayments(pat);
+			_listFamPrePaySplits.ForEach(x => UpdatePaySplitHelper(x,patFam.PatNum,nonMatch,0,_listNegPrePay.First().PayNum));
+			retVal=PaymentEdit.ImplicitlyLinkPrepaymentsHelper(_listPosPrePay,_listNegPrePay,unearnedAmt,isFamMatch:true,isProvNonZeroNonMatch:true,isClinicNumZero:true);
+			Assert.AreEqual(50,retVal);
+			//Logic check PatNum - other family members, ProvNum - non zero & non match, ClinicNum - non zero & non match
+			ResetPrepayments(pat);
+			_listFamPrePaySplits.ForEach(x => UpdatePaySplitHelper(x,patFam.PatNum,nonMatch,nonMatch,_listNegPrePay.First().PayNum));
+			retVal=PaymentEdit.ImplicitlyLinkPrepaymentsHelper(_listPosPrePay,_listNegPrePay,unearnedAmt,isFamMatch:true,isProvNonZeroNonMatch:true,isClinicNonZeroNonMatch:true);
+			Assert.AreEqual(50,retVal);
+		}
+
+		private void UpdatePaySplitHelper(PaySplit ps,long patNum,long provNum,long clinicNum,long payNum) {
+			if(payNum!=0 && payNum==ps.PayNum) {
+				ps.PatNum=patNum;
+				ps.ProvNum=provNum;
+				ps.ClinicNum=clinicNum;
+				PaySplits.Update(ps);
+			}
+		}
+
+		private void ResetPrepayments(Patient pat) {
+			Family fam=Patients.GetFamily(pat.PatNum);
+			_listFamPrePaySplits=PaySplits.GetPrepayForFam(fam);
+			_listPosPrePay=_listFamPrePaySplits.FindAll(x => x.SplitAmt.IsGreaterThan(0));
+			_listNegPrePay=_listFamPrePaySplits.FindAll(x => x.SplitAmt.IsLessThan(0));
+		}
 	}
 }

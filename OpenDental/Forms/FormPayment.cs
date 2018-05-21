@@ -1679,74 +1679,10 @@ namespace OpenDental {
 			}
 			FillListPaySplitAssociated();
 			if(IsNew && UnearnedAmt>0) {
-				List<PaySplit> listPrePaySplits=PaySplits.GetPrepayForFam(_curFamOrSuperFam);
-				foreach(PaySplit prePaySplit in listPrePaySplits) {
-					List<PaySplit> listSplitsForPrePay=PaySplits.GetSplitsForPrepay(new List<PaySplit>() { prePaySplit });//Find all splits for the pre-payment.
-					foreach(PaySplit splitForPrePay in listSplitsForPrePay) {
-						prePaySplit.SplitAmt+=splitForPrePay.SplitAmt;//Sum the amount of the pre-payment that's used. (balancing splits are negative usually)
-					}
-				}
-				//Get all claimprocs and adjustments for the proc
-				List<ClaimProc> listClaimProcs=ClaimProcs.GetForProcs(ListProcs.Select(x => x.ProcNum).Distinct().ToList());
-				List<Adjustment> listAdjusts=Adjustments.GetForProcs(ListProcs.Select(x => x.ProcNum).Distinct().ToList());
-				foreach(Procedure proc in ListProcs) {//For each proc see how much of the Unearned we use per proc
-					if(UnearnedAmt<=0) {
-						break;
-					}
-					//Calculate the amount remaining on the procedure so we can know how much of the remaining pre-payment amount we can use.
-					proc.ProcFee-=PaySplits.GetPaySplitsFromProc(proc.ProcNum).Sum(x => x.SplitAmt);//Figure out how much is due on this proc.
-					double patPortion=ClaimProcs.GetPatPortion(proc,listClaimProcs,listAdjusts);
-					foreach(PaySplit prePaySplit in listPrePaySplits) {
-						//First we need to decide how much of each pre-payment split we can use per proc.
-						if(patPortion<=0) {//Proc has been paid for, go to next proc
-							break;
-						}
-						if(prePaySplit.SplitAmt<=0) {//Split has been used, go to next split
-							continue;
-						}
-						if(patPortion<=0) {
-							break;
-						}
-						decimal splitTotal=0;
-						if(splitTotal<(decimal)prePaySplit.SplitAmt) {//If the sum indicates there's pre-payment amount left over, let's use it.
-							double amtToUse=0;
-							if(prePaySplit.SplitAmt<patPortion) {
-								amtToUse=prePaySplit.SplitAmt;
-							}
-							else {
-								amtToUse=patPortion;
-							}
-							UnearnedAmt-=amtToUse;//Reflect the new unearned amount available for future proc use.
-							PaySplit splitNeg=new PaySplit();
-							splitNeg.PatNum=prePaySplit.PatNum;
-							splitNeg.PayNum=_paymentCur.PayNum;
-							splitNeg.FSplitNum=prePaySplit.SplitNum;
-							splitNeg.ClinicNum=prePaySplit.ClinicNum;
-							splitNeg.ProvNum=0;
-							splitNeg.SplitAmt=0-amtToUse;
-							splitNeg.UnearnedType=prePaySplit.UnearnedType;
-							splitNeg.DatePay=DateTime.Now;
-							_listSplitsCur.Add(splitNeg);
-							//Make a different paysplit attached to proc and prov they want to use it for.
-							PaySplit splitPos=new PaySplit();
-							splitPos.PatNum=_patCur.PatNum;
-							splitPos.PayNum=_paymentCur.PayNum;
-							splitPos.FSplitNum=0;//The association will be done on form closing.
-							splitPos.ProvNum=proc.ProvNum;
-							splitPos.ClinicNum=proc.ClinicNum;
-							splitPos.SplitAmt=amtToUse;
-							splitPos.DatePay=DateTime.Now;
-							splitPos.ProcNum=proc.ProcNum;
-							_listSplitsCur.Add(splitPos);
-							//link negSplit to posSplit. 
-							_listPaySplitsAssociated.Add(new PaySplits.PaySplitAssociated(splitNeg,splitPos));
-							//link original prepayment to neg split.
-							PaySplit paySplitPrePayOrig=PaySplits.GetOne(prePaySplit.SplitNum);
-							_listPaySplitsAssociated.Add(new PaySplits.PaySplitAssociated(paySplitPrePayOrig,splitNeg));
-							prePaySplit.SplitAmt-=amtToUse;
-							patPortion-=amtToUse;
-						}
-					}
+				List<PaySplits.PaySplitAssociated> listUnearnedPayAssociated=PaymentEdit.AllocateUnearned(ListProcs,ref _listSplitsCur
+					,_paymentCur,UnearnedAmt,_curFamOrSuperFam);
+				if(listUnearnedPayAssociated.Count>0) {
+					_listPaySplitsAssociated.AddRange(listUnearnedPayAssociated);
 				}
 			}
 			if(IsNew) {
@@ -1829,17 +1765,23 @@ namespace OpenDental {
 
 		///<summary>Populating _listPaySplitsAssociated with splits that are linked to each other.</summary>
 		private void FillListPaySplitAssociated() {
-			List<PaySplit> listPrePaysForPayment=_loadData.ListPrePaysForPayment;
-			foreach(PaySplit split in _listSplitsCur) {
-				if(split.FSplitNum==0) {
+			//All paysplits that have an FSplitNum of 0 are original paysplits.
+			//Only loop through all allocated paysplits for this particular payment and find their corresponding original paysplit and make a PaySplitAssociated object.
+			//We purposefully do not use _loadData.ListPaySplitAllocations because it contains paysplits that are not associated to this particular payment.
+			List<PaySplit> listPaySplitAllocations=_listSplitsCur.FindAll(x => x.FSplitNum > 0);
+			foreach(PaySplit paySplitAllocated in listPaySplitAllocations) {
+				if(paySplitAllocated.FSplitNum==0) {
 					continue;
 				}
-				PaySplit psOrig=_listSplitsCur.Find(x => x.SplitNum==split.FSplitNum);
+				//Find the corresponding original paysplit for the current allocated paysplit.
+				//Look through all of the paysplits that are associated to this particular payment first (prefer _listSplitsCur due to the sync).
+				PaySplit psOrig=_listSplitsCur.Find(x => x.SplitNum==paySplitAllocated.FSplitNum);
 				if(psOrig==null) {
-					psOrig=listPrePaysForPayment.Find(x => x.SplitNum==split.FSplitNum);
+					//The original is not associated to this particular payment, look through all of the associated prepayment paysplits next.
+					psOrig=_loadData.ListPrePaysForPayment.Find(x => x.SplitNum==paySplitAllocated.FSplitNum);
 				}
 				if(psOrig!=null) {
-					_listPaySplitsAssociated.Add(new PaySplits.PaySplitAssociated(psOrig,split));
+					_listPaySplitsAssociated.Add(new PaySplits.PaySplitAssociated(psOrig,paySplitAllocated));
 				}
 			}
 		}

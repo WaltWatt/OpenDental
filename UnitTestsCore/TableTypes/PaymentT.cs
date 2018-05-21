@@ -8,7 +8,7 @@ using OpenDentBusiness;
 namespace UnitTestsCore {
 	public class PaymentT {
 		public static Payment MakePayment(long patNum,double payAmt,DateTime payDate,long payPlanNum=0,long provNum=0,long procNum=0,long payType=0,
-			long clinicNum=0) 
+			long clinicNum=0,long unearnedType = 0) 
 		{
 			Payment payment=new Payment();
 			payment.PatNum=patNum;
@@ -28,6 +28,7 @@ namespace UnitTestsCore {
 			split.ProcNum=procNum;
 			split.SplitAmt=payAmt;
 			split.DateEntry=payDate;
+			split.UnearnedType=unearnedType;
 			PaySplits.Insert(split);
 			return payment;
 		}
@@ -49,22 +50,21 @@ namespace UnitTestsCore {
 			return payment;
 		}
 
-		public static PaySplit CreateSplit(long clinicNum,long patNum,long payNum,long payplanNum,DateTime procDate,long procNum,long provNum
-			,double splitAmt,long unearnedType) 
-		{
-			PaySplit paysplit=new PaySplit() {
-				ClinicNum=clinicNum,
-				PatNum=patNum,
-				PayNum=payNum,
-				PayPlanNum=payplanNum,
-				ProcDate=procDate,
-				ProcNum=procNum,
-				ProvNum=provNum,
-				SplitAmt=splitAmt,
-				UnearnedType=unearnedType
-			};
-			PaySplits.Insert(paysplit);
-			return paysplit;
+		public static Payment MakePaymentForPrepayment(Patient pat,Clinic clinic) {
+			Payment paymentCur=new Payment();
+			paymentCur.PayDate=DateTime.Today;
+			paymentCur.PatNum=pat.PatNum;
+			paymentCur.ClinicNum=clinic.ClinicNum;
+			paymentCur.DateEntry=DateTime.Today;
+			List<Def> listDefs=Defs.GetDefsForCategory(DefCat.PaymentTypes,true);
+			if(listDefs.Count>0) {
+				paymentCur.PayType=listDefs[0].DefNum;
+			}
+			paymentCur.PaymentSource=CreditCardSource.None;
+			paymentCur.ProcessStatus=ProcessStat.OfficeProcessed;
+			paymentCur.PayAmt=0;
+			Payments.Insert(paymentCur);
+			return paymentCur;
 		}
 	}
 }
