@@ -208,7 +208,7 @@ namespace OpenDental {
 		private void WebSchedVerify_TextLeave(object sender, EventArgs e) {
 			TextBox textBox=(TextBox)sender;
 			PrefName prefName=(PrefName)textBox.Tag;
-			WebSchedVerify_UpdateClinicPref(prefName,POut.String(textBox.Text));
+			WebSchedVerify_UpdateClinicPref(prefName,textBox.Text);
 		}
 
 		/// <summary>All the user to undo all changes they have made to the currently selected clinic.</summary>
