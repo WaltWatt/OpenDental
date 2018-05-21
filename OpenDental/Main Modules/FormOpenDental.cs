@@ -8422,11 +8422,29 @@ namespace OpenDental{
 		}
 
 		private void ExecuteQueryFavorite(UserQuery userQuery) {
+			SecurityLogs.MakeLogEntry(Permissions.UserQuery,0,Lan.g(this,"User query form accessed."));
+			//ReportSimpleGrid report=new ReportSimpleGrid();
+			if(userQuery.IsPromptSetup && UserQueries.ParseSetStatements(userQuery.QueryText).Count>0) {
+				//if the user is not a query admin, they will not have the ability to edit 
+				//the query before it is run, so show them the SET statement edit window.
+				FormQueryParser FormQP = new FormQueryParser(userQuery);
+				FormQP.ShowDialog();
+				if(FormQP.DialogResult!=DialogResult.OK) {
+					//report.Query=userQuery.QueryText;
+					return;
+				}
+			}
+			if(_formUserQuery!=null) {
+				_formUserQuery.textQuery.Text=userQuery.QueryText;
+				_formUserQuery.textTitle.Text=userQuery.FileName;
+				_formUserQuery.SubmitQueryThreaded();
+				_formUserQuery.BringToFront();
+				return;
+			}
 			_formUserQuery=new FormQuery(null,true);
 			_formUserQuery.FormClosed+=new FormClosedEventHandler((object senderF,FormClosedEventArgs eF) => { _formUserQuery=null; });
 			_formUserQuery.textQuery.Text=userQuery.QueryText;
 			_formUserQuery.textTitle.Text=userQuery.FileName;
-			SecurityLogs.MakeLogEntry(Permissions.UserQuery,0,Lan.g(this,"User query form accessed."));
 			_formUserQuery.Show();
 		}
 

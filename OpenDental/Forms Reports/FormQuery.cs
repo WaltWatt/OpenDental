@@ -772,7 +772,7 @@ namespace OpenDental{
 
 		#region Thread Stuff
 		///<summary>Used to submit user queries in a thread.  Column names will be handled automatically.</summary>
-		private void SubmitQueryThreaded() {
+		public void SubmitQueryThreaded() {
 			if(_threadQuery!=null || _serverThreadID!=0) {
 				return;//There is already a query executing.
 			}

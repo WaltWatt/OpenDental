@@ -306,7 +306,7 @@ namespace OpenDental{
 			textSearch.Select();
 		}
 
-		private void FillGrid(bool refreshList = true) {
+		private void FillGrid(bool refreshList=true,bool isScrollToSelection=true) {
 			if(refreshList) {
 				_listQueries=UserQueries.GetDeepCopy();
 			}
@@ -342,13 +342,15 @@ namespace OpenDental{
 			}
 			gridMain.EndUpdate();
 			int selectedIdx=gridMain.Rows.Select(x => (UserQuery)x.Tag).ToList().FindIndex(y => y.QueryNum==selectedQueryNum);
-			if(selectedIdx > -1) {
+			if(selectedIdx>-1) {
 				gridMain.SetSelected(selectedIdx,true);
 			}
-			if(gridMain.GetSelectedIndex() == -1) {
+			if(gridMain.GetSelectedIndex()==-1) {
 				gridMain.SetSelected(0,true); //can handle values outside of the row count (so if there are no rows, this will not fail)
 			}
-			gridMain.ScrollToIndex(gridMain.GetSelectedIndex()); //can handle values outside of the row count
+			if(isScrollToSelection) {
+				gridMain.ScrollToIndex(gridMain.GetSelectedIndex()); //can handle values outside of the row count
+			}
 			RefreshQueryCur();
 		}
 
@@ -363,6 +365,14 @@ namespace OpenDental{
 		}
 
 		private void gridMain_CellClick(object sender,ODGridClickEventArgs e) {
+			if(e.Col==1) {//Released Column
+				UserQuery query=gridMain.SelectedTag<UserQuery>();
+				query.IsReleased=(!query.IsReleased);
+				UserQueries.Update(query);
+				DataValid.SetInvalid(InvalidType.UserQueries);
+				FillGrid(true,false);//Results in RefreshQueryCur()
+				return;
+			}
 			RefreshQueryCur();
 		}
 
