@@ -97,7 +97,7 @@ namespace OpenDentBusiness{
 		///<summary>1 - Download ERAs/EOBs, but do not mark claims and claim procedures as 'Received'.</summary>
 		[Description("Download ERAs, Do Not Auto Receive.")]
 		DownloadDoNotReceive,
-		///<summary>2 - Download ERAs/EOBs, and mark claims and claim procedures as 'Received'. Currently Auto-Recieve is only for ERAs.</summary>
+		///<summary>2 - Download ERAs/EOBs, and mark claims and claim procedures as 'Received'. Currently Auto-Recieve is only for EOBs.</summary>
 		[Description("Download ERAs and Auto Receive.")]
 		DownloadAndReceive
 	}
