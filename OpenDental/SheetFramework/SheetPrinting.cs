@@ -1350,7 +1350,9 @@ namespace OpenDental {
 			}
 			Sheets.SetPageMargin(sheet,_printMargin);
 			UI.ODGrid odGrid=new UI.ODGrid();//Only used for measurements, also contains printing/drawing logic.
-			odGrid.FontForSheets=new Font(field.FontName,field.FontSize,field.FontIsBold?FontStyle.Bold:FontStyle.Regular);
+			if(!string.IsNullOrEmpty(field.FontName)) {
+				odGrid.FontForSheets=new Font(field.FontName,field.FontSize,field.FontIsBold ? FontStyle.Bold : FontStyle.Regular);
+			}
 			int _yAdjCurRow=0;//used to adjust for Titles, Headers, Rows, and footers (all considered part of the same row).
 			List<DisplayField> Columns=SheetUtil.GetGridColumnsAvailable(field.FieldName);
 			if(table==null) {

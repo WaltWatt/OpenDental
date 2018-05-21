@@ -275,7 +275,9 @@ namespace OpenDental{
 			,DataSet dataSet,long eraClaimSegmentIdx=-1,DataTable table=null,Patient pat=null,Patient patGuar=null) 
 		{
 			ODGrid odGrid=new ODGrid();
-			odGrid.FontForSheets=new Font(field.FontName,field.FontSize,field.FontIsBold?FontStyle.Bold:FontStyle.Regular);
+			if(!string.IsNullOrEmpty(field.FontName)) {
+				odGrid.FontForSheets=new Font(field.FontName,field.FontSize,field.FontIsBold ? FontStyle.Bold : FontStyle.Regular);
+			}
 			odGrid.Width=field.Width;
 			odGrid.HideScrollBars=true;
 			odGrid.YPosField=field.YPos;
