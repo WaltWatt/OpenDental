@@ -1112,7 +1112,7 @@ namespace OpenDental{
 				+"Date | PatNum | Patient Name";
 			for(int i=0;i<secCPs.Rows.Count;i++) {
 				//claimProc=secondaryClaims[i];
-				message+="\r\n"+PIn.Date(secCPs.Rows[i]["ProcDate"].ToString()).ToShortDateString()
+				message+="\r\n"+PIn.Date(secCPs.Rows[i]["DateCP"].ToString()).ToShortDateString()
 					+" | "+secCPs.Rows[i]["PatNum"].ToString()
 					+" | "+Patients.GetPat(PIn.Long(secCPs.Rows[i]["PatNum"].ToString())).GetNameLF();
 			}
