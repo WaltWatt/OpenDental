@@ -63,20 +63,20 @@ namespace OpenDental{
 		private bool _isResizing;
 		private CheckBox checkShowClinicSchedules;
 		private Point _clickedCell;
-		///<summary>True when we user should not be able to modify the schedule, simply informational and printing.</summary>
-		private bool _isReadOnly;
+		///<summary>By default is FormScheduleMode.SetupSchedule.
+		///If user does not have Schedule permission then will be in FormScheduleMode.ViewSchedule.</summary>
+		private FormScheduleMode _formMode;
 		private List<long> _listPreSelectedEmpNums=new List<long>();
 		private List<long> _listPreSelectedProvNums=new List<long>();
 
 		///<summary></summary>
-		public FormSchedule(bool isReadOnly=false,List<long> listPreSelectedEmpNums=null,List<long> listPreSelectedProvNums=null)
+		public FormSchedule(List<long> listPreSelectedEmpNums=null,List<long> listPreSelectedProvNums=null)
 		{
 			//
 			// Required for Windows Form Designer support
 			//
 			InitializeComponent();
 			Lan.F(this);
-			_isReadOnly=isReadOnly;
 			if(listPreSelectedEmpNums!=null) {
 				_listPreSelectedEmpNums=listPreSelectedEmpNums;
 			}
@@ -540,38 +540,39 @@ namespace OpenDental{
 		#endregion
 
 		private void FormSchedule_Load(object sender,EventArgs e) {
-			if(!Security.IsAuthorized(Permissions.Schedules,DateTime.MinValue,true)) {
-				//gridMain.Enabled=false;
-				butDelete.Enabled=false;
-				groupCopy.Enabled=false;
-				groupPaste.Enabled=false;
-				if(PrefC.GetBool(PrefName.DistributorKey)) {//if this is OD HQ
-					checkPracticeNotes.Checked=false;
-					checkPracticeNotes.Enabled=false;
-				}
-			}
-			if(_isReadOnly) {
-				DateTime dateFrom=DateTime.Today.AddDays(-(int)DateTime.Today.DayOfWeek);//Sunday of current week.
-				textDateFrom.Text=dateFrom.ToShortDateString();
-				textDateTo.Text=dateFrom.AddMonths(1).AddDays(-1).ToShortDateString();
-			}
-			else {
-				DateTime dateFrom=new DateTime(DateTime.Today.Year,DateTime.Today.Month,1);
-				textDateFrom.Text=dateFrom.ToShortDateString();
-				textDateTo.Text=dateFrom.AddMonths(12).AddDays(-1).ToShortDateString();
+			_formMode=FormScheduleMode.ViewSchedule;
+			if(Security.IsAuthorized(Permissions.Schedules,DateTime.MinValue,true)){
+				_formMode=FormScheduleMode.SetupSchedule;
+			};
+			switch(_formMode) {
+				case FormScheduleMode.SetupSchedule:
+					DateTime dateFrom=new DateTime(DateTime.Today.Year,DateTime.Today.Month,1);
+					textDateFrom.Text=dateFrom.ToShortDateString();
+					textDateTo.Text=dateFrom.AddMonths(12).AddDays(-1).ToShortDateString();
+					break;
+				case FormScheduleMode.ViewSchedule:
+					butDelete.Visible=false;
+					groupCopy.Visible=false;
+					groupPaste.Visible=false;
+					if(PrefC.GetBool(PrefName.DistributorKey)) {//if this is OD HQ
+						checkPracticeNotes.Checked=false;
+						checkPracticeNotes.Enabled=false;
+					}
+					dateFrom=DateTime.Today.AddDays(-(int)DateTime.Today.DayOfWeek);//Sunday of current week.
+					textDateFrom.Text=dateFrom.ToShortDateString();
+					textDateTo.Text=dateFrom.AddMonths(1).AddDays(-1).ToShortDateString();
+					break;
 			}
 			RefreshClinicData();
 			FillEmployeesAndProviders();
 			FillGrid();
-			if(_isReadOnly) {
-				SetFormReadOnly();
-			}
 		}
 
 		private void RefreshClinicData() {
 			if(!PrefC.HasClinicsEnabled) {
 				labelClinic.Visible=false;
 				comboClinic.Visible=false;
+				checkShowClinicSchedules.Visible=false;
 				checkClinicNotes.Visible=false;
 				checkClinicNotes.Checked=false;
 				return;
@@ -583,12 +584,6 @@ namespace OpenDental{
 			Clinics.GetForUserod(Security.CurUser).ForEach(x => _listClinics.Add(x));//do not re-organize from cache. They could either be alphabetizeded or sorted by item order.
 			_listClinics.ForEach(x => comboClinic.Items.Add(x.Abbr));
 			comboClinic.SelectedIndex=_listClinics.FindIndex(x => x.ClinicNum==Clinics.ClinicNum);
-		}
-
-		private void SetFormReadOnly() {
-			butDelete.Visible=false;
-			groupCopy.Visible=false;
-			groupPaste.Visible=false;
 		}
 
 		///<summary>Fills the employee box based on what clinic is selected.  Set selectAll to true to have all employees in the list box selected by default.</summary>
@@ -612,20 +607,30 @@ namespace OpenDental{
 			_listEmps.ForEach(x => listEmp.Items.Add(x.FName));
 			listProv.Items.Clear();
 			_listProviders.ForEach(x => listProv.Items.Add(x.Abbr));
-			if(_isReadOnly) {
-				//Employee Listbox
-				for(int i=1;i<listEmp.Items.Count;i++) {
-					if(!_listPreSelectedEmpNums.Contains(_listEmps[i].EmployeeNum)) {
-						continue;
+			if(_listPreSelectedEmpNums!=null || _listPreSelectedProvNums!=null) {
+				if(_listPreSelectedEmpNums!=null && _listPreSelectedEmpNums.Count>0) {
+					//Employee Listbox
+					for(int i=1;i<listEmp.Items.Count;i++) {
+						if(!_listPreSelectedEmpNums.Contains(_listEmps[i].EmployeeNum)) {
+							continue;
+						}
+						listEmp.SetSelected(i,true);
 					}
-					listEmp.SetSelected(i,true);
 				}
-				//Provider Listbox
-				for(int i=1;i<listProv.Items.Count;i++) {
-					if(!_listPreSelectedProvNums.Contains(_listProviders[i].ProvNum)) {
-						continue;
+				else {
+					listEmp.SelectedIndex=0;//select the 'none' entry;
+				}
+				if(_listPreSelectedProvNums!=null && _listPreSelectedProvNums.Count>0) {
+					//Provider Listbox
+					for(int i=1;i<listProv.Items.Count;i++) {
+						if(!_listPreSelectedProvNums.Contains(_listProviders[i].ProvNum)) {
+							continue;
+						}
+						listProv.SetSelected(i,true);
 					}
-					listProv.SetSelected(i,true);
+				}
+				else {
+					listProv.SelectedIndex=0;//select the 'none' entry; 
 				}
 			}
 			else if(PrefC.GetBool(PrefName.ScheduleProvEmpSelectAll)) {
@@ -671,7 +676,7 @@ namespace OpenDental{
 #else	
 			if(PrefC.IsODHQ && e.KeyCode==Keys.W) {
 #endif
-				if(checkWeekend.CheckState!=CheckState.Indeterminate) {
+				if(checkWeekend.CheckState!=CheckState.Indeterminate) {//Checked or Unchecked
 					checkWeekend.Checked=true;
 					checkWeekend.CheckState=CheckState.Indeterminate;//Show ONLY the weekend
 					butDelete.Visible=false;
@@ -681,9 +686,9 @@ namespace OpenDental{
 				else {
 					checkWeekend.Checked=false;
 					checkWeekend.CheckState=CheckState.Unchecked;//Display Normally
-					butDelete.Visible=!_isReadOnly;
-					groupCopy.Visible=!_isReadOnly;
-					groupPaste.Visible=!_isReadOnly;
+					butDelete.Visible=(_formMode==FormScheduleMode.SetupSchedule);
+					groupCopy.Visible=(_formMode==FormScheduleMode.SetupSchedule);
+					groupPaste.Visible=(_formMode==FormScheduleMode.SetupSchedule);
 				}
 				FillGrid();
 			}
@@ -862,7 +867,7 @@ namespace OpenDental{
 		}
 
 		private void checkWeekend_Click(object sender,EventArgs e) {
-			if(!_isReadOnly && !butDelete.Visible) {//ODHQ only
+			if(_formMode==FormScheduleMode.SetupSchedule && !butDelete.Visible) {//ODHQ only
 				butDelete.Visible=true;
 				groupCopy.Visible=true;
 				groupPaste.Visible=true;
@@ -901,7 +906,7 @@ namespace OpenDental{
 		}
 
 		private void gridMain_CellDoubleClick(object sender,ODGridClickEventArgs e) {
-			if(_isReadOnly || !Security.IsAuthorized(Permissions.Schedules,DateTime.MinValue)) {
+			if(!Security.IsAuthorized(Permissions.Schedules,DateTime.MinValue)) {
 				return;
 			}
 			if(!ValidateInputs()) {
@@ -1364,6 +1369,11 @@ namespace OpenDental{
 				SecurityLogs.MakeLogEntry(Permissions.Schedules,0,"");
 			}
 		}
+	}
+
+	public enum FormScheduleMode {
+		SetupSchedule,
+		ViewSchedule
 	}
 }
 

@@ -1438,12 +1438,13 @@ namespace OpenDental{
 			FormTC.ShowDialog();
 			ModuleSelected(PatCurNum);
 		}
+
 		private void butViewSched_Click(object sender,EventArgs e) {
 			List<long> listPreSelectedEmpNums=gridEmp.SelectedGridRows.Select(x => ((Employee)x.Tag).EmployeeNum).ToList();
 			List<long> listPreSelectedProvNums=Userods.GetWhere(x => listPreSelectedEmpNums.Contains(x.EmployeeNum) && x.ProvNum!=0)
 				.Select(x => x.ProvNum)
 				.ToList();
-			FormSchedule formSched=new FormSchedule(true,listPreSelectedEmpNums,listPreSelectedProvNums);
+			FormSchedule formSched=new FormSchedule(listPreSelectedEmpNums,listPreSelectedProvNums);
 			formSched.ShowDialog();
 		}
 
