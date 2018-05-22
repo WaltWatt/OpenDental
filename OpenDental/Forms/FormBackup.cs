@@ -1316,7 +1316,19 @@ namespace OpenDental {
 				}
 			}
 			//Check database version.  At this point the database is newly created or already exists.
-			Version versionDbArchive=new Version(PrefC.GetStringNoCache(PrefName.DataBaseVersion));
+			string version=PrefC.GetStringNoCache(PrefName.DataBaseVersion);
+			if(string.IsNullOrEmpty(version)) {
+				//Preference table does not have version information.  Somehow they have a database with proper structure but no data.
+				//Best option is to truncate preference table and then insert preferences.  We don't want to truncate all tables, as they may have info for some reason in the others.
+				dcon.SetDb(connectionStrOrig,"",dbTypeOrig);
+				DataTable preferences=Prefs.GetTableFromCache(true);//Copy preferences from current db.
+				//Reconnect to new db
+				dcon.SetDb(connectionStrArchive,"",dbTypeArchive,true);//Switch connection to new db so we can copy over preferences (keeps track of db version)
+				MiscData.InsertPreferences(preferences);
+				dcon.SetDb(connectionStrArchive,"",dbTypeArchive);
+				version=PrefC.GetStringNoCache(PrefName.DataBaseVersion);
+			}
+			Version versionDbArchive=new Version(version);
 			if(versionDbOrig>versionDbArchive) {
 				//We need to update the archive version
 				if(!MsgBox.Show(this,MsgBoxButtons.YesNo,"Archive database needs to be updated.  Continue?  (WARNING: This can take a while!  DO NOT CLOSE THE PROGRAM!)")) {
