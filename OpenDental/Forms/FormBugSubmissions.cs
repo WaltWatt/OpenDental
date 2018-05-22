@@ -105,7 +105,7 @@ namespace OpenDental {
 			if(!BugSubmissionL.TryAssociateSimilarBugSubmissions(_listAllSubs,this.Location)) {
 				return;
 			}
-			FillSubGrid();
+			FillSubGrid(true);
 		}
 
 		///<summary>Click method used by all gridClaimDetails right click options.</summary>
