@@ -793,7 +793,7 @@ namespace OpenDentBusiness {
 					strLimitedWhereClause+="AND claimproc.ClaimNum IN ("+claimNumsForLimited+") ";
 				}	
 			}
-			command+=strLimitedWhereClause+" GROUP BY claimproc.ClaimNum,claimproc.DateCP,claimproc.ClaimPaymentNum "
+			command+=strLimitedWhereClause+" GROUP BY claimproc.ClaimNum,claimproc.DateCP,claimproc.Status,CASE WHEN claimproc.Status=4 THEN claimproc.ClaimPaymentNum ELSE 0 END "//Differentiate multiple supplemental payments on the same day.
 				+"ORDER BY DateCP";
 			DataTable rawClaimPay=new DataTable();
 			if(!isInvoice && (stmt.StatementType!=StmtType.LimitedStatement || procNumsForLimited!="")) {//don't run if IsInvoice or if LimitedStatement with no procs
