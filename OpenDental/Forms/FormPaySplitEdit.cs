@@ -1455,14 +1455,18 @@ namespace OpenDental
 			if(FormPSS.ShowDialog()!=DialogResult.OK) {
 				return;
 			}
-			if(isNegSplit) {
+			if(isNegSplit) {//if negative then we're allocating money from the original prepayment.
 				butAttachProc.Enabled=false;
 				butDetachProc.Enabled=false;
-				//For now there can only be one selected paysplit from the window.
-				comboProvider.SelectedIndex=0;
 				comboProvider.Enabled=false;
 			}
 			SplitAssociated=new PaySplits.PaySplitAssociated(FormPSS.ListSelectedSplits[0],PaySplitCur);
+			//Always switch when negative so it matches the original, only switch for positive proc splits when prepayment has provider
+			if(isNegSplit || SplitAssociated.PaySplitOrig.ProvNum!=0) {
+				comboProvider.SelectIndex(_listProviders.FindIndex(x => x.ProvNum==SplitAssociated.PaySplitOrig.ProvNum)
+					,Providers.GetAbbr(SplitAssociated.PaySplitOrig.ProvNum));
+				PaySplitCur.ProvNum=SplitAssociated.PaySplitOrig.ProvNum;
+			}
 			FillSplitAssociated();
 		}
 
@@ -1593,6 +1597,11 @@ namespace OpenDental
 			//Provider and Unearned combos will be correct at this point, based on ProvNum or UnearnedType.
 			//Unearned type and provider are set in SelectionChangeCommitted events for the respective combo boxes, when rigorous and provs not allowed
 			if(!_isEditAnyway && PrefC.GetInt(PrefName.RigorousAccounting)==(int)RigorousAccounting.EnforceFully) {
+				PaySplit split=SplitAssociated?.PaySplitOrig??new PaySplit();
+				if(split.ProvNum!=0 && ProcCur!=null && split.ProvNum!=ProcCur.ProvNum) {
+					MsgBox.Show(this,"Procedure provider and original paysplit provider do not match.");
+					return false;
+				}
 				if(PaySplitCur.ProvNum>0 && !PrefC.GetBool(PrefName.AllowPrepayProvider)) {
 					PaySplitCur.UnearnedType=0;
 				}
