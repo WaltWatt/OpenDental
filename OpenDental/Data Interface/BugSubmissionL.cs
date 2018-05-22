@@ -129,9 +129,9 @@ namespace OpenDental {
 			FormOpenDental.S_GoToJob(jobNew.JobNum);
 			return bugNew;
 		}
-		
-		///<summary></summary>
-		public static bool TryAssociateSimilarBugSubmissions(List<BugSubmission> listAllSubs,Point pointFormLocaiton) {
+
+		public static bool TryAssociateSimilarBugSubmissions(Point pointFormLocaiton) {
+			List<BugSubmission> listAllSubs=BugSubmissions.GetAll();
 			List<BugSubmission> listUnattachedSubs=listAllSubs.Where(x => x.BugId==0).ToList();
 			if(listUnattachedSubs.Count==0) {
 				MsgBox.Show("FormBugSubmissions","All submissions are associated to bugs already.");

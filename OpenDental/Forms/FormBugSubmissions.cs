@@ -47,7 +47,7 @@ namespace OpenDental {
 			dateRangePicker.SetDateTimeTo(DateTime.Today);
 			#region comboGrouping
 			comboGrouping.Items.Add("None");
-			comboGrouping.Items.Add("Customer");
+			comboGrouping.Items.Add("RegKey/Ver/Stack");
 			comboGrouping.Items.Add("StackTrace");
 			//comboGrouping.Items.Add("95%");
 			switch(_viewMode) {
@@ -102,7 +102,7 @@ namespace OpenDental {
 		}
 		
 		private void findPreviouslyFixedSubmisisonsToolStripMenuItem_Click(object sender,EventArgs e) {
-			if(!BugSubmissionL.TryAssociateSimilarBugSubmissions(_listAllSubs,this.Location)) {
+			if(!BugSubmissionL.TryAssociateSimilarBugSubmissions(this.Location)) {
 				return;
 			}
 			FillSubGrid(true);
@@ -204,7 +204,7 @@ namespace OpenDental {
 						#endregion
 						break;
 					case 1:
-						#region Customer
+						#region RegKey/Ver/Stack
 						listGroupedSubs=listFilteredSubs.FindAll(x => x.TagOD==null && x.RegKey==sub.RegKey
 							&& x.Info.DictPrefValues[PrefName.ProgramVersion]==sub.Info.DictPrefValues[PrefName.ProgramVersion]
 							&& x.ExceptionStackTrace==sub.ExceptionStackTrace
@@ -323,7 +323,9 @@ namespace OpenDental {
 				.ToList();
 			listVersions.Sort((x,y) => new Version(y).CompareTo(new Version(x)));//descending
 			listVersions.ForEach(x => comboVersions.Items.Add(x));
-			comboVersions.SetSelected(0,true);//Select 'All' by default
+			if(comboVersions.SelectedIndices.Count==0) {
+				comboVersions.SetSelected(0,true);//Select 'All' by default
+			}
 		}
 		
 		private void FillRegKeyFilter(List<BugSubmission> listSubmissions) {
@@ -334,7 +336,9 @@ namespace OpenDental {
 				.ToList();
 			listVersions.Sort();
 			listVersions.ForEach(x => comboRegKeys.Items.Add(x));
-			comboRegKeys.SetSelected(0,true);//Select 'All' by default
+			if(comboVersions.SelectedIndices.Count==0) {
+				comboRegKeys.SetSelected(0,true);//Select 'All' by default
+			}
 		}
 
 		private void gridSubs_CellDoubleClick(object sender,ODGridClickEventArgs e) {
@@ -456,9 +460,9 @@ namespace OpenDental {
 				case 1:
 				case 2:
 				case 3:
-					#region Customer, Stacktrace, 95%
+					#region RegKey/Ver/Stack, Stacktrace, 95%
 					List<BugSubmission> listSubGroup=((List<BugSubmission>)gridSubs.Rows[gridSubs.GetSelectedIndex()].Tag);
-					gridCustomerSubs.Title="Grouped Submissions";
+					gridCustomerSubs.Title="Grouped Submissions ("+listSubGroup.DistinctBy(x => x.RegKey).Count()+" DIST)";
 					gridCustomerSubs.BeginUpdate();
 					gridCustomerSubs.Columns.Clear();
 					gridCustomerSubs.Columns.Add(new ODGridColumn("Vers.",55,HorizontalAlignment.Center));
