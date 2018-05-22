@@ -596,7 +596,7 @@ namespace OpenDentBusiness {
 		public static DataSet GetSuperFamAccount(Statement stmtCur,bool isComputeAging=true,bool doIncludePatLName=false) {
 			//This method does not call the database directly but still requires a remoting role check because it calls a method that uses out variables.
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				return Meth.GetDS(MethodBase.GetCurrentMethod(),stmtCur,isComputeAging);
+				return Meth.GetDS(MethodBase.GetCurrentMethod(),stmtCur,isComputeAging,doIncludePatLName);
 			}
 			DataSet retVal=new DataSet();
 			List<Patient> listSuperFamilyGuars=new List<Patient>();
@@ -686,7 +686,7 @@ namespace OpenDentBusiness {
 		public static DataSet GetAccount(long patNum,Statement stmt,bool isComputeAging=true,bool doIncludePatLName=false) {
 			//This method does not call the database directly but still requires a remoting role check because it calls a method that uses out variables.
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				return Meth.GetDS(MethodBase.GetCurrentMethod(),patNum,stmt,isComputeAging);
+				return Meth.GetDS(MethodBase.GetCurrentMethod(),patNum,stmt,isComputeAging,doIncludePatLName);
 			}
 			bool showProcBreakdown=false;
 			if(!stmt.IsInvoice) {
