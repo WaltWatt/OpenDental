@@ -5,6 +5,7 @@ using OpenDentBusiness.WebTypes.WebSched.TimeSlot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using UnitTestsCore;
@@ -613,6 +614,66 @@ namespace UnitTests.UnitTests {
 				,null);//Null clinic will only consider ops with ClinicNum set to 0.
 			//There should not be ANY time slots returned that fall outside of our start and end date ranges.
 			Assert.IsTrue(listTimeSlots.All(x => x.DateTimeStart.Date.Between(dateStart,dateEnd)));
+		}
+
+		///<summary>The last available time slot for today is not always getting returned in a very specific setup.
+		///This unit test is for helping make sure that our time slot finding logic returns expected results for same day time slots.</summary>
+		[TestMethod]
+		public void TimeSlots_GetTimeSlotsForRange_LastSlotSameDay() {
+			string suffix=MethodBase.GetCurrentMethod().Name;
+			//Have the date we prefer be today.  This date will be used for schedules time slot finding.
+			DateTime dateTimeSchedule=DateTime.Now;
+			long provNumHyg=ProviderT.CreateProvider("Hyg-"+suffix);
+			Patient pat=PatientT.CreatePatient(suffix,provNumHyg);
+			//Make sure the that Appointment View time increment is set to 15 min.
+			Prefs.UpdateInt(PrefName.AppointmentTimeIncrement,15);
+			//Create an operatory for the provider.
+			Operatory opHyg=OperatoryT.CreateOperatory("1-"+suffix,"Hyg Op - "+suffix,provHygienist:provNumHyg,isWebSched:true,itemOrder:0);
+			//Create a schedule for the provider from 08:00 - 19:00
+			Schedule schedDoc=ScheduleT.CreateSchedule(dateTimeSchedule,new TimeSpan(new DateTime(1,1,1,8,0,0).Ticks)
+				,new TimeSpan(new DateTime(1,1,1,19,0,0).Ticks),schedType:ScheduleType.Provider,provNum:provNumHyg);
+			//Now link up the schedule entry to the Web Sched operatory
+			ScheduleOpT.CreateScheduleOp(opHyg.OperatoryNum,schedDoc.ScheduleNum);
+			//Make the date range for the entire month that we landed on.
+			DateTime dateStart=new DateTime(dateTimeSchedule.Year,dateTimeSchedule.Month,1);
+			DateTime dateEnd=dateStart.AddMonths(1).AddDays(-1);//Will always return the last day of the month.
+			//Refresh the schedule that we created above so that the non db columns are filled correctly.
+			List<Schedule> listSchedules=Schedules.GetByScheduleNum(new List<long>() {
+				schedDoc.ScheduleNum,
+			});
+			//Create two appointments that take up the majority of the operatory except the last two hour blocks.
+			//This is the specific scenario that the eServices team setup in order to duplicate the issue.
+			//390 min long appointment from 08:00 - 14:30
+			AppointmentT.CreateAppointment(pat.PatNum,new DateTime(dateTimeSchedule.Year,dateTimeSchedule.Month,dateTimeSchedule.Day,8,0,0)
+				,opHyg.OperatoryNum,provNumHyg,pattern: "//////////////////////////////////////////////////////////////////////////////");
+			//150 min long appointment from 14:30 - 17:00
+			AppointmentT.CreateAppointment(pat.PatNum,new DateTime(dateTimeSchedule.Year,dateTimeSchedule.Month,dateTimeSchedule.Day,14,30,0)
+				,opHyg.OperatoryNum,provNumHyg,pattern: "//////////////////////////////");
+			//Search for hour long time slot openings.
+			List<TimeSlot> listTimeSlots=TimeSlots.GetTimeSlotsForRange(dateStart,dateEnd
+				,"/XXXXXXXXXX/"//60 min appt
+				,new List<long>() { provNumHyg }
+				,new List<Operatory>() { opHyg }
+				,listSchedules
+				,null);//Null clinic will only consider ops with ClinicNum set to 0.
+			//The time slots returned will depend on what time of day this unit test is actually ran.
+			if(dateTimeSchedule.Hour < 17) {
+				Assert.AreEqual(2,listTimeSlots.Count);
+				//There should only be two time slots available and it is the last two hours of the schedule; 17:00 - 18:00 and 18:00 - 19:00.
+				Assert.IsTrue(listTimeSlots[0].DateTimeStart==new DateTime(dateTimeSchedule.Year,dateTimeSchedule.Month,dateTimeSchedule.Day,17,0,0)
+					&& listTimeSlots[0].DateTimeStop==new DateTime(dateTimeSchedule.Year,dateTimeSchedule.Month,dateTimeSchedule.Day,18,0,0));
+				Assert.IsTrue(listTimeSlots[1].DateTimeStart==new DateTime(dateTimeSchedule.Year,dateTimeSchedule.Month,dateTimeSchedule.Day,18,0,0)
+					&& listTimeSlots[1].DateTimeStop==new DateTime(dateTimeSchedule.Year,dateTimeSchedule.Month,dateTimeSchedule.Day,19,0,0));
+			}
+			else if(dateTimeSchedule.Hour < 18) {
+				//Only one time slot will be available because the engineer is working too late and needs to go home to their family.
+				Assert.AreEqual(1,listTimeSlots.Count);
+				//It doesn't matter what time this slot is available, just the fact that only one is available is good enough.
+			}
+			else {
+				//There won't be any time slots for today available.  This unit test is kind of pointless to run so late in the day.
+				Assert.AreEqual(0,listTimeSlots.Count);
+			}
 		}
 
 	}
