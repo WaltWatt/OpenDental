@@ -41,6 +41,37 @@ namespace OpenDentBusiness {
 			public List<PatRestriction> ListPatRestricts;
 			public List<ProcButtonQuick> ListProcButtonQuicks;
 			public Patient SuperFamHead;
+
+			public void ClearData() {
+				this.TableProgNotes=new DataTable();
+				this.TablePlannedAppts=new DataTable();
+				this.Pat=new Patient();
+				this.Fam=new Family();
+				this.ListInsSubs=new List<InsSub>();
+				this.ListInsPlans=new List<InsPlan>();
+				this.ListPatPlans=new List<PatPlan>();
+				this.ListBenefits=new List<Benefit>();
+				this.ListClaimProcHists=new List<ClaimProcHist>();
+				this.PatNote=new PatientNote();
+				Array.Clear(ArrDocuments,0,ArrDocuments.Length);
+				Array.Clear(ArrAppts,0,ArrAppts.Length);
+				this.ListToothInitials=new List<ToothInitial>();
+				Array.Clear(ArrPatFields,0,ArrPatFields.Length);
+				this.TableChartViews=new DataTable();
+				this.ListProcGroupItems=new List<ProcGroupItem>();
+				this.ListRefAttaches=new List<RefAttach>();
+				this.PayorType="";
+				this.ListDiseases=new List<Disease>();
+				this.TableMeds=new DataTable();
+				this.ListMedPats=new List<MedicationPat>();
+				this.ListAllergies=new List<Allergy>();
+				this.HasPatientPortalAccess=false;
+				this.ListFieldDefLinks=new List<FieldDefLink>();
+				this.ListTobaccoStatuses=new List<EhrMeasureEvent>();
+				this.ListPatRestricts=new List<PatRestriction>();
+				this.ListProcButtonQuicks=new List<ProcButtonQuick>();
+				this.SuperFamHead=new Patient();
+			}
 		}
 
 		///<summary>Gets all the data needed to load the chart module.</summary>

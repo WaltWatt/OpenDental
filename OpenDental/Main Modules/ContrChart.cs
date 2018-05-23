@@ -3685,6 +3685,7 @@ namespace OpenDental {
 		private void RefreshModuleData(long patNum,bool isFullRefresh) {
 			UpdateTreatmentNote();
 			if(patNum==0){
+				_loadData?.ClearData();
 				PatCur=null;
 				FamCur=null;
 				return;
@@ -6547,7 +6548,7 @@ namespace OpenDental {
 					if(!checkComm.Checked) {
 						continue;
 					}
-					if(patNumCur!=PatCur.PatNum) {//if this is a different family member
+					if(PatCur!=null && patNumCur!=PatCur.PatNum) {//if this is a different family member
 						if(!checkCommFamily.Checked) {
 							continue;
 						}
@@ -6567,7 +6568,7 @@ namespace OpenDental {
 					if(!checkTasks.Checked) {
 						continue;
 					}
-					if(patNumCur!=PatCur.PatNum) {//if this is a different family member
+					if(PatCur!=null && patNumCur!=PatCur.PatNum) {//if this is a different family member
 						if(!checkCommFamily.Checked) { //uses same check box as commlog
 							continue;
 						}
