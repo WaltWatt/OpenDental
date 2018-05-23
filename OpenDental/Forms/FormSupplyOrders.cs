@@ -99,7 +99,7 @@ namespace OpenDental {
 				//soi.SupplyOrderItemNum
 				SupplyOrderItems.Insert(orderitem);
 			}
-			FillGridOrderItem();
+			UpdatePriceAndRefresh();
 		}
 
 		private void FillGridOrders() {
@@ -127,6 +127,7 @@ namespace OpenDental {
 				row.Cells.Add(_listOrders[i].AmountTotal.ToString("c"));
 				row.Cells.Add(Suppliers.GetName(_listSuppliers,_listOrders[i].SupplierNum));
 				row.Cells.Add(_listOrders[i].Note);
+				row.Tag=_listOrders[i];
 				gridOrders.Rows.Add(row);
 			}
 			gridOrders.EndUpdate();
@@ -229,11 +230,7 @@ namespace OpenDental {
 				return;
 			}
 			SupplyOrderItems.Update(FormSOIE.ItemCur);
-			_listOrdersAll = SupplyOrders.GetAll();//force refresh because total might have changed.
-			int gridSelect = gridOrders.SelectedIndices[0];
-			FillGridOrders();
-			gridOrders.SetSelected(gridSelect,true);
-			FillGridOrderItem();
+			UpdatePriceAndRefresh();
 		}
 
 		///<summary>Used to update subtotal when qty or price are edited.</summary>
@@ -440,6 +437,19 @@ namespace OpenDental {
 			_listOrdersAll=SupplyOrders.GetAll();
 			FillGridOrders();
 			gridOrders.SetSelected(si,true);
+		}
+
+		private void UpdatePriceAndRefresh() {
+			SupplyOrder gridSelect=gridOrders.SelectedTag<SupplyOrder>();
+			SupplyOrders.UpdateOrderPrice(_listOrders[gridOrders.GetSelectedIndex()].SupplyOrderNum);
+			_listOrdersAll=SupplyOrders.GetAll();
+			FillGridOrders();
+			for(int i=0;i<gridOrders.Rows.Count;i++) {
+				if(gridSelect!=null && ((SupplyOrder)gridOrders.Rows[i].Tag).SupplyOrderNum==gridSelect.SupplyOrderNum) {
+					gridOrders.SetSelected(i,true);
+				}
+			}
+			FillGridOrderItem();
 		}
 
 		private void butOK_Click(object sender,EventArgs e) {
