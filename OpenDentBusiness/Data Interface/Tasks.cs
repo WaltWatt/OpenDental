@@ -138,7 +138,7 @@ namespace OpenDentBusiness{
 				.Where(x => patNum==0 || (x.ObjectType==TaskObjectType.Patient && x.KeyNum==patNum))//filter by patnum, if neccesary
 				.Where(x => dateCompletedFrom==DateTime.MinValue || x.DateTimeFinished.Date>=dateCompletedFrom.Date)//filter by dateFrom, if neccesary
 				.Where(x => dateCompletedTo==DateTime.MinValue || x.DateTimeFinished.Date<=dateCompletedTo.Date)
-				.OrderByDescending(x=> x.DateTimeEntry).ToList();//Order results
+				.OrderByDescending(x=> x.DateTimeOriginal).ToList();//Order results
 			List<TaskNote> listTaskNotes=new List<TaskNote>();
 			if(doIncludeTaskNote) {
 				//All notes for the tasks.	(Ordered by dateTime)		
@@ -187,7 +187,7 @@ namespace OpenDentBusiness{
 				if(taskCur.DateTask.Year>1880) {//check if due date set for task or note
 					row["dateCreate"]=taskCur.DateTask.ToString(Lans.GetShortDateTimeFormat());
 				}
-				else if(taskCur.DateTimeEntry.Year>1880) {//since dateT was just redefined, check it now
+				else if(taskCur.DateTimeOriginal.Year>1880) {
 					row["dateCreate"]=taskCur.DateTimeEntry.ToShortDateString();
 				}
 				if(taskCur.DateTask.TimeOfDay!=TimeSpan.Zero) {
@@ -235,11 +235,11 @@ namespace OpenDentBusiness{
 			}
 			//Note: DateTime strings that are empty actually are " " due to how the empty datetime control behaves.
 			if(dateCreatedFrom>DateTime.MinValue) {
-				listWhereClauses.Add("DATE(task.DateTimeEntry)>="+POut.Date(dateCreatedFrom));
+				listWhereClauses.Add("DATE(task.DateTimeOriginal)>="+POut.Date(dateCreatedFrom));
 				listWhereNoteClauses.Add("DATE(tasknote.DateTimeNote)>="+POut.Date(dateCreatedFrom));
 			}
 			if(dateCreatedTo>DateTime.MinValue) {
-				listWhereClauses.Add("DATE(task.DateTimeEntry)<="+POut.Date(dateCreatedTo));
+				listWhereClauses.Add("DATE(task.DateTimeOriginal)<="+POut.Date(dateCreatedTo));
 				listWhereNoteClauses.Add("DATE(tasknote.DateTimeNote)<="+POut.Date(dateCreatedTo));
 			}
 			if(dateCompletedFrom>DateTime.MinValue) {
@@ -286,7 +286,7 @@ namespace OpenDentBusiness{
 			string command="(SELECT task.TaskNum AS TaskNum "
 				+"FROM task "
 				+whereClause
-				+"ORDER BY task.DateTimeEntry DESC";
+				+"ORDER BY task.DateTimeOriginal DESC";
 			if(limit) {
 				command+=" LIMIT 50";
 			}

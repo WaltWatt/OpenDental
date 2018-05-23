@@ -31,7 +31,7 @@ namespace OpenDentBusiness{
 		public long FromNum;
 		///<summary>Enum:TaskObjectType  0=none,1=Patient,2=Appointment.  More will be added later. If a type is selected, then the KeyNum will contain the primary key of the corresponding Patient or Appointment.  Does not really have anything to do with the ObjectType of the parent tasklist, although they tend to match.</summary>
 		public TaskObjectType ObjectType;
-		///<summary>The date and time that this task was added.  Used to sort the list by the order entered.
+		///<summary>The date and time that this task was added.  User editable.
 		///For reminder tasks, this field is used to indicate the date and time the reminder will take effect.</summary>
 		[CrudColumn(SpecialType=CrudSpecialColType.DateT)]
 		public DateTime DateTimeEntry;
@@ -58,7 +58,7 @@ namespace OpenDentBusiness{
 		public TaskReminderType ReminderType;
 		///<summary></summary>
 		public int ReminderFrequency;
-		///<summary>The original datetime that the row was inserted.
+		///<summary>The original datetime that the row was inserted.  Used to sort the list by the order entered.
 		///Using taskhist.DateTimeOriginal will get the datetime that the taskhist row was inserted, not the task.</summary>
 		[CrudColumn(SpecialType=CrudSpecialColType.DateTEntry)]
 		public DateTime DateTimeOriginal;
