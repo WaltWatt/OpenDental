@@ -704,36 +704,27 @@ namespace OpenDentBusiness {
 					throw new Exception(Lans.g("Userods","UserName already in use."));
 				}
 			}
-			//make sure that there would still be at least one user with security admin permissions
-			if(!isNew) {
-				List<long> listUserGroupNums=UserGroupAttaches.GetForUser(user.UserNum).Select(x => x.UserGroupNum).ToList();
-				if(listUserGroupNums.Count < 1) {
-					throw new Exception(Lans.g("Userods","The current user must be in at least one user group."));
-				}
-				command="SELECT COUNT(*) FROM grouppermission "
-					+"WHERE PermType='"+POut.Long((int)Permissions.SecurityAdmin)+"' "
-					+"AND UserGroupNum IN ("+ string.Join(",",listUserGroupNums)+") ";
-				if(Db.GetCount(command)=="0") {//if this user would not have admin
-					//make sure someone else has admin
-					if(!IsSomeoneElseSecurityAdmin(user)) {
-						throw new Exception(Lans.g("Users","At least one user must have Security Admin permission."));
-					}
-				}
+			if(listUserGroupNum==null) {//Not validating UserGroup selections.
+				return;
 			}
-			if(listUserGroupNum!=null) {
-				if(listUserGroupNum.Count < 1) {
-					throw new Exception(Lans.g("Userods","The current user must be in at least one user group."));
-				}
-				//an admin user can never be hidden
-				command="SELECT COUNT(*) FROM grouppermission "
-					+"WHERE PermType='"+POut.Long((int)Permissions.SecurityAdmin)+"' "
-					+"AND UserGroupNum IN ("+string.Join(",",listUserGroupNum)+") ";
-				if(user.IsHidden //hidden 
-					&& user.UserNumCEMT==0 //and non-CEMT
-					&& Db.GetCount(command)!="0")//if this user is admin
-				{
-					throw new Exception(Lans.g("Userods","Admins cannot be hidden."));
-				}
+			if(listUserGroupNum.Count<1) {
+				throw new Exception(Lans.g("Userods","The current user must be in at least one user group."));
+			}
+			//an admin user can never be hidden
+			command="SELECT COUNT(*) FROM grouppermission "
+				+"WHERE PermType='"+POut.Long((int)Permissions.SecurityAdmin)+"' "
+				+"AND UserGroupNum IN ("+string.Join(",",listUserGroupNum)+") ";
+			if(!isNew//Updating.
+				&& Db.GetCount(command)=="0"//if this user would not have admin
+				&& !IsSomeoneElseSecurityAdmin(user))//make sure someone else has admin
+			{
+				throw new Exception(Lans.g("Users","At least one user must have Security Admin permission."));
+			}
+			if(user.IsHidden//hidden 
+				&& user.UserNumCEMT==0//and non-CEMT
+				&& Db.GetCount(command)!="0")//if this user is admin
+			{
+				throw new Exception(Lans.g("Userods","Admins cannot be hidden."));
 			}
 		}
 
