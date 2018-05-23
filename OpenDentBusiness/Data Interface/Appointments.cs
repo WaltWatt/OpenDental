@@ -2594,7 +2594,7 @@ namespace OpenDentBusiness{
 		///Inserts an invalid appointment signalod if hasSignal.  The hasSignal defaults to false because this function is referenced from CRUD.</summary>
 		public static void Delete(long aptNum,bool hasSignal=false) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				Meth.GetVoid(MethodBase.GetCurrentMethod(),aptNum);
+				Meth.GetVoid(MethodBase.GetCurrentMethod(),aptNum,hasSignal);
 				return;
 			}
 			string command;
