@@ -235,12 +235,12 @@ namespace OpenDentBusiness{
 			}
 			//Note: DateTime strings that are empty actually are " " due to how the empty datetime control behaves.
 			if(dateCreatedFrom>DateTime.MinValue) {
-				listWhereClauses.Add("DATE(task.DateTimeOriginal)>="+POut.Date(dateCreatedFrom));
-				listWhereNoteClauses.Add("DATE(tasknote.DateTimeNote)>="+POut.Date(dateCreatedFrom));
+				listWhereClauses.Add("DATE(task.DateTimeOriginal)>="+POut.Date(dateCreatedFrom)); 
+				listWhereNoteClauses.Add("DATE(tasknote.DateTimeNote)>="+POut.Date(dateCreatedFrom)); 
 			}
 			if(dateCreatedTo>DateTime.MinValue) {
-				listWhereClauses.Add("DATE(task.DateTimeOriginal)<="+POut.Date(dateCreatedTo));
-				listWhereNoteClauses.Add("DATE(tasknote.DateTimeNote)<="+POut.Date(dateCreatedTo));
+				listWhereClauses.Add("DATE(task.DateTimeOriginal)<="+POut.Date(dateCreatedTo)); 
+				listWhereNoteClauses.Add("DATE(tasknote.DateTimeNote)<="+POut.Date(dateCreatedTo)); 
 			}
 			if(dateCompletedFrom>DateTime.MinValue) {
 				listWhereClauses.Add("DATE(task.DateTimeFinished)>="+POut.Date(dateCompletedFrom));
