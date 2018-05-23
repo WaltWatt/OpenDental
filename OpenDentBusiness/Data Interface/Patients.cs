@@ -2336,7 +2336,7 @@ namespace OpenDentBusiness {
 		///<summary>Used only to run finance charges, so it ignores negative balances.</summary>
 		public static List<PatAging> GetAgingListSimple(List<long> listBillingTypeNums,List<long> listGuarantors,bool doIncludeZeroBalance=false){
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				return Meth.GetObject<List<PatAging>>(MethodBase.GetCurrentMethod(),listBillingTypeNums,listGuarantors);
+				return Meth.GetObject<List<PatAging>>(MethodBase.GetCurrentMethod(),listBillingTypeNums,listGuarantors,doIncludeZeroBalance);
 			}
 			string command="SELECT PatNum,Bal_0_30,Bal_31_60,Bal_61_90,BalOver90,BalTotal,InsEst,LName,FName,MiddleI,PriProv,BillingType,Guarantor "
 				+"FROM patient ";//actually only gets guarantors since others are 0.
