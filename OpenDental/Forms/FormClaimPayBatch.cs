@@ -1109,10 +1109,10 @@ namespace OpenDental{
 				return;
 			}
 			string message="Some of the payments have secondary claims: \r\n"
-				+"Date | PatNum | Patient Name";
+				+"Date of Service | PatNum | Patient Name";
 			for(int i=0;i<secCPs.Rows.Count;i++) {
 				//claimProc=secondaryClaims[i];
-				message+="\r\n"+PIn.Date(secCPs.Rows[i]["DateCP"].ToString()).ToShortDateString()
+				message+="\r\n"+PIn.Date(secCPs.Rows[i]["ProcDate"].ToString()).ToShortDateString()
 					+" | "+secCPs.Rows[i]["PatNum"].ToString()
 					+" | "+Patients.GetPat(PIn.Long(secCPs.Rows[i]["PatNum"].ToString())).GetNameLF();
 			}

@@ -207,7 +207,7 @@ namespace OpenDentBusiness{
 			if(table.Rows.Count==0) {
 				return new DataTable();//No procedures are attached to these claims.  This frequently happens in conversions.  No need to look for related secondary claims.
 			}
-			command="SELECT claimproc.PatNum,claimproc.DateCP"
+			command="SELECT claimproc.PatNum,claimproc.ProcDate"
 				+" FROM claimproc"
 				+" JOIN claim ON claimproc.ClaimNum=claim.ClaimNum"
 				+" WHERE ProcNum IN (";
@@ -219,7 +219,7 @@ namespace OpenDentBusiness{
 			}
 			command+=") AND claimproc.ClaimNum NOT IN ("+claimNums+")"
 				+" AND ClaimType = 'S'"
-				+" GROUP BY claimproc.ClaimNum,claimproc.PatNum,claimproc.DateCP";
+				+" GROUP BY claimproc.ClaimNum,claimproc.PatNum,claimproc.ProcDate";
 			DataTable secondaryClaims=Db.GetTable(command);
 			return secondaryClaims;
 		}
