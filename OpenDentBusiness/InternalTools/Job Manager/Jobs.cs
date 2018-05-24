@@ -82,6 +82,20 @@ namespace OpenDentBusiness {
 			return Crud.JobCrud.SelectMany(command);
 		}
 
+		public static List<Job> GetReleaseCalculatorJobs(List<long> listPriorities,List<JobPhase> listPhases,List<JobCategory> listCategories) {
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				return Meth.GetObject<List<Job>>(MethodBase.GetCurrentMethod(),listPriorities,listPhases,listCategories);
+			}
+			string command="SELECT * "
+					+"FROM job "
+					+"WHERE job.Priority IN ("+String.Join(",",listPriorities)+") "
+					+"AND job.PhaseCur IN ('"+String.Join("','",listPhases.Select(x=>x.ToString()))+"') "
+					+"AND job.Category IN ('"+String.Join("','",listCategories.Select(x=>x.ToString()))+"') "
+					+"GROUP BY job.JobNum "
+					+"ORDER BY job.PhaseCur,job.Category,job.DateTimeEntry;";
+			return Crud.JobCrud.SelectMany(command);
+		}
+
 		public static bool ValidateJobNum(long jobNum) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
 				return Meth.GetBool(MethodBase.GetCurrentMethod(),jobNum);

@@ -571,6 +571,12 @@
     <Compile Include="InternalTools\Job Manager\FormJobAdd.Designer.cs">
       <DependentUpon>FormJobAdd.cs</DependentUpon>
     </Compile>
+    <Compile Include="InternalTools\Job Manager\FormReleaseCalculator.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="InternalTools\Job Manager\FormReleaseCalculator.designer.cs">
+      <DependentUpon>FormReleaseCalculator.cs</DependentUpon>
+    </Compile>
     <Compile Include="InternalTools\Job Manager\ODjobTextEditor.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -4958,6 +4964,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="InternalTools\Job Manager\FormJobAdd.resx">
       <DependentUpon>FormJobAdd.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="InternalTools\Job Manager\FormReleaseCalculator.resx">
+      <DependentUpon>FormReleaseCalculator.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="InternalTools\Job Manager\ODjobTextEditor.resx">
       <DependentUpon>ODjobTextEditor.cs</DependentUpon>

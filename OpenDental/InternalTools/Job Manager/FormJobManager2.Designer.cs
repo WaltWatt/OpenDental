@@ -67,6 +67,7 @@
 			this.menuGoToAccount = new System.Windows.Forms.MenuItem();
 			this.butBugSubs = new OpenDental.UI.Button();
 			this.butAddChildJob = new OpenDental.UI.Button();
+			this.butReleaseCalc = new OpenDental.UI.Button();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
 			this.splitContainer1.Panel1.SuspendLayout();
 			this.splitContainer1.Panel2.SuspendLayout();
@@ -696,10 +697,27 @@
 			this.butAddChildJob.Text = "Add Child Job";
 			this.butAddChildJob.Click += new System.EventHandler(this.butAddChildJob_Click);
 			// 
+			// butReleaseCalc
+			// 
+			this.butReleaseCalc.AdjustImageLocation = new System.Drawing.Point(0, 0);
+			this.butReleaseCalc.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.butReleaseCalc.Autosize = true;
+			this.butReleaseCalc.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
+			this.butReleaseCalc.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
+			this.butReleaseCalc.CornerRadius = 4F;
+			this.butReleaseCalc.Location = new System.Drawing.Point(979, 3);
+			this.butReleaseCalc.Name = "butReleaseCalc";
+			this.butReleaseCalc.Size = new System.Drawing.Size(105, 24);
+			this.butReleaseCalc.TabIndex = 246;
+			this.butReleaseCalc.Text = "Release Calculator";
+			this.butReleaseCalc.Visible = false;
+			this.butReleaseCalc.Click += new System.EventHandler(this.butReleaseCalc_Click);
+			// 
 			// FormJobManager2
 			// 
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
 			this.ClientSize = new System.Drawing.Size(1281, 712);
+			this.Controls.Add(this.butReleaseCalc);
 			this.Controls.Add(this.butAddChildJob);
 			this.Controls.Add(this.butBugSubs);
 			this.Controls.Add(this.butDashboard);
@@ -781,5 +799,6 @@
 		private System.Windows.Forms.MenuItem menuGoToAccount;
 		private UI.Button butBugSubs;
 		private UI.Button butAddChildJob;
+		private UI.Button butReleaseCalc;
 	}
 }

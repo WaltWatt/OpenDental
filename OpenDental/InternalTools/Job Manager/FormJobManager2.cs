@@ -35,6 +35,9 @@ namespace OpenDental {
 
 		private void FormJobManager_Load(object sender,EventArgs e) {
 			comboUser.Tag=Security.CurUser;
+			if(Security.IsAuthorized(Permissions.SecurityAdmin)) {
+				butReleaseCalc.Visible=true;
+			}
 			_listUsers=Userods.GetUsersForJobs();
 			FillPriorityList();
 			FillComboUser();
@@ -1782,6 +1785,11 @@ namespace OpenDental {
 		private void butBugSubs_Click(object sender,EventArgs e) {
 			FormBugSubmissions FormBugSubs=new FormBugSubmissions();
 			FormBugSubs.Show();//Non-modal
+		}
+
+		private void butReleaseCalc_Click(object sender,EventArgs e) {
+			FormReleaseCalculator FormRC=new FormReleaseCalculator();
+			FormRC.Show();
 		}
 
 		private bool JobUnsavedChangesCheck() {

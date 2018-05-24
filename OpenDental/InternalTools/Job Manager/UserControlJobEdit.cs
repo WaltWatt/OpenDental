@@ -1344,7 +1344,7 @@ namespace OpenDental.InternalTools.Job_Manager {
 
 		private void actionMenu_RequestQuoteClick(object sender,EventArgs e) {
 			long userNumQuoter = _jobCur.UserNumQuoter;
-			if(_jobCur.UserNumQuoter==0 && !PickUserByJobPermission("Pick Quoter",JobPerm.Writeup,out userNumQuoter,0,false,false)) {
+			if(_jobCur.UserNumQuoter==0 && !PickUserByJobPermission("Pick Quoter",JobPerm.Quote,out userNumQuoter,0,false,false)) {
 				return;
 			}
 			IsChanged=true;

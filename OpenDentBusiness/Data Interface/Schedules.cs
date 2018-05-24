@@ -137,6 +137,23 @@ namespace OpenDentBusiness{
 			return RefreshAndFill(command);
 		}
 
+		public static List<Schedule> RefreshPeriodForEmps(DateTime dateStart,DateTime dateEnd,List<long> listEmpNums){
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				return Meth.GetObject<List<Schedule>>(MethodBase.GetCurrentMethod(),dateStart,dateEnd,listEmpNums);
+			}
+			List<string> listOrClauses=new List<string>();
+			if(listEmpNums.Count>0) {
+				listOrClauses.Add("(SchedType="+POut.Int((int)ScheduleType.Employee)+" "
+					+"AND EmployeeNum IN ("+string.Join(",",listEmpNums.Select(x => POut.Long(x)))+"))");
+			}
+			string command="SELECT schedule.* "
+				+"FROM schedule "
+				+"WHERE SchedDate BETWEEN "+POut.Date(dateStart)+" AND "+POut.Date(dateEnd)+" "
+				+"AND ("+string.Join(" OR ",listOrClauses)+") "
+				+"ORDER BY SchedDate";
+			return RefreshAndFill(command);
+		}
+
 		public static List<Schedule> GetByScheduleNum(List<long> listScheduleNums) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
 				return Meth.GetObject<List<Schedule>>(MethodBase.GetCurrentMethod(),listScheduleNums);
