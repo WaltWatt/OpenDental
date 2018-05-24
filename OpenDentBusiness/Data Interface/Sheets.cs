@@ -458,7 +458,7 @@ namespace OpenDentBusiness{
 		///<summary>Used to get sheets filled via the web.</summary>
 		public static DataTable GetWebFormSheetsTable(DateTime dateFrom,DateTime dateTo,long clinicNum=0) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				return Meth.GetTable(MethodBase.GetCurrentMethod(),dateFrom,dateTo);
+				return Meth.GetTable(MethodBase.GetCurrentMethod(),dateFrom,dateTo,clinicNum);
 			}
 			DataTable table=new DataTable("");
 			DataRow row;
