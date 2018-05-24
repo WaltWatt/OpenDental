@@ -9,6 +9,7 @@ using CodeBase;
 using OpenDentBusiness;
 using OpenDental.UI;
 using System.Linq;
+using System.Globalization;
 
 namespace OpenDental{
 ///<summary></summary>
@@ -1121,6 +1122,41 @@ namespace OpenDental{
 			msgBox.ShowDialog();
 		}
 
+		///<summary>Validates that the numbers behind the Amount and Total text boxes equate.
+		///Shows a friendly exception message which will allow us engineers to click the Details label in order to get more information.
+		///Customers have called in with very strange things happening with these two text box values not equating in the past (UI glitches?).</summary>
+		private bool IsAmountAndTotalEqual() {
+			//The Amount field within the Payment Details group box needs to equate to the Total Payments field.
+			//Old logic would read in the values being displayed to the user (via PIn.Double(textbox.Text)) which was somehow failing.
+			//HQ has photographic evidence of customers that have this window loaded with an empty Amount text box (should be impossible).
+			//New logic will not read in values from the read only text boxes but instead will compare the values that are used to populate the text boxes.
+			double amountRaw=ClaimPaymentCur.CheckAmt;//textAmount is filled on load and also when updated manually by user.
+			double totalRaw=ClaimsAttached.Sum(x => x.InsPayAmt);//textTotal is filled like this every time FillGrid is invoked.
+			//We used to use textbox.Text which was displaying the above doubles utilizing .ToString("F")
+			//which uses the "Default precision specifier: Defined by NumberFormatInfo.NumberDecimalDigits."
+			//When the precision specifier controls the number of fractional digits in the result string, the result strings reflect numbers that are 
+			//rounded away from zero (that is, using MidpointRounding.AwayFromZero).
+			//Therefore, in order to preserve old behavior, we are going to apply rounding utilizing
+			//NumberFormatInfo.NumberDecimalDigits along with MidpointRounding.AwayFromZero on both doubles in question (amount and total).
+			//E.g. we need to preserve the old logic which would take the double 18934.1879 and display it to the user as 18934.19 (note the rounding).
+			//see https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-numeric-format-strings#FFormatString for more details.
+			int digits=NumberFormatInfo.CurrentInfo.NumberDecimalDigits;
+			double amountRounded=Math.Round(amountRaw,digits,MidpointRounding.AwayFromZero);
+			double totalRounded=Math.Round(totalRaw,digits,MidpointRounding.AwayFromZero);
+			if(!amountRounded.IsEqual(totalRounded)) {
+				FriendlyException.Show("Amounts do not match.",new ApplicationException("Variables:\r\n"
+					+"NumberFormatInfo.CurrentInfo.NumberDecimalDigits: "+digits+"\r\n"
+					+"amountRaw: "+amountRaw+"\r\n"
+					+"amountRounded: "+amountRounded+"\r\n"
+					+"totalRaw: "+totalRaw+"\r\n"
+					+"totalRounded: "+totalRounded+"\r\n"
+					+"The above values need to equate within a small epsilon to be acceptable.  See ODExtensions.IsZero().\r\n"
+					+"Math.Abs("+amountRounded+"-"+totalRounded+") = "+Math.Abs(amountRounded-totalRounded)));
+				return false;
+			}
+			return true;
+		}
+
 		private void butView_Click(object sender,EventArgs e) {
 			FormImages formI=new FormImages();
 			formI.ClaimPaymentNum=ClaimPaymentCur.ClaimPaymentNum;
@@ -1159,9 +1195,7 @@ namespace OpenDental{
 		}
 
 		private void butOK_Click(object sender,EventArgs e) {
-			//only visible if IsFromClaim and IsNew
-			if(!PIn.Double(textAmount.Text).IsEqual(PIn.Double(textTotal.Text))) { //PIn to fix amounts which are somehow sometimes different.
-				MsgBox.Show(this,"Amounts do not match.");
+			if(!IsAmountAndTotalEqual()) {
 				return;
 			}
 			if(gridAttached.Rows.Count==0) {
@@ -1200,7 +1234,7 @@ namespace OpenDental{
 				return; //Leave the payment as partial so the user can come back and edit.
 			}
 			if(ClaimPaymentCur.IsPartial) {
-				if(PIn.Double(textAmount.Text).IsEqual(PIn.Double(textTotal.Text))) { //PIn to fix amounts which are somehow sometimes different.
+				if(IsAmountAndTotalEqual()) {
 					if(ClaimsAttached.Count>0) {
 						ShowSecondaryClaims();//always continues after this dlg
 					}
@@ -1209,7 +1243,7 @@ namespace OpenDental{
 				}
 			}
 			else {//locked
-				if(!PIn.Double(textAmount.Text).IsEqual(PIn.Double(textTotal.Text))) { //PIn to fix amounts which are somehow sometimes different.
+				if(!IsAmountAndTotalEqual()) {
 					//Someone edited a locked payment
 					if(!MsgBox.Show(this,MsgBoxButtons.OKCancel,"Amounts do not match.  Continue anyway?")) {
 						e.Cancel=true;
