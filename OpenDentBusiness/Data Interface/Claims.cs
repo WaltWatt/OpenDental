@@ -104,9 +104,8 @@ namespace OpenDentBusiness{
 			//See job #7423.
 			//The claimproc.DateCP is essentially the same as the claim.DateReceived.
 			//We used to use the claimproc.ProcDate, which is essentially the same as the claim.DateService.
-			//In the near future, we will use a rolling date preference for the "claimPayDate" which will be a number of days from today to look into
-			//the past to include $0 claimprocs.  Since the service date could be weeks or months in the past, it makes more sense to use the 
-			//received date, which will be more recent.  Additionally, users found using the date of service to be unintuitive.
+			//Since the service date could be weeks or months in the past, it makes more sense to use the received date, which will be more recent.
+			//Additionally, users found using the date of service to be unintuitive.
 			//STRONG CAUTION not to use the claimproc.ProcDate here in the future.
 			command+="INNER JOIN claimproc ON claimproc.ClaimNum=claim.ClaimNum "
 				+"WHERE (claim.ClaimStatus='S' OR "

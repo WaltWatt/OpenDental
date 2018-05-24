@@ -349,8 +349,11 @@ namespace OpenDentBusiness {
 		ClaimMedTypeIsInstWhenInsPlanIsMedical,
 		///<summary>Boolean, 0 by default.  When true, only Batch Insurance in Manage Module can be used to finalize payments.</summary>
 		ClaimPaymentBatchOnly,
-		///<summary>Date.  Defaults to the day you update to 17.4.53.
-		///Used to filter Outstanding Claims from FormClaimPayBatch list, and when finalizing from clam edit.</summary>
+		///<summary>Int.  Valid values are >=0.  Use -1 to disable.  Used to be a date.  Now represents a rolling date, thus the name is a bit off.
+		///We decided to keep the name the same instead of deprecating and creating a new pref, because user never sees the pref name and to avoid bloat.
+		///Number of days (default 1) to subtract from the current date when deciding which NO PAYMENT claims and
+		///$0 claimprocs to consider when using the This Claim Only button from the Edit Claim window or when creating a batch payment from Manage module.
+		///Used for filtering Outstanding Claims from FormClaimPayBatch list, and when finalizing from Edit Claim window.</summary>
 		ClaimPaymentNoShowZeroDate,
 		///<summary>When true, procedurecode overrides will send the override's description to insurance instead of the original procedurecode's description.</summary>
 		ClaimPrintProcChartedDesc,

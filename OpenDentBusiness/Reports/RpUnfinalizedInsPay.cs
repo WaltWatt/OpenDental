@@ -10,9 +10,9 @@ using System.Text;
 namespace OpenDentBusiness {
 	public class RpUnfinalizedInsPay {
 		///<summary>Gets a list of unfinalized insurance payments.</summary>
-		public static List<UnfinalizedInsPay> GetUnfinalizedInsPay(string carrierName,DateTime dateClaimPayZero) {
+		public static List<UnfinalizedInsPay> GetUnfinalizedInsPay(string carrierName) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				return Meth.GetObject<List<UnfinalizedInsPay>>(MethodBase.GetCurrentMethod(),carrierName,dateClaimPayZero);
+				return Meth.GetObject<List<UnfinalizedInsPay>>(MethodBase.GetCurrentMethod(),carrierName);
 			}
 			string command=@"
 				SELECT partialpay.PayType,partialpay.PatNum,partialpay.ClaimPaymentNum,partialpay.ClinicNum,partialpay.CarrierName,partialpay.Date,
@@ -34,10 +34,9 @@ namespace OpenDentBusiness {
 						INNER JOIN insplan ON insplan.PlanNum=claimproc.PlanNum
 						INNER JOIN carrier ON carrier.CarrierNum=insplan.CarrierNum	
 							AND carrier.CarrierName LIKE '%"+POut.String(carrierName.Trim())+"%' "
-						//Filter logic here mimics ClaimProcs.AttachAllOutstandingToPayment().
-						+@"WHERE claimproc.ClaimPaymentNum = 0
-						AND (claimproc.InsPayAmt != 0 "+((dateClaimPayZero.Year>1880)?("OR DateCP >= "+POut.Date(dateClaimPayZero)):"")+")"+
-						@"AND claimproc.Status IN("+POut.Int((int)ClaimProcStatus.Received)+","
+						//Filter logic here mimics batch payments in ClaimProcs.AttachAllOutstandingToPayment().
+						+@"WHERE claimproc.ClaimPaymentNum = 0 AND claimproc.InsPayAmt != 0 
+							AND claimproc.Status IN("+POut.Int((int)ClaimProcStatus.Received)+","
 							+POut.Int((int)ClaimProcStatus.Supplemental)+","+POut.Int((int)ClaimProcStatus.CapClaim)+@") 
 						GROUP BY claimproc.ClaimNum	
 			) partialpay";

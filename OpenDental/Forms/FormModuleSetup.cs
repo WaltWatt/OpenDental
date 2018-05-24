@@ -154,7 +154,7 @@ namespace OpenDental{
 		private Label labelSuperFamSort;
 		private Label labelProcFeeUpdatePrompt;
 		private Label apptClickDelay;
-		private Label labelUnpaidClaimDate;
+		private Label labelClaimsReceivedDays;
 		private ComboBox comboBrokenApptAdjType;
 		private ComboBox comboFinanceChargeAdjType;
 		private ComboBox comboTimeDismissed;
@@ -217,7 +217,6 @@ namespace OpenDental{
 		private ODtextBox textTreatNote;
 		private ListBox listboxBadDebtAdjs;
 		private ToolTip toolTip1;
-		private ValidDate textUnpaidClaimDate;
 		private ValidNumber textStatementsCalcDueDate;
 		private ValidNum textPayPlansBillInAdvanceDays;
 		private ValidNum textBillingElectBatchMax;
@@ -276,6 +275,7 @@ namespace OpenDental{
 		private CheckBox checkAllowFutureTrans;
 		private CheckBox checkAllowPrepayProvider;
 		private CheckBox checkShowAutoDeposit;
+		private ValidNumber textClaimsReceivedDays;
 		private List<Def> _listApptConfirmedDefs;
 
 		///<summary>Default constructor.  Opens the form with the Appts tab selected.</summary>
@@ -535,10 +535,11 @@ namespace OpenDental{
 			this.radioImagesModuleTreeIsCollapsed = new System.Windows.Forms.RadioButton();
 			this.radioImagesModuleTreeIsExpanded = new System.Windows.Forms.RadioButton();
 			this.tabManage = new System.Windows.Forms.TabPage();
+			this.textClaimsReceivedDays = new OpenDental.ValidNumber();
 			this.checkShowAutoDeposit = new System.Windows.Forms.CheckBox();
 			this.checkEraOneClaimPerPage = new System.Windows.Forms.CheckBox();
 			this.checkClaimPaymentBatchOnly = new System.Windows.Forms.CheckBox();
-			this.labelUnpaidClaimDate = new System.Windows.Forms.Label();
+			this.labelClaimsReceivedDays = new System.Windows.Forms.Label();
 			this.checkScheduleProvEmpSelectAll = new System.Windows.Forms.CheckBox();
 			this.checkClaimsSendWindowValidateOnLoad = new System.Windows.Forms.CheckBox();
 			this.checkTimeCardADP = new System.Windows.Forms.CheckBox();
@@ -561,7 +562,6 @@ namespace OpenDental{
 			this.comboTimeCardOvertimeFirstDayOfWeek = new System.Windows.Forms.ComboBox();
 			this.label16 = new System.Windows.Forms.Label();
 			this.checkRxSendNewToQueue = new System.Windows.Forms.CheckBox();
-			this.textUnpaidClaimDate = new OpenDental.ValidDate();
 			this.butCancel = new OpenDental.UI.Button();
 			this.butOK = new OpenDental.UI.Button();
 			this.tabControlMain.SuspendLayout();
@@ -3172,10 +3172,11 @@ namespace OpenDental{
 			// tabManage
 			// 
 			this.tabManage.BackColor = System.Drawing.SystemColors.Window;
+			this.tabManage.Controls.Add(this.textClaimsReceivedDays);
 			this.tabManage.Controls.Add(this.checkShowAutoDeposit);
 			this.tabManage.Controls.Add(this.checkEraOneClaimPerPage);
 			this.tabManage.Controls.Add(this.checkClaimPaymentBatchOnly);
-			this.tabManage.Controls.Add(this.labelUnpaidClaimDate);
+			this.tabManage.Controls.Add(this.labelClaimsReceivedDays);
 			this.tabManage.Controls.Add(this.checkScheduleProvEmpSelectAll);
 			this.tabManage.Controls.Add(this.checkClaimsSendWindowValidateOnLoad);
 			this.tabManage.Controls.Add(this.checkTimeCardADP);
@@ -3183,7 +3184,6 @@ namespace OpenDental{
 			this.tabManage.Controls.Add(this.comboTimeCardOvertimeFirstDayOfWeek);
 			this.tabManage.Controls.Add(this.label16);
 			this.tabManage.Controls.Add(this.checkRxSendNewToQueue);
-			this.tabManage.Controls.Add(this.textUnpaidClaimDate);
 			this.tabManage.Location = new System.Drawing.Point(4, 22);
 			this.tabManage.Name = "tabManage";
 			this.tabManage.Padding = new System.Windows.Forms.Padding(3);
@@ -3191,11 +3191,21 @@ namespace OpenDental{
 			this.tabManage.TabIndex = 6;
 			this.tabManage.Text = "Manage";
 			// 
-			// checkAutoDeposit
+			// textClaimsReceivedDays
+			// 
+			this.textClaimsReceivedDays.Location = new System.Drawing.Point(380, 372);
+			this.textClaimsReceivedDays.MaxVal = 999999;
+			this.textClaimsReceivedDays.MinVal = 0;
+			this.textClaimsReceivedDays.Name = "textClaimsReceivedDays";
+			this.textClaimsReceivedDays.Size = new System.Drawing.Size(60, 20);
+			this.textClaimsReceivedDays.TabIndex = 248;
+			this.textClaimsReceivedDays.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+			// 
+			// checkShowAutoDeposit
 			// 
 			this.checkShowAutoDeposit.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
 			this.checkShowAutoDeposit.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.checkShowAutoDeposit.Location = new System.Drawing.Point(19, 430);
+			this.checkShowAutoDeposit.Location = new System.Drawing.Point(18, 430);
 			this.checkShowAutoDeposit.Name = "checkShowAutoDeposit";
 			this.checkShowAutoDeposit.Size = new System.Drawing.Size(422, 17);
 			this.checkShowAutoDeposit.TabIndex = 246;
@@ -3206,7 +3216,7 @@ namespace OpenDental{
 			// 
 			this.checkEraOneClaimPerPage.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
 			this.checkEraOneClaimPerPage.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.checkEraOneClaimPerPage.Location = new System.Drawing.Point(20, 412);
+			this.checkEraOneClaimPerPage.Location = new System.Drawing.Point(19, 412);
 			this.checkEraOneClaimPerPage.Name = "checkEraOneClaimPerPage";
 			this.checkEraOneClaimPerPage.Size = new System.Drawing.Size(421, 17);
 			this.checkEraOneClaimPerPage.TabIndex = 206;
@@ -3217,22 +3227,22 @@ namespace OpenDental{
 			// 
 			this.checkClaimPaymentBatchOnly.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
 			this.checkClaimPaymentBatchOnly.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.checkClaimPaymentBatchOnly.Location = new System.Drawing.Point(20, 395);
+			this.checkClaimPaymentBatchOnly.Location = new System.Drawing.Point(19, 395);
 			this.checkClaimPaymentBatchOnly.Name = "checkClaimPaymentBatchOnly";
 			this.checkClaimPaymentBatchOnly.Size = new System.Drawing.Size(421, 17);
 			this.checkClaimPaymentBatchOnly.TabIndex = 205;
 			this.checkClaimPaymentBatchOnly.Text = "Finalize Claim Payments in Batch Insurance window only";
 			this.checkClaimPaymentBatchOnly.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
-			// labelUnpaidClaimDate
+			// labelClaimsReceivedDays
 			// 
-			this.labelUnpaidClaimDate.Location = new System.Drawing.Point(83, 375);
-			this.labelUnpaidClaimDate.MaximumSize = new System.Drawing.Size(1000, 300);
-			this.labelUnpaidClaimDate.Name = "labelUnpaidClaimDate";
-			this.labelUnpaidClaimDate.Size = new System.Drawing.Size(267, 18);
-			this.labelUnpaidClaimDate.TabIndex = 203;
-			this.labelUnpaidClaimDate.Text = "Show claims received after\r\n";
-			this.labelUnpaidClaimDate.TextAlign = System.Drawing.ContentAlignment.BottomRight;
+			this.labelClaimsReceivedDays.Location = new System.Drawing.Point(18, 372);
+			this.labelClaimsReceivedDays.MaximumSize = new System.Drawing.Size(1000, 300);
+			this.labelClaimsReceivedDays.Name = "labelClaimsReceivedDays";
+			this.labelClaimsReceivedDays.Size = new System.Drawing.Size(361, 20);
+			this.labelClaimsReceivedDays.TabIndex = 203;
+			this.labelClaimsReceivedDays.Text = "Show claims received after days (blank to disable)";
+			this.labelClaimsReceivedDays.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
 			// checkScheduleProvEmpSelectAll
 			// 
@@ -3477,13 +3487,6 @@ namespace OpenDental{
 			this.checkRxSendNewToQueue.TabIndex = 47;
 			this.checkRxSendNewToQueue.Text = "Send all new prescriptions to electronic queue";
 			this.checkRxSendNewToQueue.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-			// 
-			// textUnpaidClaimDate
-			// 
-			this.textUnpaidClaimDate.Location = new System.Drawing.Point(351, 373);
-			this.textUnpaidClaimDate.Name = "textUnpaidClaimDate";
-			this.textUnpaidClaimDate.Size = new System.Drawing.Size(100, 20);
-			this.textUnpaidClaimDate.TabIndex = 204;
 			// 
 			// butCancel
 			// 
@@ -3955,12 +3958,9 @@ namespace OpenDental{
 			#region Manage Module
 			//Manage module----------------------------------------------------------------------
 			checkRxSendNewToQueue.Checked=PrefC.GetBool(PrefName.RxSendNewToQueue);
-			DateTime unpaidClaimDate=PrefC.GetDate(PrefName.ClaimPaymentNoShowZeroDate);
-			if(unpaidClaimDate.Year > 1880) {
-				textUnpaidClaimDate.Text=unpaidClaimDate.ToShortDateString();
-			}
-			else {
-				textUnpaidClaimDate.Text="";
+			int claimZeroPayRollingDays=PrefC.GetInt(PrefName.ClaimPaymentNoShowZeroDate);
+			if(claimZeroPayRollingDays>=0) {
+				textClaimsReceivedDays.Text=claimZeroPayRollingDays.ToString();
 			}
 			for(int i=0;i<7;i++) {
 				comboTimeCardOvertimeFirstDayOfWeek.Items.Add(Lan.g("enumDayOfWeek",Enum.GetNames(typeof(DayOfWeek))[i]));
@@ -4312,8 +4312,8 @@ namespace OpenDental{
 				MsgBox.Show(this,"Service Snapshot Run Time must be a valid time value.");
 				return;
 			}
-			if(textUnpaidClaimDate.errorProvider1.GetError(textUnpaidClaimDate)!="") {
-				MsgBox.Show(this,"Batch insurance payments date must be a valid date.");
+			if(textClaimsReceivedDays.errorProvider1.GetError(textClaimsReceivedDays)!="") {
+				MsgBox.Show(this,"Show claims received after days must be a non-negative integer or blank.");
 				return;
 			}
 			claimSnapshotRunTime=new DateTime(1881,01,01,claimSnapshotRunTime.Hour,claimSnapshotRunTime.Minute,claimSnapshotRunTime.Second);
@@ -4504,7 +4504,7 @@ namespace OpenDental{
 				| Prefs.UpdateBool(PrefName.IntermingleFamilyDefault,checkIntermingleDefault.Checked)
 				| Prefs.UpdateInt(PrefName.BillingElectBatchMax,PIn.Int(textBillingElectBatchMax.Text))
 				| Prefs.UpdateBool(PrefName.BillingShowSendProgress,checkBillingShowProgress.Checked)
-				| (Prefs.UpdateString(PrefName.ClaimPaymentNoShowZeroDate,PIn.Date(textUnpaidClaimDate.Text).ToShortDateString()))
+				| Prefs.UpdateInt(PrefName.ClaimPaymentNoShowZeroDate,(textClaimsReceivedDays.Text=="")?-1:PIn.Int(textClaimsReceivedDays.Text))
 				| Prefs.UpdateBool(PrefName.ClaimPaymentBatchOnly,checkClaimPaymentBatchOnly.Checked)
 				| Prefs.UpdateBool(PrefName.EraPrintOneClaimPerPage,checkEraOneClaimPerPage.Checked)
 				| Prefs.UpdateBool(PrefName.ShowAutoDeposit,checkShowAutoDeposit.Checked)

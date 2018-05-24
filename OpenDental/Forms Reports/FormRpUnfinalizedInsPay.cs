@@ -66,7 +66,7 @@ namespace OpenDental {
 		///<summary>Retrieves data and uses them to create new UnfinalizedInsPay objects.
 		///Heavy lifting done here once upon load.  This also gets called if the user clicks "Refresh Data".</summary>
 		private bool LoadData() {
-			_listUnfinalizedInsPay=RpUnfinalizedInsPay.GetUnfinalizedInsPay(textCarrier.Text,PrefC.GetDate(PrefName.ClaimPaymentNoShowZeroDate));		
+			_listUnfinalizedInsPay=RpUnfinalizedInsPay.GetUnfinalizedInsPay(textCarrier.Text);		
       return true;
 		}
 
@@ -225,7 +225,7 @@ namespace OpenDental {
 			List<InsPlan> listInsPlan=InsPlans.RefreshForSubList(listInsSub);
 			claimPayment.CarrierName=Carriers.GetName(InsPlans.GetPlan(unfinalPay.ClaimCur.PlanNum,listInsPlan).CarrierNum);
 			ClaimPayments.Insert(claimPayment);
-			double amt=ClaimProcs.AttachAllOutstandingToPayment(claimPayment.ClaimPaymentNum,PrefC.GetDate(PrefName.ClaimPaymentNoShowZeroDate));
+			double amt=ClaimProcs.AttachAllOutstandingToPayment(claimPayment.ClaimPaymentNum,PrefC.DateClaimReceivedAfter);
 			claimPayment.CheckAmt=amt;
 			ClaimPayments.Update(claimPayment);
 			FormClaimEdit.FormFinalizePaymentHelper(claimPayment,unfinalPay.ClaimCur,unfinalPay.PatientCur,famCur);

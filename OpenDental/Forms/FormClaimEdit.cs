@@ -385,6 +385,9 @@ namespace OpenDental{
 		private Label label62;
 		private bool _isDeleting;
 		private List<ClaimForm> _listClaimForms;
+		private GroupBox groupFinalizePayment;
+		private UI.Button butThisClaimOnly;
+
 		///<summary>Data necessary to load the form.</summary>
 		private ClaimEdit.LoadData _loadData;
 
@@ -730,6 +733,8 @@ namespace OpenDental{
 			this.butOK = new OpenDental.UI.Button();
 			this.contextAdjust = new System.Windows.Forms.ContextMenu();
 			this.menuItemAddAdj = new System.Windows.Forms.MenuItem();
+			this.butThisClaimOnly = new OpenDental.UI.Button();
+			this.groupFinalizePayment = new System.Windows.Forms.GroupBox();
 			this.groupProsth.SuspendLayout();
 			this.groupOrtho.SuspendLayout();
 			this.groupBox2.SuspendLayout();
@@ -756,6 +761,7 @@ namespace OpenDental{
 			this.tabHistory.SuspendLayout();
 			this.groupEnterPayment.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this._recalcErrorProvider)).BeginInit();
+			this.groupFinalizePayment.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// label3
@@ -3535,12 +3541,12 @@ namespace OpenDental{
 			// 
 			// labelBatch
 			// 
-			this.labelBatch.Location = new System.Drawing.Point(574, 421);
+			this.labelBatch.Location = new System.Drawing.Point(2, 38);
 			this.labelBatch.Name = "labelBatch";
-			this.labelBatch.Size = new System.Drawing.Size(168, 53);
+			this.labelBatch.Size = new System.Drawing.Size(167, 28);
 			this.labelBatch.TabIndex = 151;
-			this.labelBatch.Text = "After all insurance payments on your EOB have been entered, click \"Finalize Payme" +
-    "nt\" to finish this batch for daily reporting.";
+			this.labelBatch.Text = "Click Batch after entering all ins payments for one EOB; or";
+			this.labelBatch.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
 			// 
 			// labelDateSent
 			// 
@@ -3627,11 +3633,11 @@ namespace OpenDental{
 			this.butBatch.CornerRadius = 4F;
 			this.butBatch.Image = global::OpenDental.Properties.Resources.Add;
 			this.butBatch.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.butBatch.Location = new System.Drawing.Point(577, 389);
+			this.butBatch.Location = new System.Drawing.Point(22, 14);
 			this.butBatch.Name = "butBatch";
-			this.butBatch.Size = new System.Drawing.Size(145, 24);
+			this.butBatch.Size = new System.Drawing.Size(130, 24);
 			this.butBatch.TabIndex = 150;
-			this.butBatch.Text = "Finalize Payment";
+			this.butBatch.Text = "Batch";
 			this.butBatch.Click += new System.EventHandler(this.butBatch_Click);
 			// 
 			// butHistory
@@ -3907,19 +3913,47 @@ namespace OpenDental{
 			this.menuItemAddAdj.Text = "Add Adjustment";
 			this.menuItemAddAdj.Click += new System.EventHandler(this.menuItemAddAdj_Click);
 			// 
+			// butThisClaimOnly
+			// 
+			this.butThisClaimOnly.AdjustImageLocation = new System.Drawing.Point(0, 0);
+			this.butThisClaimOnly.Autosize = true;
+			this.butThisClaimOnly.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
+			this.butThisClaimOnly.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
+			this.butThisClaimOnly.CornerRadius = 4F;
+			this.butThisClaimOnly.Image = global::OpenDental.Properties.Resources.Add;
+			this.butThisClaimOnly.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			this.butThisClaimOnly.Location = new System.Drawing.Point(22, 66);
+			this.butThisClaimOnly.Name = "butThisClaimOnly";
+			this.butThisClaimOnly.Size = new System.Drawing.Size(130, 24);
+			this.butThisClaimOnly.TabIndex = 264;
+			this.butThisClaimOnly.Text = "This Claim Only";
+			this.butThisClaimOnly.Click += new System.EventHandler(this.butThisClaimOnly_Click);
+			// 
+			// groupFinalizePayment
+			// 
+			this.groupFinalizePayment.Controls.Add(this.butBatch);
+			this.groupFinalizePayment.Controls.Add(this.butThisClaimOnly);
+			this.groupFinalizePayment.Controls.Add(this.labelBatch);
+			this.groupFinalizePayment.Location = new System.Drawing.Point(577, 383);
+			this.groupFinalizePayment.Name = "groupFinalizePayment";
+			this.groupFinalizePayment.Size = new System.Drawing.Size(170, 92);
+			this.groupFinalizePayment.TabIndex = 265;
+			this.groupFinalizePayment.TabStop = false;
+			this.groupFinalizePayment.Text = "Finalize Payment";
+			// 
 			// FormClaimEdit
 			// 
 			this.AutoScroll = true;
 			this.ClientSize = new System.Drawing.Size(974, 832);
 			this.ControlBox = false;
+			this.Controls.Add(this.groupFinalizePayment);
+			this.Controls.Add(this.tabMain);
 			this.Controls.Add(this.butViewEra);
 			this.Controls.Add(this.butPickProvTreat);
 			this.Controls.Add(this.butPickProvBill);
 			this.Controls.Add(this.butResend);
 			this.Controls.Add(this.textDateSent);
 			this.Controls.Add(this.labelDateSent);
-			this.Controls.Add(this.labelBatch);
-			this.Controls.Add(this.butBatch);
 			this.Controls.Add(this.comboClaimForm);
 			this.Controls.Add(this.label87);
 			this.Controls.Add(this.comboMedType);
@@ -3930,7 +3964,6 @@ namespace OpenDental{
 			this.Controls.Add(this.textReasonUnder);
 			this.Controls.Add(this.label4);
 			this.Controls.Add(this.gridPay);
-			this.Controls.Add(this.tabMain);
 			this.Controls.Add(this.panelRightEdge);
 			this.Controls.Add(this.panelBottomEdge);
 			this.Controls.Add(this.groupEnterPayment);
@@ -4022,6 +4055,7 @@ namespace OpenDental{
 			this.tabHistory.ResumeLayout(false);
 			this.groupEnterPayment.ResumeLayout(false);
 			((System.ComponentModel.ISupportInitialize)(this._recalcErrorProvider)).EndInit();
+			this.groupFinalizePayment.ResumeLayout(false);
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -5793,6 +5827,14 @@ namespace OpenDental{
 		}*/
 
 		private void butBatch_Click(object sender,EventArgs e) {
+			FinalizePayment(false);
+		}
+
+		private void butThisClaimOnly_Click(object sender,EventArgs e) {
+			FinalizePayment(true);
+		}
+
+		private void FinalizePayment(bool isThisClaimOnly) {
 			if(!Security.IsAuthorized(Permissions.InsPayCreate)) {//date not checked here, but it will be checked when saving the check to prevent backdating
 				return;
 			}
@@ -5823,15 +5865,20 @@ namespace OpenDental{
 			claimPayment.ClinicNum=PatCur.ClinicNum;
 			claimPayment.CarrierName=Carriers.GetName(InsPlans.GetPlan(ClaimCur.PlanNum,PlanList).CarrierNum);
 			ClaimPayments.Insert(claimPayment);
-			double amt=ClaimProcs.AttachAllOutstandingToPayment(claimPayment.ClaimPaymentNum,PrefC.GetDate(PrefName.ClaimPaymentNoShowZeroDate));
+			long onlyOneClaimNum=0;
+			if(isThisClaimOnly) {
+				onlyOneClaimNum=ClaimCur.ClaimNum;
+			}
+			double amt=ClaimProcs.AttachAllOutstandingToPayment(claimPayment.ClaimPaymentNum,PrefC.DateClaimReceivedAfter,onlyOneClaimNum);
 			claimPayment.CheckAmt=amt;
 			ClaimPayments.Update(claimPayment);
-			FormFinalizePaymentHelper(claimPayment,ClaimCur,PatCur,FamCur);
+			FormFinalizePaymentHelper(claimPayment,ClaimCur,PatCur,FamCur,onlyOneClaimNum);
 			DialogResult=DialogResult.OK;
 		}
 
-		///<summary>Called after finalizing an insurance payment to bring up various forms for the user.</summary>
-		public static void FormFinalizePaymentHelper(ClaimPayment claimPayment,Claim claimCur,Patient patCur,Family famCur) {
+		///<summary>Called after finalizing an insurance payment to bring up various forms for the user.
+		///If finalizing an individual claim (Edit Claim window only), then onlyOneClaimNum must be the current ClaimNum.</summary>
+		public static void FormFinalizePaymentHelper(ClaimPayment claimPayment,Claim claimCur,Patient patCur,Family famCur,long onlyOneClaimNum=0) {
 			FormClaimPayEdit FormCPE=new FormClaimPayEdit(claimPayment);
 			FormCPE.IsCreateLogEntry=true;
 			//FormCPE.IsNew=true;//not new.  Already added.
@@ -5854,7 +5901,7 @@ namespace OpenDental{
 				ClaimPayments.Delete(claimPayment);
 				return;
 			}
-			ClaimProcs.DateInsFinalizedHelper(claimPayment.ClaimPaymentNum,PrefC.GetDate(PrefName.ClaimPaymentNoShowZeroDate));
+			ClaimProcs.DateInsFinalizedHelper(claimPayment.ClaimPaymentNum,PrefC.DateClaimReceivedAfter,onlyOneClaimNum);
 			//ClaimList=Claims.Refresh(PatCur.PatNum);
 			//ClaimProcList=ClaimProcs.Refresh(PatCur.PatNum);
 			//FillGrids();

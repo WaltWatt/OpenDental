@@ -7066,6 +7066,12 @@ No Action Required in many cases, check your new patient Web Sched on your web s
 			CanadaDeleteDuplicatePreauthClaimprocs();
 		}
 
+		private static void To17_4_73() {
+			string command;
+			command="UPDATE preference SET ValueString='1' WHERE PrefName='ClaimPaymentNoShowZeroDate'";
+			Db.NonQ(command);
+		}
+
 		private static void To18_1_1() {
 			string command;
 			DataTable table;
@@ -8393,6 +8399,22 @@ No Action Required in many cases, check your new patient Web Sched on your web s
 
 		private static void To18_1_9() {
 			CanadaDeleteDuplicatePreauthClaimprocs();
+		}
+
+		private static void To18_1_14() {
+			string command;
+			command="SELECT ValueString FROM preference WHERE PrefName='ClaimPaymentNoShowZeroDate'";
+			DataTable table=Db.GetTable(command);
+			try {
+				int.Parse(table.Rows[0][0].ToString());
+				//If succeeds, then has already been converted to an int from a date in version 17.4.73.
+			}
+			catch(Exception ex) {
+				ex.DoNothing();
+				//If fails, then the preference needs to be converted to and int.
+				command="UPDATE preference SET ValueString='1' WHERE PrefName='ClaimPaymentNoShowZeroDate'";
+				Db.NonQ(command);
+			}
 		}
 
 	}

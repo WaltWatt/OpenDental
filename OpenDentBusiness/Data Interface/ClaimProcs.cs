@@ -1966,45 +1966,68 @@ namespace OpenDentBusiness{
 			Db.NonQ(command);
 		}
 
-		///<summary>Attaches all claimprocs that have an InsPayAmt entered to the specified ClaimPayment, and then returns the sum amount of all the attached payments.  The claimprocs must be currently unattached.  Used from FormClaimEdit when user is not doing the batch entry.</summary>
-		public static double AttachAllOutstandingToPayment(long claimPaymentNum,DateTime dateClaimPayZero) {
+		///<summary>Attaches all claimprocs that have an InsPayAmt entered to the specified ClaimPayment, 
+		///and then returns the sum amount of all the attached payments.  The claimprocs must be currently unattached.
+		///Used from Edit Claim window (FormClaimEdit) when user is not doing the batch entry.
+		///To finalize a single claim, set onlyOneClaimNum to the claimNum to finalize.</summary>
+		public static double AttachAllOutstandingToPayment(long claimPaymentNum,DateTime dateClaimPayZero,long onlyOneClaimNum=0) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				return Meth.GetObject<double>(MethodBase.GetCurrentMethod(),claimPaymentNum,dateClaimPayZero);
+				return Meth.GetObject<double>(MethodBase.GetCurrentMethod(),claimPaymentNum,dateClaimPayZero,onlyOneClaimNum);
 			}
 			//See job #7423.
 			//The claimproc.DateCP is essentially the same as the claim.DateReceived.
 			//We used to use the claimproc.ProcDate, which is essentially the same as the claim.DateService.
-			//In the near future, we will use a rolling date preference for the "claimPayDate" which will be a number of days from today to look into
-			//the past to include $0 claimprocs.  Since the service date could be weeks or months in the past, it makes more sense to use the 
-			//received date, which will be more recent.  Additionally, users found using the date of service to be unintuitive.
+			//Since the service date could be weeks or months in the past, it makes more sense to use the received date, which will be more recent.
+			//Additionally, users found using the date of service to be unintuitive.
 			//STRONG CAUTION not to use the claimproc.ProcDate here in the future.
 			string command="UPDATE claimproc SET ClaimPaymentNum="+POut.Long(claimPaymentNum)+" "
 				+"WHERE ClaimPaymentNum=0 "
 				+"AND (claimproc.Status = '1' OR claimproc.Status = '4' OR claimproc.Status='5') "//received or supplemental or capclaim
-				+"AND (InsPayAmt != 0 "+((dateClaimPayZero.Year>1880)?("OR DateCP >= "+POut.Date(dateClaimPayZero)):"")+")";
+				+"AND (InsPayAmt != 0 ";
+			//See job #7517.
+			//Always exclude NO PAYMENT claims and $0 claimprocs for batch payments created from the Edit Claim window.
+			//Include $0 claimprocs on or after rolling date (if enabled) when finalizing an individual claim.
+			if(onlyOneClaimNum!=0 && dateClaimPayZero.Year > 1880) {
+				command+="OR DateCP >= "+POut.Date(dateClaimPayZero);
+			}
+			command+=") ";
+			if(onlyOneClaimNum!=0) {//Finalizing individual claim.
+				command+="AND ClaimNum="+POut.Long(onlyOneClaimNum);
+			}
 			Db.NonQ(command);
 			command="SELECT SUM(InsPayAmt) FROM claimproc WHERE ClaimPaymentNum="+POut.Long(claimPaymentNum);
 			return PIn.Double(Db.GetScalar(command));
 		}
 
-		///<summary>Called when we want to try and update claimProc.DateInsFinalized for claimProcs associated to the given claimPaymentNum.</summary>
-		public static void DateInsFinalizedHelper(long claimPaymentNum,DateTime dateClaimPayZero) {
+		///<summary>Called when we want to try and update claimProc.DateInsFinalized for claimProcs associated to the given claimPaymentNum.
+		///The filters inside this function mimic AttachAllOutstandingToPayment() above.
+		///If finalizing a single claim, set onlyOneClaimNum to the claimNum to finalize.</summary>
+		public static void DateInsFinalizedHelper(long claimPaymentNum,DateTime dateClaimPayZero,long onlyOneClaimNum=0) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				Meth.GetVoid(MethodBase.GetCurrentMethod(),claimPaymentNum,dateClaimPayZero);
+				Meth.GetVoid(MethodBase.GetCurrentMethod(),claimPaymentNum,dateClaimPayZero,onlyOneClaimNum);
 				return;
 			}
 			//See job #7423.
 			//The claimproc.DateCP is essentially the same as the claim.DateReceived.
 			//We used to use the claimproc.ProcDate, which is essentially the same as the claim.DateService.
-			//In the near future, we will use a rolling date preference for the "claimPayDate" which will be a number of days from today to look into
-			//the past to include $0 claimprocs.  Since the service date could be weeks or months in the past, it makes more sense to use the 
-			//received date, which will be more recent.  Additionally, users found using the date of service to be unintuitive.
+			//Since the service date could be weeks or months in the past, it makes more sense to use the received date, which will be more recent.
+			//Additionally, users found using the date of service to be unintuitive.
 			//STRONG CAUTION not to use the claimproc.ProcDate here in the future.
 			string command="UPDATE claimproc SET "
 				+"DateInsFinalized = (CASE DateInsFinalized WHEN '0001-01-01' THEN "+DbHelper.Now()+" ELSE DateInsFinalized END) "
 				+"WHERE ClaimPaymentNum="+POut.Long(claimPaymentNum)+" "
 				+"AND (claimproc.Status = '1' OR claimproc.Status = '4' OR claimproc.Status='5') "//received or supplemental or capclaim
-				+"AND (InsPayAmt != 0 "+((dateClaimPayZero.Year>1880)?("OR DateCP >= "+POut.Date(dateClaimPayZero)):"")+")";
+				+"AND (InsPayAmt != 0 ";
+			//See job #7517.
+			//Always exclude NO PAYMENT claims and $0 claimprocs for batch payments created from the Edit Claim window.
+			//Include $0 claimprocs on or after rolling date (if enabled) when finalizing an individual claim.
+			if(onlyOneClaimNum!=0 && dateClaimPayZero.Year > 1880) {
+				command+="OR DateCP >= "+POut.Date(dateClaimPayZero);
+			}
+			command+=") ";
+			if(onlyOneClaimNum!=0) {//Finalizing individual claim.
+				command+="AND ClaimNum="+POut.Long(onlyOneClaimNum);
+			}
 			Db.NonQ(command);
 			return;
 		}

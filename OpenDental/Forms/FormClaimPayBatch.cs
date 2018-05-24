@@ -885,7 +885,7 @@ namespace OpenDental{
 			#region gridOutstanding
 			int scrollValue=gridOut.ScrollValue;
 			int selectedIdx=gridOut.GetSelectedIndex();
-			ClaimsOutstanding=Claims.GetOutstandingClaims(textCarrier.Text,textName.Text,PrefC.GetDate(PrefName.ClaimPaymentNoShowZeroDate),textClaimID.Text);
+			ClaimsOutstanding=Claims.GetOutstandingClaims(textCarrier.Text,textName.Text,PrefC.DateClaimReceivedAfter,textClaimID.Text);
 			gridOut.BeginUpdate();
 			gridOut.Columns.Clear();
 			col=new ODGridColumn("",25);//so that it lines up with the grid above
