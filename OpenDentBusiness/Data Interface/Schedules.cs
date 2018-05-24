@@ -231,7 +231,7 @@ namespace OpenDentBusiness{
 		///<summary>Similar to Crud.ScheduleCrud.Update except this also handles ScheduleOps.  Insert an invalid schedule signalod when hasSignal=true.</summary>
 		public static void Update(Schedule schedNew,Schedule schedOld,bool validate,bool hasSignal=true) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				Meth.GetVoid(MethodBase.GetCurrentMethod(),schedNew,schedOld,validate);
+				Meth.GetVoid(MethodBase.GetCurrentMethod(),schedNew,schedOld,validate,hasSignal);
 				return;
 			}
 			if(validate) {
@@ -256,7 +256,7 @@ namespace OpenDentBusiness{
 		///<summary>Set validate to true to throw an exception if start and stop times need to be validated.  If validate is set to false, then the calling code is responsible for the validation.  Also inserts necessary scheduleop enteries.  Insert an invalid schedule signalod when hasSignal=true.</summary>
 		public static long Insert(Schedule sched,bool validate,bool hasSignal=true){
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				sched.ScheduleNum=Meth.GetLong(MethodBase.GetCurrentMethod(),sched,validate);
+				sched.ScheduleNum=Meth.GetLong(MethodBase.GetCurrentMethod(),sched,validate,hasSignal);
 				return sched.ScheduleNum;
 			}
 			if(validate) {
@@ -295,7 +295,7 @@ namespace OpenDentBusiness{
 		///<summary>Delete an invalid schedule.  Insert an invalid schedule signalod when hasSignal=true.</summary>
 		public static void Delete(Schedule sched,bool hasSignal=false){
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				Meth.GetVoid(MethodBase.GetCurrentMethod(),sched);
+				Meth.GetVoid(MethodBase.GetCurrentMethod(),sched,hasSignal);
 				return;
 			}
 			string command= "DELETE from schedule WHERE schedulenum='"+POut.Long(sched.ScheduleNum)+"'";
