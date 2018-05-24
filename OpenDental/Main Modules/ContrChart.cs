@@ -12452,15 +12452,19 @@ namespace OpenDental {
 
 		/// <summary>Event handler for closing FormSheetFillEdit when it is non-modal.</summary>
 		private void FormSheetFillEdit_FormClosing(object sender,FormClosingEventArgs e) {
-			if(((FormSheetFillEdit)sender).DialogResult==DialogResult.OK) {
+			FormSheetFillEdit form=((FormSheetFillEdit)sender);
+			if(form.DialogResult==DialogResult.OK && PatCur!=null && form.SheetCur.PatNum==PatCur.PatNum) {
 				ModuleSelected(PatCur.PatNum);
 			}
 		}
 
 		/// <summary>Event handler for closing FormExamSheets when it is non-modal.</summary>
 		private void FormExamSheets_FormClosing(object sender,FormClosingEventArgs e) {
-			_loadData.TableProgNotes=ChartModules.GetProgNotes(PatCur.PatNum,checkAudit.Checked,GetChartModuleComponents());
-			RefreshModuleScreen();
+			long formPatNum=((FormExamSheets)sender).PatNum;
+			if(PatCur!=null && PatCur.PatNum==formPatNum) { //Only refresh if we have a patient selected and are currently on the chart module matching this exam sheet.
+				_loadData.TableProgNotes=ChartModules.GetProgNotes(formPatNum,checkAudit.Checked,GetChartModuleComponents());
+				RefreshModuleScreen();
+			}
 		}
 
 	}//end class
