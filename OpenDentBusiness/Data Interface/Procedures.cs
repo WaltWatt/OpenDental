@@ -3096,6 +3096,10 @@ namespace OpenDentBusiness {
 		}
 
 		public static void DeleteCanadianLabFeesForProcCode(long procNum) {
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				Meth.GetVoid(MethodBase.GetCurrentMethod(),procNum);
+				return;
+			}
 			string command="SELECT * FROM procedurelog WHERE ProcNumLab="+procNum+" AND ProcStatus!="+POut.Int((int)ProcStat.D);
 			List<Procedure> labFeeProcs=Crud.ProcedureCrud.SelectMany(command);
 			for(int i=0;i<labFeeProcs.Count;i++) {
