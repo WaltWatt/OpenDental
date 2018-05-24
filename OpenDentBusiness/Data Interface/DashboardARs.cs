@@ -46,6 +46,10 @@ namespace OpenDentBusiness{
 
 		///<summary>Dashboardar is safe to truncate because it gets refilled as needed and there are no FKeys to any other table.</summary>
 		public static void Truncate() {
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				Meth.GetVoid(MethodBase.GetCurrentMethod());
+				return;
+			}
 			string command = "TRUNCATE dashboardar";
 			Db.NonQ(command);
 			if(!string.IsNullOrEmpty(PrefC.ReportingServer.Server)) { //only attempt to insert into the reporting server if the reporting server is set up.
