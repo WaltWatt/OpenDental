@@ -81,7 +81,7 @@ namespace OpenDentBusiness {
 		///<summary></summary>
 		public static List<BugSubmission> GetAllInRange(DateTime dateFrom,DateTime dateTo) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				return Meth.GetObject<List<BugSubmission>>(MethodBase.GetCurrentMethod());
+				return Meth.GetObject<List<BugSubmission>>(MethodBase.GetCurrentMethod(),dateFrom,dateTo);
 			}
 			List<BugSubmission> listBugSubs=new List<BugSubmission>();
 			DataAction.RunBugsHQ(() => { 
