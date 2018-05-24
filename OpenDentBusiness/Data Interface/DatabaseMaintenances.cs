@@ -8096,7 +8096,7 @@ HAVING cnt>1";
 		/// <summary></summary>
 		public static string FixMissingClaimProcs(string olddb) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				return Meth.GetString(MethodBase.GetCurrentMethod());
+				return Meth.GetString(MethodBase.GetCurrentMethod(),olddb);
 			}
 			string log="";
 			//command="SELECT LName,FName,patient.PatNum,ClaimNum,FeeBilled,Status,ProcNum,ProcDate,ClaimProcNum,InsPayAmt,LineNumber "
