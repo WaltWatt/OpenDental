@@ -117,7 +117,7 @@ namespace OpenDentBusiness{
 		///<summary>Checks the database for equipment that has the supplied serial number.</summary>
 		public static bool HasExisting(Equipment equip) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				return Meth.GetBool(MethodBase.GetCurrentMethod());
+				return Meth.GetBool(MethodBase.GetCurrentMethod(),equip);
 			}
 			string command="SELECT COUNT(*) FROM equipment WHERE SerialNumber = '"+POut.String(equip.SerialNumber)+"' AND EquipmentNum != "+POut.Long(equip.EquipmentNum);
 			if(Db.GetScalar(command)=="0") {
