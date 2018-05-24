@@ -163,6 +163,7 @@ namespace OpenDental {
 		}
 
 		private void FillGridWebSchedNewPatApptHostedURLs() {
+			panelHostedURLs.Controls.Clear();
 			List<Clinic> clinicsAll=Clinics.GetDeepCopy();
 			var eServiceData=WebServiceMainHQProxy.GetSignups<WebServiceMainHQProxy.EServiceSetup.SignupOut.SignupOutEService>(_signupOut,eServiceCode.WebSchedNewPatAppt)
 				.Select(x => new {
