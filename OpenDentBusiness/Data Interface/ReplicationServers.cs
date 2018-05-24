@@ -204,6 +204,9 @@ namespace OpenDentBusiness{
 
 		///<summary>Gets a single ReplicationServer based on server_id.  Used to avoid cache issues.</summary>
 		public static ReplicationServer GetServer(long server_id) {
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				return Meth.GetObject<ReplicationServer>(MethodBase.GetCurrentMethod(),server_id);
+			}
 			string command="SELECT * FROM replicationserver WHERE ServerId="+POut.Long(server_id);
 			return Crud.ReplicationServerCrud.SelectOne(command);
 		}
