@@ -163,8 +163,8 @@ namespace OpenDentBusiness{
     ///Does not search on fields that are passed-in blank, 0, or DateTime.MinVal (depending on type).</summary>
     public static List<EmailMessage> GetBySearch(long searchPatNum,string searchEmail,DateTime dateFrom,DateTime dateTo,string searchBody,bool hasAttach) {
       if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-        return Meth.GetObject<List<EmailMessage>>(MethodBase.GetCurrentMethod(),searchPatNum,searchEmail,dateFrom,dateTo,searchBody);
-      }
+				return Meth.GetObject<List<EmailMessage>>(MethodBase.GetCurrentMethod(),searchPatNum,searchEmail,dateFrom,dateTo,searchBody,hasAttach);
+			}
       string command="SELECT * FROM emailmessage "
         +"WHERE TRUE ";
       if(searchPatNum!=0) {
