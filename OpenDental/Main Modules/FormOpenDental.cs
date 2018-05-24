@@ -7284,7 +7284,7 @@ namespace OpenDental{
 				return;
 			}
 			if(PrefC.GetLong(PrefName.DefaultUserGroup)==0) {
-				MsgBox.Show(this,"Default user group is not set. Make sure to set a default user group.");
+				MsgBox.Show(this,"Default user group is not set. Set a default user group in Global Security Settings.");
 				return;
 			}
 			FormUserEdit FormUE=new FormUserEdit(new Userod(),true);
