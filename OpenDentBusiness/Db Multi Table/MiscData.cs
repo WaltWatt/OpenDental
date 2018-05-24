@@ -169,7 +169,7 @@ namespace OpenDentBusiness {
 
 		public static void MakeTables(List<string> listTableQueries) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				Meth.GetVoid(MethodBase.GetCurrentMethod());
+				Meth.GetVoid(MethodBase.GetCurrentMethod(),listTableQueries);
 				return;
 			}
 			foreach(string command in listTableQueries) {
@@ -179,7 +179,7 @@ namespace OpenDentBusiness {
 
 		public static void InsertPreferences(DataTable preferences) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				Meth.GetVoid(MethodBase.GetCurrentMethod());
+				Meth.GetVoid(MethodBase.GetCurrentMethod(),preferences);
 				return;
 			}
 			string command="";
