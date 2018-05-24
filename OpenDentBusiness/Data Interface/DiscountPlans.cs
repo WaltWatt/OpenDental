@@ -79,6 +79,7 @@ namespace OpenDentBusiness{
 		public static void MergeTwoPlans(DiscountPlan planInto,DiscountPlan planFrom) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
 				Meth.GetVoid(MethodBase.GetCurrentMethod(),planInto,planFrom);
+				return;
 			}
 			string command="UPDATE patient SET DiscountPlanNum="+POut.Long(planInto.DiscountPlanNum)
 				+" WHERE DiscountPlanNum="+POut.Long(planFrom.DiscountPlanNum);
