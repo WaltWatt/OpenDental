@@ -126,6 +126,10 @@ namespace OpenDentBusiness{
 		}
 
 		public static void WikiPageRestore(WikiPage wikiPageRestored,long userNum) {
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				Meth.GetVoid(MethodBase.GetCurrentMethod(),wikiPageRestored,userNum);
+				return;
+			}
 			//Update the wikipage with new user and flip the IsDelete flag.
 			wikiPageRestored.IsDeleted=false;
 			wikiPageRestored.UserNum=userNum;
@@ -192,7 +196,7 @@ namespace OpenDentBusiness{
 		///<summary>Searches keywords, title, content.  Does not return pagetitles for drafts.</summary>
 		public static List<string> GetForSearch(string searchText,bool ignoreContent,bool isDeleted=false) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				return Meth.GetObject<List<string>>(MethodBase.GetCurrentMethod(),searchText,ignoreContent);
+				return Meth.GetObject<List<string>>(MethodBase.GetCurrentMethod(),searchText,ignoreContent,isDeleted);
 			}
 			List<string> retVal=new List<string>();
 			DataTable tableResults=new DataTable();
