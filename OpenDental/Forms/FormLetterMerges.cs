@@ -739,18 +739,16 @@ namespace OpenDental{
 				rawBase64=Convert.ToBase64String(File.ReadAllBytes(fileSourcePath));
 			}
 			Document docSave=new Document();
-			docSave.DocNum=Documents.Insert(docSave);
-			string fileName=Lans.g(this,"LetterMerge")+"_"+letterCur.Description+docSave.DocNum;
-			string fileDestPath=FileAtoZ.CombinePaths(ImageStore.GetPatientFolder(PatCur,ImageStore.GetPreferredAtoZpath()),fileName+".doc");
 			docSave.ImgType=ImageType.Document;
 			docSave.DateCreated=DateTime.Now;
 			docSave.PatNum=PatCur.PatNum;
 			docSave.DocCategory=letterCur.ImageFolder;
-			docSave.Description=fileName;//no extension.
+			docSave.Description=letterCur.Description+docSave.DocNum; ;//no extension.
 			docSave.RawBase64=rawBase64;//blank if using AtoZfolder
-			docSave.FileName=fileName+".doc";//file extension used for both DB images and AtoZ images
+			docSave.FileName=".doc";//file extension used for both DB images and AtoZ images. The insert will generate the file name.
+			docSave=Documents.InsertAndGet(docSave,PatCur);
+			string fileDestPath=ImageStore.GetFilePath(docSave,ImageStore.GetPatientFolder(PatCur,ImageStore.GetPreferredAtoZpath()));
 			FileAtoZ.Copy(fileSourcePath,fileDestPath,FileAtoZSourceDestination.LocalToAtoZ);
-			Documents.Update(docSave);
 			return docSave;
 		}
 
