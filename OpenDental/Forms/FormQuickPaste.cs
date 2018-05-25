@@ -40,6 +40,7 @@ namespace OpenDental{
 		///<summary>Set this property before calling this form. It will insert the value into this textbox.</summary>
 		public System.Windows.Forms.RichTextBox TextToFill;
 		private UI.ODGrid gridMain;
+		private bool _hasChanges;
 
 		///<summary></summary>
 		public QuickPasteType QuickType;
@@ -389,6 +390,7 @@ namespace OpenDental{
 			gridMain.Columns.Add(new ODGridColumn("Note",600));
 			gridMain.Rows.Clear();
 			if(listCat.SelectedIndex==-1) {
+				gridMain.EndUpdate();
 				return;
 			}
 			ODGridRow row;
@@ -421,6 +423,7 @@ namespace OpenDental{
 			}
 			quickCat=FormQ.QuickCat;
 			QuickPasteCats.Insert(quickCat);
+			_hasChanges=true;
 			//We are doing this so tha when the sync is called in FormQuickPaste_FormClosing(...) we do not re-insert.
 			//For now the sync will still detect a change due to the item orders.
 			_listCatsOld.Add(quickCat.Copy());
@@ -593,11 +596,13 @@ namespace OpenDental{
 		}
 
 		private void butOK_Click(object sender, System.EventArgs e) {
-			if(gridMain.GetSelectedIndex()==-1) {
-				MessageBox.Show(Lan.g(this,"Please select a note first."));
-				return;
+			if(TextToFill!=null) {
+				if(gridMain.GetSelectedIndex()==-1) {
+					MessageBox.Show(Lan.g(this,"Please select a note first."));
+					return;
+				}
+				InsertValue(((QuickPasteNote)gridMain.Rows[gridMain.GetSelectedIndex()].Tag).Note);
 			}
-			InsertValue(((QuickPasteNote)gridMain.Rows[gridMain.GetSelectedIndex()].Tag).Note);
 			DialogResult=DialogResult.OK;
 		}
 
@@ -626,15 +631,14 @@ namespace OpenDental{
 		}
 
 		private void FormQuickPaste_FormClosing(object sender,FormClosingEventArgs e) {
-			bool hasChanges;
 			for(int i=0;i<_listNotes.Count;i++) {
 				_listNotes[i].ItemOrder=i;//Fix item orders.
 			}
 			for(int i=0;i<_listCats.Count;i++) {
 				_listCats[i].ItemOrder=i;//Fix item orders.
 			}
-			hasChanges=QuickPasteCats.Sync(_listCats,_listCatsOld);
-			if(QuickPasteNotes.Sync(_listNotes,_listNotesOld) || hasChanges) {
+			_hasChanges|=QuickPasteCats.Sync(_listCats,_listCatsOld);
+			if(QuickPasteNotes.Sync(_listNotes,_listNotesOld) || _hasChanges) {
 				SecurityLogs.MakeLogEntry(Permissions.AutoNoteQuickNoteEdit,0,"Quick Paste Notes/Cats Changed");
 				DataValid.SetInvalid(InvalidType.QuickPaste);
 			}
