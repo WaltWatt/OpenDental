@@ -35,7 +35,7 @@ namespace OpenDental {
 
 		private void FormJobManager_Load(object sender,EventArgs e) {
 			comboUser.Tag=Security.CurUser;
-			if(Security.IsAuthorized(Permissions.SecurityAdmin)) {
+			if(Security.IsAuthorized(Permissions.SecurityAdmin,true)) {
 				butReleaseCalc.Visible=true;
 			}
 			_listUsers=Userods.GetUsersForJobs();
