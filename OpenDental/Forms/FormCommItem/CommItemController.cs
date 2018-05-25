@@ -74,6 +74,9 @@ namespace OpenDental {
 			if(!_view.TryGetCommItem(showMsg,out commlog)) {
 				return false;
 			}
+			if(IsPersistent && string.IsNullOrWhiteSpace(commlog.Note)) { //in persistent mode, we don't want to save empty commlogs
+				return false;
+			}
 			if(IsNew || IsPersistent) {
 				_view.SetCommlogNum(Commlogs.Insert(commlog));
 				SecurityLogs.MakeLogEntry(Permissions.CommlogEdit,commlog.PatNum,"Insert");
