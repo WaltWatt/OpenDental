@@ -167,7 +167,9 @@ namespace OpenDental {
 
 		private void labelMinimize_Click(object sender,EventArgs e) {
 			WindowState=FormWindowState.Minimized;
-			Owner.Focus();//This is because the above line would sometimes cause the application behind OD come into focus.
+			if(Owner!=null) {
+				Owner.Focus();//This is because the above line would sometimes cause the application behind OD come into focus.
+			}
 		}
 		
 		private void labelMinimize_MouseEnter(object sender,EventArgs e) {
