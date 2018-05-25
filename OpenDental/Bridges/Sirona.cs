@@ -1,178 +1,178 @@
 using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 using OpenDentBusiness;
-using System.Collections.Generic;
 
-namespace OpenDental.Bridges{
+namespace OpenDental.Bridges {
 	/// <summary></summary>
-	public class Sirona{
-		private static string iniFile;
+	public class Sirona {
 
 		/// <summary></summary>
-		public Sirona(){
+		public Sirona() {
 			
 		}
 
 		[DllImport("kernel32")]//this is the windows function for writing to ini files.
-    private static extern long WritePrivateProfileString(string section,string key,string val
-			,string filePath);
+    private static extern long WritePrivateProfileString(string section,string key,string val,string filePath);
 
 		[DllImport("kernel32")]//this is the windows function for reading from ini files.
-    private static extern int GetPrivateProfileString(string section,string key,string def
-			,StringBuilder retVal,int size,string filePath);
-
-		private static string ReadValue(string section,string key){
-			StringBuilder strBuild=new StringBuilder(255);
-			int i=GetPrivateProfileString(section,key,"",strBuild,255,iniFile);
-				return strBuild.ToString();
-			}
+    private static extern int GetPrivateProfileString(string section,string key,string def,StringBuilder retVal,int size,string filePath);
 
 		///<summary>Sends data for Patient to a mailbox file and launches the program.</summary>
-		public static void SendData(Program ProgramCur, Patient pat){
+		public static void SendData(Program ProgramCur, Patient pat) {
 			string path=Programs.GetProgramPath(ProgramCur);
-			List<ProgramProperty> ForProgram =ProgramProperties.GetForProgram(ProgramCur.ProgramNum);
-			if(pat!=null){
-				//read file C:\sidexis\sifiledb.ini
-				iniFile=Path.GetDirectoryName(path)+"\\sifiledb.ini";
-				if(!File.Exists(iniFile)){
-					MessageBox.Show(iniFile+" could not be found. Is Sidexis installed properly?");
+			List<ProgramProperty> listProgramProperties=ProgramProperties.GetForProgram(ProgramCur.ProgramNum);
+			if(pat!=null) {
+				try {
+					#region Read / Write .ini
+					//read file C:\sidexis\sifiledb.ini
+					string iniFile=Path.GetDirectoryName(path)+"\\sifiledb.ini";
+					if(!File.Exists(iniFile)) {
+						throw new ApplicationException(iniFile+" "+Lan.g("Sirona","could not be found. Is Sidexis installed properly?"));
+					}
+					//read FromStation0 | File to determine location of comm file (sendBox) (siomin.sdx)
+					//example:
+					//[FromStation0]
+					//File=F:\PDATA\siomin.sdx  //only one sendBox on entire network.
+					StringBuilder retVal=new StringBuilder(255);
+					GetPrivateProfileString("FromStation0","File","",retVal,255,iniFile);
+					string sendBox=retVal.ToString();
+					//read Multistations | GetRequest (=1) to determine if station can take xrays.
+					//but we don't care at this point, so ignore
+					//set OfficeManagement | OffManConnected = 1 to make sidexis ready to accept a message.
+					WritePrivateProfileString("OfficeManagement","OffManConnected","1",iniFile);
+					#endregion
+					#region Write to SendBox File (siomin.sdx)
+					using(FileStream fs=new FileStream(sendBox,FileMode.Append))
+					using(BinaryWriter bw=new BinaryWriter(fs)) {
+						//line formats: first two bytes are the length of line including first two bytes and \r\n
+						//each field is terminated by null (byte 0).
+						//Append U token to siomin.sdx file
+						StringBuilder line=new StringBuilder();
+						char nTerm=(char)0;//Convert.ToChar(0);
+						line.Append("U");//U signifies Update patient in sidexis. Gets ignored if new patient.
+						line.Append(nTerm);
+						line.Append(pat.LName);
+						line.Append(nTerm);
+						line.Append(pat.FName);
+						line.Append(nTerm);
+						line.Append(pat.Birthdate.ToString("dd.MM.yyyy"));
+						line.Append(nTerm);
+						//leave initial patient id blank. This updates sidexis to patNums used in Open Dental
+						line.Append(nTerm);
+						line.Append(pat.LName);
+						line.Append(nTerm);
+						line.Append(pat.FName);
+						line.Append(nTerm);
+						line.Append(pat.Birthdate.ToString("dd.MM.yyyy"));
+						line.Append(nTerm);
+						//Patient id:
+						ProgramProperty PPCur=ProgramProperties.GetCur(listProgramProperties, "Enter 0 to use PatientNum, or 1 to use ChartNum");;
+						if(PPCur.PropertyValue=="0"){
+							line.Append(pat.PatNum.ToString());
+						}
+						else{
+							line.Append(pat.ChartNumber);
+						}
+						line.Append(nTerm);
+						if(pat.Gender==PatientGender.Female)
+							line.Append("F");
+						else
+							line.Append("M");
+						line.Append(nTerm);
+						line.Append(Providers.GetAbbr(Patients.GetProvNum(pat)));
+						line.Append(nTerm);
+						line.Append("OpenDental");
+						line.Append(nTerm);
+						line.Append("Sidexis");
+						line.Append(nTerm);
+						line.Append("\r\n");
+						bw.Write(IntToByteArray(line.Length+2));//the 2 accounts for these two chars.
+						bw.Write(StrBuildToBytes(line));
+						//Append N token to siomin.sdx file
+						//N signifies create New patient in sidexis. If patient already exists,
+						//then it simply updates any old data.
+						line=new StringBuilder();
+						line.Append("N");
+						line.Append(nTerm);
+						line.Append(pat.LName);
+						line.Append(nTerm);
+						line.Append(pat.FName);
+						line.Append(nTerm);
+						line.Append(pat.Birthdate.ToString("dd.MM.yyyy"));
+						line.Append(nTerm);
+						//Patient id:
+						if(PPCur.PropertyValue=="0"){
+							line.Append(pat.PatNum.ToString());
+						}
+						else{
+							line.Append(pat.ChartNumber);
+						}
+						line.Append(nTerm);
+						if(pat.Gender==PatientGender.Female)
+							line.Append("F");
+						else
+							line.Append("M");
+						line.Append(nTerm);
+						line.Append(Providers.GetAbbr(Patients.GetProvNum(pat)));
+						line.Append(nTerm);
+						line.Append("OpenDental");
+						line.Append(nTerm);
+						line.Append("Sidexis");
+						line.Append(nTerm);
+						line.Append("\r\n");
+						bw.Write(IntToByteArray(line.Length+2));
+						bw.Write(StrBuildToBytes(line));
+						//Append A token to siomin.sdx file
+						//A signifies Autoselect patient. 
+						line=new StringBuilder();
+						line.Append("A");
+						line.Append(nTerm);
+						line.Append(pat.LName);
+						line.Append(nTerm);
+						line.Append(pat.FName);
+						line.Append(nTerm);
+						line.Append(pat.Birthdate.ToString("dd.MM.yyyy"));
+						line.Append(nTerm);
+						if(PPCur.PropertyValue=="0"){
+							line.Append(pat.PatNum.ToString());
+						}
+						else{
+							line.Append(pat.ChartNumber);
+						}
+						line.Append(nTerm);
+						line.Append(SystemInformation.ComputerName);
+						line.Append(nTerm);
+						line.Append(DateTime.Now.ToString("dd.MM.yyyy"));
+						line.Append(nTerm);
+						line.Append(DateTime.Now.ToString("HH.mm.ss"));
+						line.Append(nTerm);
+						line.Append("OpenDental");
+						line.Append(nTerm);
+						line.Append("Sidexis");
+						line.Append(nTerm);
+						line.Append("0");//0=no image selection
+						line.Append(nTerm);
+						line.Append("\r\n");
+						bw.Write(IntToByteArray(line.Length+2));
+						bw.Write(StrBuildToBytes(line));
+					}
+					#endregion
+				}
+				catch(Exception ex) {
+					FriendlyException.Show(Lan.g("Sirona","Error preparing Sidexis for patient message."),ex);
 					return;
 				}
-				//read FromStation0 | File to determine location of comm file (sendBox) (siomin.sdx)
-				//example:
-				//[FromStation0]
-				//File=F:\PDATA\siomin.sdx  //only one sendBox on entire network.
-				string sendBox=ReadValue("FromStation0","File");
-				//read Multistations | GetRequest (=1) to determine if station can take xrays.
-				//but we don't care at this point, so ignore
-				//set OfficeManagement | OffManConnected = 1 to make sidexis ready to accept a message.
-				WritePrivateProfileString("OfficeManagement","OffManConnected","1",iniFile);
-				//line formats: first two bytes are the length of line including first two bytes and \r\n
-				//each field is terminated by null (byte 0).
-				//Append U token to siomin.sdx file
-				StringBuilder line=new StringBuilder();
-				FileStream fs=new FileStream(sendBox,FileMode.Append);
-				using(BinaryWriter bw=new BinaryWriter(fs)){
-					char nTerm=(char)0;//Convert.ToChar(0);
-					line.Append("U");//U signifies Update patient in sidexis. Gets ignored if new patient.
-					line.Append(nTerm);
-					line.Append(pat.LName);
-					line.Append(nTerm);
-					line.Append(pat.FName);
-					line.Append(nTerm);
-					line.Append(pat.Birthdate.ToString("dd.MM.yyyy"));
-					line.Append(nTerm);
-					//leave initial patient id blank. This updates sidexis to patNums used in Open Dental
-					line.Append(nTerm);
-					line.Append(pat.LName);
-					line.Append(nTerm);
-					line.Append(pat.FName);
-					line.Append(nTerm);
-					line.Append(pat.Birthdate.ToString("dd.MM.yyyy"));
-					line.Append(nTerm);
-					//Patient id:
-					ProgramProperty PPCur=ProgramProperties.GetCur(ForProgram, "Enter 0 to use PatientNum, or 1 to use ChartNum");;
-					if(PPCur.PropertyValue=="0"){
-						line.Append(pat.PatNum.ToString());
-					}
-					else{
-						line.Append(pat.ChartNumber);
-					}
-					line.Append(nTerm);
-					if(pat.Gender==PatientGender.Female)
-						line.Append("F");
-					else
-						line.Append("M");
-					line.Append(nTerm);
-					line.Append(Providers.GetAbbr(Patients.GetProvNum(pat)));
-					line.Append(nTerm);
-					line.Append("OpenDental");
-					line.Append(nTerm);
-					line.Append("Sidexis");
-					line.Append(nTerm);
-					line.Append("\r\n");
-					bw.Write(IntToByteArray(line.Length+2));//the 2 accounts for these two chars.
-					bw.Write(StrBuildToBytes(line));
-					//Append N token to siomin.sdx file
-					//N signifies create New patient in sidexis. If patient already exists,
-					//then it simply updates any old data.
-					line=new StringBuilder();
-					line.Append("N");
-					line.Append(nTerm);
-					line.Append(pat.LName);
-					line.Append(nTerm);
-					line.Append(pat.FName);
-					line.Append(nTerm);
-					line.Append(pat.Birthdate.ToString("dd.MM.yyyy"));
-					line.Append(nTerm);
-					//Patient id:
-					if(PPCur.PropertyValue=="0"){
-						line.Append(pat.PatNum.ToString());
-					}
-					else{
-						line.Append(pat.ChartNumber);
-					}
-					line.Append(nTerm);
-					if(pat.Gender==PatientGender.Female)
-						line.Append("F");
-					else
-						line.Append("M");
-					line.Append(nTerm);
-					line.Append(Providers.GetAbbr(Patients.GetProvNum(pat)));
-					line.Append(nTerm);
-					line.Append("OpenDental");
-					line.Append(nTerm);
-					line.Append("Sidexis");
-					line.Append(nTerm);
-					line.Append("\r\n");
-					bw.Write(IntToByteArray(line.Length+2));
-					bw.Write(StrBuildToBytes(line));
-					//Append A token to siomin.sdx file
-					//A signifies Autoselect patient. 
-					line=new StringBuilder();
-					line.Append("A");
-					line.Append(nTerm);
-					line.Append(pat.LName);
-					line.Append(nTerm);
-					line.Append(pat.FName);
-					line.Append(nTerm);
-					line.Append(pat.Birthdate.ToString("dd.MM.yyyy"));
-					line.Append(nTerm);
-					if(PPCur.PropertyValue=="0"){
-						line.Append(pat.PatNum.ToString());
-					}
-					else{
-						line.Append(pat.ChartNumber);
-					}
-					line.Append(nTerm);
-					line.Append(SystemInformation.ComputerName);
-					line.Append(nTerm);
-					line.Append(DateTime.Now.ToString("dd.MM.yyyy"));
-					line.Append(nTerm);
-					line.Append(DateTime.Now.ToString("HH.mm.ss"));
-					line.Append(nTerm);
-					line.Append("OpenDental");
-					line.Append(nTerm);
-					line.Append("Sidexis");
-					line.Append(nTerm);
-					line.Append("0");//0=no image selection
-					line.Append(nTerm);
-					line.Append("\r\n");
-					bw.Write(IntToByteArray(line.Length+2));
-					bw.Write(StrBuildToBytes(line));
-				}
-				fs.Close();
 			}//if patient is loaded
 			//Start Sidexis.exe whether patient loaded or not.
-			try{
+			try {
 				Process.Start(path);
 			}
-			catch{
+			catch {
 				MessageBox.Show(path+" is not available.");
 			}
 		}
@@ -299,13 +299,3 @@ namespace OpenDental.Bridges{
 
 	}
 }
-
-
-
-
-
-
-
-
-
-
