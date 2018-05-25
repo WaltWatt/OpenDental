@@ -966,6 +966,16 @@ namespace OpenDental.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        public static System.Drawing.Bitmap PaySimple_Button {
+            get {
+                object obj = ResourceManager.GetObject("PaySimple_Button", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to PDFsharp is published under the MIT License.
         ///
         ///Copyright (c) 2005-2014 empira Software GmbH, Troisdorf (Germany)

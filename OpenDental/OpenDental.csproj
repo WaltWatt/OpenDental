@@ -8317,6 +8317,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\PaySimple_Button.png" />
     <None Include="Resources\Microphone_22px.png" />
     <None Include="Resources\Microphone_30px.png" />
     <Resource Include="Resources\SharpDX.txt" />

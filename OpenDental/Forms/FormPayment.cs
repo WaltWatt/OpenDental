@@ -180,7 +180,7 @@ namespace OpenDental {
 		private bool _isInit;
 		private int _originalHeight;
 		private bool _preferCurrentPat;
-		private UI.Button butPaySimple;
+		private Panel butPaySimple;
 		private ContextMenu contextMenuPaySimple;
 		private MenuItem menuPaySimple;
 
@@ -328,7 +328,7 @@ namespace OpenDental {
 			this.butPrintReceipt = new OpenDental.UI.Button();
 			this.butEmailReceipt = new OpenDental.UI.Button();
 			this.splitContainerCharges = new System.Windows.Forms.SplitContainer();
-			this.butPaySimple = new OpenDental.UI.Button();
+			this.butPaySimple = new System.Windows.Forms.Panel();
 			this.butShowHide = new OpenDental.UI.Button();
 			this.comboClinic = new System.Windows.Forms.ComboBox();
 			this.textDeposit = new System.Windows.Forms.TextBox();
@@ -609,17 +609,12 @@ namespace OpenDental {
 			// 
 			// butPaySimple
 			// 
-			this.butPaySimple.AdjustImageLocation = new System.Drawing.Point(0, 0);
-			this.butPaySimple.Autosize = false;
-			this.butPaySimple.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
-			this.butPaySimple.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
-			this.butPaySimple.CornerRadius = 4F;
+			this.butPaySimple.BackgroundImage = global::OpenDental.Properties.Resources.PaySimple_Button;
 			this.butPaySimple.Location = new System.Drawing.Point(979, 24);
 			this.butPaySimple.Name = "butPaySimple";
-			this.butPaySimple.Size = new System.Drawing.Size(75, 24);
+			this.butPaySimple.Size = new System.Drawing.Size(76, 26);
 			this.butPaySimple.TabIndex = 140;
-			this.butPaySimple.Text = "PaySimple";
-			this.butPaySimple.Click += new System.EventHandler(this.butPaySimple_Click);
+			this.butPaySimple.MouseClick += new System.Windows.Forms.MouseEventHandler(this.butPaySimple_Click);
 			// 
 			// butShowHide
 			// 
@@ -3088,7 +3083,7 @@ namespace OpenDental {
 				MsgBox.Show(this,"X-Charge entry is missing from the database.");//should never happen
 				return false;
 			}
-			bool isSetupRequired=!_xProg.Enabled;//if X-Charge is disabled, setup is required
+			bool isSetupRequired=false;
 			//if X-Charge is enabled, but the Username or Password are blank or the PaymentType is not a valid DefNum, setup is required
 			if(_xProg.Enabled) {
 				//X-Charge is enabled if the username and password are set and the PaymentType is a valid DefNum
@@ -3100,6 +3095,12 @@ namespace OpenDental {
 				{
 					isSetupRequired=true;
 				}
+			}
+			else {//Program link not enabled.  Launch a promo site.
+				ODException.SwallowAnyException(() =>
+					Process.Start("www.opendental.com/site/redirectopenedge.html")
+				);
+				return false;
 			}
 			//if X-Charge is enabled and the Username and Password is set and the PaymentType is a valid DefNum,
 			//make sure the path (either local override or program path) is valid
@@ -3438,12 +3439,16 @@ namespace OpenDental {
 				string paymentType=ProgramProperties.GetPropVal(prog.ProgramNum,"PaymentType",_paymentCur.ClinicNum);
 				if(string.IsNullOrEmpty(ProgramProperties.GetPropVal(prog.ProgramNum,"Username",_paymentCur.ClinicNum))
 					|| string.IsNullOrEmpty(ProgramProperties.GetPropVal(prog.ProgramNum,"Password",_paymentCur.ClinicNum))
-					|| !_listPaymentTypeDefs.Any(x => x.DefNum.ToString()==paymentType)) {
+					|| !_listPaymentTypeDefs.Any(x => x.DefNum.ToString()==paymentType)) 
+				{
 					isSetupRequired=true;
 				}
 			}
-			else {//Program link not enabled.  They need to enable it first.
-				isSetupRequired=true;
+			else {//Program link not enabled.  Launch a promo site.
+				ODException.SwallowAnyException(() =>
+					Process.Start("www.opendental.com/site/redirectpayconnect.html")
+				);
+				return false;
 			}
 			if(isSetupRequired) {
 				if(!Security.IsAuthorized(Permissions.Setup)) {
@@ -3460,7 +3465,10 @@ namespace OpenDental {
 			return true;
 		}
 
-		private void butPaySimple_Click(object sender,EventArgs e) {
+		private void butPaySimple_Click(object sender,MouseEventArgs e) {
+			if(e.Button!=MouseButtons.Left) {
+				return;
+			}
 			MakePaySimpleTransaction();
 		}
 
@@ -3618,12 +3626,16 @@ namespace OpenDental {
 				string paymentType=ProgramProperties.GetPropValForClinicOrDefault(prog.ProgramNum,PaySimple.PropertyDescs.PaySimplePayType,_paymentCur.ClinicNum);
 				if(string.IsNullOrEmpty(ProgramProperties.GetPropValForClinicOrDefault(prog.ProgramNum,PaySimple.PropertyDescs.PaySimpleApiUserName,_paymentCur.ClinicNum))
 					|| string.IsNullOrEmpty(ProgramProperties.GetPropValForClinicOrDefault(prog.ProgramNum,PaySimple.PropertyDescs.PaySimpleApiKey,_paymentCur.ClinicNum))
-					|| !_listPaymentTypeDefs.Any(x => x.DefNum.ToString()==paymentType)) {
+					|| !_listPaymentTypeDefs.Any(x => x.DefNum.ToString()==paymentType)) 
+				{
 					isSetupRequired=true;
 				}
 			}
-			else {//Program link not enabled.  They need to enable it first.
-				isSetupRequired=true;
+			else {//Program link not enabled.  Launch a promo website.
+				ODException.SwallowAnyException(() =>
+					Process.Start("www.opendental.com/site/redirectpaysimple.html")
+				);
+				return false;
 			}
 			if(isSetupRequired) {
 				if(!Security.IsAuthorized(Permissions.Setup)) {
