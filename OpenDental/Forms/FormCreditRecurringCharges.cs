@@ -899,11 +899,12 @@ namespace OpenDental {
 						CreditCards.Update(ccCur);
 					}
 					//add to strbuilder that will be written to txt file and to the payment note
+					string clinicDesc="";
 					if(PrefC.HasClinicsEnabled && dictClinicNumDesc.ContainsKey(clinicNumCur)) {
-						strBuilderResultText.AppendLine("Clinic="+dictClinicNumDesc[clinicNumCur]);
+						clinicDesc=dictClinicNumDesc[clinicNumCur];
 					}
-					strBuilderResultText.AppendLine(response.ToNoteString(dictClinicNumDesc[clinicNumCur],"Manual"
-						,Security.CurUser.UserName,ccCur.CCExpiration.Month.ToString().PadLeft(2,'0')+(ccCur.CCExpiration.Year%100),"PaySimple Token"));
+					strBuilderResultText.AppendLine(response.ToNoteString(clinicDesc,"Manual",Security.CurUser.UserName,
+						ccCur.CCExpiration.Month.ToString().PadLeft(2,'0')+(ccCur.CCExpiration.Year%100),"PaySimple Token"));
 					resultAmt=(double)response.Amount;
 					response.BuildReceiptString(ccCur.CCNumberMasked,ccCur.CCExpiration.Month,ccCur.CCExpiration.Year,"",clinicNumCur);
 					string receipt=response.TransactionReceipt;

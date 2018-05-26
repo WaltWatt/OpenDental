@@ -244,7 +244,7 @@ namespace OpenDentBusiness {
 					Lans.g("PaySimple","Auth Code")+": "+this.AuthCode+Environment.NewLine+
 					Lans.g("PaySimple","Amount")+": "+this.Amount+Environment.NewLine+
 					Lans.g("PaySimple","PaySimple Account ID")+": "+this.PaySimpleToken+Environment.NewLine+
-					Lans.g("PaySimple","PaySimple Transaction Number")+": "+this.RefNumber;
+					Lans.g("PaySimple","PaySimple Transaction Number")+": "+this.RefNumber+Environment.NewLine;
 				if(!string.IsNullOrWhiteSpace(entry)) {
 					retVal+=Lans.g("PaySimple","Entry")+": "+entry+Environment.NewLine;
 				}
