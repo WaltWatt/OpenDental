@@ -8417,5 +8417,18 @@ No Action Required in many cases, check your new patient Web Sched on your web s
 			}
 		}
 
+		private static void To18_1_16() {
+			string command;
+			//Remove 'ApptEConfirmStatusSent' from 'ApptConfirmExcludeESend' so that multiple eConfirmations can be sent for one appointment.
+			command="SELECT ValueString FROM preference WHERE PrefName='ApptEConfirmStatusSent'";
+			string defNumConfirmSent=Db.GetScalar(command);
+			command="SELECT ValueString FROM preference WHERE PrefName='ApptConfirmExcludeESend'";
+			List<string> listDefNums=Db.GetScalar(command).Split(new char[] { ',' },StringSplitOptions.RemoveEmptyEntries).ToList();
+			listDefNums.RemoveAll(x => x==defNumConfirmSent);
+			string defNumsExclude=string.Join(",",listDefNums);
+			command="UPDATE preference SET ValueString='"+POut.String(defNumsExclude)+"' WHERE PrefName='ApptConfirmExcludeESend'";
+			Db.NonQ(command);
+		}
+
 	}
 }

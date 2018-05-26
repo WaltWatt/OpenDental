@@ -17,6 +17,12 @@ namespace OpenDental {
 		private List<CommType> _sendOrder;
 		private List<ApptReminderRule> _listRulesClinic;
 
+		///<summary>True if any preferences were updated.</summary>
+		public bool IsPrefsChanged {
+			get;
+			private set;
+		}
+
 		public FormApptReminderRuleEdit(ApptReminderRule apptReminderCur,List<ApptReminderRule> listRulesClinic=null) {
 			InitializeComponent();
 			Lan.F(this);
@@ -177,6 +183,27 @@ namespace OpenDental {
 			}
 		}
 
+		///<summary>Removes 'Do not send eConfirmations' from the confirmed status for 'eConfirm Sent' if multiple eConfirmations are set up.</summary>
+		private void CheckMultipleEConfirms() {
+			int countEConfirm=_listRulesClinic?.Count(x => x.TypeCur==ApptReminderType.ConfirmationFutureDay)??0;
+			string confStatusEConfirmSent=Defs.GetDef(DefCat.ApptConfirmed,PrefC.GetLong(PrefName.ApptEConfirmStatusSent)).ItemName;
+			List<string> listExclude=PrefC.GetString(PrefName.ApptConfirmExcludeESend)
+				.Split(new char[] { ',' },StringSplitOptions.RemoveEmptyEntries).ToList();
+			if(ApptReminderRuleCur.TypeCur==ApptReminderType.ConfirmationFutureDay
+				//And there is more than 1 eConfirmation rule.
+				&& (countEConfirm > 1 || (countEConfirm==1 && ApptReminderRuleCur.ApptReminderRuleNum==0))
+				//And the confirmed status for 'eConfirm Sent' is marked 'Do not send eConfirmations'
+				&& listExclude.Contains(PrefC.GetString(PrefName.ApptEConfirmStatusSent))
+				//Ask them to fix their exclude send statuses
+				&& MessageBox.Show(Lans.g(this,"Appointments will not receive multiple eConfirmations if the '")+confStatusEConfirmSent+"' "+
+						Lans.g(this,"status is set as 'Don't Send'. Would you like to remove 'Don't Send' from that status?"),
+					"",MessageBoxButtons.YesNo)==DialogResult.Yes) 
+			{
+				listExclude.RemoveAll(x => x==PrefC.GetString(PrefName.ApptEConfirmStatusSent));
+				IsPrefsChanged|=Prefs.UpdateString(PrefName.ApptConfirmExcludeESend,string.Join(",",listExclude));
+			}
+		}
+
 		private void butOk_Click(object sender,EventArgs e) {
 			if(!textHours.IsValid	|| !textDays.IsValid || !textHoursWithin.IsValid || !textDaysWithin.IsValid) {
 				MsgBox.Show(this,"Fix data entry errors first.");
@@ -203,6 +230,7 @@ namespace OpenDental {
 			else {
 				tsPrior=TimeSpan.Zero;
 			}
+			CheckMultipleEConfirms();
 			ApptReminderRuleCur.TemplateSMS=textTemplateSms.Text.Replace("[ConfirmURL].","[ConfirmURL] .");//Clicking a link with a period will not get recognized. 
 			ApptReminderRuleCur.TemplateEmailSubject=textTemplateSubject.Text;
 			ApptReminderRuleCur.TemplateEmail=textTemplateEmail.Text;

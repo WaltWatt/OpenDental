@@ -327,6 +327,9 @@ namespace OpenDental {
 			else {//Update
 				_dictClinicRules[_clinicRuleClinicNum][idx]=FormARRE.ApptReminderRuleCur;
 			}
+			if(FormARRE.IsPrefsChanged) {
+				FillConfStatusesGrid();
+			}
 			FillRemindConfirmData();
 		}
 		
@@ -347,6 +350,9 @@ namespace OpenDental {
 			}
 			else {//Insert
 				_dictClinicRules[_clinicRuleClinicNum].Add(FormARRE.ApptReminderRuleCur);
+			}
+			if(FormARRE.IsPrefsChanged) {
+				FillConfStatusesGrid();
 			}
 			FillRemindConfirmData();
 		}
@@ -369,6 +375,9 @@ namespace OpenDental {
 			}
 			else {//Insert
 				_dictClinicRules[_clinicRuleClinicNum].Add(FormARRE.ApptReminderRuleCur);
+			}
+			if(FormARRE.IsPrefsChanged) {
+				FillConfStatusesGrid();
 			}
 			FillRemindConfirmData();
 		}
