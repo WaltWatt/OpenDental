@@ -638,6 +638,10 @@ namespace CodeBase {
 		public LogLevel LogLevel;
 		public string BaseDirectory;
 
+		///<summary>For serialization.</summary>
+		public LogWriter() {
+		}
+
 		public LogWriter(LogLevel logLevel,string baseDirectory) {
 			LogLevel=logLevel;
 			BaseDirectory=baseDirectory;
@@ -654,6 +658,10 @@ namespace CodeBase {
 	///<summary>Class that generates a unique ID and includes it in every line it logs.</summary>
 	public class LogRequest:LogWriter {
 		private string _requestId;
+
+		///<summary>For serialization.</summary>
+		public LogRequest() {
+		}
 
 		public LogRequest(LogLevel logLevel,string baseDirectory) : base(logLevel,baseDirectory) {
 			_requestId=Guid.NewGuid().ToString();

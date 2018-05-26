@@ -180,7 +180,7 @@ namespace OpenDentBusiness{
 			Logger.IWriteLine log=null) 
 		{
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				return GetApptsForOpsByPeriod(opNums,dateStart,dateEnd);//Middle tier cannot currently serialize an interface.
+				return Meth.GetObject<List<Appointment>>(MethodBase.GetCurrentMethod(),opNums,dateStart,dateEnd,log);
 			}
 			string command="SELECT * FROM appointment WHERE Op > 0 ";
 			if(opNums!=null && opNums.Count > 0) {
@@ -195,16 +195,7 @@ namespace OpenDentBusiness{
 			log?.WriteLine("command: "+command,LogLevel.Verbose);
 			return Crud.AppointmentCrud.SelectMany(command);
 		}
-
-		///<summary>Gets all appointments scheduled in the operatories passed in that fall within the start and end dates.
-		///Does not currently consider the time portion of the DateTimes passed in.</summary>
-		public static List<Appointment> GetApptsForOpsByPeriod(List<long> opNums,DateTime dateStart,DateTime dateEnd) {
-			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				return Meth.GetObject<List<Appointment>>(MethodBase.GetCurrentMethod(),opNums,dateStart,dateEnd);
-			}
-			return GetAppointmentsForOpsByPeriod(opNums,dateStart,dateEnd);
-		}
-
+		
 		///<summary>Gets the appointments for the dates and operatories passed in.</summary>
 		///<param name="listDateOps">DateTime is the AptDate, long is the OperatoryNum.</param>
 		public static List<Appointment> GetApptsForDatesOps(List<Tuple<DateTime,long>> listDateOps) {

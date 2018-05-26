@@ -59,7 +59,7 @@ namespace OpenDentBusiness {
 			*/
 			writer.WriteStartElement("TypeName");
 			Type type=ConvertNameToType(TypeName);
-			if(type==typeof(object)) {
+			if(type==typeof(object) || (type.IsInterface && Obj!=null)) {
 				type=Obj.GetType();
 				TypeName=type.FullName;
 			}
@@ -73,8 +73,10 @@ namespace OpenDentBusiness {
 			else if(TypeName=="System.Data.DataTable") {
 				writer.WriteRaw(XmlConverter.TableToXml((DataTable)Obj));
 			}
+			else if(type.IsInterface) {
+				//Interfaces cannot be serialized. Should only get here if the interface is null.
+			}
 			else {
-				//string assemb=Assembly.GetAssembly(typeof(Db)).FullName;//"OpenDentBusiness, Version=14.3.0.0, Culture=neutral, PublicKeyToken=null"
 				XmlSerializer serializer=new XmlSerializer(type);
 				serializer.Serialize(writer,Obj);
 			}
@@ -120,14 +122,19 @@ namespace OpenDentBusiness {
 			else{
 				type=ConvertNameToType(TypeName);
 			}
-			XmlSerializer serializer = new XmlSerializer(type);
-			//XmlReader reader2=XmlReader.Create(new StringReader(strObj));
+			XmlSerializer serializer=null;
+			if(!type.IsInterface) {
+				serializer=new XmlSerializer(type);
+			}
 			XmlTextReader reader2=new XmlTextReader(new StringReader(strObj));
 			if(TypeName=="System.Drawing.Color") {
 				Obj=Color.FromArgb((int)serializer.Deserialize(reader2));
 			}
 			else if(TypeName=="System.Data.DataTable") {
 				Obj=XmlConverter.XmlToTable(strObj);
+			}
+			else if(type.IsInterface) {
+				//We should only ever get here if the interface was null when serialized.
 			}
 			else {
 				Obj=serializer.Deserialize(reader2);
@@ -211,6 +218,9 @@ namespace OpenDentBusiness {
 				Assembly assemb=Plugins.GetAssembly(strTypeGenName);//usually null, unless the type is for a plugin
 				if(assemb==null) {
 					typeGen=Type.GetType(strTypeGenName);//strTypeName includes the namespace, which we require to be same as assembly by convention
+					if(typeGen==null) {//For assemblies other than OpenDentBusiness, i.e. CodeBase
+						typeGen=Type.GetType(strTypeGenName+","+strTypeGenName.SubstringBefore("."));
+					}
 				}
 				else {//plugin was found
 					typeGen=assemb.GetType(strTypeGenName);//strTypeName includes the namespace, which we require to be same as assembly by convention
@@ -229,6 +239,9 @@ namespace OpenDentBusiness {
 				Assembly assemb=Plugins.GetAssembly(strAssembName);//usually null, unless the type is for a plugin
 				if(assemb==null) {
 					typeObj=Type.GetType(strTypeName);//strTypeName includes the namespace, which we require to be same as assembly by convention
+					if(typeObj==null) {//For assemblies other than OpenDentBusiness, i.e. CodeBase
+						typeObj=Type.GetType(strTypeName+","+strTypeName.SubstringBefore("."));
+					}
 				}
 				else {//plugin was found
 					typeObj=assemb.GetType(strTypeName);//strTypeName includes the namespace, which we require to be same as assembly by convention

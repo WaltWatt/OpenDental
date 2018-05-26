@@ -185,6 +185,12 @@ namespace OpenDentBusiness {
 			return value+addition;
 		}
 
+		///<summary>Returns everything in the string after the "beforeThis" string. Throws if "beforeThis" is not present in the string.</summary>
+		///<exception cref="IndexOutOfRangeException" />
+		public static string SubstringBefore(this string value,string beforeThis) {
+			return value.Substring(0,value.IndexOf(beforeThis));
+		}
+
 		///<summary>Returns everything in the string after the "afterThis" string. Throws if "afterThis" is not present in the string.</summary>
 		///<exception cref="IndexOutOfRangeException" />
 		public static string SubstringAfter(this string value,string afterThis) {
