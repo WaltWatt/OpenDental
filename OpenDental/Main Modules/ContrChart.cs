@@ -5045,6 +5045,10 @@ namespace OpenDental {
 		}
 
 		private void Tool_Perio_Click() {
+			if(PatCur==null || _loadData==null || _loadData.TableProgNotes==null) {
+				MsgBox.Show(this,"Please select a patient and try again.");
+				return;
+			}
 			List<Procedure> listPatProcs=new List<Procedure>();
 			DataTable table=_loadData.TableProgNotes;
 			//Find rows which are procedures (ProcNum!=0) and use the CodeNum and ToothNum columns to create a list of pseudo "Procedures".
