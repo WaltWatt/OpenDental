@@ -1455,12 +1455,22 @@ namespace OpenDental
 			if(FormPSS.ShowDialog()!=DialogResult.OK) {
 				return;
 			}
+			SplitAssociated=new PaySplits.PaySplitAssociated(FormPSS.ListSelectedSplits[0],PaySplitCur);
 			if(isNegSplit) {//if negative then we're allocating money from the original prepayment.
 				butAttachProc.Enabled=false;
 				butDetachProc.Enabled=false;
 				comboProvider.Enabled=false;
+				if(PrefC.GetInt(PrefName.RigorousAccounting)==(int)RigorousAccounting.EnforceFully && !PrefC.GetBool(PrefName.AllowPrepayProvider)) {
+					//this probably needs to set comboProvider disabled in here as well (instead of above). Leaving for now due to separate bug fix.
+					butPickProv.Enabled=false;  
+				}
+				if(comboUnearnedTypes.SelectedIndex==0) {//unearned has not been set
+					int selectedIndex=_listPaySplitUnearnedTypeDefs.FindIndex(x => x.DefNum==SplitAssociated.PaySplitOrig.UnearnedType)+1;//+1 because of 'None'
+					comboUnearnedTypes.SelectIndex(selectedIndex,Defs.GetName(DefCat.PaySplitUnearnedType,SplitAssociated.PaySplitOrig.UnearnedType));
+					PaySplitCur.UnearnedType=SplitAssociated.PaySplitOrig.UnearnedType;
+				}
+				comboUnearnedTypes.Enabled=false;
 			}
-			SplitAssociated=new PaySplits.PaySplitAssociated(FormPSS.ListSelectedSplits[0],PaySplitCur);
 			//Always switch when negative so it matches the original, only switch for positive proc splits when prepayment has provider
 			if(isNegSplit || SplitAssociated.PaySplitOrig.ProvNum!=0) {
 				comboProvider.SelectIndex(_listProviders.FindIndex(x => x.ProvNum==SplitAssociated.PaySplitOrig.ProvNum)
@@ -1477,6 +1487,7 @@ namespace OpenDental
 			PaySplitCur.FSplitNum=0;
 			SplitAssociated=null;
 			comboProvider.Enabled=true;
+			butPickProv.Enabled=true;
 			comboUnearnedTypes.Enabled=true;
 			FillSplitAssociated();
 		}
