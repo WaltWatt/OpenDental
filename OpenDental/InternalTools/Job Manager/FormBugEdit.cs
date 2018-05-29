@@ -21,6 +21,12 @@ namespace OpenDental {
 		}
 
 		private void FormBugEdit_Load(object sender,EventArgs e) {
+			if(BugCur==null) {
+				MsgBox.Show(this,"An invalid bug was attempted to be loaded.");
+				DialogResult=DialogResult.Abort;
+				Close();
+				return;
+			}
 			textBugId.Text=BugCur.BugId.ToString();
 			textCreationDate.Text=BugCur.CreationDate.ToString();
 			comboStatus.Text=BugCur.Status_.ToString();

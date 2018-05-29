@@ -485,7 +485,7 @@ namespace OpenDental {
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.Name = "FormBugEdit";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-			this.Text = "FormBugEdit";
+			this.Text = "Bug Edit";
 			this.Load += new System.EventHandler(this.FormBugEdit_Load);
 			this.ResumeLayout(false);
 			this.PerformLayout();
