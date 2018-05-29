@@ -1019,7 +1019,8 @@ namespace OpenDental{
 		/// <summary>destinationPath includes filename (Setup.exe).  destinationPath2 will create a second copy at the specified path/filename, or it will be skipped if null or empty.</summary>
 		public static void DownloadInstallPatchFromURI(string downloadUri,string destinationPath,bool runSetupAfterDownload,bool showShutdownWindow,string destinationPath2){
 			string[] dblist=PrefC.GetString(PrefName.UpdateMultipleDatabases).Split(new string[] {","},StringSplitOptions.RemoveEmptyEntries);
-			if(showShutdownWindow) {
+			bool isShutdownWindowNeeded=showShutdownWindow;
+			while(isShutdownWindowNeeded) {
 				//Even if updating multiple databases, extra shutdown signals are not needed.
 				FormShutdown FormSD=new FormShutdown();
 				FormSD.IsUpdate=true;
@@ -1031,9 +1032,15 @@ namespace OpenDental{
 					sig.IType=InvalidType.ShutDownNow;
 					Signalods.Insert(sig);
 					Computers.ClearAllHeartBeats(Environment.MachineName);//always assume success
+					isShutdownWindowNeeded=false;
 					//SecurityLogs.MakeLogEntry(Permissions.Setup,0,"Shutdown all workstations.");//can't do this because sometimes no user.
 				}
-				//continue on even if user clicked cancel
+				else if(FormSD.DialogResult==DialogResult.Cancel){//Cancel
+					if(MsgBox.Show("FormUpdate",MsgBoxButtons.YesNo,"Are you sure you want to cancel the update?")) {
+						return;
+					}
+					continue;
+				}
 				//no other workstation will be able to start up until this value is reset.
 				Prefs.UpdateString(PrefName.UpdateInProgressOnComputerName,Environment.MachineName);
 			}
