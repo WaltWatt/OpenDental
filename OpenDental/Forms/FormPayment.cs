@@ -4219,6 +4219,7 @@ namespace OpenDental {
 			if(checkPayTypeNone.Checked) {//Button only visible if EnforceFully is enabled
 				FormPaySplitManage FormPSM=new FormPaySplitManage(checkPayTypeNone.Checked);
 				FormPSM.ListSplitsCur=_listSplitsCur;
+				FormPSM.ListSplitsAssociated=_listPaySplitsAssociated;
 				FormPSM.PayDate=PIn.Date(textDate.Text);
 				FormPSM.PatCur=_patCur;
 				FormPSM.PaymentAmt=0;

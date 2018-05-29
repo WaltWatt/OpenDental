@@ -31,6 +31,7 @@ namespace OpenDental {
 		///Should contain all patients in the current family along with any patients of payment plans of which a member of this family is the guarantor.</summary>
 		private Dictionary<long,Patient> dictPatients;
 		private bool _isIncomeTransfer;
+		public List<PaySplits.PaySplitAssociated> ListSplitsAssociated;
 
 		public FormPaySplitManage(bool isIncomeTransfer) {
 			InitializeComponent();
@@ -663,7 +664,10 @@ namespace OpenDental {
 			}
 			FormPaySplitEdit FormPSE=new FormPaySplitEdit(FamCur,_isIncomeTransfer);
       FormPSE.ListSplitsCur=ListSplitsCur;
-			FormPSE.PaySplitCur=paySplit; if(paySplit.IsInterestSplit && !MsgBox.Show(this,MsgBoxButtons.OKCancel,"Editing or deleting interest splits for a payment plan charge can"
+			FormPSE.PaySplitCur=paySplit;
+			FormPSE.SplitAssociated=ListSplitsAssociated.Find(x => x.PaySplitLinked==paySplitOld)??new PaySplits.PaySplitAssociated(null,null);
+			FormPSE.ListPaySplitAssociated=ListSplitsAssociated;
+			if(paySplit.IsInterestSplit && !MsgBox.Show(this,MsgBoxButtons.OKCancel,"Editing or deleting interest splits for a payment plan charge can"
 				+" cause future splits to be allocated to the wrong provider. Do you want to continue?")) {
 				return;
 			}
