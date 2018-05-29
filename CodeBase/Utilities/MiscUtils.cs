@@ -201,6 +201,17 @@ namespace CodeBase {
 		public static bool DoSlotsOverlap(DateTime slot1Start,DateTime slot1End,DateTime slot2Start,DateTime slot2End) {
 			return (slot1End > slot2Start && slot1Start < slot2End);
 		}
+
+		///<summary>Returns exception string that includes the threadName if provided and exception type and up to 5 inner exceptions.
+		///Used for both bugSubmissions and the MsgBoxCopyPaste shown to customers when a UE occurs.</summary>
+		public static string GetExceptionText(Exception e,string threadName=null) {
+			return "Unhandled exception"+(string.IsNullOrEmpty(threadName) ?"":" from "+threadName)+":  "
+					+(string.IsNullOrEmpty(e.Message)?"No Exception Message":e.Message+"\r\n")
+					+(string.IsNullOrEmpty(e.GetType().ToString())?"No Exception Type":e.GetType().ToString())+"\r\n"
+					+(string.IsNullOrEmpty(e.StackTrace)?"No StackTrace":e.StackTrace)
+					+InnerExceptionToString(e);//New lines handled in method.
+		}
+
 		///<summary>Formats the inner exception (and all its inner exceptions) as a readable string. Okay to pass in an exception with no inner 
 		///exception.</summary>
 		///<param name="depth">The recursive depth of the current method call.</param>

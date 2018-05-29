@@ -56,10 +56,7 @@ namespace OpenDental {
 				catch(Exception ex) {
 					ex.DoNothing();
 				}
-				string errorText="Unhandled exception"+(string.IsNullOrEmpty(threadName) ?"":" from "+threadName)+":  "
-					+e.Message+"\r\n"+e.GetType().ToString()+"\r\n"+e.StackTrace;
-				errorText+=MiscUtils.InnerExceptionToString(e);
-				MsgBoxCopyPaste formException=new MsgBoxCopyPaste(errorText);
+				MsgBoxCopyPaste formException=new MsgBoxCopyPaste(MiscUtils.GetExceptionText(e));
 				formException.SetButOKText("Quit");
 				formException.ShowDialog();
 				formOD.ProcessKillCommand();

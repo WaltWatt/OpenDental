@@ -67,7 +67,7 @@ namespace OpenDentBusiness {
 		///Only use this constructor from an Open Dental proper instance, never call from other entities (e.g. WebServiceMainHQ).</summary>
 		public BugSubmission(Exception e,string threadName="",long patNum=-1,string moduleName="") : this() {
 			ExceptionMessageText=e.Message;
-			ExceptionStackTrace=e.StackTrace;
+			ExceptionStackTrace=MiscUtils.GetExceptionText(e);
 			DbInfoJson=GetDbInfoJSON(patNum,moduleName);
 			//The following lines will fail if we do not have the office's database context in DataConnection.
 			RegKey=Info.DictPrefValues[PrefName.RegistrationKey];
