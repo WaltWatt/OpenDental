@@ -3308,13 +3308,15 @@ namespace OpenDentBusiness {
 		}
 
 		///<summary>Sets either the AptNum or Planned AptNum for given procs.
-		///Uses listSelectedRows and listProcNumsAttachedStart to determin if procs are attaching to or detaching from AptCur.
-		///When moving proc from another appt, other appts description is also updated.
-		///listProcCodes can be null.</summary>
+		///Uses listSelectedRows and listProcNumsAttachedStart to determine if procs are attaching to or detaching from AptCur.
+		///When moving proc from another appt, other appt descriptions are updated.</summary>
 		public static void ProcsAptNumHelper(List<Procedure> listProcs,Appointment AptCur,List<Appointment> listAppointments,
 			List<int> listSelectedRows,List<long> listProcNumsAttachedStart,bool isAptPlanned=false,LogSources logSource=LogSources.None)
 		{
 			//No need to check RemotingRole; no call to db.
+			if(listProcs==null || AptCur==null || listAppointments==null || listSelectedRows==null || listProcNumsAttachedStart==null) {
+				return;
+			}
 			for(int i=0;i<listProcs.Count;i++) {
 				Procedure proc=listProcs[i];
 				Procedure procOld=proc.Copy();
@@ -3331,9 +3333,10 @@ namespace OpenDentBusiness {
 				else if(isDetachedStart && isAttaching && isAptPlanned) {//Attaching to this planned appointment.
 					if(proc.PlannedAptNum!=0 && proc.PlannedAptNum != AptCur.AptNum) {//Currently attached to another planned appointment.
 						Appointment apptOldPlanned=listAppointments.FirstOrDefault(x => x.AptNum==proc.PlannedAptNum && x.AptStatus==ApptStatus.Planned);
+						string apptOldPlannedDateStr=(apptOldPlanned==null ? "[INVALID #"+proc.PlannedAptNum+"]" : apptOldPlanned.AptDateTime.ToShortDateString());
 						SecurityLogs.MakeLogEntry(Permissions.AppointmentEdit,AptCur.PatNum,Lans.g("AppointmentEdit","Procedure")+" "
 							+ProcedureCodes.GetProcCode(proc.CodeNum).AbbrDesc+" "+Lans.g("AppointmentEdit","moved from planned appointment created on")+" "
-							+apptOldPlanned.AptDateTime.ToShortDateString()+" "+Lans.g("AppointmentEdit","to planned appointment created on")+" "
+							+apptOldPlannedDateStr+" "+Lans.g("AppointmentEdit","to planned appointment created on")+" "
 							+AptCur.AptDateTime.ToShortDateString(),logSource);
 						UpdateOtherApptDesc(proc,AptCur,isAptPlanned,listAppointments,listProcs);
 					}
@@ -3342,8 +3345,9 @@ namespace OpenDentBusiness {
 				else if(isDetachedStart && isAttaching && !isAptPlanned) {//Attaching to this appointment.
 					if(proc.AptNum!=0 && proc.AptNum != AptCur.AptNum) {//Currently attached to another appointment.
 						Appointment apptOld=listAppointments.FirstOrDefault(x => x.AptNum==proc.AptNum);
+						string apptOldDateStr=(apptOld==null ? "[INVALID #"+proc.AptNum+"]" : apptOld.AptDateTime.ToShortDateString());
 						SecurityLogs.MakeLogEntry(Permissions.AppointmentEdit,AptCur.PatNum,Lans.g("AppointmentEdit","Procedure")+" "
-							+ProcedureCodes.GetProcCode(proc.CodeNum).AbbrDesc+" "+Lans.g("AppointmentEdit","moved from appointment on")+" "+apptOld.AptDateTime
+							+ProcedureCodes.GetProcCode(proc.CodeNum).AbbrDesc+" "+Lans.g("AppointmentEdit","moved from appointment on")+" "+apptOldDateStr
 							+" "+Lans.g("AppointmentEdit","to appointment on")+" "+AptCur.AptDateTime,logSource);
 						UpdateOtherApptDesc(proc,AptCur,isAptPlanned,listAppointments,listProcs);
 					}
