@@ -1304,6 +1304,7 @@ namespace OpenDental{
 			Family fam;
 			Patient pat;
 			DataSet dataSet;
+			string selectedDir=null;
 			bool isComputeAging=true;//will be false if AgingIsEnterprise and aging was calculated for today already (or successfully runs for today)
 			if(PrefC.GetBool(PrefName.AgingIsEnterprise)) {
 				if(PrefC.GetDate(PrefName.DateLastAging).Date!=MiscData.GetNowDateTime().Date && !RunAgingEnterprise()) {//run aging for all patients
@@ -1465,16 +1466,31 @@ namespace OpenDental{
 						if(Directory.Exists(filePath)) {
 							filePath=ODFileUtils.CombinePaths(filePath,"Statements.xml");
 						}
+						else if(!String.IsNullOrEmpty(selectedDir)) {//Default Output path not set, however, User already chose a filepath to output to on the previous pass.
+							filePath=ODFileUtils.CombinePaths(selectedDir,"Statements.xml");
+						}
+						else if(selectedDir=="") {//User canceled when prompted for output path, since preference path is invalid.  Skip all batches.
+							sentElect-=listElectStmtNums.Count;
+							continue;//Go on to next batch
+						}
 						else {
 							//Only bring up save dialog if path is invalid
-							//MessageBox.Show(this,Lan.g(this,"Billing Defaults Output Path value is invalid.\r\nPlease specify the path to save the file to."));
 							SaveFileDialog dlg = new SaveFileDialog();
 							dlg.FileName="Statements.xml";
 							dlg.CheckPathExists=true;
 							if(dlg.ShowDialog()!=DialogResult.OK) {
 								sentElect-=listElectStmtNums.Count;
+								selectedDir="";//To remember that the user canceled the first time through.  User only needs to cancel once to cancel each batch.
+								continue;//Go on to next batch
 							}
 							filePath=dlg.FileName;
+							selectedDir=Path.GetDirectoryName(filePath);
+						}
+						if(PrefC.HasClinicsEnabled) {
+							//Key exists, so GetClinic should never return null.
+							string clinicAbbr=Clinics.GetClinic(entryForClinic.Key).Abbr;//Abbr is required by our interface, so no need to check if blank.
+							string fileName=Path.GetFileNameWithoutExtension(filePath)+'-'+clinicAbbr+Path.GetExtension(filePath);
+							filePath=ODFileUtils.CombinePaths(Path.GetDirectoryName(filePath),fileName);
 						}
 						File.WriteAllText(filePath,strBuildElect.ToString());
 						for(int i = 0;i<listElectStmtNums.Count;i++) {
