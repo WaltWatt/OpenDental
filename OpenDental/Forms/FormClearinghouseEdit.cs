@@ -1147,7 +1147,7 @@ namespace OpenDental{
 				butDelete.Enabled=true;
 			}
 			FillListBoxEraBehavior();
-			if(ClearinghouseCur.CommBridge.In(EclaimsCommBridge.EDS,EclaimsCommBridge.Claimstream,EclaimsCommBridge.ITRANS)) {
+			if(ClearinghouseCur.CommBridge.In(EclaimsCommBridge.ClaimConnect,EclaimsCommBridge.EDS,EclaimsCommBridge.Claimstream,EclaimsCommBridge.ITRANS)) {
 				listBoxEraBehavior.Enabled=true;
 				checkIsClaimExportAllowed.Enabled=true;
 				checkIsClaimExportAllowed.Checked=ClearinghouseCur.IsClaimExportAllowed;
@@ -1497,7 +1497,7 @@ namespace OpenDental{
 		private void comboCommBridge_SelectionChangeCommitted(object sender,EventArgs e) {
 			FillListBoxEraBehavior();//Update ERA/EOB list box, specifically for if we print ERA vs EOB.
 			bool hasEclaimsEnabled=comboCommBridge.SelectedTag<EclaimsCommBridge>().In(
-				EclaimsCommBridge.EDS,EclaimsCommBridge.Claimstream,EclaimsCommBridge.ITRANS);
+				EclaimsCommBridge.ClaimConnect,EclaimsCommBridge.EDS,EclaimsCommBridge.Claimstream,EclaimsCommBridge.ITRANS);
 			listBoxEraBehavior.Enabled=hasEclaimsEnabled;
 			checkIsClaimExportAllowed.Enabled=hasEclaimsEnabled;
 		}

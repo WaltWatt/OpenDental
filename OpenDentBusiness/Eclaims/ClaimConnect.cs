@@ -328,6 +328,13 @@ namespace OpenDentBusiness.Eclaims {
 		}
 
 		public static bool Retrieve(Clearinghouse clearinghouse,IODProgressExtended progress=null) {
+			ErrorMessage="";
+			if(clearinghouse.IsEraDownloadAllowed==EraBehaviors.None//Do not download.
+				|| clearinghouse.IsEraDownloadAllowed==EraBehaviors.DownloadAndReceive)//Not valid for US, should never happen, but just in case.
+			{
+				ErrorMessage="Clearinghouse is not setup to retrieve ERAs.";
+				return false;
+			}
 			progress=progress??new ODProgressExtendedNull();
 			progress.UpdateProgress(Lans.g(progress.LanThis,"Contacting web server and downloading reports"),"reports","17%",17);
 			if(progress.IsPauseOrCancel()) {
@@ -352,7 +359,6 @@ namespace OpenDentBusiness.Eclaims {
 #else
 			service.Url="https://webservices.dentalxchange.com/dws/DwsService?wsdl";
 #endif
-			ErrorMessage="";
 			List<string> listEraStrings=new List<string>();
 			try {
 				Dentalxchange2016.UnProcessedEraResponse response;
