@@ -196,7 +196,7 @@ namespace OpenDental.UI {
 
 		///<summary>Sets the specified buttonIndex to a color and attaches the signal responsible.  This is also used for the manual ack to increase responsiveness.  buttonIndex is 0-based.</summary>
 		public void SetButtonActive(int buttonIndex,Color color,SigMessage activeSigMessage) {
-			if(buttonIndex>=sigButStates.Length){
+			if(!IsValidSigButState(buttonIndex)) {
 				return;//no button to light up.
 			}
 			sigButStates[buttonIndex].CurrentColor=color;
@@ -225,40 +225,40 @@ namespace OpenDental.UI {
 			return -1;
 		}
 
+		private bool IsValidSigButState(int index) {
+			if(index<0 || sigButStates==null) {
+				return false;
+			}
+			//Either 0 or a positive index was passed in.  Make sure that index is less than the length of our array.
+			return (index < sigButStates.Length);
+		}
+
 		///<summary>This should only happen when mouse enters. Only causes a repaint if needed.</summary>
 		protected override void OnMouseMove(System.Windows.Forms.MouseEventArgs e) {
 			base.OnMouseMove(e);
 			if(mouseIsDown) {
-				//regardless of whether a button is hot, nothing changes until the mouse is released.
-				//a hot(pressed) button remains so, and no buttons are hot when hover
-				//,so do nothing
+				//Regardless of whether a button is hot, nothing changes until the mouse is released.
+				//A hot(pressed) button remains so, and no buttons are hot when hover, so do nothing.
+				return;
 			}
-			else {//mouse is not down
-				int button=HitTest(e.X,e.Y);//this is the button the mouse is over at the moment.
-				//first handle the old hotbutton
-				if(hotButton!=-1) {//if there is a previous hotbutton
-					if(hotButton!=button) {//if we have moved to hover over a new button, or to hover over nothing
-						sigButStates[hotButton].State=ToolBarButtonState.Normal;
-						Invalidate();//hotButton.Bounds);
-					}
+			//Mouse is not down
+			int button=HitTest(e.X,e.Y);//this is the button the mouse is over at the moment.
+			//first handle the old hotbutton
+			if(hotButton!=-1) {//if there is a previous hotbutton
+				if(hotButton!=button && IsValidSigButState(hotButton)) {//if we have moved to hover over a new button, or to hover over nothing
+					sigButStates[hotButton].State=ToolBarButtonState.Normal;
+					Invalidate();
 				}
-				//then, the new button
-				if(button!=-1) {
-					if(hotButton!=button) {//if we have moved to hover over a new button
-						//toolTip1.SetToolTip(this,button.ToolTipText);
-						sigButStates[button].State=ToolBarButtonState.Hover;
-						Invalidate();//button.Bounds);
-					}
-					else {//Still hovering over the same button as before
-						//do nothing.
-					}
-				}
-				else {
-					//toolTip1.SetToolTip(this,"");
-				}
-				hotButton=button;//this might be -1 if hovering over nothing.
-				//if there was no previous hotbutton, and there is not current hotbutton, then do nothing.
 			}
+			//then, the new button
+			if(button!=-1) {
+				if(hotButton!=button && IsValidSigButState(button)) {//if we have moved to hover over a new button
+					sigButStates[button].State=ToolBarButtonState.Hover;
+					Invalidate();
+				}
+			}
+			hotButton=button;//this might be -1 if hovering over nothing.
+			//if there was no previous hotbutton, and there is not current hotbutton, then do nothing.
 		}
 
 		///<summary>Returns the 0-based button index that contains these coordinates, or -1 if no hit.</summary>
@@ -271,24 +271,22 @@ namespace OpenDental.UI {
 			if(retVal>sigButStates.Length-1) {//button not visible
 				return -1;
 			}
-			return retVal;
+			return (retVal < 0 ? -1 : retVal);//The only valid negative number is -1 regardless of the math above.
 		}
 
 		///<summary>Resets button appearance. This will also deactivate the button if it has been pressed but not released. A pressed button will still be hot, however, so that if the mouse enters again, it will behave properly.  Repaints only if necessary.</summary>
 		protected override void OnMouseLeave(System.EventArgs e) {
 			base.OnMouseLeave(e);
 			if(mouseIsDown) {//mouse is down
-				//if a button is hot, it will remain so, even if leave.  As long as mouse is down.
-				//,so do nothing.
-				//Also, if a button is not hot, nothing will happen when leave
-				//,so do nothing.
+				//If a button is hot, it will remain so, even if leave.  As long as mouse is down, so do nothing.
+				//Also, if a button is not hot, nothing will happen when leave, so do nothing.
+				return;
 			}
-			else {//mouse is not down
-				if(hotButton!=-1) {//if there was a previous hotButton
-					sigButStates[hotButton].State=ToolBarButtonState.Normal;
-					Invalidate();//hotButton.Bounds);
-					hotButton=-1;
-				}
+			//Mouse is not down
+			if(IsValidSigButState(hotButton)) {//if there was a previous hotButton
+				sigButStates[hotButton].State=ToolBarButtonState.Normal;
+				Invalidate();
+				hotButton=-1;
 			}
 		}
 
@@ -304,21 +302,12 @@ namespace OpenDental.UI {
 			}
 			mouseIsDown=true;
 			int button=HitTest(e.X,e.Y);
-			if(button==-1) {//if there is no current hover button
+			if(!IsValidSigButState(button)) {//if there is no current hover button
 				return;//don't set a hotButton
 			}
-			//if(!button.Enabled){
-			//	return;//disabled buttons don't respond
-			//}
 			hotButton=button;
-			//if(button.Style==ODToolBarButtonStyle.DropDownButton
-			//	&& HitTestDrop(button,e.X,e.Y)) {
-			//	button.State=ToolBarButtonState.DropPressed;
-			//}
-			//else {
-				sigButStates[button].State=ToolBarButtonState.Pressed;
-			//}
-			Invalidate();//button.Bounds);
+			sigButStates[button].State=ToolBarButtonState.Pressed;
+			Invalidate();
 		}
 
 		///<summary>Change button to hover state and repaint if needed.</summary>
@@ -329,27 +318,26 @@ namespace OpenDental.UI {
 			}
 			mouseIsDown=false;
 			int button=HitTest(e.X,e.Y);
-			if(hotButton==-1) {//if there was not a previous hotButton
-				//do nothing
+			if(!IsValidSigButState(hotButton)) {//if there was not a previous hotButton
+				return;
 			}
-			else {//there was a hotButton
-				sigButStates[hotButton].State=ToolBarButtonState.Normal;
-				//but can't set it null yet, because still need it for testing
-				Invalidate();//hotButton.Bounds);//invalidate the old button
-				//CLICK: 
-				if(hotButton==button) {//if mouse was released over the same button as it was depressed
-					OnButtonClicked(button,sigButStates[button].ButDef,sigButStates[button].ActiveSignal);
-					return;//the button will not revert back to hover
-				}//end of click section
-				else {//there was a hot button, but it did not turn into a click
-					hotButton=-1;
-				}
+			//There was a previous hotButton
+			sigButStates[hotButton].State=ToolBarButtonState.Normal;
+			//But can't set it null yet, because still need it for testing
+			Invalidate();
+			//CLICK: 
+			if(hotButton==button && IsValidSigButState(button)) {//if mouse was released over the same button as it was depressed
+				OnButtonClicked(button,sigButStates[button].ButDef,sigButStates[button].ActiveSignal);
+				return;//the button will not revert back to hover
+			}//end of click section
+			else {//there was a hot button, but it did not turn into a click
+				hotButton=-1;
 			}
-			if(button!=-1) {//no click, and now there is a hover button, not the same as original button.
+			if(IsValidSigButState(button)) {//no click, and now there is a hover button, not the same as original button.
 				//this section could easily be deleted, since all the user has to do is move the mouse slightly.
 				sigButStates[button].State=ToolBarButtonState.Hover;
 				hotButton=button;//set the current hover button to be the new hotbutton
-				Invalidate();//button.Bounds);
+				Invalidate();
 			}
 		}
 
@@ -362,7 +350,7 @@ namespace OpenDental.UI {
 
 		protected void menuItemKick_Click(object sender,EventArgs e) {
 			int button=HitTest(_mouseCoords.X,_mouseCoords.Y);//idx of button
-			if(button==-1) {//if there is no current hover button
+			if(!IsValidSigButState(button)) {//if there is no current hover button
 				return;
 			}
 			string confRoom=new string(Array.FindAll(sigButStates[button].Text.ToCharArray(),(x => char.IsDigit(x))));
