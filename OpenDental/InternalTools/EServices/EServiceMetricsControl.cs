@@ -6,6 +6,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using CodeBase;
 
 namespace OpenDental {
 	public partial class EServiceMetricsControl:UserControl {
@@ -102,16 +103,19 @@ namespace OpenDental {
 		}
 
 		private void panelAlertColor_Paint(object sender,PaintEventArgs e) {
-			e.Graphics.Clear(this.BackColor);
-			Rectangle rectDraw=Rectangle.FromLTRB(e.ClipRectangle.Left,e.ClipRectangle.Top,e.ClipRectangle.Right,e.ClipRectangle.Bottom);
-			rectDraw.Inflate(-2,-2);
-			using(Pen pen=new Pen(this.ForeColor,4)) {
-				e.Graphics.DrawEllipse(pen,rectDraw);
-			}
-			rectDraw.Inflate(-1,-1);
-			using(Brush brush=new SolidBrush(panelAlertColor.BackColor)) {
-				e.Graphics.FillEllipse(brush,rectDraw);
-			}
+			//A generic GDI+ exception can happen within this paint method (see job #7657) and this isn't important enough to crash the whole program.
+			ODException.SwallowAnyException(() => {
+				e.Graphics.Clear(this.BackColor);
+				Rectangle rectDraw=Rectangle.FromLTRB(e.ClipRectangle.Left,e.ClipRectangle.Top,e.ClipRectangle.Right,e.ClipRectangle.Bottom);
+				rectDraw.Inflate(-2,-2);
+				using(Pen pen=new Pen(this.ForeColor,4)) {
+					e.Graphics.DrawEllipse(pen,rectDraw);
+				}
+				rectDraw.Inflate(-1,-1);
+				using(Brush brush=new SolidBrush(panelAlertColor.BackColor)) {
+					e.Graphics.FillEllipse(brush,rectDraw);
+				}
+			});
 		}
 
 		private void labelAccountBalance_DoubleClick(object sender,EventArgs e) {
