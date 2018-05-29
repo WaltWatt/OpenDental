@@ -251,12 +251,14 @@ namespace OpenDental {
 						Appointment aptCur=Appointments.GetOneApt(row.AptNum);
 						if(aptCur.AptDateTime.Year<1880) {//if the date was not updated since put on the pinboard
 							Appointments.Delete(aptCur.AptNum,true);
-							string logText=Lan.g(this,"Deleted from pinboard while closing Open Dental")+": ";
-							if(aptCur.AptDateTime.Year>1880) {
-								logText+=aptCur.AptDateTime.ToString()+", ";
+							if(Security.CurUser!=null) {//Make a security log if we still have a valid user logged in.  E.g. clicking Log Off invalidates the user.
+								string logText=Lan.g(this,"Deleted from pinboard while closing Open Dental")+": ";
+								if(aptCur.AptDateTime.Year>1880) {
+									logText+=aptCur.AptDateTime.ToString()+", ";
+								}
+								logText+=aptCur.ProcDescript;
+								SecurityLogs.MakeLogEntry(Permissions.AppointmentEdit,aptCur.PatNum,logText);
 							}
-							logText+=aptCur.ProcDescript;
-							SecurityLogs.MakeLogEntry(Permissions.AppointmentEdit,aptCur.PatNum,logText);
 						}
 					}
 				}
