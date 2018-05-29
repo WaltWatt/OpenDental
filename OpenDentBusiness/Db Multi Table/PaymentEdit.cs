@@ -902,12 +902,11 @@ namespace OpenDentBusiness {
 				split.PatNum=autoSplitData.Payment.PatNum;
 				if(PrefC.IsODHQ) {
 					split.ProvNum=7;//Jordan's ProvNum
-					split.UnearnedType=0;
 				}
 				else { 
 					split.ProvNum=0;
-					split.UnearnedType=PrefC.GetLong(PrefName.PrepaymentUnearnedType);//Use default unallocated type
 				}
+				split.UnearnedType=PrefC.GetLong(PrefName.PrepaymentUnearnedType);//Use default unallocated type
 				if(PrefC.HasClinicsEnabled) {
 					split.ClinicNum=autoSplitData.Payment.ClinicNum;
 				}
@@ -922,12 +921,11 @@ namespace OpenDentBusiness {
 				split.PatNum=autoSplitData.Payment.PatNum;
 				if(PrefC.IsODHQ) {
 					split.ProvNum=7;//Jordan's ProvNum
-					split.UnearnedType=0;
 				}
 				else { 
 					split.ProvNum=0;
-					split.UnearnedType=PrefC.GetLong(PrefName.PrepaymentUnearnedType);//Use default unallocated type
 				}
+				split.UnearnedType=PrefC.GetLong(PrefName.PrepaymentUnearnedType);//Use default unallocated type
 				if(PrefC.HasClinicsEnabled) {
 					split.ClinicNum=autoSplitData.Payment.ClinicNum;
 				}
