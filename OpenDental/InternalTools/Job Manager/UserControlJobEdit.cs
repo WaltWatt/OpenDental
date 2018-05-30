@@ -935,7 +935,8 @@ namespace OpenDental.InternalTools.Job_Manager {
 						if(JobPermissions.IsAuthorized(JobPerm.Approval,true) || JobPermissions.IsAuthorized(JobPerm.Writeup,true) || _isOverride) {
 							actionMenu.MenuItems.Add(new MenuItem((_jobCur.UserNumExpert==0 ? "A" : "Rea")+"ssign Expert",actionMenu_AssignExpertClick) { Enabled=true });//x
 						}
-						perm=JobPermissions.IsAuthorized(JobPerm.Writeup,true) && (_jobCur.UserNumExpert==0 || _jobCur.UserNumExpert==Security.CurUser.UserNum);
+						perm=JobPermissions.IsAuthorized(JobPerm.Approval,true) 
+							|| (JobPermissions.IsAuthorized(JobPerm.Writeup,true) && (_jobCur.UserNumExpert==0 || _jobCur.UserNumExpert==Security.CurUser.UserNum));
 						actionMenu.MenuItems.Add(new MenuItem("Send for Approval",actionMenu_RequestJobApprovalClick) { Enabled=perm });//x
 						if(_jobCur.Category.In(JobCategory.Bug,JobCategory.Conversion)) {
 							actionMenu.MenuItems.Add(new MenuItem("Send to In Development",actionMenu_SendInDevelopmentClick) { Enabled=perm });//x

@@ -27,7 +27,8 @@ namespace OpenDental {
 		private bool _IsSearchReady = false;
 		private List<Userod> _listUsers;
 
-		public FormJobSearch() {
+		public FormJobSearch(List<Job> listJobsAll=null) {
+			_listJobsAll=listJobsAll;
 			InitializeComponent();
 		}
 
@@ -54,12 +55,10 @@ namespace OpenDental {
 			_listJobCategory.ForEach(x => listBoxCategory.Items.Add(x.ToString()));
 			ODThread thread=new ODThread((o) => {
 				//We can reduce these calls to DB by passing in more data from calling class. if available.
-				_listJobsAll=Jobs.GetAll();
-				Jobs.FillInMemoryLists(_listJobsAll);
-				_listTasksAll=Tasks.GetMany(_listJobsAll.SelectMany(x=>x.ListJobLinks).Where(x=>x.LinkType==JobLinkType.Task).Select(x=>x.FKey).Distinct().ToList());
-				_listTaskNotesAll=TaskNotes.GetForTasks(_listTasksAll.Select(x => x.TaskNum).ToList());
-				_listPatientAll=Patients.GetMultPats(_listJobsAll.SelectMany(x => x.ListJobQuotes).Select(x => x.PatNum).Distinct().ToList()).ToList();
-				_listPatientAll.AddRange(Patients.GetMultPats(_listTasksAll.FindAll(x=>x.ObjectType==TaskObjectType.Patient).Select(x=>x.KeyNum).ToList()));
+				if(_listJobsAll==null) {
+					_listJobsAll=Jobs.GetAll();
+					Jobs.FillInMemoryLists(_listJobsAll);
+				}
 				try {
 					_listFeatureRequestsAll=FeatureRequests.GetAll();
 				}
@@ -112,8 +111,6 @@ namespace OpenDental {
 			gridMain.Columns.Add(new ODGridColumn("Expert",75));
 			gridMain.Columns.Add(new ODGridColumn("Engineer",75));
 			gridMain.Columns.Add(new ODGridColumn("Job\r\nMatch",45) { TextAlign=HorizontalAlignment.Center });
-			gridMain.Columns.Add(new ODGridColumn("Task\r\nMatch",45) { TextAlign=HorizontalAlignment.Center });
-			gridMain.Columns.Add(new ODGridColumn("Cust.\r\nMatch",45) { TextAlign=HorizontalAlignment.Center });
 			gridMain.Columns.Add(new ODGridColumn("Bug\r\nMatch",45) { TextAlign=HorizontalAlignment.Center });
 			gridMain.Columns.Add(new ODGridColumn("Feature\r\nRequest\r\nMatch",45) { TextAlign=HorizontalAlignment.Center });
 			gridMain.Rows.Clear();
@@ -142,44 +139,23 @@ namespace OpenDental {
 					continue;
 				}
 				bool isJobMatch = false;
-				bool isTaskMatch = false;
-				bool isCustomerMatch = false;
 				bool isBugMatch = false;
 				bool isFeatureReqMatch = false;
 				if(searchTokens.Length>0) {
 					bool addRow = false;
-					List<Task> listTasks = jobCur.ListJobLinks.FindAll(x => x.LinkType==JobLinkType.Task).Select(x => _listTasksAll.FirstOrDefault(y => x.FKey==y.TaskNum)).Where(x => x!=null).ToList();
-					List<TaskNote> listTaskNotes = listTasks.Select(x => _listTaskNotesAll.FirstOrDefault(y => x.TaskNum==y.TaskNum)).Where(x => x!=null).ToList();
-					List<Patient> listCustomers = Patients.GetMultPats(jobCur.ListJobQuotes.Select(x => x.PatNum).Union(listTasks.FindAll(x => x.ObjectType==TaskObjectType.Patient).Select(x => x.KeyNum)).Distinct().ToList()).ToList();
 					List<Bug> listBugs = jobCur.ListJobLinks.FindAll(x => x.LinkType==JobLinkType.Bug).Select(x => _listBugsAll.FirstOrDefault(y => x.FKey==y.BugId)).Where(x => x!=null).ToList();
 					List<FeatureRequest> listFeatures = jobCur.ListJobLinks.FindAll(x => x.LinkType==JobLinkType.Request).Select(x => _listFeatureRequestsAll.FirstOrDefault(y => x.FKey==y.FeatReqNum)).Where(x => x!=null).ToList();
 					foreach(string token in searchTokens.Distinct()) {
 						bool isFound = false;
 						//JOB MATCHES
-						if(jobCur.Title.ToLower().Contains(token) || jobCur.Implementation.ToLower().Contains(token) || jobCur.JobNum.ToString().Contains(token)) {
+						if(jobCur.Title.ToLower().Contains(token) 
+							|| jobCur.Implementation.ToLower().Contains(token)
+							|| jobCur.Requirements.ToLower().Contains(token) 
+							|| jobCur.Documentation.ToLower().Contains(token)
+							|| jobCur.JobNum.ToString().Contains(token)) 
+						{
 							isFound=true;
 							isJobMatch=true;
-						}
-						//List of tasks is also used to find customer matches.
-						//TASK MATCHES
-						if(!isFound || !isTaskMatch) {
-							if(listTasks.Any(x => x.Descript.ToLower().Contains(token))) {
-								isFound=true;
-								isTaskMatch=true;
-							}
-							if(!isFound || !isTaskMatch) {//only look through notes if we have not matched
-								if(listTaskNotes.Any(x => x.Note.ToLower().Contains(token))) {
-									isFound=true;
-									isTaskMatch=true;
-								}
-							}
-						}
-						//CUSTOMER MATCHES
-						if(!isFound || !isCustomerMatch) {
-							if(listCustomers.Any(x => x.GetNameLF().ToLower().Contains(token))) {
-								isFound=true;
-								isCustomerMatch=true;
-							}
 						}
 						//BUG MATCHES
 						if(!isFound || !isBugMatch) {
@@ -214,8 +190,6 @@ namespace OpenDental {
 				row.Cells.Add(Userods.GetName(jobCur.UserNumExpert));
 				row.Cells.Add(Userods.GetName(jobCur.UserNumEngineer));
 				row.Cells.Add(isJobMatch ? "X" : "");
-				row.Cells.Add(isTaskMatch ? "X" : "");
-				row.Cells.Add(isCustomerMatch ? "X" : "");
 				row.Cells.Add(isBugMatch ? "X" : "");
 				row.Cells.Add(new ODGridCell(isFeatureReqMatch ? "X" : "") { CellColor=_listFeatureRequestsAll.Count==0 ? Control.DefaultBackColor : Color.Empty });
 				row.Tag=jobCur;

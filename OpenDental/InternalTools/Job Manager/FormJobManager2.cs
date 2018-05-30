@@ -193,6 +193,7 @@ namespace OpenDental {
 					FilterAndFill();
 					FillGridActions();
 					FillGridDocumentation();
+					FillGridSubscribed();
 					FillGridNotify();
 					FillExtraGrids();
 					FillGridQueries();
@@ -512,6 +513,90 @@ namespace OpenDental {
 				for(int i = 0;i<gridNotify.Rows.Count;i++) {
 					if((gridNotify.Rows[i].Tag is Job) && ((Job)gridNotify.Rows[i].Tag).JobNum==selectedJobNum) {
 						gridNotify.SetSelected(i,true);
+						break;
+					}
+				}
+			}
+		}
+
+		private void FillGridSubscribed() {
+			if(!tabControlNav.TabPages.Contains(tabSubscribed)) {
+				return;
+			}
+			long selectedJobNum = 0;
+			int jobCount = 0;
+			//sort dictionary so actions will appear in same order
+			List<int> listCategoriesSorted = new List<int> {
+				(int)JobCategory.Bug,
+				(int)JobCategory.Enhancement,
+				(int)JobCategory.ProgramBridge,
+				(int)JobCategory.Feature,
+				(int)JobCategory.Query,
+				(int)JobCategory.InternalRequest,
+				(int)JobCategory.HqRequest,
+				(int)JobCategory.Conversion,
+				(int)JobCategory.Research,
+			};
+			//Sort jobs into category dictionary
+			Dictionary<JobCategory,List<Job>> dictCategories=_listJobsAll.GroupBy(x => x.Category).ToDictionary(y => y.Key,y => y.ToList());
+			Userod userFilter = Security.CurUser;
+			if(comboUser.SelectedIndex==1) {
+				userFilter=new Userod() { UserName="Unassigned",UserNum=0 };
+			}
+			else if(comboUser.SelectedIndex>1) {
+				userFilter=_listUsers[comboUser.SelectedIndex-2];
+			}
+			if(userControlJobEdit.GetJob()!=null) {
+				selectedJobNum=userControlJobEdit.GetJob().JobNum;
+			}
+			gridSubscribedJobs.BeginUpdate();
+			gridSubscribedJobs.Columns.Clear();
+			gridSubscribedJobs.Columns.Add(new ODGridColumn("Priority",50) { TextAlign=HorizontalAlignment.Center });
+			gridSubscribedJobs.Columns.Add(new ODGridColumn("Expert",50) { TextAlign=HorizontalAlignment.Center });
+			gridSubscribedJobs.Columns.Add(new ODGridColumn("Engineer",50) { TextAlign=HorizontalAlignment.Center });
+			gridSubscribedJobs.Columns.Add(new ODGridColumn("Phase",75) { TextAlign=HorizontalAlignment.Center });
+			gridSubscribedJobs.Columns.Add(new ODGridColumn("",0));
+			gridSubscribedJobs.Rows.Clear();
+			dictCategories=dictCategories.OrderBy(x => listCategoriesSorted.IndexOf((int)x.Key)).ToDictionary(x => x.Key,x => x.Value);
+			foreach(KeyValuePair<JobCategory,List<Job>> kvp in dictCategories) {
+				List<Job> listJobsSorted = kvp.Value.OrderBy(x => _listJobPriorities.FirstOrDefault(y => y.DefNum==x.Priority).ItemOrder).ToList();
+				if(!checkSubscribedIncludeCancelled.Checked) {
+					listJobsSorted.RemoveAll(x => x.PhaseCur==JobPhase.Cancelled);
+				}
+				if(!checkSubscribedIncludeComplete.Checked) {
+					listJobsSorted.RemoveAll(x => x.PhaseCur==JobPhase.Complete);
+				}
+				if(!checkSubscribedIncludeOnHold.Checked) {
+					listJobsSorted.RemoveAll(x => x.Priority==_listJobPriorities.FirstOrDefault(y => y.ItemValue.Contains("OnHold")).DefNum);
+				}
+				listJobsSorted.RemoveAll(x => !x.ListJobLinks.Exists(y => y.LinkType==JobLinkType.Subscriber && y.FKey==userFilter.UserNum));
+				if(listJobsSorted.Count==0) {
+					continue;
+				}
+				gridSubscribedJobs.Rows.Add(new ODGridRow("","","","",kvp.Key.ToString()) { ColorBackG=gridSubscribedJobs.HeaderColor,Bold=true });
+				foreach(Job job in listJobsSorted) {
+					Def jobPriority = _listJobPriorities.FirstOrDefault(y => y.DefNum==job.Priority);
+					gridSubscribedJobs.Rows.Add(
+						new ODGridRow(
+							new ODGridCell(jobPriority.ItemName) { CellColor=jobPriority.ItemColor },
+							new ODGridCell(job.UserNumExpert==0?"-":Userods.GetName(job.UserNumExpert)),
+							new ODGridCell(job.UserNumEngineer==0?"-":Userods.GetName(job.UserNumEngineer)),
+							new ODGridCell(job.PhaseCur.ToString()),
+							new ODGridCell(job.ToString()) { CellColor=(job.ToString().ToLower().Contains(textSearch.Text.ToLower())&&!string.IsNullOrWhiteSpace(textSearch.Text) ? Color.LightYellow : Color.Empty) }
+							) {
+							Tag=job
+						}
+					);
+				}
+				jobCount+=listJobsSorted.Count;
+			}
+			gridSubscribedJobs.EndUpdate();
+			tabNeedsEngineer.Text="Needs Engineer ("+jobCount+")";
+			//RESELECT JOB
+			if(selectedJobNum>0) {
+				for(int i = 0;i<gridSubscribedJobs.Rows.Count;i++) {
+					if((gridSubscribedJobs.Rows[i].Tag is Job) && ((Job)gridSubscribedJobs.Rows[i].Tag).JobNum==selectedJobNum) {
+						gridSubscribedJobs.SetSelected(i,true);
 						break;
 					}
 				}
@@ -1312,6 +1397,7 @@ namespace OpenDental {
 			FillGridActions();
 			FillGridQueries();
 			FillGridDocumentation();
+			FillGridSubscribed();
 			FillGridNotify();
 			FillExtraGrids();
 		}
@@ -1329,6 +1415,7 @@ namespace OpenDental {
 			FillGridActions();
 			FillGridQueries();
 			FillGridDocumentation();
+			FillGridSubscribed();
 			FillGridNotify();
 			FillExtraGrids();
 		}
@@ -1406,8 +1493,16 @@ namespace OpenDental {
 			Owner
 		}
 
+		private void textSearchAction_TextChanged(object sender,EventArgs e) {
+			timerSearch.Stop();
+			timerSearch.Start();
+		}
+
 		private void butSearch_Click(object sender,EventArgs e) {
-			FormJobSearch FormJS=new FormJobSearch();
+			if(_listJobsAll.Count==0) {
+				return;
+			}
+			FormJobSearch FormJS=new FormJobSearch(_listJobsAll);
 			FormJS.InitialSearchString=textSearch.Text;
 			//pass in data here to reduce calls to DB.
 			FormJS.ShowDialog();
@@ -1437,18 +1532,21 @@ namespace OpenDental {
 			}
 		}
 
-		private void comboCategorySearch_SelectedIndexChanged(object sender,EventArgs e) {
-			FilterAndFill();
-		}
-
-		private void textSearchAction_TextChanged(object sender,EventArgs e) {
+		private void timerSearch_Tick(object sender,EventArgs e) {
+			timerSearch.Stop();
 			FillGridActions();
 			FillGridQueries();
 			FillGridDocumentation();
+			FillGridSubscribed();
 			FillGridNotify();
 			FillExtraGrids();
 			FilterAndFill();
 		}
+
+		private void comboCategorySearch_SelectedIndexChanged(object sender,EventArgs e) {
+			FilterAndFill();
+		}
+
 
 		private void butMe_Click(object sender,EventArgs e) {
 			comboUser.Tag=Security.CurUser;
@@ -1456,6 +1554,7 @@ namespace OpenDental {
 			FillGridActions();
 			FillGridQueries();
 			FillGridDocumentation();
+			FillGridSubscribed();
 			FillGridNotify();
 			FillExtraGrids();
 		}
@@ -1467,7 +1566,6 @@ namespace OpenDental {
 			}
 			RefreshAndFillThreaded();
 		}
-
 
 		public override void OnProcessSignals(List<Signalod> listSignals) {
 			if(!listSignals.Exists(x => x.IType==InvalidType.Jobs || x.IType==InvalidType.Security || x.IType==InvalidType.Defs)) {
@@ -1531,6 +1629,7 @@ namespace OpenDental {
 					}
 					FillGridActions();
 					FillGridDocumentation();
+					FillGridSubscribed();
 					FillGridNotify();
 					FillExtraGrids();
 					FillGridQueries();
@@ -1606,6 +1705,18 @@ namespace OpenDental {
 
 		private void checkShowQueryCancelled_CheckedChanged(object sender,EventArgs e) {
 			FillGridQueries();
+		}
+
+		private void checkSubscribedIncludeCancelled_CheckedChanged(object sender,EventArgs e) {
+			FillGridSubscribed();
+		}
+
+		private void checkSubscribedIncludeComplete_CheckedChanged(object sender,EventArgs e) {
+			FillGridSubscribed();
+		}
+
+		private void checkSubscribedIncludeOnHold_CheckedChanged(object sender,EventArgs e) {
+			FillGridSubscribed();
 		}
 
 		private void gridQueries_CellClick(object sender,ODGridClickEventArgs e) {
@@ -1759,6 +1870,32 @@ namespace OpenDental {
 			}
 		}
 
+		private void gridSubscribedJobs_CellClick(object sender,ODGridClickEventArgs e) {
+			if(JobUnsavedChangesCheck()) {
+				return;
+			}
+			if(!(gridSubscribedJobs.Rows[e.Row].Tag is Job)) {
+				return;
+			}
+			Job selectedjob = (Job)gridSubscribedJobs.Rows[e.Row].Tag;
+			if(selectedjob.Category==JobCategory.Query) {
+				userControlQueryEdit.Visible=true;
+				userControlJobEdit.Visible=false;
+				userControlQueryEdit.LoadJob(selectedjob,GetJobTree(selectedjob));
+			}
+			else {
+				userControlQueryEdit.Visible=false;
+				userControlJobEdit.Visible=true;
+				userControlJobEdit.LoadJob(selectedjob,GetJobTree(selectedjob));
+			}
+		}
+
+		private void gridSubscribedJobs_CellDoubleClick(object sender,ODGridClickEventArgs e) {
+			if(!(gridSubscribedJobs.Rows[e.Row].Tag is Job)) {
+				return;
+			}
+		}
+
 		private void comboUser_SelectionChangeCommitted(object sender,EventArgs e) {
 			if(comboUser.SelectedIndex==0) {//All
 				comboUser.Tag=new Userod() { UserNum=0 };
@@ -1772,6 +1909,7 @@ namespace OpenDental {
 			FillGridActions();
 			FillGridQueries();
 			FillGridDocumentation();
+			FillGridSubscribed();
 			FillGridNotify();
 			FillExtraGrids();
 			this.Text="Job Manager"+(comboUser.Text=="" ? "" : " - "+comboUser.Text);
@@ -1788,6 +1926,10 @@ namespace OpenDental {
 		}
 
 		private void butReleaseCalc_Click(object sender,EventArgs e) {
+			if(Application.OpenForms.OfType<FormReleaseCalculator>().Count()>0) {
+				Application.OpenForms.OfType<FormReleaseCalculator>().ToList()[0].BringToFront();
+				return;
+			}
 			FormReleaseCalculator FormRC=new FormReleaseCalculator();
 			FormRC.Show();
 		}

@@ -14,7 +14,7 @@ namespace OpenDental {
 		private List<long> _listDefaultEngEmpNums = new List<long>() {15,34,36,64,72,74,88,94,118,121,163,173,179,253,257};
 		private List<Tuple<long,double>> _listTopJobs=new List<Tuple<long,double>>();
 		private double _avgJobHours=9.43;
-		private double _jobTimePercent=0.173;
+		private double _jobTimePercent=0.3;
 		private double _avgBreakHours=0.85;
 
 
