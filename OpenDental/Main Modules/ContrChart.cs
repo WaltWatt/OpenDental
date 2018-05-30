@@ -9461,28 +9461,22 @@ namespace OpenDental {
 			}
 			for(int i=0;i<toothChart.SelectedTeeth.Count;i++) {
 				if(textShiftM.Text!=""){
-					ToothInitials.SetValue(PatCur.PatNum,toothChart.SelectedTeeth[i],
-						ToothInitialType.ShiftM,PIn.Float(textShiftM.Text));
+					ToothInitials.SetValue(PatCur.PatNum,toothChart.SelectedTeeth[i],ToothInitialType.ShiftM,PIn.Float(textShiftM.Text));
 				}
 				if(textShiftO.Text!="") {
-					ToothInitials.SetValue(PatCur.PatNum,toothChart.SelectedTeeth[i],
-						ToothInitialType.ShiftO,PIn.Float(textShiftO.Text));
+					ToothInitials.SetValue(PatCur.PatNum,toothChart.SelectedTeeth[i],ToothInitialType.ShiftO,PIn.Float(textShiftO.Text));
 				}
 				if(textShiftB.Text!="") {
-					ToothInitials.SetValue(PatCur.PatNum,toothChart.SelectedTeeth[i],
-						ToothInitialType.ShiftB,PIn.Float(textShiftB.Text));
+					ToothInitials.SetValue(PatCur.PatNum,toothChart.SelectedTeeth[i],ToothInitialType.ShiftB,PIn.Float(textShiftB.Text));
 				}
 				if(textRotate.Text!="") {
-					ToothInitials.SetValue(PatCur.PatNum,toothChart.SelectedTeeth[i],
-						ToothInitialType.Rotate,PIn.Float(textRotate.Text));
+					ToothInitials.SetValue(PatCur.PatNum,toothChart.SelectedTeeth[i],ToothInitialType.Rotate,PIn.Float(textRotate.Text));
 				}
 				if(textTipM.Text!="") {
-					ToothInitials.SetValue(PatCur.PatNum,toothChart.SelectedTeeth[i],
-						ToothInitialType.TipM,PIn.Float(textTipM.Text));
+					ToothInitials.SetValue(PatCur.PatNum,toothChart.SelectedTeeth[i],ToothInitialType.TipM,PIn.Float(textTipM.Text));
 				}
 				if(textTipB.Text!="") {
-					ToothInitials.SetValue(PatCur.PatNum,toothChart.SelectedTeeth[i],
-						ToothInitialType.TipB,PIn.Float(textTipB.Text));
+					ToothInitials.SetValue(PatCur.PatNum,toothChart.SelectedTeeth[i],ToothInitialType.TipB,PIn.Float(textTipB.Text));
 				}
 			}
 			ToothInitialList=ToothInitials.Refresh(PatCur.PatNum);

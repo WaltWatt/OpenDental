@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Reflection;
+using CodeBase;
 
 namespace OpenDentBusiness{
 	///<summary></summary>
@@ -46,9 +47,6 @@ namespace OpenDentBusiness{
 				init.ToothInitialNum=Meth.GetLong(MethodBase.GetCurrentMethod(),init);
 				return init.ToothInitialNum;
 			}
-			if(PrefC.RandomKeys) {
-				init.ToothInitialNum=ReplicationServers.GetKey("toothinitial","ToothInitialNum");
-			}
 			return Crud.ToothInitialCrud.Insert(init);
 		}
 
@@ -67,7 +65,7 @@ namespace OpenDentBusiness{
 				Meth.GetVoid(MethodBase.GetCurrentMethod(),init);
 				return;
 			}
-			string command= "DELETE FROM toothinitial WHERE ToothInitialNum = '"+init.ToothInitialNum.ToString()+"'";
+			string command= "DELETE FROM toothinitial WHERE ToothInitialNum="+POut.Long(init.ToothInitialNum);
 			Db.NonQ(command);
 		}
 		
@@ -81,17 +79,19 @@ namespace OpenDentBusiness{
 		public static void SetValue(long patNum,string tooth_id,ToothInitialType initialType,float moveAmt) {
 			//No need to check RemotingRole; no call to db.
 			ClearValue(patNum,tooth_id,initialType);
-			ToothInitial ti=new ToothInitial();
-			ti.PatNum=patNum;
-			ti.ToothNum=tooth_id;
-			ti.InitialType=initialType;
-			ti.Movement=moveAmt;
-			ToothInitials.Insert(ti);
+			SetValueQuick(patNum,tooth_id,initialType,moveAmt);
 		}
 
 		///<summary>Same as SetValue, but does not clear any values first.  Only use this if you have first run ClearAllValuesForType.</summary>
 		public static void SetValueQuick(long patNum,string tooth_id,ToothInitialType initialType,float moveAmt) {
 			//No need to check RemotingRole; no call to db.
+			//if initialType is a movement and the movement amt is 0, then don't add a row, just return;
+			if(moveAmt==0
+				&& initialType.In(ToothInitialType.ShiftM,ToothInitialType.ShiftO,ToothInitialType.ShiftB,ToothInitialType.Rotate,ToothInitialType.TipM,
+					ToothInitialType.TipB))
+			{
+				return;
+			}
 			ToothInitial ti=new ToothInitial();
 			ti.PatNum=patNum;
 			ti.ToothNum=tooth_id;
@@ -103,14 +103,10 @@ namespace OpenDentBusiness{
 		///<summary>Only used for incremental tooth movements.  Automatically adds a movement to any existing movement.  Supply a list of all toothInitials for the patient.</summary>
 		public static void AddMovement(List<ToothInitial> initialList,long patNum,string tooth_id,ToothInitialType initialType,float moveAmt) {
 			//No need to check RemotingRole; no call to db.
-			ToothInitial ti=null;
-			for(int i=0;i<initialList.Count;i++){
-				if(initialList[i].ToothNum==tooth_id
-					&& initialList[i].InitialType==initialType)
-				{
-					ti=initialList[i].Copy();
-				}
+			if(moveAmt==0) {
+				return;
 			}
+			ToothInitial ti=initialList.Find(x => x.ToothNum==tooth_id && x.InitialType==initialType)?.Copy();
 			if(ti==null){
 				ti=new ToothInitial();
 				ti.PatNum=patNum;
@@ -121,7 +117,12 @@ namespace OpenDentBusiness{
 				return;
 			}
 			ti.Movement+=moveAmt;
-			ToothInitials.Update(ti);		
+			if(ti.Movement==0) {
+				ClearValue(patNum,tooth_id,initialType);
+			}
+			else {
+				ToothInitials.Update(ti);
+			}
 		}
 
 		///<summary>Sets teeth not missing, or sets to perm, or clears movement values.</summary>
