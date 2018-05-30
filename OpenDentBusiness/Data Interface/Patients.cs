@@ -89,29 +89,35 @@ namespace OpenDentBusiness {
 			return Crud.PatientCrud.SelectMany(command);
 		}
 
+		///<summary>Gets an AgingList for all patients who have the collection billing type (marked with a 'C') and are not deleted/archived or who have a
+		///balance.  Includes the list of tsitranslogs, a value indicating whether or not insurance is pending, and a value indicating whether or not
+		///there are any unsent procs for each pataging.  Only used for the A/R Manager</summary>
 		public static List<PatAging> GetAgingList() {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
 				return Meth.GetObject<List<PatAging>>(MethodBase.GetCurrentMethod());
 			}
 			long collectionBillType=Defs.GetDefsForCategory(DefCat.BillingTypes,true).FirstOrDefault(x => x.ItemValue.ToLower()=="c")?.DefNum??0;
-			string command="SELECT guar.PatNum,guar.Guarantor,guar.Bal_0_30,guar.Bal_31_60,guar.Bal_61_90,guar.BalOver90,guar.BalTotal,guar.InsEst,"
-				+"guar.BalTotal-guar.InsEst AS $pat,guar.PayPlanDue,guar.LName,guar.FName,guar.Preferred,guar.MiddleI,guar.PriProv,guar.BillingType,"
-				+"guar.ClinicNum,guar.Address,guar.City,guar.State,guar.Zip,guar.Birthdate,COALESCE(guarPay.DateLastPay,'0001-01-01') DateLastPay "
-				+"FROM patient guar "
-				+"LEFT JOIN ("
-					+"SELECT p.Guarantor,MAX(ps.DatePay) DateLastPay "
-					+"FROM paysplit ps "
-					+"INNER JOIN patient p ON p.PatNum=ps.PatNum "
-					+"WHERE ps.SplitAmt != 0 "
-					+"GROUP BY p.Guarantor"
-				+") guarPay ON guar.PatNum=guarPay.Guarantor "
-				+"WHERE guar.PatNum=guar.Guarantor "
-				+"AND guar.PatStatus != "+POut.Int((int)PatientStatus.Deleted)+" "
-				+"AND ("
-					+"((guar.PatStatus!="+POut.Int((int)PatientStatus.Archived)+" OR ROUND(guar.BalTotal,3)!=0) "//Hide archived patients with PatBal=0.
-						+"AND (guar.Bal_0_30  > 0.005 OR guar.Bal_31_60 > 0.005 OR guar.Bal_61_90 > 0.005 OR guar.BalOver90 > 0.005)) "
-					+(collectionBillType>0?("OR guar.BillingType = "+POut.Long(collectionBillType)+" "):"")+") "
-				+"ORDER BY guar.Lname,guar.FName";
+			string whereCollBillType=(collectionBillType>0?(@"
+					OR guar.BillingType = "+POut.Long(collectionBillType)):"");
+			string command=@"SELECT guar.PatNum,guar.Guarantor,guar.Bal_0_30,guar.Bal_31_60,guar.Bal_61_90,guar.BalOver90,guar.BalTotal,guar.InsEst,
+				guar.BalTotal-guar.InsEst AS $pat,guar.PayPlanDue,guar.LName,guar.FName,guar.Preferred,guar.MiddleI,guar.PriProv,guar.BillingType,
+				guar.ClinicNum,guar.Address,guar.City,guar.State,guar.Zip,guar.Birthdate,COALESCE(guarPay.DateLastPay,'0001-01-01') DateLastPay
+				FROM patient guar
+				LEFT JOIN (
+					SELECT p.Guarantor,MAX(ps.DatePay) DateLastPay
+					FROM paysplit ps
+					INNER JOIN patient p ON p.PatNum=ps.PatNum
+					WHERE ps.SplitAmt != 0
+					GROUP BY p.Guarantor
+				) guarPay ON guar.PatNum=guarPay.Guarantor
+				WHERE guar.PatNum=guar.Guarantor
+				AND guar.PatStatus != "+POut.Int((int)PatientStatus.Deleted)+@"
+				AND (
+					guar.PatStatus!="+POut.Int((int)PatientStatus.Archived)+@"
+					OR ROUND(guar.BalTotal,3)!=0"
+					+whereCollBillType+@"
+				)
+				ORDER BY guar.Lname,guar.FName";
 			DataTable table=Db.GetTable(command);
 			List<PatAging> agingList=new List<PatAging>();
 			if(table.Rows.Count<1) {

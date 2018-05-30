@@ -632,9 +632,8 @@ namespace OpenDental {
 			}
 			#endregion Get Filter Data
 			#region Apply Filter Data to PatAging List
-			bool balsDontSubtractIns=PrefC.GetBool(PrefName.BalancesDontSubtractIns);
 			retval=_listPatAgingUnsentAll.FindAll(x =>
-				Math.Round(x.BalTotal-(balsDontSubtractIns?0:x.InsEst),3) >= minBalance
+				Math.Round(x.AmountDue,3) >= minBalance
 				&& (dtLastPay.Date>=DateTime.Today.Date || x.DateLastPay.Date<dtLastPay.Date)
 				&& (listBillTypes.Count==0 || listBillTypes.Contains(x.BillingType))
 				&& (listProvNums.Count==0 || listProvNums.Contains(x.PriProv))
@@ -645,7 +644,7 @@ namespace OpenDental {
 				&& ( ((int)accountAge < 4 && x.BalOver90 > 0.005)//if Any, Over30, Over60 or Over90 are selected, check BalOver90
 					|| ((int)accountAge < 3 && x.Bal_61_90 > 0.005)//if Any, Over30 or Over60 are selected, check Bal_61_90
 					|| ((int)accountAge < 2 && x.Bal_31_60 > 0.005)//if Any or Over30 are selected, check Bal_31_60
-					|| ((int)accountAge < 1 && x.Bal_0_30  > 0.005)));//if Any bal is selected, check Bal_0_30
+					|| (int)accountAge < 1 ));//or if Any bal is selected
 			#endregion Apply Filter Data to PatAging List
 			return retval;
 		}
@@ -984,6 +983,28 @@ namespace OpenDental {
 				MessageBox.Show(msgTxt);
 			}
 			#endregion Validate Birthdate and Address
+			#region Validate Balances
+			List<long> listPatNumsNegBal=listPatAging
+				.FindAll(x => !listPatNumsToReselect.Contains(x.PatNum) && Math.Round(x.AmountDue,3) < 0.005)
+				.Select(x => x.PatNum).ToList();
+			if(listPatNumsNegBal.Count>0) {
+				Cursor=Cursors.Default;
+				msgTxt=listPatNumsNegBal.Count+" "+Lan.g(this,"of the selected guarantor(s) have a balance less than or equal to 0.  Are you sure you want "
+					+"to send the account(s) to TSI?")+"\r\n\r\n"
+					+Lan.g(this,"Press Yes to send the account(s) with a balance less than or equal to 0 anyway.")+"\r\n\r\n"
+					+Lan.g(this,"Press No to skip the account(s) with a balance less than or equal to 0 and send the remaining account(s) to TSI.")+"\r\n\r\n"
+					+Lan.g(this,"Press Cancel to cancel sending all accounts.");
+				switch(MessageBox.Show(msgTxt,"",MessageBoxButtons.YesNoCancel)) {
+					case DialogResult.No:
+						listPatNumsToReselect.AddRange(listPatNumsNegBal);
+						break;
+					case DialogResult.Cancel:
+						return;
+					default:
+						break;
+				}
+			}
+			#endregion Validate Balances
 			Cursor=Cursors.WaitCursor;
 			listPatAging.RemoveAll(x => listPatNumsToReselect.Contains(x.PatNum));
 			listPatNumsToReselect.ForEach(x => dictPatNumDateBalBegan.Remove(x));
@@ -1359,9 +1380,8 @@ namespace OpenDental {
 			}
 			#endregion Get Filter Data
 			#region Apply Filter Data to PatAging List
-			bool balsDontSubtractIns=PrefC.GetBool(PrefName.BalancesDontSubtractIns);
 			retval=_listPatAgingSentAll.FindAll(x =>
-				Math.Round(x.BalTotal-(balsDontSubtractIns?0:x.InsEst),3) >= minBalance
+				Math.Round(x.AmountDue,3) >= minBalance
 				&& (dtLastPay.Date>=DateTime.Today.Date || x.DateLastPay.Date<dtLastPay.Date)
 				&& (listTranTypes.Count==0 || x.ListTsiLogs.Count<1 || listTranTypes.Contains(x.ListTsiLogs[0].TransType))
 				&& (listProvNums.Count==0 || listProvNums.Contains(x.PriProv))
@@ -1369,7 +1389,7 @@ namespace OpenDental {
 				&& ( ((int)accountAge < 4 && x.BalOver90 > 0.005)//if Any, Over30, Over60 or Over90 are selected, check BalOver90
 					|| ((int)accountAge < 3 && x.Bal_61_90 > 0.005)//if Any, Over30 or Over60 are selected, check Bal_61_90
 					|| ((int)accountAge < 2 && x.Bal_31_60 > 0.005)//if Any or Over30 are selected, check Bal_31_60
-					|| ((int)accountAge < 1 && x.Bal_0_30  > 0.005)));//if Any bal is selected, check Bal_0_30
+					|| (int)accountAge < 1 ));//or if Any bal is selected
 			#endregion Apply Filter Data to PatAging List
 			return retval;
 		}
