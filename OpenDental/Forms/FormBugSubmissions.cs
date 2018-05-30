@@ -43,13 +43,36 @@ namespace OpenDental {
 		}
 
 		private void FormBugSubmissions_Load(object sender,EventArgs e) {
-			dateRangePicker.SetDateTimeFrom(DateTime.Today.AddDays(-60));
-			dateRangePicker.SetDateTimeTo(DateTime.Today);
+			switch(_viewMode) {
+				case FormBugSubmissionMode.AddBug:
+					dateRangePicker.SetDateTimeFrom(DateTime.Today.AddDays(-60));
+					dateRangePicker.SetDateTimeTo(DateTime.Today);
+					break;
+				case FormBugSubmissionMode.ViewOnly:
+					dateRangePicker.SetDateTimeFrom(DateTime.MinValue);
+					dateRangePicker.SetDateTimeTo(DateTime.MaxValue);
+					butAddJob.Visible=false;
+					checkShowAttached.Checked=true;
+					break;
+				case FormBugSubmissionMode.SelectionMode:
+					dateRangePicker.SetDateTimeFrom(DateTime.MinValue);
+					dateRangePicker.SetDateTimeTo(DateTime.MaxValue);
+					butAddJob.Text="OK";//On click the selected rows are saved and this form will close.
+					break;
+				case FormBugSubmissionMode.ValidationMode:
+					dateRangePicker.SetDateTimeFrom(DateTime.MinValue);
+					dateRangePicker.SetDateTimeTo(DateTime.MaxValue);
+					butAddJob.Text="OK";
+					checkShowAttached.Checked=true;
+					groupFilters.Enabled=false;
+					break;
+			}
+			bugSubmissionControl.TextDevNoteLeave+=textDevNote_PostLeave;
 			#region comboGrouping
 			comboGrouping.Items.Add("None");
 			comboGrouping.Items.Add("RegKey/Ver/Stack");
 			comboGrouping.Items.Add("StackTrace");
-			//comboGrouping.Items.Add("95%");
+			comboGrouping.Items.Add("95%");
 			switch(_viewMode) {
 				case FormBugSubmissionMode.AddBug:
 					comboGrouping.SelectedIndex=2;//Default to StackTrace.
@@ -87,18 +110,6 @@ namespace OpenDental {
 			gridSubs.ContextMenu=gridSubMenu;
 			#endregion
 			FillSubGrid(true);
-			if(_viewMode==FormBugSubmissionMode.ViewOnly) {
-				butAddBug.Visible=false;
-				checkShowAttached.Checked=true;
-			}
-			else if(_viewMode==FormBugSubmissionMode.SelectionMode) {
-				butAddBug.Text="OK";//On click the selected rows are saved and this form will close.
-			}
-			else if(_viewMode==FormBugSubmissionMode.ValidationMode) {
-				butAddBug.Text="OK";
-				checkShowAttached.Checked=true;
-				groupFilters.Enabled=false;
-			}
 		}
 		
 		private void findPreviouslyFixedSubmisisonsToolStripMenuItem_Click(object sender,EventArgs e) {
@@ -126,9 +137,11 @@ namespace OpenDental {
 			}
 		}
 
-		private void FillSubGrid(bool isRefreshNeeded=false) {
+		private void FillSubGrid(bool isRefreshNeeded=false,string grouping95="") {
 			Action loadingProgress=null;
-			SetCustomerInfo();
+			Cursor=Cursors.WaitCursor;
+			bugSubmissionControl.ClearCustomerInfo();
+			bugSubmissionControl.SetTextDevNoteEnabled(false);
 			if(isRefreshNeeded) {
 				loadingProgress=ODProgressOld.ShowProgressStatus("FormBugSubmissions",this,Lan.g(this,"Refreshing Data")+"...",false);
 				#region Refresh Logic
@@ -180,7 +193,7 @@ namespace OpenDental {
 				.Select(x => x.ToLower()).ToList();
 			_listAllSubs.ForEach(x => x.TagOD=null);
 			List<BugSubmission> listFilteredSubs=_listAllSubs.Where(x => 
-				PassesFilterValidation(x,listSelectedRegKeys,listStackFilters,listPatNumFilters,listSelectedVersions)
+				PassesFilterValidation(x,listSelectedRegKeys,listStackFilters,listPatNumFilters,listSelectedVersions,grouping95)
 			).ToList();
 			if(isRefreshNeeded) {
 				FillVersionsFilter(listFilteredSubs);
@@ -234,17 +247,13 @@ namespace OpenDental {
 						break;
 					case 3:
 						#region 95%
-						//listGroupedSubs=listFilteredSubs.FindAll(x => x.TagOD==null && x.BugId==sub.BugId
-						//	&& x.ExceptionMessageText==sub.ExceptionMessageText
-						//	&& (x==sub||BugSubmissionL.CalculateSimilarity(x.ExceptionStackTrace,sub.ExceptionStackTrace)>95));
-						//if(listGroupedSubs.Count==0) {
-						//	continue;
-						//}
-						//listGroupedSubs=listGroupedSubs.OrderByDescending(x => new Version(x.Info.DictPrefValues[PrefName.ProgramVersion]))
-						//	.ThenByDescending(x => x.SubmissionDateTime).ToList();
-						//listGroupedSubs.ForEach(x => x.TagOD=true);//So we don't considered previously handled submissions.
-						//listGroupedSubs.First().TagOD=listGroupedSubs;//First element is what is shown in grid, still wont be considered again.
-						//listGridSubmissions.Add(listGroupedSubs.First().Copy());
+						//At this point all bugSubmissions in listFilteredSubs is at least a 95% match. Group them all together in a single row.
+						listGroupedSubs=listFilteredSubs;
+						listGroupedSubs=listGroupedSubs.OrderByDescending(x => new Version(x.Info.DictPrefValues[PrefName.ProgramVersion]))
+							.ThenByDescending(x => x.SubmissionDateTime).ToList();
+						listGroupedSubs.ForEach(x => x.TagOD=true);//So we don't considered previously handled submissions.
+						listGroupedSubs.First().TagOD=listGroupedSubs;//First element is what is shown in grid, still wont be considered again.
+						listGridSubmissions.Add(listGroupedSubs.First().Copy());
 						#endregion
 						break;
 				}
@@ -269,7 +278,13 @@ namespace OpenDental {
 			}
 			gridSubs.EndUpdate();
 			#endregion
-			loadingProgress?.Invoke();
+			try {
+				loadingProgress?.Invoke();//When this function executes quickly this can fail rarely, fail silently because of WaitCursor.
+			}
+			catch(Exception ex) {
+				ex.DoNothing();
+			}
+			Cursor=Cursors.Default;
 		}
 
 		private ODGridRow GetODGridRowForSub(BugSubmission sub) {
@@ -294,9 +309,10 @@ namespace OpenDental {
 		}
 
 		private bool PassesFilterValidation(BugSubmission sub,List<string> listSelectedRegKeys,
-			List<string> listStackFilters,List<string> listPatNumFilters,List<string> listSelectedVersions)
+			List<string> listStackFilters,List<string> listPatNumFilters,List<string> listSelectedVersions,string grouping95)
 		{
-			if((!string.IsNullOrWhiteSpace(textMsgText.Text)&&!sub.ExceptionMessageText.ToLower().Contains(textMsgText.Text.ToLower()))
+			if(!_viewMode.In(FormBugSubmissionMode.ValidationMode,FormBugSubmissionMode.ViewOnly) 
+					&& ((!string.IsNullOrWhiteSpace(textMsgText.Text)&&!sub.ExceptionMessageText.ToLower().Contains(textMsgText.Text.ToLower()))
 					||(listSelectedRegKeys.Count!=0 && !listSelectedRegKeys.Contains(sub.RegKey))
 					||(listStackFilters.Count!=0 && !listStackFilters.Exists(x => sub.ExceptionStackTrace.ToLower().Contains(x)))
 					||(listPatNumFilters.Count!=0 && !listPatNumFilters.Exists(x => x==_dictPatients[sub.RegKey].PatNum.ToString()))
@@ -304,7 +320,8 @@ namespace OpenDental {
 					||(checkExcludeHQ.Checked && (_dictPatients[sub.RegKey].BillingType==436||_dictPatients[sub.RegKey].PatNum==1486))//436 is "Internal Use" def, 1486 is HQ patNum.
 					||(listSelectedVersions.Count!=0 && !listSelectedVersions.Contains(sub.Info.DictPrefValues[PrefName.ProgramVersion]))
 					||(!sub.SubmissionDateTime.Between(dateRangePicker.GetDateTimeFrom(),dateRangePicker.GetDateTimeTo()))
-					||(!string.IsNullOrWhiteSpace(textDevNoteFilter.Text)&&!sub.DevNote.ToLower().Contains(textDevNoteFilter.Text.ToLower())))
+					||(!string.IsNullOrWhiteSpace(textDevNoteFilter.Text) && !sub.DevNote.ToLower().Contains(textDevNoteFilter.Text.ToLower()))
+					||(!string.IsNullOrEmpty(grouping95) && BugSubmissionL.CalculateSimilarity(grouping95,sub.ExceptionStackTrace)<95)))
 			{
 				return false;
 			}
@@ -336,7 +353,7 @@ namespace OpenDental {
 				.ToList();
 			listVersions.Sort();
 			listVersions.ForEach(x => comboRegKeys.Items.Add(x));
-			if(comboVersions.SelectedIndices.Count==0) {
+			if(comboRegKeys.SelectedIndices.Count==0) {
 				comboRegKeys.SetSelected(0,true);//Select 'All' by default
 			}
 		}
@@ -378,197 +395,73 @@ namespace OpenDental {
 		}
 		
 		private void gridSubs_CellClick(object sender,UI.ODGridClickEventArgs e) {
-			if(e.Row==-1 || gridSubs.SelectedIndices.Length>1) {
-				SetCustomerInfo();//Clears customer info, stackTrace and info.
+			butAddJob.Text="Add Job";//Always reset
+			if(_viewMode.In(FormBugSubmissionMode.SelectionMode,FormBugSubmissionMode.ValidationMode)) {
+				butAddJob.Text="OK";
+			}
+			if(e.Row==-1 || gridSubs.SelectedIndices.Length!=1) {
+				bugSubmissionControl.ClearCustomerInfo();
 				_subCur=null;
-				textDevNote.Enabled=false;
+				bugSubmissionControl.SetTextDevNoteEnabled(false);
 				return;
 			}
-			textDevNote.Enabled=true;
-			BugSubmission sub=((List<BugSubmission>)gridSubs.Rows[e.Row].Tag)[0];
-			textStack.Text=sub.ExceptionMessageText+"\r\n"+sub.ExceptionStackTrace;
-			textDevNote.Text=sub.DevNote;
-			FillOfficeInfoGrid(sub);
-			SetCustomerInfo(sub);
-			_subCur=sub;
-		}
-		
-		///<summary>When sub is set, fills customer group box with various information.
-		///When null, clears all fields.</summary>
-		private void SetCustomerInfo(BugSubmission sub=null,bool refreshGrid=true) {
-			if(sub==null) {
-				textStack.Text="";//Also clear any submission specific fields.
-				labelCustomerNum.Text="";
-				labelRegKey.Text="";
-				labelCustomerState.Text="";
-				labelCustomerPhone.Text="";
-				labelSubNum.Text="";
-				labelLastCall.Text="";
-				FillOfficeInfoGrid(null);
-				gridCustomerSubs.BeginUpdate();
-				gridCustomerSubs.Rows.Clear();
-				gridCustomerSubs.EndUpdate();
-				butGoToAccount.Enabled=false;
-				butBugTask.Enabled=false;
-				textDevNote.Text="";
-				return;
+			bugSubmissionControl.SetTextDevNoteEnabled(true);
+			_subCur=((List<BugSubmission>)gridSubs.Rows[e.Row].Tag)[0];
+			if(_dictPatients.ContainsKey(_subCur.RegKey)) {
+				_patCur=_dictPatients[_subCur.RegKey];
 			}
-			try {
-				if(_dictPatients.ContainsKey(sub.RegKey)) {
-					_patCur=_dictPatients[sub.RegKey];
-				}
-				else {
-					RegistrationKey key=RegistrationKeys.GetByKey(sub.RegKey);
+			else {
+				try {
+					RegistrationKey key=RegistrationKeys.GetByKey(_subCur.RegKey);
 					_patCur=Patients.GetPat(key.PatNum);
-					if(_patCur==null) {
-						return;//Should not happen.
-					}
-					_dictPatients.Add(sub.RegKey,_patCur);
+
 				}
-				labelCustomerNum.Text=_patCur.PatNum.ToString();
-				labelRegKey.Text=sub.RegKey;
-				labelCustomerState.Text=_patCur.State;
-				labelCustomerPhone.Text=_patCur.WkPhone;
-				labelSubNum.Text=POut.Long(sub.BugSubmissionNum);
-				labelLastCall.Text=Commlogs.GetDateTimeOfLastEntryForPat(_patCur.PatNum).ToString();
+				catch(Exception ex) {
+					ex.DoNothing();
+					_patCur=new Patient();//Just in case, needed mostly for debug.
+				}
+				_dictPatients.Add(_subCur.RegKey,_patCur);
 			}
-			catch(Exception ex) {
-				ex.DoNothing();
+			List<BugSubmission> listSubs=_listAllSubs;
+			if(comboGrouping.SelectedIndex.In(1,2,3)) {
+				listSubs=((List<BugSubmission>)gridSubs.Rows[gridSubs.GetSelectedIndex()].Tag);
 			}
-			if(!refreshGrid) {
-				return;
+			butAddJob.Tag=null;
+			bugSubmissionControl.RefreshData(_dictPatients,comboGrouping.SelectedIndex,listSubs);//New selelction, refresh control data.
+			bugSubmissionControl.RefreshView(_subCur);
+			if(_subCur.BugId!=0) {
+				List<JobLink> _listLinks=JobLinks.GetForType(JobLinkType.Bug,_subCur.BugId);
+				if(_listLinks.Count==1) {
+					butAddJob.Text="View Job";
+					butAddJob.Tag=_listLinks.First();
+				}
 			}
-			switch(comboGrouping.SelectedIndex) {
-				case 0:
-					#region None
-					gridCustomerSubs.Title="Customer Submissions";
-					gridCustomerSubs.BeginUpdate();
-					gridCustomerSubs.Columns.Clear();
-					gridCustomerSubs.Columns.Add(new ODGridColumn("Version",100,HorizontalAlignment.Center));
-					gridCustomerSubs.Columns.Add(new ODGridColumn("Count",50,HorizontalAlignment.Center));
-					gridCustomerSubs.Rows.Clear();
-					Dictionary<string,List<BugSubmission>> dictCustomerSubVersions=_listAllSubs
-						.Where(x => x.RegKey==sub.RegKey)
-						.GroupBy(x => x.Info.DictPrefValues[PrefName.ProgramVersion])
-						.ToDictionary(x => x.Key,x => x.DistinctBy(y => y.ExceptionStackTrace).ToList());
-					foreach(KeyValuePair<string,List<BugSubmission>> pair in dictCustomerSubVersions) {
-						gridCustomerSubs.Rows.Add(new ODGridRow(pair.Key,pair.Value.Count.ToString()));
-					}
-					gridCustomerSubs.EndUpdate();
-					#endregion
-					break;
-				case 1:
-				case 2:
-				case 3:
-					#region RegKey/Ver/Stack, Stacktrace, 95%
-					List<BugSubmission> listSubGroup=((List<BugSubmission>)gridSubs.Rows[gridSubs.GetSelectedIndex()].Tag);
-					gridCustomerSubs.Title="Grouped Submissions ("+listSubGroup.DistinctBy(x => x.RegKey).Count()+" DIST)";
-					gridCustomerSubs.BeginUpdate();
-					gridCustomerSubs.Columns.Clear();
-					gridCustomerSubs.Columns.Add(new ODGridColumn("Vers.",55,HorizontalAlignment.Center));
-					gridCustomerSubs.Columns.Add(new ODGridColumn("RegKey",140,HorizontalAlignment.Center));
-					gridCustomerSubs.Rows.Clear();
-					listSubGroup.ForEach(x => { 
-						ODGridRow row=new ODGridRow(x.Info.DictPrefValues[PrefName.ProgramVersion],x.RegKey);
-						row.Tag=x;
-						gridCustomerSubs.Rows.Add(row);
-					});
-					gridCustomerSubs.EndUpdate();
-					#endregion
-					break;
-			}
-			butGoToAccount.Enabled=true;
-			butBugTask.Enabled=true;
 		}
 		
-		private void gridCustomerSubs_CellClick(object sender,ODGridClickEventArgs e) {
-			if(e.Row==-1 || comboGrouping.SelectedIndex==0) {//0=None
-				_subCur=null;
-				return;
-			}
-			BugSubmission sub=(BugSubmission)gridCustomerSubs.Rows[e.Row].Tag;
-			textStack.Text=sub.ExceptionMessageText+"\r\n"+sub.ExceptionStackTrace;
-			textDevNote.Text=sub.DevNote;
-			FillOfficeInfoGrid(sub);
-			SetCustomerInfo(sub,false);
-			_subCur=sub;
-		}
-
-		private void gridCustomerSubs_CellDoubleClick(object sender,ODGridClickEventArgs e) {
-			if(e.Row==-1 || comboGrouping.SelectedIndex==0) {//0=None
-				return;
-			}
-			List<BugSubmission> listSubGroup=((List<BugSubmission>)gridSubs.Rows[gridSubs.GetSelectedIndex()].Tag);
-			FormBugSubmissions formGroupBugSubs=new FormBugSubmissions(viewMode:FormBugSubmissionMode.ViewOnly);
-			formGroupBugSubs.ListViewedSubs=listSubGroup;
-			formGroupBugSubs.ShowDialog();
-		}
-
-		private void butGoToAccount_Click(object sender,EventArgs e) {
-			//Button is only enabled if _patCur is not null.
-			GotoModule.GotoAccount(_patCur.PatNum);
-		}
-
-		private void butBugTask_Click(object sender,EventArgs e) {
-			//Button is only enabled if _patCur is not null (user has 1 row selected).
-			BugSubmission sub=gridSubs.SelectedIndices.SelectMany(x => (List<BugSubmission>)gridSubs.Rows[x].Tag).First();
-			BugSubmissionL.CreateTask(_patCur,sub);
-		}
-
-		private void FillOfficeInfoGrid(BugSubmission sub){
-			gridOfficeInfo.BeginUpdate();
-			if(gridOfficeInfo.Columns.Count==0) {
-				gridOfficeInfo.Columns.Add(new ODGridColumn("Field",130));
-				gridOfficeInfo.Columns.Add(new ODGridColumn("Value",125));
-			}
-			gridOfficeInfo.Rows.Clear();
-			if(sub!=null) {
-				gridOfficeInfo.Rows.Add(new ODGridRow("Preferences","") { ColorBackG=gridOfficeInfo.HeaderColor,Bold=true,Tag=true });
-				List<PrefName> listPrefNames=sub.Info.DictPrefValues.Keys.ToList();
-				foreach(PrefName prefName in listPrefNames) {
-					ODGridRow row=new ODGridRow();
-					row.Cells.Add(prefName.ToString());
-					row.Cells.Add(sub.Info.DictPrefValues[prefName]);
-					gridOfficeInfo.Rows.Add(row);
-				}
-				gridOfficeInfo.Rows.Add(new ODGridRow("Other","") { ColorBackG=gridOfficeInfo.HeaderColor,Bold=true,Tag=true });
-				gridOfficeInfo.Rows.Add(new ODGridRow("CountClinics",sub.Info.CountClinics.ToString()));
-				gridOfficeInfo.Rows.Add(new ODGridRow("EnabledPlugins",string.Join(",",sub.Info.EnabledPlugins?.Select(x => x).ToList()??new List<string>())));
-				gridOfficeInfo.Rows.Add(new ODGridRow("ClinicNumCur",sub.Info.ClinicNumCur.ToString()));
-				gridOfficeInfo.Rows.Add(new ODGridRow("UserNumCur",sub.Info.UserNumCur.ToString()));
-				gridOfficeInfo.Rows.Add(new ODGridRow("PatientNumCur",sub.Info.PatientNumCur.ToString()));
-				gridOfficeInfo.Rows.Add(new ODGridRow("ModuleNameCur",sub.Info.ModuleNameCur?.ToString()));
-				gridOfficeInfo.Rows.Add(new ODGridRow("IsOfficeOnReplication",sub.Info.IsOfficeOnReplication.ToString()));
-				gridOfficeInfo.Rows.Add(new ODGridRow("IsOfficeUsingMiddleTier",sub.Info.IsOfficeUsingMiddleTier.ToString()));
-				gridOfficeInfo.Rows.Add(new ODGridRow("WindowsVersion",sub.Info.WindowsVersion?.ToString()));
-				gridOfficeInfo.Rows.Add(new ODGridRow("CompName",sub.Info.CompName?.ToString()));
-				gridOfficeInfo.Rows.Add(new ODGridRow("PreviousUpdateVersion",sub.Info.PreviousUpdateVersion));
-				gridOfficeInfo.Rows.Add(new ODGridRow("PreviousUpdateTime",sub.Info.PreviousUpdateTime.ToString()));
-				gridOfficeInfo.Rows.Add(new ODGridRow("ThreadName",sub.Info.ThreadName?.ToString()));
-				gridOfficeInfo.Rows.Add(new ODGridRow("DatabaseName",sub.Info.DatabaseName?.ToString()));
-			}
-			gridOfficeInfo.EndUpdate();
-		}
-		
-		private void textDevNote_Leave(object sender,EventArgs e) {
-			if(_subCur==null || gridSubs.SelectedIndices.Length==0 || gridSubs.SelectedIndices.Length>1 || _subCur.DevNote==textDevNote.Text) {
-				return;
-			}
-			_subCur.DevNote=textDevNote.Text;
-			BugSubmissions.Update(_subCur);
-			if(_subCur.TagOD is List<BugSubmission>) {//If _subCur is set from gridCustomerSubs then do not update row because dev note is not shown.
+		public void textDevNote_PostLeave(object sender,EventArgs e){
+			if(_subCur.TagOD is List<BugSubmission> && gridSubs.SelectedIndices.Count()>0) {//If _subCur is set from gridCustomerSubs then do not update row because dev note is not shown.
+				int index=gridSubs.SelectedIndices[0];
 				gridSubs.BeginUpdate();
 				gridSubs.Rows[gridSubs.SelectedIndices[0]]=GetODGridRowForSub(_subCur);
 				gridSubs.EndUpdate();
-			}
+				gridSubs.SetSelected(index,true);
+			}	
 		}
-
+		
 		private void dateRangePicker_CalendarClosed(object sender,EventArgs e) {
 			FillSubGrid(true);//Refresh _listAllSubs
 		}
 
 		private void comboVersions_SelectionChangeCommitted(object sender,EventArgs e) {
-			FillSubGrid();
+			string group95Matching="";
+			if(sender==comboGrouping && comboGrouping.SelectedIndex==3) {//95%
+				InputBox input=new InputBox("Paste the stack trace you wish to match against.",true);
+				if(input.ShowDialog()!=DialogResult.OK) {
+					return;
+				}
+				group95Matching=input.textResult.Text;
+			}
+			FillSubGrid(grouping95:group95Matching);
 		}
 		
 		private void Filters_TextChanged(object sender,EventArgs e) {
@@ -592,6 +485,10 @@ namespace OpenDental {
 			if(_viewMode==FormBugSubmissionMode.ValidationMode) {//Text is set to "Ok" when SelectionMode
 				ListSelectedSubs=_listAllSubs;
 				DialogResult=DialogResult.OK;
+				return;
+			}
+			if(butAddJob.Text=="View Job" && butAddJob.Tag is JobLink) {//Assocaited to job, see gridSubs_CellClick(...)	
+				FormOpenDental.S_GoToJob((butAddJob.Tag as JobLink).JobNum);
 				return;
 			}
 			List<BugSubmission> listSelectedSubs=gridSubs.SelectedIndices.SelectMany(x => (List<BugSubmission>)gridSubs.Rows[x].Tag).ToList();
@@ -618,11 +515,11 @@ namespace OpenDental {
 	public enum FormBugSubmissionMode {
 		///<summary>This is the default way for the form to load. Used by job manager to add bugs</summary>
 		AddBug,
-		///<summary>Used when we wish to simply view the bug submissions, does not allow users to add bugs.</summary>
+		///<summary>Used when we wish to simply view the bug submissions, does not allow users to add bugs. Filter validation is skipped.</summary>
 		ViewOnly,
 		///<summary>Used when attaching bug submissions to exiting bugs. Changed butAdd to show "OK" and return selected rows.</summary>
 		SelectionMode,
-		///<summary>Used when using the similiar bugs tool. Changed butAdd to show "OK" and returns all BugSubmissions in the grid on Ok click.</summary>
+		///<summary>Used when using the similiar bugs tool. Changed butAdd to show "OK" and returns all BugSubmissions in the grid on Ok click. Filter validation is skipped.</summary>
 		ValidationMode,
 	}
 }

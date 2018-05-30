@@ -9,7 +9,7 @@ using CodeBase;
 namespace OpenDental {
 	public partial class FormBugSubmission:ODForm {
 		///<summary></summary>
-		public BugSubmission Submission;
+		private BugSubmission _subCur;
 		///<summary>Used to determine if a new bug should show (Enhancement) in the description.</summary>
 		private Job _jobCur;
 		///<summary>Null unless a bug is added  or alrady exists.</summary>
@@ -19,28 +19,27 @@ namespace OpenDental {
 		///<summary></summary>
 		private List<JobLink> _listLinks=new List<JobLink>();
 
-		public FormBugSubmission(BugSubmission bugSub,Job job=null) {
+		public FormBugSubmission(BugSubmission sub,Job job=null) {
 			InitializeComponent();
 			Lan.F(this);
-			Submission=bugSub;
+			_subCur=sub;
 			_jobCur=job;
 		}
 
 		private void FormBugSubmission_Load(object sender,EventArgs e) {
-			textStack.Text=Submission.ExceptionMessageText+"\r\n"+Submission.ExceptionStackTrace;
-			textDevNote.Text=Submission.DevNote;
 			try {
-				RegistrationKey key=RegistrationKeys.GetByKey(Submission.RegKey);
+				RegistrationKey key=RegistrationKeys.GetByKey(_subCur.RegKey);
 				_patCur=Patients.GetPat(key.PatNum);
 			}
 			catch(Exception ex) {
 				ex.DoNothing();
+				_patCur=new Patient();//Just in case, needed mostly for debug.
 			}
 			labelName.Text=_patCur?.GetNameLF()??"";
-			labelDateTime.Text=POut.DateT(Submission.SubmissionDateTime);
-			labelVersion.Text=Submission.Info.DictPrefValues[PrefName.ProgramVersion];
-			if(Submission.BugId!=0) {//Already associated to a bug
-				_bug=Bugs.GetOne(Submission.BugId);
+			labelDateTime.Text=POut.DateT(_subCur.SubmissionDateTime);
+			labelVersion.Text=_subCur.Info.DictPrefValues[PrefName.ProgramVersion];
+			if(_subCur.BugId!=0) {//Already associated to a bug
+				_bug=Bugs.GetOne(_subCur.BugId);
 				butAddViewBug.Text="View Bug";
 			}
 			if(_bug!=null) {
@@ -49,112 +48,15 @@ namespace OpenDental {
 					butAddViewJob.Text="View Job";
 				}
 			}
-			FillOfficeInfoGrid(Submission);
-			SetCustomerInfo(Submission);
-		}
-		
-		private void FillOfficeInfoGrid(BugSubmission sub){
-			gridOfficeInfo.BeginUpdate();
-			if(gridOfficeInfo.Columns.Count==0) {
-				gridOfficeInfo.Columns.Add(new ODGridColumn("Field",130));
-				gridOfficeInfo.Columns.Add(new ODGridColumn("Value",125));
-			}
-			gridOfficeInfo.Rows.Clear();
-			if(sub!=null) {
-				gridOfficeInfo.Rows.Add(new ODGridRow("Preferences","") { ColorBackG=gridOfficeInfo.HeaderColor,Bold=true,Tag=true });
-				List<PrefName> listPrefNames=sub.Info.DictPrefValues.Keys.ToList();
-				foreach(PrefName prefName in listPrefNames) {
-					ODGridRow row=new ODGridRow();
-					row.Cells.Add(prefName.ToString());
-					row.Cells.Add(sub.Info.DictPrefValues[prefName]);
-					gridOfficeInfo.Rows.Add(row);
-				}
-				gridOfficeInfo.Rows.Add(new ODGridRow("Other","") { ColorBackG=gridOfficeInfo.HeaderColor,Bold=true,Tag=true });
-				gridOfficeInfo.Rows.Add(new ODGridRow("CountClinics",sub.Info.CountClinics.ToString()));
-				gridOfficeInfo.Rows.Add(new ODGridRow("EnabledPlugins",string.Join(",",sub.Info.EnabledPlugins?.Select(x => x).ToList()??new List<string>())));
-				gridOfficeInfo.Rows.Add(new ODGridRow("ClinicNumCur",sub.Info.ClinicNumCur.ToString()));
-				gridOfficeInfo.Rows.Add(new ODGridRow("UserNumCur",sub.Info.UserNumCur.ToString()));
-				gridOfficeInfo.Rows.Add(new ODGridRow("PatientNumCur",sub.Info.PatientNumCur.ToString()));
-				gridOfficeInfo.Rows.Add(new ODGridRow("ModuleNameCur",sub.Info.ModuleNameCur?.ToString()));
-				gridOfficeInfo.Rows.Add(new ODGridRow("IsOfficeOnReplication",sub.Info.IsOfficeOnReplication.ToString()));
-				gridOfficeInfo.Rows.Add(new ODGridRow("IsOfficeUsingMiddleTier",sub.Info.IsOfficeUsingMiddleTier.ToString()));
-				gridOfficeInfo.Rows.Add(new ODGridRow("WindowsVersion",sub.Info.WindowsVersion?.ToString()));
-				gridOfficeInfo.Rows.Add(new ODGridRow("CompName",sub.Info.CompName?.ToString()));
-				gridOfficeInfo.Rows.Add(new ODGridRow("PreviousUpdateVersion",sub.Info.PreviousUpdateVersion));
-				gridOfficeInfo.Rows.Add(new ODGridRow("PreviousUpdateTime",sub.Info.PreviousUpdateTime.ToString()));
-				gridOfficeInfo.Rows.Add(new ODGridRow("ThreadName",sub.Info.ThreadName?.ToString()));
-				gridOfficeInfo.Rows.Add(new ODGridRow("DatabaseName",sub.Info.DatabaseName?.ToString()));
-			}
-			gridOfficeInfo.EndUpdate();
-		}
-
-		///<summary>When sub is set, fills customer group box with various information.
-		///When null, clears all fields.</summary>
-		private void SetCustomerInfo(BugSubmission sub=null) {
-			if(sub==null) {
-				textStack.Text="";//Also clear any submission specific fields.
-				labelCustomerNum.Text="";
-				labelRegKey.Text="";
-				labelCustomerState.Text="";
-				labelCustomerPhone.Text="";
-				labelSubNum.Text="";
-				labelLastCall.Text="";
-				FillOfficeInfoGrid(null);
-				butGoToAccount.Enabled=false;
-				butBugTask.Enabled=false;
-				textDevNote.Text="";
-				return;
-			}
-			try {
-				labelCustomerNum.Text=_patCur?.PatNum.ToString()??"";
-				labelRegKey.Text=sub.RegKey;
-				labelCustomerState.Text=_patCur?.State??"";
-				labelCustomerPhone.Text=_patCur?.WkPhone??"";
-				labelSubNum.Text=POut.Long(sub.BugSubmissionNum);
-				labelLastCall.Text=Commlogs.GetDateTimeOfLastEntryForPat(_patCur?.PatNum??0).ToString();
-			}
-			catch(Exception ex) {
-				ex.DoNothing();
-			}
-			butGoToAccount.Enabled=true;
-			butBugTask.Enabled=true;
-		}
-		
-		private void textDevNote_Leave(object sender,EventArgs e) {
-			if(Submission.DevNote==textDevNote.Text) {
-				return;
-			}
-			Submission.DevNote=textDevNote.Text;
-			BugSubmissions.Update(Submission);
-		}
-
-		private void butGoToAccount_Click(object sender,EventArgs e) {
-			if(_patCur==null) {
-				return;
-			}
-			//Button is only enabled if _patCur is not null.
-			GotoModule.GotoAccount(_patCur.PatNum);
-		}
-
-		private void butBugTask_Click(object sender,EventArgs e) {
-			if(_patCur==null) {
-				return;
-			}
-			BugSubmissionL.CreateTask(_patCur,Submission);
-		}
-		
-		private void butCompare_Click(object sender,EventArgs e) {
-			InputBox input=new InputBox("Please copy/paste your stack trace to compare to this bug.",true);
-			if(input.ShowDialog()!=DialogResult.OK) {
-				return;
-			}
-			string perct=POut.Double(BugSubmissionL.CalculateSimilarity(textStack.Text,input.textResult.Text));
-			MsgBox.Show(this,perct+"%");
+			Dictionary<string,Patient> dictPats=new Dictionary<string,Patient>();
+			dictPats.Add(_subCur.RegKey,_patCur);
+			bugSubmissionControl.RefreshData(dictPats,-1,null);//New selelction, refresh control data.
+			bugSubmissionControl.RefreshView(_subCur);
 		}
 
 		private void butAddViewBug_Click(object sender,EventArgs e) {
 			if(butAddViewBug.Text=="View Bug") {
-				OpenBug(Submission);
+				OpenBug(_subCur);
 				return;
 			}
 			if(AddBug()) {//Bug added.
@@ -185,7 +87,7 @@ namespace OpenDental {
 				formBE.ShowDialog();
 				return false;
 			}
-			_bug=BugSubmissionL.AddBug(Submission,_jobCur);
+			_bug=BugSubmissionL.AddBug(_subCur,_jobCur);
 			return (_bug==null);
 		}
 		
@@ -203,7 +105,7 @@ namespace OpenDental {
 				}
 				return;
 			}
-			_bug=BugSubmissionL.AddBugAndJob(this,new List<BugSubmission>() { Submission },_patCur);
+			_bug=BugSubmissionL.AddBugAndJob(this,new List<BugSubmission>() { _subCur },_patCur);
 			if(_bug==null) {
 				return;
 			}

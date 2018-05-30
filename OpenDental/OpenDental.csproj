@@ -4622,6 +4622,12 @@
     <Compile Include="SheetFramework\SheetComboBox.Designer.cs">
       <DependentUpon>SheetComboBox.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI\BugSubmissionControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UI\BugSubmissionControl.Designer.cs">
+      <DependentUpon>BugSubmissionControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\ComboBoxClinic.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -7666,6 +7672,9 @@
     <EmbeddedResource Include="Tables Old Grids\TableZips.resx">
       <DependentUpon>TableZips.cs</DependentUpon>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\BugSubmissionControl.resx">
+      <DependentUpon>BugSubmissionControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\ODDateRangePickerVertical.resx">
       <DependentUpon>ODDateRangePickerVertical.cs</DependentUpon>

@@ -210,7 +210,7 @@ namespace OpenDental {
 				return 0;
 			}
 			if((source.Length==0) || (target.Length==0)
-				|| !source.Length.Between(target.Length-50,target.Length+50))
+				|| !source.Length.Between(target.Length-75,target.Length+75))
 			{
 				return 0;
 			}
