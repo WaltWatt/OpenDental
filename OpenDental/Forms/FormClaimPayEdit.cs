@@ -68,7 +68,7 @@ namespace OpenDental{
 		private Deposit _depositOld;
 		///<summary>Set to the value of PrefName.ShowAutoDeposit on load.</summary>
 		private bool _hasAutoDeposit;
-		private UI.Button butPaySimple;
+		private Panel butPaySimple;
 
 		///<summary>Gets set to true when the user deletes the Deposit from the Edit Deposit window.</summary>
 		private bool _IsAutoDepositDeleted;
@@ -125,6 +125,7 @@ namespace OpenDental{
 			this.labelClaimPaymentGroup = new System.Windows.Forms.Label();
 			this.panelXcharge = new System.Windows.Forms.Panel();
 			this.groupPrepaid = new System.Windows.Forms.GroupBox();
+			this.butPaySimple = new System.Windows.Forms.Panel();
 			this.butPayConnect = new OpenDental.UI.Button();
 			this.groupBoxDeposit = new System.Windows.Forms.GroupBox();
 			this.labelDepositAccountNum = new System.Windows.Forms.Label();
@@ -136,7 +137,6 @@ namespace OpenDental{
 			this.validDepositDate = new OpenDental.ValidDate();
 			this.labelDepositAmount = new System.Windows.Forms.Label();
 			this.validDoubleDepositAmt = new OpenDental.ValidDouble();
-			this.butPaySimple = new OpenDental.UI.Button();
 			this.groupPrepaid.SuspendLayout();
 			this.groupBoxDeposit.SuspendLayout();
 			this.SuspendLayout();
@@ -435,6 +435,16 @@ namespace OpenDental{
 			this.groupPrepaid.TabStop = false;
 			this.groupPrepaid.Text = "Virtual Credit Card Payment";
 			// 
+			// butPaySimple
+			// 
+			this.butPaySimple.BackgroundImage = global::OpenDental.Properties.Resources.PaySimple_Button;
+			this.butPaySimple.Location = new System.Drawing.Point(236, 21);
+			this.butPaySimple.Name = "butPaySimple";
+			this.butPaySimple.Size = new System.Drawing.Size(76, 26);
+			this.butPaySimple.TabIndex = 131;
+			this.butPaySimple.Text = "PaySimple";
+			this.butPaySimple.MouseClick += new System.Windows.Forms.MouseEventHandler(this.butPaySimple_MouseClick);
+			// 
 			// butPayConnect
 			// 
 			this.butPayConnect.AdjustImageLocation = new System.Drawing.Point(0, 0);
@@ -554,20 +564,6 @@ namespace OpenDental{
 			this.validDoubleDepositAmt.Size = new System.Drawing.Size(68, 20);
 			this.validDoubleDepositAmt.TabIndex = 104;
 			this.validDoubleDepositAmt.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-			// 
-			// butPaySimple
-			// 
-			this.butPaySimple.AdjustImageLocation = new System.Drawing.Point(0, 0);
-			this.butPaySimple.Autosize = false;
-			this.butPaySimple.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
-			this.butPaySimple.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
-			this.butPaySimple.CornerRadius = 4F;
-			this.butPaySimple.Location = new System.Drawing.Point(236, 21);
-			this.butPaySimple.Name = "butPaySimple";
-			this.butPaySimple.Size = new System.Drawing.Size(75, 24);
-			this.butPaySimple.TabIndex = 131;
-			this.butPaySimple.Text = "PaySimple";
-			this.butPaySimple.Click += new System.EventHandler(this.butPaySimple_Click);
 			// 
 			// FormClaimPayEdit
 			// 
@@ -934,7 +930,10 @@ namespace OpenDental{
 			}
 		}
 
-		private void butPaySimple_Click(object sender,EventArgs e) {
+		private void butPaySimple_MouseClick(object sender,MouseEventArgs e) {
+			if(e.Button!=MouseButtons.Left) {
+				return;
+			}
 			if(textAmount.Text=="" || PIn.Double(textAmount.Text)==0) {
 				MsgBox.Show(this,"Please enter an amount first.");
 				textAmount.Focus();
