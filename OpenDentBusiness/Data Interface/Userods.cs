@@ -801,13 +801,13 @@ namespace OpenDentBusiness {
 		}
 
 		///<summary>This always returns one admin user.  There must be one and there is rarely more than one.
-		///Only used on startup to determine if security is being used.  Can return null.</summary>
+		///Only used on startup to determine if security is being used.  Can return null. Only returns non-hidden users</summary>
 		public static Userod GetAdminUser() {
 			//No need to check RemotingRole; no call to db.
 			//just find any permission for security admin.  There has to be one.
 			List<GroupPermission> listGroupPermissions=GroupPermissions.GetWhere(x => x.PermType==Permissions.SecurityAdmin);
 			//Return the first user that is in any of the admin user groups.
-			return GetFirstOrDefault(x => listGroupPermissions.Any(y => x.IsInUserGroup(y.UserGroupNum)));
+			return GetFirstOrDefault(x => listGroupPermissions.Any(y => x.IsInUserGroup(y.UserGroupNum)),true);
 		}
 
 		/// <summary>Will return 0 if no inbox found for user.</summary>
