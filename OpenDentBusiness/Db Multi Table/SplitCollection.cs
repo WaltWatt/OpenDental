@@ -8,6 +8,7 @@ using System.Xml.Schema;
 using System.Xml.Serialization;
 
 namespace OpenDentBusiness {
+	[Serializable]
 	public class SplitCollection:ICollection<PaySplit>,IXmlSerializable {
 		private List<PaySplit> _listSplits=new List<PaySplit>();
 
@@ -74,12 +75,18 @@ namespace OpenDentBusiness {
 		}
 
 		public void ReadXml(XmlReader reader) {
-			XmlSerializer serializer=new XmlSerializer(typeof(PaySplit));//TODO: this might need to be a List<PaySplit>. Test on middle tier.
+			XmlSerializer serializer=new XmlSerializer(typeof(List<PaySplit>));
+			bool wasEmpty=reader.IsEmptyElement;
+			reader.Read();
+			if(wasEmpty) {
+				return;
+			}
 			_listSplits=(List<PaySplit>)serializer.Deserialize(reader);
+			reader.ReadEndElement();
 		}
 
 		public void WriteXml(XmlWriter writer) {
-			XmlSerializer serializer=new XmlSerializer(typeof(PaySplit));
+			XmlSerializer serializer=new XmlSerializer(typeof(List<PaySplit>));
 			serializer.Serialize(writer,_listSplits);
 		}
 	}

@@ -2,15 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Xml.Serialization;
 
 namespace OpenDentBusiness {
 	///<summary>Separate class for keeping track of accounting transactions (procedures, payplancharges, and adjustments).
 	///This should be used when you need to get a list of all transactions for a patient and sort them, eg in FormProcSelect.</summary>
+	[Serializable]
 	public class AccountEntry {
 		private static long AccountEntryAutoIncrementValue=1;
 		///<summary>No matter which constructor is used, the AccountEntryNum will be unique and automatically assigned.</summary>
 		public long AccountEntryNum = (AccountEntryAutoIncrementValue++);
 		//Read only data.  Do not modify, or else the historic information will be changed.
+		[XmlIgnore]
 		public object Tag;
 		public DateTime Date;
 		public long PriKey;
@@ -21,11 +24,31 @@ namespace OpenDentBusiness {
 		//Variables below will be changed as needed.
 		public decimal AmountStart;
 		public decimal AmountEnd;
-		//public List<PaySplit> ListPaySplits = new List<PaySplit>();//List of paysplits for this charge.
 		public SplitCollection SplitCollection=new SplitCollection();
 
+		[XmlElement(nameof(Tag))]
+		public DtoObject TagXml {
+			get {
+				if(Tag==null) {
+					return null;
+				}
+				return new DtoObject(Tag,Tag.GetType());
+			}
+			set {
+				if(value==null) {
+					Tag=null;
+					return;
+				}
+				Tag=value.Obj;
+			}
+		}
+		
 		public new Type GetType() {
 			return Tag.GetType();
+		}
+
+		///<summary>For serialization only.</summary>
+		public AccountEntry() {
 		}
 
 		public AccountEntry(ClaimProc claimProc) {

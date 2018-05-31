@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Reflection;
+using System.Xml.Serialization;
 
 namespace OpenDentBusiness {
 	public class PaymentEdit {
@@ -963,6 +964,7 @@ namespace OpenDentBusiness {
 			public Family SuperFam;
 			public List<CreditCard> ListCreditCards;
 			public XWebResponse XWebResponse;
+			[XmlIgnore]
 			public DataTable TableBalances;
 			public List<PaySplit> ListSplits;//current list of splits associated to this payment
 			public List<PaySplit> ListPaySplitAllocations;
@@ -972,6 +974,23 @@ namespace OpenDentBusiness {
 			public List<PaySplit> ListPrePaysForPayment;
 			public ConstructChargesData ConstructChargesData;
 			public List<Procedure> ListProcsForSplits;
+
+			[XmlElement(nameof(TableBalances))]
+			public string TableBalancesXml {
+				get {
+					if(TableBalances==null) {
+						return null;
+					}
+					return XmlConverter.TableToXml(TableBalances);
+				}
+				set {
+					if(value==null) {
+						TableBalances=null;
+						return;
+					}
+					TableBalances=XmlConverter.XmlToTable(value);
+				}
+			}
 		}
 
 		///<summary>The data needed to construct a list of charges for FormPayment.</summary>
