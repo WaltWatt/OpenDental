@@ -56,9 +56,7 @@ namespace OpenDental {
 				catch(Exception ex) {
 					ex.DoNothing();
 				}
-				MsgBoxCopyPaste formException=new MsgBoxCopyPaste(MiscUtils.GetExceptionText(e));
-				formException.SetButOKText("Quit");
-				formException.ShowDialog();
+				FriendlyException.Show("Critical Error: "+e.Message,e,"Quit");
 				formOD.ProcessKillCommand();
 			});
 			CodeBase.ODThread.RegisterForUnhandledExceptions(formOD,onUnhandled);

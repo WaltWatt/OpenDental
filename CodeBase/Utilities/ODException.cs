@@ -3,11 +3,20 @@
 namespace CodeBase {
 	public class ODException:ApplicationException {
 		private int _errorCode=0;
+		///<summary>Contains query text when an ErrorCode in the 700s was thrown. This is the query that was attempted prior to an exception.</summary>
+		private string _query="";
 
 		///<summary>Gets the error code associated to this exception.  Defaults to 0 if no error code was explicitly set.</summary>		
 		public int ErrorCode {
 			get {
 				return _errorCode;
+			}
+		}
+
+		///<summary>Contains query text when an ErrorCode in the 700s was thrown. This is the query that was attempted prior to an exception.</summary>
+		public string Query {
+			get {
+				return _query??"";
 			}
 		}
 
@@ -38,6 +47,12 @@ namespace CodeBase {
 		public ODException(string message,int errorCode)
 			: base(message) {
 			_errorCode=errorCode;
+		}
+		
+		///<summary>Used for query based exceptions in Db.cs</summary>
+		public ODException(string message,string query,Exception ex) : base(message,ex) {
+			_query=query;
+			_errorCode=(int)ErrorCodes.DbQueryError;
 		}
 
 		///<summary>Wrap the given action in a try/catch and swallow any exceptions that are thrown. 
@@ -94,6 +109,9 @@ namespace CodeBase {
 			//600-699 range. Values used by RemotingClient/MiddleTier
 			///<summary>After successfully logging in to Open Dental, a middle tier call to Userods.CheckUserAndPassword returned an "Invalid user or password" error.</summary>
 			CheckUserAndPasswordFailed=600,
+			//700-799 range. Values used by failed query exceptions.
+			///<summary>Generic database command failed to execute.</summary>
+			DbQueryError=700,
 		}
 	}
 }
