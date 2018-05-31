@@ -304,7 +304,7 @@ namespace OpenDental {
 						//A workaround for this would be to train our techs to never run billing after the 28th of every month that way incomplete statements are not sent.
 						dayOtherCharges=daysInMonth;
 					}
-					DateTime dateErxCharge=new DateTime(_dateBillingMonthYear.Year,_dateBillingMonthYear.Month,dayOtherCharges);
+					DateTime dateErxCharge=new DateTime(DateTime.Today.Year,DateTime.Today.Month,dayOtherCharges);
 					if(dateErxCharge<DateTime.Today.AddMonths(-3)) {//Just in case the user runs an older report.
 						numSkipped++;
 						continue;
@@ -313,7 +313,7 @@ namespace OpenDental {
 					charge.repeatCharge.IsNew=true;
 					charge.repeatCharge.PatNum=charge.PatNumForRegKey;
 					charge.repeatCharge.ProcCode=GetProcCodeForNewCharge(charge.PatNumForRegKey);
-					charge.repeatCharge.ChargeAmt=15;//15$/month
+					charge.repeatCharge.ChargeAmt=22;//$22/month is the cost for the basic plan. The user has to manually change the fee if it's supposed to be comprehensive.
 					charge.repeatCharge.DateStart=dateErxCharge;
 					charge.repeatCharge.Npi=charge.NPI;
 					charge.repeatCharge.ErxAccountId=charge.AccountId;
