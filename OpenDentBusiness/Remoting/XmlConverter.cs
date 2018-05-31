@@ -305,7 +305,8 @@ namespace OpenDentBusiness {
 						//Something went wrong, odds are there are no invalid chars to escape.  Move on.
 					}
 				}
-				PropertyInfo[] piArray=type.GetProperties().Where(x => x!=null).ToArray();
+				PropertyInfo[] piArray=type.GetProperties().Where(x => x!=null)
+					.Where(x => x.GetCustomAttributes<XmlIgnoreAttribute>().Count()==0).ToArray();
 				foreach(PropertyInfo pi in piArray) {
 					try {
 						object objCur=pi.GetValue(obj,null);
@@ -362,6 +363,11 @@ namespace OpenDentBusiness {
 			else if(type==typeof(TimeSpan)) {
 				serializer = new XmlSerializer(typeof(long));
 				retVal=(T)((object)TimeSpan.FromTicks((long)serializer.Deserialize(reader)));
+			}
+			else if(type.IsInterface) {
+				//For methods that return an interface, we serialize the return object as a DtoObject.
+				serializer=new XmlSerializer(typeof(DtoObject));
+				retVal=(T)((DtoObject)serializer.Deserialize(reader)).Obj;
 			}
 			else {
 				serializer = new XmlSerializer(type);

@@ -59,7 +59,7 @@ namespace OpenDentBusiness {
 			*/
 			writer.WriteStartElement("TypeName");
 			Type type=ConvertNameToType(TypeName);
-			if(type==typeof(object) || (type.IsInterface && Obj!=null)) {
+			if((type==typeof(object) || type.IsInterface) && Obj!=null) {
 				type=Obj.GetType();
 				TypeName=type.FullName;
 			}
@@ -70,13 +70,14 @@ namespace OpenDentBusiness {
 				XmlSerializer serializer = new XmlSerializer(typeof(int));
 				serializer.Serialize(writer,((Color)Obj).ToArgb());
 			}
-			else if(TypeName=="System.Data.DataTable") {
+			else if(TypeName=="System.Data.DataTable" && Obj!=null) {
 				writer.WriteRaw(XmlConverter.TableToXml((DataTable)Obj));
 			}
-			else if(type.IsInterface) {
-				//Interfaces cannot be serialized. Should only get here if the interface is null.
-			}
 			else {
+				if(type.IsInterface) {
+					//Interfaces cannot be serialized. Should only get here if the interface is null.
+					type=typeof(NullObject);
+				}
 				XmlSerializer serializer=new XmlSerializer(type);
 				serializer.Serialize(writer,Obj);
 			}
@@ -104,10 +105,12 @@ namespace OpenDentBusiness {
 				reader.Read();
 			}
 			reader.ReadEndElement();//Obj
-			string isNull="";
+			while(reader.NodeType==XmlNodeType.Whitespace) {
+				reader.Read();
+			}
 			if(reader.Name=="IsNull") {//Older versions that haven't updated to 17.3 yet may not have this element.
 				reader.ReadStartElement("IsNull");
-				isNull=reader.ReadString();
+				IsNull=(reader.ReadString().ToLower()=="true");
 				reader.ReadEndElement();//IsNull
 			}
 			while(reader.NodeType!=XmlNodeType.EndElement) {
@@ -131,7 +134,9 @@ namespace OpenDentBusiness {
 				Obj=Color.FromArgb((int)serializer.Deserialize(reader2));
 			}
 			else if(TypeName=="System.Data.DataTable") {
-				Obj=XmlConverter.XmlToTable(strObj);
+				if(!IsNull) {
+					Obj=XmlConverter.XmlToTable(strObj);
+				}
 			}
 			else if(type.IsInterface) {
 				//We should only ever get here if the interface was null when serialized.
@@ -139,8 +144,7 @@ namespace OpenDentBusiness {
 			else {
 				Obj=serializer.Deserialize(reader2);
 			}
-			if(isNull.ToLower()=="true") {
-				IsNull=true;
+			if(IsNull) {
 				Obj=null;
 			}
 			//Convert.ChangeType(serializer.Deserialize(reader2),type);

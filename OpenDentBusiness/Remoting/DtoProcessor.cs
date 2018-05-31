@@ -297,6 +297,10 @@ namespace OpenDentBusiness {
 					object[] paramObjs=DtoObject.GenerateObjects(parameters);
 					Object objResult=methodInfo.Invoke(null,paramObjs);
 					Type returnType=methodInfo.ReturnType;
+					if(returnType.IsInterface) {
+						objResult=new DtoObject(objResult,objResult?.GetType()??returnType);
+						returnType=typeof(DtoObject);
+					}
 					return XmlConverter.Serialize(returnType,objResult);
 				}
 				#endregion
