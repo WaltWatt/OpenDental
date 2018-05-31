@@ -4,7 +4,9 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
+using System.Xml.Serialization;
 using CodeBase;
+using Newtonsoft.Json;
 
 namespace OpenDentBusiness {
 	public class ChartModules {
@@ -13,7 +15,9 @@ namespace OpenDentBusiness {
 		///<summary>The data necessary to load the chart module.</summary>
 		[Serializable]
 		public class LoadData {
+			[XmlIgnore]
 			public DataTable TableProgNotes;
+			[XmlIgnore]
 			public DataTable TablePlannedAppts;
 			public Patient Pat;
 			public Family Fam;
@@ -27,11 +31,13 @@ namespace OpenDentBusiness {
 			public Appointment[] ArrAppts;
 			public List<ToothInitial> ListToothInitials;
 			public PatField[] ArrPatFields;
+			[XmlIgnore]
 			public DataTable TableChartViews;
 			public List<ProcGroupItem> ListProcGroupItems;
 			public List<RefAttach> ListRefAttaches;
 			public string PayorType;
 			public List<Disease> ListDiseases;
+			[XmlIgnore]
 			public DataTable TableMeds;
 			public List<MedicationPat> ListMedPats;
 			public List<Allergy> ListAllergies;
@@ -41,6 +47,74 @@ namespace OpenDentBusiness {
 			public List<PatRestriction> ListPatRestricts;
 			public List<ProcButtonQuick> ListProcButtonQuicks;
 			public Patient SuperFamHead;
+
+			[XmlElement(nameof(TableProgNotes))]
+			public string TableProgNotesXml {
+				get {
+					if(TableProgNotes==null) {
+						return null;
+					}
+					return XmlConverter.TableToXml(TableProgNotes);
+				}
+				set {
+					if(value==null) {
+						TableProgNotesXml=null;
+						return;
+					}
+					TableProgNotes=XmlConverter.XmlToTable(value);
+				}
+			}
+
+			[XmlElement(nameof(TablePlannedAppts))]
+			public string TablePlannedApptsXml {
+				get {
+					if(TablePlannedAppts==null) {
+						return null;
+					}
+					return XmlConverter.TableToXml(TablePlannedAppts);
+				}
+				set {
+					if(value==null) {
+						TablePlannedAppts=null;
+						return;
+					}
+					TablePlannedAppts=XmlConverter.XmlToTable(value);
+				}
+			}
+
+			[XmlElement(nameof(TableChartViews))]
+			public string TableChartViewsXml {
+				get {
+					if(TableChartViews==null) {
+						return null;
+					}
+					return XmlConverter.TableToXml(TableChartViews);
+				}
+				set {
+					if(value==null) {
+						TableChartViews=null;
+						return;
+					}
+					TableChartViews=XmlConverter.XmlToTable(value);
+				}
+			}
+
+			[XmlElement(nameof(TableMeds))]
+			public string TableMedsXml {
+				get {
+					if(TableMeds==null) {
+						return null;
+					}
+					return XmlConverter.TableToXml(TableMeds);
+				}
+				set {
+					if(value==null) {
+						TableMeds=null;
+						return;
+					}
+					TableMeds=XmlConverter.XmlToTable(value);
+				}
+			}
 
 			public void ClearData() {
 				this.TableProgNotes=new DataTable();
