@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace OpenDentBusiness {
 	public class ClaimEdit {
@@ -78,9 +79,27 @@ namespace OpenDentBusiness {
 			public List<Procedure> ListProcs;
 			public List<ClaimValCodeLog> ListClaimValCodes;
 			public ClaimCondCodeLog ClaimCondCodeLogCur;
+			[XmlIgnore]
 			public DataTable TablePayments;
 			public List<ToothInitial> ListToothInitials;
 			public List<ClaimTracking> ListCustomStatusEntries;
+
+			[XmlElement(nameof(TablePayments))]
+			public string TablePaymentsXml {
+				get {
+					if(TablePayments==null) {
+						return null;
+					}
+					return XmlConverter.TableToXml(TablePayments);
+				}
+				set {
+					if(value==null) {
+						TablePayments=null;
+						return;
+					}
+					TablePayments=XmlConverter.XmlToTable(value);
+				}
+			}
 		}
 	}
 }
