@@ -36,7 +36,7 @@ namespace OpenDental {
 		private void FormJobManager_Load(object sender,EventArgs e) {
 			comboUser.Tag=Security.CurUser;
 			if(Security.IsAuthorized(Permissions.SecurityAdmin,true)) {
-				butReleaseCalc.Visible=true;
+				releaseCalculatorToolStripMenuItem.Visible=true;
 			}
 			_listUsers=Userods.GetUsersForJobs();
 			FillPriorityList();
@@ -47,8 +47,8 @@ namespace OpenDental {
 			Enum.GetNames(typeof(GroupJobsBy)).ToList().ForEach(x => comboGroup.Items.Add(x));
 			comboGroup.SelectedIndex=(int)GroupJobsBy.Hierarchy;
 			if(!JobPermissions.IsAuthorized(JobPerm.Concept,true) && !JobPermissions.IsAuthorized(JobPerm.QueryTech,true)) {
-				butAddJob.Enabled=false;
-				butAddChildJob.Enabled=false;
+				addJobToolStripMenuItem.Enabled=false;
+				addChildJobToolStripMenuItem.Enabled=false;
 			}
 			_listHiddenTabs=new List<TabPage>();
 			RefreshTabs();

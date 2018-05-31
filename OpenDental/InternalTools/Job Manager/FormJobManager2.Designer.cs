@@ -27,10 +27,7 @@
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormJobManager2));
 			this.contextMenuQueries = new System.Windows.Forms.ContextMenu();
 			this.menuGoToAccount = new System.Windows.Forms.MenuItem();
-			this.butReleaseCalc = new OpenDental.UI.Button();
-			this.butAddChildJob = new OpenDental.UI.Button();
-			this.butBugSubs = new OpenDental.UI.Button();
-			this.butDashboard = new OpenDental.UI.Button();
+			this.timerSearch = new System.Windows.Forms.Timer(this.components);
 			this.textSearch = new System.Windows.Forms.TextBox();
 			this.splitContainer1 = new System.Windows.Forms.SplitContainer();
 			this.tabControlNav = new System.Windows.Forms.TabControl();
@@ -71,10 +68,15 @@
 			this.label5 = new System.Windows.Forms.Label();
 			this.butSearch = new OpenDental.UI.Button();
 			this.butMe = new OpenDental.UI.Button();
-			this.butAddJob = new OpenDental.UI.Button();
 			this.comboUser = new System.Windows.Forms.ComboBox();
 			this.label4 = new System.Windows.Forms.Label();
-			this.timerSearch = new System.Windows.Forms.Timer(this.components);
+			this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+			this.addJobToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.addChildJobToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.dashboardToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.releaseCalculatorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.bugSubmissionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
 			this.splitContainer1.Panel1.SuspendLayout();
 			this.splitContainer1.Panel2.SuspendLayout();
@@ -89,6 +91,7 @@
 			this.tabNeedsEngineer.SuspendLayout();
 			this.tabNeedsExpert.SuspendLayout();
 			this.tabOnHold.SuspendLayout();
+			this.menuStrip1.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// contextMenuQueries
@@ -102,73 +105,18 @@
 			this.menuGoToAccount.Text = "Go To Account";
 			this.menuGoToAccount.Click += new System.EventHandler(this.menuGoToAccount_Click);
 			// 
-			// butReleaseCalc
+			// timerSearch
 			// 
-			this.butReleaseCalc.AdjustImageLocation = new System.Drawing.Point(0, 0);
-			this.butReleaseCalc.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.butReleaseCalc.Autosize = true;
-			this.butReleaseCalc.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
-			this.butReleaseCalc.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
-			this.butReleaseCalc.CornerRadius = 4F;
-			this.butReleaseCalc.Location = new System.Drawing.Point(979, 3);
-			this.butReleaseCalc.Name = "butReleaseCalc";
-			this.butReleaseCalc.Size = new System.Drawing.Size(105, 24);
-			this.butReleaseCalc.TabIndex = 246;
-			this.butReleaseCalc.Text = "Release Calculator";
-			this.butReleaseCalc.Visible = false;
-			this.butReleaseCalc.Click += new System.EventHandler(this.butReleaseCalc_Click);
-			// 
-			// butAddChildJob
-			// 
-			this.butAddChildJob.AdjustImageLocation = new System.Drawing.Point(0, 0);
-			this.butAddChildJob.Autosize = true;
-			this.butAddChildJob.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
-			this.butAddChildJob.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
-			this.butAddChildJob.CornerRadius = 4F;
-			this.butAddChildJob.Location = new System.Drawing.Point(85, 4);
-			this.butAddChildJob.Name = "butAddChildJob";
-			this.butAddChildJob.Size = new System.Drawing.Size(80, 24);
-			this.butAddChildJob.TabIndex = 245;
-			this.butAddChildJob.Text = "Add Child Job";
-			this.butAddChildJob.Click += new System.EventHandler(this.butAddChildJob_Click);
-			// 
-			// butBugSubs
-			// 
-			this.butBugSubs.AdjustImageLocation = new System.Drawing.Point(0, 0);
-			this.butBugSubs.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.butBugSubs.Autosize = true;
-			this.butBugSubs.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
-			this.butBugSubs.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
-			this.butBugSubs.CornerRadius = 4F;
-			this.butBugSubs.Location = new System.Drawing.Point(1090, 3);
-			this.butBugSubs.Name = "butBugSubs";
-			this.butBugSubs.Size = new System.Drawing.Size(97, 24);
-			this.butBugSubs.TabIndex = 244;
-			this.butBugSubs.Text = "Bug Submissions";
-			this.butBugSubs.Click += new System.EventHandler(this.butBugSubs_Click);
-			// 
-			// butDashboard
-			// 
-			this.butDashboard.AdjustImageLocation = new System.Drawing.Point(0, 0);
-			this.butDashboard.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.butDashboard.Autosize = true;
-			this.butDashboard.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
-			this.butDashboard.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
-			this.butDashboard.CornerRadius = 4F;
-			this.butDashboard.Location = new System.Drawing.Point(1189, 3);
-			this.butDashboard.Name = "butDashboard";
-			this.butDashboard.Size = new System.Drawing.Size(80, 24);
-			this.butDashboard.TabIndex = 243;
-			this.butDashboard.Text = "Dashboard";
-			this.butDashboard.Click += new System.EventHandler(this.butDashboard_Click);
+			this.timerSearch.Interval = 200;
+			this.timerSearch.Tick += new System.EventHandler(this.timerSearch_Tick);
 			// 
 			// textSearch
 			// 
 			this.textSearch.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.textSearch.Location = new System.Drawing.Point(462, 6);
+			this.textSearch.Location = new System.Drawing.Point(345, 32);
 			this.textSearch.Name = "textSearch";
-			this.textSearch.Size = new System.Drawing.Size(181, 20);
+			this.textSearch.Size = new System.Drawing.Size(343, 20);
 			this.textSearch.TabIndex = 240;
 			this.textSearch.TextChanged += new System.EventHandler(this.textSearchAction_TextChanged);
 			// 
@@ -177,7 +125,7 @@
 			this.splitContainer1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.splitContainer1.Location = new System.Drawing.Point(-1, 34);
+			this.splitContainer1.Location = new System.Drawing.Point(-1, 58);
 			this.splitContainer1.Name = "splitContainer1";
 			// 
 			// splitContainer1.Panel1
@@ -190,7 +138,7 @@
 			this.splitContainer1.Panel2.Controls.Add(this.userControlJobEdit);
 			this.splitContainer1.Panel2.Controls.Add(this.userControlQueryEdit);
 			this.splitContainer1.Panel2MinSize = 250;
-			this.splitContainer1.Size = new System.Drawing.Size(1284, 678);
+			this.splitContainer1.Size = new System.Drawing.Size(1284, 654);
 			this.splitContainer1.SplitterDistance = 293;
 			this.splitContainer1.TabIndex = 6;
 			// 
@@ -209,7 +157,7 @@
 			this.tabControlNav.Location = new System.Drawing.Point(0, 0);
 			this.tabControlNav.Name = "tabControlNav";
 			this.tabControlNav.SelectedIndex = 0;
-			this.tabControlNav.Size = new System.Drawing.Size(293, 678);
+			this.tabControlNav.Size = new System.Drawing.Size(293, 654);
 			this.tabControlNav.TabIndex = 1;
 			// 
 			// tabAction
@@ -219,7 +167,7 @@
 			this.tabAction.Location = new System.Drawing.Point(4, 22);
 			this.tabAction.Name = "tabAction";
 			this.tabAction.Padding = new System.Windows.Forms.Padding(3);
-			this.tabAction.Size = new System.Drawing.Size(285, 652);
+			this.tabAction.Size = new System.Drawing.Size(285, 628);
 			this.tabAction.TabIndex = 0;
 			this.tabAction.Text = "Needs Action";
 			this.tabAction.UseVisualStyleBackColor = true;
@@ -249,7 +197,7 @@
 			this.gridAction.Location = new System.Drawing.Point(3, 31);
 			this.gridAction.Name = "gridAction";
 			this.gridAction.ScrollValue = 0;
-			this.gridAction.Size = new System.Drawing.Size(279, 618);
+			this.gridAction.Size = new System.Drawing.Size(279, 594);
 			this.gridAction.TabIndex = 227;
 			this.gridAction.Title = "Action Items";
 			this.gridAction.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
@@ -265,7 +213,7 @@
 			this.tabDocumentation.Location = new System.Drawing.Point(4, 22);
 			this.tabDocumentation.Name = "tabDocumentation";
 			this.tabDocumentation.Padding = new System.Windows.Forms.Padding(3);
-			this.tabDocumentation.Size = new System.Drawing.Size(285, 652);
+			this.tabDocumentation.Size = new System.Drawing.Size(285, 628);
 			this.tabDocumentation.TabIndex = 6;
 			this.tabDocumentation.Text = "Documentation";
 			this.tabDocumentation.UseVisualStyleBackColor = true;
@@ -285,7 +233,7 @@
 			this.gridDocumentation.Location = new System.Drawing.Point(3, 3);
 			this.gridDocumentation.Name = "gridDocumentation";
 			this.gridDocumentation.ScrollValue = 0;
-			this.gridDocumentation.Size = new System.Drawing.Size(279, 645);
+			this.gridDocumentation.Size = new System.Drawing.Size(279, 621);
 			this.gridDocumentation.TabIndex = 239;
 			this.gridDocumentation.Title = "Action Items";
 			this.gridDocumentation.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
@@ -301,7 +249,7 @@
 			this.tabQuery.Location = new System.Drawing.Point(4, 22);
 			this.tabQuery.Name = "tabQuery";
 			this.tabQuery.Padding = new System.Windows.Forms.Padding(3);
-			this.tabQuery.Size = new System.Drawing.Size(285, 652);
+			this.tabQuery.Size = new System.Drawing.Size(285, 628);
 			this.tabQuery.TabIndex = 5;
 			this.tabQuery.Text = "Queries";
 			this.tabQuery.UseVisualStyleBackColor = true;
@@ -347,7 +295,7 @@
 			this.gridQueries.Location = new System.Drawing.Point(2, 29);
 			this.gridQueries.Name = "gridQueries";
 			this.gridQueries.ScrollValue = 0;
-			this.gridQueries.Size = new System.Drawing.Size(280, 620);
+			this.gridQueries.Size = new System.Drawing.Size(280, 596);
 			this.gridQueries.TabIndex = 230;
 			this.gridQueries.Title = "Queries to be done";
 			this.gridQueries.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
@@ -360,7 +308,7 @@
 			this.tabNotify.Controls.Add(this.gridNotify);
 			this.tabNotify.Location = new System.Drawing.Point(4, 22);
 			this.tabNotify.Name = "tabNotify";
-			this.tabNotify.Size = new System.Drawing.Size(285, 652);
+			this.tabNotify.Size = new System.Drawing.Size(285, 628);
 			this.tabNotify.TabIndex = 7;
 			this.tabNotify.Text = "Notify Customer";
 			this.tabNotify.UseVisualStyleBackColor = true;
@@ -380,7 +328,7 @@
 			this.gridNotify.Location = new System.Drawing.Point(3, 4);
 			this.gridNotify.Name = "gridNotify";
 			this.gridNotify.ScrollValue = 0;
-			this.gridNotify.Size = new System.Drawing.Size(279, 645);
+			this.gridNotify.Size = new System.Drawing.Size(279, 621);
 			this.gridNotify.TabIndex = 240;
 			this.gridNotify.Title = "Action Items";
 			this.gridNotify.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
@@ -397,7 +345,7 @@
 			this.tabSubscribed.Location = new System.Drawing.Point(4, 22);
 			this.tabSubscribed.Name = "tabSubscribed";
 			this.tabSubscribed.Padding = new System.Windows.Forms.Padding(3);
-			this.tabSubscribed.Size = new System.Drawing.Size(285, 652);
+			this.tabSubscribed.Size = new System.Drawing.Size(285, 628);
 			this.tabSubscribed.TabIndex = 8;
 			this.tabSubscribed.Text = "Subscribed Jobs";
 			this.tabSubscribed.UseVisualStyleBackColor = true;
@@ -453,7 +401,7 @@
 			this.gridSubscribedJobs.Location = new System.Drawing.Point(2, 49);
 			this.gridSubscribedJobs.Name = "gridSubscribedJobs";
 			this.gridSubscribedJobs.ScrollValue = 0;
-			this.gridSubscribedJobs.Size = new System.Drawing.Size(280, 600);
+			this.gridSubscribedJobs.Size = new System.Drawing.Size(280, 576);
 			this.gridSubscribedJobs.TabIndex = 239;
 			this.gridSubscribedJobs.Title = "Subscribed Jobs";
 			this.gridSubscribedJobs.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
@@ -476,7 +424,7 @@
 			this.tabTree.Location = new System.Drawing.Point(4, 22);
 			this.tabTree.Name = "tabTree";
 			this.tabTree.Padding = new System.Windows.Forms.Padding(3);
-			this.tabTree.Size = new System.Drawing.Size(285, 652);
+			this.tabTree.Size = new System.Drawing.Size(285, 628);
 			this.tabTree.TabIndex = 1;
 			this.tabTree.Text = "Tree View";
 			this.tabTree.UseVisualStyleBackColor = true;
@@ -518,7 +466,7 @@
 			this.treeJobs.Indent = 9;
 			this.treeJobs.Location = new System.Drawing.Point(3, 118);
 			this.treeJobs.Name = "treeJobs";
-			this.treeJobs.Size = new System.Drawing.Size(283, 531);
+			this.treeJobs.Size = new System.Drawing.Size(283, 507);
 			this.treeJobs.TabIndex = 220;
 			this.treeJobs.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.treeJobs_ItemDrag);
 			this.treeJobs.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.treeJobs_NodeMouseClick);
@@ -599,7 +547,7 @@
 			this.tabNeedsEngineer.Location = new System.Drawing.Point(4, 22);
 			this.tabNeedsEngineer.Name = "tabNeedsEngineer";
 			this.tabNeedsEngineer.Padding = new System.Windows.Forms.Padding(3);
-			this.tabNeedsEngineer.Size = new System.Drawing.Size(285, 652);
+			this.tabNeedsEngineer.Size = new System.Drawing.Size(285, 628);
 			this.tabNeedsEngineer.TabIndex = 2;
 			this.tabNeedsEngineer.Text = "Needs Engineer";
 			this.tabNeedsEngineer.UseVisualStyleBackColor = true;
@@ -619,7 +567,7 @@
 			this.gridAvailableJobs.Location = new System.Drawing.Point(0, 0);
 			this.gridAvailableJobs.Name = "gridAvailableJobs";
 			this.gridAvailableJobs.ScrollValue = 0;
-			this.gridAvailableJobs.Size = new System.Drawing.Size(285, 652);
+			this.gridAvailableJobs.Size = new System.Drawing.Size(285, 628);
 			this.gridAvailableJobs.TabIndex = 228;
 			this.gridAvailableJobs.Title = "Available Engineer Jobs";
 			this.gridAvailableJobs.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
@@ -634,7 +582,7 @@
 			this.tabNeedsExpert.Location = new System.Drawing.Point(4, 22);
 			this.tabNeedsExpert.Name = "tabNeedsExpert";
 			this.tabNeedsExpert.Padding = new System.Windows.Forms.Padding(3);
-			this.tabNeedsExpert.Size = new System.Drawing.Size(285, 652);
+			this.tabNeedsExpert.Size = new System.Drawing.Size(285, 628);
 			this.tabNeedsExpert.TabIndex = 3;
 			this.tabNeedsExpert.Text = "Needs Expert";
 			this.tabNeedsExpert.UseVisualStyleBackColor = true;
@@ -654,7 +602,7 @@
 			this.gridAvailableJobsExpert.Location = new System.Drawing.Point(0, 0);
 			this.gridAvailableJobsExpert.Name = "gridAvailableJobsExpert";
 			this.gridAvailableJobsExpert.ScrollValue = 0;
-			this.gridAvailableJobsExpert.Size = new System.Drawing.Size(285, 652);
+			this.gridAvailableJobsExpert.Size = new System.Drawing.Size(285, 628);
 			this.gridAvailableJobsExpert.TabIndex = 229;
 			this.gridAvailableJobsExpert.Title = "Available Expert Jobs";
 			this.gridAvailableJobsExpert.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
@@ -669,7 +617,7 @@
 			this.tabOnHold.Location = new System.Drawing.Point(4, 22);
 			this.tabOnHold.Name = "tabOnHold";
 			this.tabOnHold.Padding = new System.Windows.Forms.Padding(3);
-			this.tabOnHold.Size = new System.Drawing.Size(285, 652);
+			this.tabOnHold.Size = new System.Drawing.Size(285, 628);
 			this.tabOnHold.TabIndex = 4;
 			this.tabOnHold.Text = "On Hold";
 			this.tabOnHold.UseVisualStyleBackColor = true;
@@ -689,7 +637,7 @@
 			this.gridJobsOnHold.Location = new System.Drawing.Point(0, 0);
 			this.gridJobsOnHold.Name = "gridJobsOnHold";
 			this.gridJobsOnHold.ScrollValue = 0;
-			this.gridJobsOnHold.Size = new System.Drawing.Size(285, 652);
+			this.gridJobsOnHold.Size = new System.Drawing.Size(285, 628);
 			this.gridJobsOnHold.TabIndex = 230;
 			this.gridJobsOnHold.Title = "Jobs On Hold";
 			this.gridJobsOnHold.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
@@ -705,7 +653,7 @@
 			this.userControlJobEdit.IsOverride = false;
 			this.userControlJobEdit.Location = new System.Drawing.Point(0, 0);
 			this.userControlJobEdit.Name = "userControlJobEdit";
-			this.userControlJobEdit.Size = new System.Drawing.Size(987, 678);
+			this.userControlJobEdit.Size = new System.Drawing.Size(987, 654);
 			this.userControlJobEdit.TabIndex = 0;
 			this.userControlJobEdit.SaveClick += new System.EventHandler(this.userControlJobEdit_SaveClick);
 			this.userControlJobEdit.RequestJob += new OpenDental.InternalTools.Job_Manager.UserControlJobEdit.RequestJobEvent(this.userControlJobEdit_RequestJob);
@@ -717,7 +665,7 @@
 			this.userControlQueryEdit.IsOverride = false;
 			this.userControlQueryEdit.Location = new System.Drawing.Point(0, 0);
 			this.userControlQueryEdit.Name = "userControlQueryEdit";
-			this.userControlQueryEdit.Size = new System.Drawing.Size(987, 678);
+			this.userControlQueryEdit.Size = new System.Drawing.Size(987, 654);
 			this.userControlQueryEdit.TabIndex = 1;
 			this.userControlQueryEdit.Visible = false;
 			this.userControlQueryEdit.SaveClick += new System.EventHandler(this.userControlQueryEdit_SaveClick);
@@ -725,7 +673,7 @@
 			// 
 			// label5
 			// 
-			this.label5.Location = new System.Drawing.Point(406, 5);
+			this.label5.Location = new System.Drawing.Point(289, 31);
 			this.label5.Margin = new System.Windows.Forms.Padding(0);
 			this.label5.Name = "label5";
 			this.label5.Size = new System.Drawing.Size(55, 20);
@@ -741,7 +689,7 @@
 			this.butSearch.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
 			this.butSearch.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
 			this.butSearch.CornerRadius = 4F;
-			this.butSearch.Location = new System.Drawing.Point(649, 4);
+			this.butSearch.Location = new System.Drawing.Point(694, 29);
 			this.butSearch.Name = "butSearch";
 			this.butSearch.Size = new System.Drawing.Size(80, 24);
 			this.butSearch.TabIndex = 231;
@@ -755,40 +703,26 @@
 			this.butMe.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
 			this.butMe.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
 			this.butMe.CornerRadius = 4F;
-			this.butMe.Location = new System.Drawing.Point(372, 6);
+			this.butMe.Location = new System.Drawing.Point(254, 32);
 			this.butMe.Name = "butMe";
 			this.butMe.Size = new System.Drawing.Size(31, 21);
 			this.butMe.TabIndex = 239;
 			this.butMe.Text = "Me";
 			this.butMe.Click += new System.EventHandler(this.butMe_Click);
 			// 
-			// butAddJob
-			// 
-			this.butAddJob.AdjustImageLocation = new System.Drawing.Point(0, 0);
-			this.butAddJob.Autosize = true;
-			this.butAddJob.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
-			this.butAddJob.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
-			this.butAddJob.CornerRadius = 4F;
-			this.butAddJob.Location = new System.Drawing.Point(5, 4);
-			this.butAddJob.Name = "butAddJob";
-			this.butAddJob.Size = new System.Drawing.Size(75, 24);
-			this.butAddJob.TabIndex = 227;
-			this.butAddJob.Text = "Add Job";
-			this.butAddJob.Click += new System.EventHandler(this.butAddJob_Click);
-			// 
 			// comboUser
 			// 
 			this.comboUser.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.comboUser.FormattingEnabled = true;
-			this.comboUser.Location = new System.Drawing.Point(219, 6);
+			this.comboUser.Location = new System.Drawing.Point(64, 32);
 			this.comboUser.Name = "comboUser";
-			this.comboUser.Size = new System.Drawing.Size(153, 21);
+			this.comboUser.Size = new System.Drawing.Size(184, 21);
 			this.comboUser.TabIndex = 236;
 			this.comboUser.SelectionChangeCommitted += new System.EventHandler(this.comboUser_SelectionChangeCommitted);
 			// 
 			// label4
 			// 
-			this.label4.Location = new System.Drawing.Point(163, 9);
+			this.label4.Location = new System.Drawing.Point(8, 35);
 			this.label4.Margin = new System.Windows.Forms.Padding(0);
 			this.label4.Name = "label4";
 			this.label4.Size = new System.Drawing.Size(55, 15);
@@ -796,28 +730,77 @@
 			this.label4.Text = "User";
 			this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
-			// timerSearch
+			// menuStrip1
 			// 
-			this.timerSearch.Interval = 200;
-			this.timerSearch.Tick += new System.EventHandler(this.timerSearch_Tick);
+			this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.addJobToolStripMenuItem,
+            this.addChildJobToolStripMenuItem,
+            this.toolsToolStripMenuItem,
+            this.bugSubmissionsToolStripMenuItem});
+			this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+			this.menuStrip1.Name = "menuStrip1";
+			this.menuStrip1.Size = new System.Drawing.Size(1281, 24);
+			this.menuStrip1.TabIndex = 247;
+			this.menuStrip1.Text = "menuStrip1";
+			// 
+			// addJobToolStripMenuItem
+			// 
+			this.addJobToolStripMenuItem.Name = "addJobToolStripMenuItem";
+			this.addJobToolStripMenuItem.Size = new System.Drawing.Size(62, 20);
+			this.addJobToolStripMenuItem.Text = "Add Job";
+			this.addJobToolStripMenuItem.Click += new System.EventHandler(this.butAddJob_Click);
+			// 
+			// addChildJobToolStripMenuItem
+			// 
+			this.addChildJobToolStripMenuItem.Name = "addChildJobToolStripMenuItem";
+			this.addChildJobToolStripMenuItem.Size = new System.Drawing.Size(93, 20);
+			this.addChildJobToolStripMenuItem.Text = "Add Child Job";
+			this.addChildJobToolStripMenuItem.Click += new System.EventHandler(this.butAddChildJob_Click);
+			// 
+			// toolsToolStripMenuItem
+			// 
+			this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.dashboardToolStripMenuItem,
+            this.releaseCalculatorToolStripMenuItem});
+			this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
+			this.toolsToolStripMenuItem.Size = new System.Drawing.Size(47, 20);
+			this.toolsToolStripMenuItem.Text = "Tools";
+			// 
+			// dashboardToolStripMenuItem
+			// 
+			this.dashboardToolStripMenuItem.Name = "dashboardToolStripMenuItem";
+			this.dashboardToolStripMenuItem.Size = new System.Drawing.Size(170, 22);
+			this.dashboardToolStripMenuItem.Text = "Dashboard";
+			this.dashboardToolStripMenuItem.Click += new System.EventHandler(this.butDashboard_Click);
+			// 
+			// releaseCalculatorToolStripMenuItem
+			// 
+			this.releaseCalculatorToolStripMenuItem.Name = "releaseCalculatorToolStripMenuItem";
+			this.releaseCalculatorToolStripMenuItem.Size = new System.Drawing.Size(170, 22);
+			this.releaseCalculatorToolStripMenuItem.Text = "Release Calculator";
+			this.releaseCalculatorToolStripMenuItem.Click += new System.EventHandler(this.butReleaseCalc_Click);
+			// 
+			// bugSubmissionsToolStripMenuItem
+			// 
+			this.bugSubmissionsToolStripMenuItem.Name = "bugSubmissionsToolStripMenuItem";
+			this.bugSubmissionsToolStripMenuItem.Size = new System.Drawing.Size(109, 20);
+			this.bugSubmissionsToolStripMenuItem.Text = "Bug Submissions";
+			this.bugSubmissionsToolStripMenuItem.Click += new System.EventHandler(this.butBugSubs_Click);
 			// 
 			// FormJobManager2
 			// 
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
 			this.ClientSize = new System.Drawing.Size(1281, 712);
-			this.Controls.Add(this.butReleaseCalc);
-			this.Controls.Add(this.butAddChildJob);
-			this.Controls.Add(this.butBugSubs);
-			this.Controls.Add(this.butDashboard);
 			this.Controls.Add(this.textSearch);
 			this.Controls.Add(this.splitContainer1);
 			this.Controls.Add(this.label5);
 			this.Controls.Add(this.butSearch);
 			this.Controls.Add(this.butMe);
-			this.Controls.Add(this.butAddJob);
 			this.Controls.Add(this.comboUser);
 			this.Controls.Add(this.label4);
+			this.Controls.Add(this.menuStrip1);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+			this.MainMenuStrip = this.menuStrip1;
 			this.Name = "FormJobManager2";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "Job Manager 2";
@@ -838,6 +821,8 @@
 			this.tabNeedsEngineer.ResumeLayout(false);
 			this.tabNeedsExpert.ResumeLayout(false);
 			this.tabOnHold.ResumeLayout(false);
+			this.menuStrip1.ResumeLayout(false);
+			this.menuStrip1.PerformLayout();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -846,7 +831,6 @@
 		#endregion
 
 		private System.Windows.Forms.SplitContainer splitContainer1;
-		private UI.Button butAddJob;
 		private System.Windows.Forms.CheckBox checkCollapse;
 		private System.Windows.Forms.Label labelGroupBy;
 		private System.Windows.Forms.TreeView treeJobs;
@@ -869,7 +853,6 @@
 		private System.Windows.Forms.CheckBox checkResults;
 		private System.Windows.Forms.TabPage tabNeedsEngineer;
 		private UI.ODGrid gridAvailableJobs;
-		private UI.Button butDashboard;
 		private System.Windows.Forms.TabPage tabNeedsExpert;
 		private UI.ODGrid gridAvailableJobsExpert;
 		private System.Windows.Forms.TabPage tabOnHold;
@@ -886,14 +869,18 @@
 		private UI.ODGrid gridNotify;
 		private System.Windows.Forms.ContextMenu contextMenuQueries;
 		private System.Windows.Forms.MenuItem menuGoToAccount;
-		private UI.Button butBugSubs;
-		private UI.Button butAddChildJob;
-		private UI.Button butReleaseCalc;
 		private System.Windows.Forms.TabPage tabSubscribed;
 		private System.Windows.Forms.CheckBox checkSubscribedIncludeCancelled;
 		private System.Windows.Forms.CheckBox checkSubscribedIncludeComplete;
 		private UI.ODGrid gridSubscribedJobs;
 		private System.Windows.Forms.CheckBox checkSubscribedIncludeOnHold;
 		private System.Windows.Forms.Timer timerSearch;
+		private System.Windows.Forms.MenuStrip menuStrip1;
+		private System.Windows.Forms.ToolStripMenuItem addJobToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem addChildJobToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem toolsToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem dashboardToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem releaseCalculatorToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem bugSubmissionsToolStripMenuItem;
 	}
 }

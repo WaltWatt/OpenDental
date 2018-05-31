@@ -24,13 +24,9 @@ namespace OpenDental{
 		/// </summary>
 		private void InitializeComponent() {
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormReleaseCalculator));
-			this.label2 = new System.Windows.Forms.Label();
-			this.textAvgJobHours = new System.Windows.Forms.TextBox();
-			this.textEngJobPercent = new System.Windows.Forms.TextBox();
-			this.label1 = new System.Windows.Forms.Label();
-			this.label7 = new System.Windows.Forms.Label();
-			this.textBreakHours = new System.Windows.Forms.TextBox();
 			this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+			this.tabControl1 = new System.Windows.Forms.TabControl();
+			this.tabPage1 = new System.Windows.Forms.TabPage();
 			this.panel1 = new System.Windows.Forms.Panel();
 			this.panelExtra = new System.Windows.Forms.Panel();
 			this.listEngNoJobs = new System.Windows.Forms.ListBox();
@@ -51,84 +47,69 @@ namespace OpenDental{
 			this.labelJobNumber = new System.Windows.Forms.Label();
 			this.label8 = new System.Windows.Forms.Label();
 			this.labelReleaseDate = new System.Windows.Forms.Label();
+			this.tabPage2 = new System.Windows.Forms.TabPage();
+			this.gridCalculatedJobs = new OpenDental.UI.ODGrid();
 			this.panel2 = new System.Windows.Forms.Panel();
+			this.label7 = new System.Windows.Forms.Label();
 			this.listEngineers = new System.Windows.Forms.ListBox();
 			this.label3 = new System.Windows.Forms.Label();
+			this.textBreakHours = new System.Windows.Forms.TextBox();
+			this.label1 = new System.Windows.Forms.Label();
 			this.butCalculate = new OpenDental.UI.Button();
+			this.textEngJobPercent = new System.Windows.Forms.TextBox();
 			this.label6 = new System.Windows.Forms.Label();
+			this.textAvgJobHours = new System.Windows.Forms.TextBox();
+			this.label2 = new System.Windows.Forms.Label();
 			this.listPhases = new System.Windows.Forms.ListBox();
 			this.label5 = new System.Windows.Forms.Label();
 			this.listCategories = new System.Windows.Forms.ListBox();
 			this.label4 = new System.Windows.Forms.Label();
 			this.listPriorities = new System.Windows.Forms.ListBox();
 			this.tableLayoutPanel1.SuspendLayout();
+			this.tabControl1.SuspendLayout();
+			this.tabPage1.SuspendLayout();
 			this.panel1.SuspendLayout();
 			this.panelExtra.SuspendLayout();
+			this.tabPage2.SuspendLayout();
 			this.panel2.SuspendLayout();
 			this.SuspendLayout();
-			// 
-			// label2
-			// 
-			this.label2.AutoSize = true;
-			this.label2.Location = new System.Drawing.Point(18, 32);
-			this.label2.Name = "label2";
-			this.label2.Size = new System.Drawing.Size(77, 13);
-			this.label2.TabIndex = 9;
-			this.label2.Text = "Avg Job Hours";
-			// 
-			// textAvgJobHours
-			// 
-			this.textAvgJobHours.Location = new System.Drawing.Point(101, 29);
-			this.textAvgJobHours.Name = "textAvgJobHours";
-			this.textAvgJobHours.Size = new System.Drawing.Size(46, 20);
-			this.textAvgJobHours.TabIndex = 8;
-			// 
-			// textEngJobPercent
-			// 
-			this.textEngJobPercent.Location = new System.Drawing.Point(101, 3);
-			this.textEngJobPercent.Name = "textEngJobPercent";
-			this.textEngJobPercent.Size = new System.Drawing.Size(46, 20);
-			this.textEngJobPercent.TabIndex = 6;
-			// 
-			// label1
-			// 
-			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(31, 6);
-			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(64, 13);
-			this.label1.TabIndex = 7;
-			this.label1.Text = "Job Percent";
-			// 
-			// label7
-			// 
-			this.label7.AutoSize = true;
-			this.label7.Location = new System.Drawing.Point(7, 58);
-			this.label7.Name = "label7";
-			this.label7.Size = new System.Drawing.Size(88, 13);
-			this.label7.TabIndex = 19;
-			this.label7.Text = "Avg Break Hours";
-			// 
-			// textBreakHours
-			// 
-			this.textBreakHours.Location = new System.Drawing.Point(101, 55);
-			this.textBreakHours.Name = "textBreakHours";
-			this.textBreakHours.Size = new System.Drawing.Size(46, 20);
-			this.textBreakHours.TabIndex = 18;
 			// 
 			// tableLayoutPanel1
 			// 
 			this.tableLayoutPanel1.ColumnCount = 2;
 			this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 61.53846F));
 			this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 38.46154F));
-			this.tableLayoutPanel1.Controls.Add(this.panel1, 1, 0);
+			this.tableLayoutPanel1.Controls.Add(this.tabControl1, 1, 0);
 			this.tableLayoutPanel1.Controls.Add(this.panel2, 0, 0);
 			this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
 			this.tableLayoutPanel1.Name = "tableLayoutPanel1";
 			this.tableLayoutPanel1.RowCount = 1;
 			this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-			this.tableLayoutPanel1.Size = new System.Drawing.Size(722, 392);
+			this.tableLayoutPanel1.Size = new System.Drawing.Size(868, 392);
 			this.tableLayoutPanel1.TabIndex = 9;
+			// 
+			// tabControl1
+			// 
+			this.tabControl1.Controls.Add(this.tabPage1);
+			this.tabControl1.Controls.Add(this.tabPage2);
+			this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.tabControl1.Location = new System.Drawing.Point(537, 3);
+			this.tabControl1.Name = "tabControl1";
+			this.tabControl1.SelectedIndex = 0;
+			this.tabControl1.Size = new System.Drawing.Size(328, 386);
+			this.tabControl1.TabIndex = 26;
+			// 
+			// tabPage1
+			// 
+			this.tabPage1.Controls.Add(this.panel1);
+			this.tabPage1.Location = new System.Drawing.Point(4, 22);
+			this.tabPage1.Name = "tabPage1";
+			this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
+			this.tabPage1.Size = new System.Drawing.Size(320, 360);
+			this.tabPage1.TabIndex = 0;
+			this.tabPage1.Text = "Calculations";
+			this.tabPage1.UseVisualStyleBackColor = true;
 			// 
 			// panel1
 			// 
@@ -146,9 +127,9 @@ namespace OpenDental{
 			this.panel1.Controls.Add(this.label8);
 			this.panel1.Controls.Add(this.labelReleaseDate);
 			this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.panel1.Location = new System.Drawing.Point(447, 3);
+			this.panel1.Location = new System.Drawing.Point(3, 3);
 			this.panel1.Name = "panel1";
-			this.panel1.Size = new System.Drawing.Size(272, 386);
+			this.panel1.Size = new System.Drawing.Size(314, 354);
 			this.panel1.TabIndex = 0;
 			// 
 			// panelExtra
@@ -162,23 +143,23 @@ namespace OpenDental{
 			this.panelExtra.Controls.Add(this.butJob2);
 			this.panelExtra.Location = new System.Drawing.Point(3, 133);
 			this.panelExtra.Name = "panelExtra";
-			this.panelExtra.Size = new System.Drawing.Size(266, 250);
+			this.panelExtra.Size = new System.Drawing.Size(309, 224);
 			this.panelExtra.TabIndex = 25;
 			this.panelExtra.Visible = false;
 			// 
 			// listEngNoJobs
 			// 
 			this.listEngNoJobs.FormattingEnabled = true;
-			this.listEngNoJobs.Location = new System.Drawing.Point(43, 135);
+			this.listEngNoJobs.Location = new System.Drawing.Point(69, 135);
 			this.listEngNoJobs.Name = "listEngNoJobs";
 			this.listEngNoJobs.SelectionMode = System.Windows.Forms.SelectionMode.None;
-			this.listEngNoJobs.Size = new System.Drawing.Size(169, 108);
+			this.listEngNoJobs.Size = new System.Drawing.Size(169, 82);
 			this.listEngNoJobs.TabIndex = 23;
 			// 
 			// label15
 			// 
 			this.label15.AutoSize = true;
-			this.label15.Location = new System.Drawing.Point(40, 119);
+			this.label15.Location = new System.Drawing.Point(66, 119);
 			this.label15.Name = "label15";
 			this.label15.Size = new System.Drawing.Size(165, 13);
 			this.label15.TabIndex = 24;
@@ -187,7 +168,7 @@ namespace OpenDental{
 			// label14
 			// 
 			this.label14.AutoSize = true;
-			this.label14.Location = new System.Drawing.Point(6, 9);
+			this.label14.Location = new System.Drawing.Point(34, 9);
 			this.label14.Name = "label14";
 			this.label14.Size = new System.Drawing.Size(206, 13);
 			this.label14.TabIndex = 18;
@@ -200,7 +181,7 @@ namespace OpenDental{
 			this.butJob1.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
 			this.butJob1.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
 			this.butJob1.CornerRadius = 4F;
-			this.butJob1.Location = new System.Drawing.Point(86, 25);
+			this.butJob1.Location = new System.Drawing.Point(114, 25);
 			this.butJob1.Name = "butJob1";
 			this.butJob1.Size = new System.Drawing.Size(84, 23);
 			this.butJob1.TabIndex = 20;
@@ -215,7 +196,7 @@ namespace OpenDental{
 			this.butJob3.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
 			this.butJob3.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
 			this.butJob3.CornerRadius = 4F;
-			this.butJob3.Location = new System.Drawing.Point(86, 83);
+			this.butJob3.Location = new System.Drawing.Point(114, 83);
 			this.butJob3.Name = "butJob3";
 			this.butJob3.Size = new System.Drawing.Size(84, 23);
 			this.butJob3.TabIndex = 22;
@@ -230,7 +211,7 @@ namespace OpenDental{
 			this.butJob2.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
 			this.butJob2.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
 			this.butJob2.CornerRadius = 4F;
-			this.butJob2.Location = new System.Drawing.Point(86, 54);
+			this.butJob2.Location = new System.Drawing.Point(114, 54);
 			this.butJob2.Name = "butJob2";
 			this.butJob2.Size = new System.Drawing.Size(84, 23);
 			this.butJob2.TabIndex = 21;
@@ -242,7 +223,7 @@ namespace OpenDental{
 			// 
 			this.label12.AutoSize = true;
 			this.label12.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Underline))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.label12.Location = new System.Drawing.Point(22, 88);
+			this.label12.Location = new System.Drawing.Point(48, 88);
 			this.label12.Name = "label12";
 			this.label12.Size = new System.Drawing.Size(231, 24);
 			this.label12.TabIndex = 16;
@@ -251,7 +232,7 @@ namespace OpenDental{
 			// labelJobHours
 			// 
 			this.labelJobHours.AutoSize = true;
-			this.labelJobHours.Location = new System.Drawing.Point(215, 29);
+			this.labelJobHours.Location = new System.Drawing.Point(259, 29);
 			this.labelJobHours.Name = "labelJobHours";
 			this.labelJobHours.Size = new System.Drawing.Size(13, 13);
 			this.labelJobHours.TabIndex = 15;
@@ -260,7 +241,7 @@ namespace OpenDental{
 			// label13
 			// 
 			this.label13.AutoSize = true;
-			this.label13.Location = new System.Drawing.Point(151, 29);
+			this.label13.Location = new System.Drawing.Point(195, 29);
 			this.label13.Name = "label13";
 			this.label13.Size = new System.Drawing.Size(58, 13);
 			this.label13.TabIndex = 14;
@@ -323,7 +304,7 @@ namespace OpenDental{
 			// labelJobNumber
 			// 
 			this.labelJobNumber.AutoSize = true;
-			this.labelJobNumber.Location = new System.Drawing.Point(215, 3);
+			this.labelJobNumber.Location = new System.Drawing.Point(259, 3);
 			this.labelJobNumber.Name = "labelJobNumber";
 			this.labelJobNumber.Size = new System.Drawing.Size(13, 13);
 			this.labelJobNumber.TabIndex = 7;
@@ -332,7 +313,7 @@ namespace OpenDental{
 			// label8
 			// 
 			this.label8.AutoSize = true;
-			this.label8.Location = new System.Drawing.Point(151, 3);
+			this.label8.Location = new System.Drawing.Point(195, 3);
 			this.label8.Name = "label8";
 			this.label8.Size = new System.Drawing.Size(54, 13);
 			this.label8.TabIndex = 6;
@@ -342,12 +323,44 @@ namespace OpenDental{
 			// 
 			this.labelReleaseDate.AutoSize = true;
 			this.labelReleaseDate.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.labelReleaseDate.Location = new System.Drawing.Point(94, 112);
+			this.labelReleaseDate.Location = new System.Drawing.Point(120, 112);
 			this.labelReleaseDate.Name = "labelReleaseDate";
 			this.labelReleaseDate.Size = new System.Drawing.Size(87, 18);
 			this.labelReleaseDate.TabIndex = 5;
 			this.labelReleaseDate.Text = "releaseDate";
 			this.labelReleaseDate.Visible = false;
+			// 
+			// tabPage2
+			// 
+			this.tabPage2.Controls.Add(this.gridCalculatedJobs);
+			this.tabPage2.Location = new System.Drawing.Point(4, 22);
+			this.tabPage2.Name = "tabPage2";
+			this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+			this.tabPage2.Size = new System.Drawing.Size(320, 360);
+			this.tabPage2.TabIndex = 1;
+			this.tabPage2.Text = "Jobs";
+			this.tabPage2.UseVisualStyleBackColor = true;
+			// 
+			// gridCalculatedJobs
+			// 
+			this.gridCalculatedJobs.CellFont = new System.Drawing.Font("Microsoft Sans Serif", 8.5F);
+			this.gridCalculatedJobs.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.gridCalculatedJobs.HasAddButton = false;
+			this.gridCalculatedJobs.HasDropDowns = false;
+			this.gridCalculatedJobs.HasMultilineHeaders = false;
+			this.gridCalculatedJobs.HeaderFont = new System.Drawing.Font("Microsoft Sans Serif", 8.5F, System.Drawing.FontStyle.Bold);
+			this.gridCalculatedJobs.HeaderHeight = 15;
+			this.gridCalculatedJobs.HScrollVisible = false;
+			this.gridCalculatedJobs.Location = new System.Drawing.Point(3, 3);
+			this.gridCalculatedJobs.Name = "gridCalculatedJobs";
+			this.gridCalculatedJobs.ScrollValue = 0;
+			this.gridCalculatedJobs.Size = new System.Drawing.Size(314, 354);
+			this.gridCalculatedJobs.TabIndex = 0;
+			this.gridCalculatedJobs.Title = "";
+			this.gridCalculatedJobs.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
+			this.gridCalculatedJobs.TitleHeight = 0;
+			this.gridCalculatedJobs.TranslationName = "Jobs";
+			this.gridCalculatedJobs.CellDoubleClick += new OpenDental.UI.ODGridClickEventHandler(this.gridCalculatedJobs_CellDoubleClick);
 			// 
 			// panel2
 			// 
@@ -369,8 +382,17 @@ namespace OpenDental{
 			this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.panel2.Location = new System.Drawing.Point(3, 3);
 			this.panel2.Name = "panel2";
-			this.panel2.Size = new System.Drawing.Size(438, 386);
+			this.panel2.Size = new System.Drawing.Size(528, 386);
 			this.panel2.TabIndex = 20;
+			// 
+			// label7
+			// 
+			this.label7.AutoSize = true;
+			this.label7.Location = new System.Drawing.Point(7, 58);
+			this.label7.Name = "label7";
+			this.label7.Size = new System.Drawing.Size(88, 13);
+			this.label7.TabIndex = 19;
+			this.label7.Text = "Avg Break Hours";
 			// 
 			// listEngineers
 			// 
@@ -378,7 +400,7 @@ namespace OpenDental{
 			this.listEngineers.Location = new System.Drawing.Point(9, 112);
 			this.listEngineers.Name = "listEngineers";
 			this.listEngineers.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-			this.listEngineers.Size = new System.Drawing.Size(125, 225);
+			this.listEngineers.Size = new System.Drawing.Size(170, 225);
 			this.listEngineers.TabIndex = 12;
 			// 
 			// label3
@@ -389,6 +411,22 @@ namespace OpenDental{
 			this.label3.Size = new System.Drawing.Size(54, 13);
 			this.label3.TabIndex = 14;
 			this.label3.Text = "Engineers";
+			// 
+			// textBreakHours
+			// 
+			this.textBreakHours.Location = new System.Drawing.Point(101, 55);
+			this.textBreakHours.Name = "textBreakHours";
+			this.textBreakHours.Size = new System.Drawing.Size(46, 20);
+			this.textBreakHours.TabIndex = 18;
+			// 
+			// label1
+			// 
+			this.label1.AutoSize = true;
+			this.label1.Location = new System.Drawing.Point(31, 6);
+			this.label1.Name = "label1";
+			this.label1.Size = new System.Drawing.Size(64, 13);
+			this.label1.TabIndex = 7;
+			this.label1.Text = "Job Percent";
 			// 
 			// butCalculate
 			// 
@@ -402,10 +440,17 @@ namespace OpenDental{
 			this.butCalculate.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.butCalculate.Location = new System.Drawing.Point(140, 341);
 			this.butCalculate.Name = "butCalculate";
-			this.butCalculate.Size = new System.Drawing.Size(125, 36);
+			this.butCalculate.Size = new System.Drawing.Size(215, 36);
 			this.butCalculate.TabIndex = 4;
 			this.butCalculate.Text = "&Calculate";
 			this.butCalculate.Click += new System.EventHandler(this.butCalculate_Click);
+			// 
+			// textEngJobPercent
+			// 
+			this.textEngJobPercent.Location = new System.Drawing.Point(101, 3);
+			this.textEngJobPercent.Name = "textEngJobPercent";
+			this.textEngJobPercent.Size = new System.Drawing.Size(46, 20);
+			this.textEngJobPercent.TabIndex = 6;
 			// 
 			// label6
 			// 
@@ -416,19 +461,35 @@ namespace OpenDental{
 			this.label6.TabIndex = 17;
 			this.label6.Text = "Priorities";
 			// 
+			// textAvgJobHours
+			// 
+			this.textAvgJobHours.Location = new System.Drawing.Point(101, 29);
+			this.textAvgJobHours.Name = "textAvgJobHours";
+			this.textAvgJobHours.Size = new System.Drawing.Size(46, 20);
+			this.textAvgJobHours.TabIndex = 8;
+			// 
+			// label2
+			// 
+			this.label2.AutoSize = true;
+			this.label2.Location = new System.Drawing.Point(18, 32);
+			this.label2.Name = "label2";
+			this.label2.Size = new System.Drawing.Size(77, 13);
+			this.label2.TabIndex = 9;
+			this.label2.Text = "Avg Job Hours";
+			// 
 			// listPhases
 			// 
 			this.listPhases.FormattingEnabled = true;
-			this.listPhases.Location = new System.Drawing.Point(140, 112);
+			this.listPhases.Location = new System.Drawing.Point(181, 112);
 			this.listPhases.Name = "listPhases";
 			this.listPhases.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-			this.listPhases.Size = new System.Drawing.Size(125, 225);
+			this.listPhases.Size = new System.Drawing.Size(170, 225);
 			this.listPhases.TabIndex = 10;
 			// 
 			// label5
 			// 
 			this.label5.AutoSize = true;
-			this.label5.Location = new System.Drawing.Point(268, 96);
+			this.label5.Location = new System.Drawing.Point(350, 96);
 			this.label5.Name = "label5";
 			this.label5.Size = new System.Drawing.Size(57, 13);
 			this.label5.TabIndex = 16;
@@ -437,16 +498,16 @@ namespace OpenDental{
 			// listCategories
 			// 
 			this.listCategories.FormattingEnabled = true;
-			this.listCategories.Location = new System.Drawing.Point(271, 112);
+			this.listCategories.Location = new System.Drawing.Point(353, 112);
 			this.listCategories.Name = "listCategories";
 			this.listCategories.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-			this.listCategories.Size = new System.Drawing.Size(120, 225);
+			this.listCategories.Size = new System.Drawing.Size(170, 225);
 			this.listCategories.TabIndex = 11;
 			// 
 			// label4
 			// 
 			this.label4.AutoSize = true;
-			this.label4.Location = new System.Drawing.Point(137, 96);
+			this.label4.Location = new System.Drawing.Point(178, 96);
 			this.label4.Name = "label4";
 			this.label4.Size = new System.Drawing.Size(42, 13);
 			this.label4.TabIndex = 15;
@@ -464,17 +525,20 @@ namespace OpenDental{
 			// FormReleaseCalculator
 			// 
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
-			this.ClientSize = new System.Drawing.Size(722, 392);
+			this.ClientSize = new System.Drawing.Size(868, 392);
 			this.Controls.Add(this.tableLayoutPanel1);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.Name = "FormReleaseCalculator";
 			this.Text = "Release Calculator";
 			this.Load += new System.EventHandler(this.FormReleaseCalculator_Load);
 			this.tableLayoutPanel1.ResumeLayout(false);
+			this.tabControl1.ResumeLayout(false);
+			this.tabPage1.ResumeLayout(false);
 			this.panel1.ResumeLayout(false);
 			this.panel1.PerformLayout();
 			this.panelExtra.ResumeLayout(false);
 			this.panelExtra.PerformLayout();
+			this.tabPage2.ResumeLayout(false);
 			this.panel2.ResumeLayout(false);
 			this.panel2.PerformLayout();
 			this.ResumeLayout(false);
@@ -519,5 +583,9 @@ namespace OpenDental{
 		private UI.Button butJob1;
 		private UI.Button butJob3;
 		private UI.Button butJob2;
+		private System.Windows.Forms.TabControl tabControl1;
+		private System.Windows.Forms.TabPage tabPage1;
+		private System.Windows.Forms.TabPage tabPage2;
+		private UI.ODGrid gridCalculatedJobs;
 	}
 }

@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using OpenDentBusiness;
 using System.Linq;
 using CodeBase;
+using OpenDental.UI;
 
 namespace OpenDental {
 	public partial class FormReleaseCalculator:ODForm {
@@ -56,6 +57,7 @@ namespace OpenDental {
 
 		private void butCalculate_Click(object sender,EventArgs e) {
 			_listTopJobs.Clear();
+			listEngNoJobs.Items.Clear();
 			List<long> listEngNums=listEngineers.SelectedTags<Employee>().Select(x => x.EmployeeNum).ToList();
 			List<long> listUserNums=listEngNums.Select(x => Userods.GetUserByEmployeeNum(x).UserNum).ToList();
 			//Get 6 months of scheduled engineering time. Arbitrary because there should be no way we have a 6 month release cycle.
@@ -74,6 +76,12 @@ namespace OpenDental {
 			Double.TryParse(textAvgJobHours.Text,out avgJobHours);
 			Double.TryParse(textEngJobPercent.Text,out jobTimePercent);
 			Double.TryParse(textBreakHours.Text,out avgBreakHours);
+			gridCalculatedJobs.BeginUpdate();
+			gridCalculatedJobs.Columns.Clear();
+			gridCalculatedJobs.Columns.Add(new ODGridColumn("EstHrs",0) { TextAlign=HorizontalAlignment.Center });
+			gridCalculatedJobs.Columns.Add(new ODGridColumn("ActHrs",0) { TextAlign=HorizontalAlignment.Center });
+			gridCalculatedJobs.Columns.Add(new ODGridColumn("",200));
+			gridCalculatedJobs.Rows.Clear();
 			foreach(Job job in listJobs) {
 				if(job.UserNumEngineer==0 && listUserNums.Contains(job.UserNumExpert)) {
 					listUserNums.Remove(job.UserNumExpert);
@@ -90,7 +98,17 @@ namespace OpenDental {
 				if(job.PhaseCur==JobPhase.Development) {
 					_listTopJobs.Add(new Tuple<long,double>(job.JobNum,hrsCalculated));
 				}
+				gridCalculatedJobs.Rows.Add(
+					new ODGridRow(
+						new ODGridCell(job.HoursEstimate==0?"0("+_avgJobHours+")":job.HoursEstimate.ToString()),
+						new ODGridCell(job.HoursActual.ToString()),
+						new ODGridCell(job.Title)
+						) {
+						Tag=job
+					}
+					);
 			}
+			gridCalculatedJobs.EndUpdate();
 			foreach(long engNum in listUserNums) {
 				Userod eng=Userods.GetUser(engNum);
 				listEngNoJobs.Items.Add(new ODBoxItem<Userod>(eng.UserName,eng));
@@ -144,6 +162,10 @@ namespace OpenDental {
 
 		private void butJob3_Click(object sender,EventArgs e) {
 			FormOpenDental.S_GoToJob(_listTopJobs[2].Item1);
+		}
+
+		private void gridCalculatedJobs_CellDoubleClick(object sender,ODGridClickEventArgs e) {
+			FormOpenDental.S_GoToJob(((Job)gridCalculatedJobs.Rows[e.Row].Tag).JobNum);
 		}
 	}
 }
