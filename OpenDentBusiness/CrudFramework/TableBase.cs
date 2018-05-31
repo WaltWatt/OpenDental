@@ -17,12 +17,28 @@ namespace OpenDentBusiness {
 			set { isNew = value; }
 		}
 
-		///<summary>Not a db column.  Tag can be useful when you need to associate this object to another object and do not have a control Tag.
-		///This tag cannot be used on both sides of a remoting role check.</summary>
+		///<summary>Not a db column.  Tag can be useful when you need to associate this object to another object and do not have a control Tag.</summary>
 		[XmlIgnore]
 		public object TagOD {
 			get{ return _tagOD;}
 			set{ _tagOD = value;}
+		}
+
+		[XmlElement(nameof(TagOD))]
+		public DtoObject TagODXml {
+			get {
+				if(TagOD==null) {
+					return null;
+				}
+				return new DtoObject(TagOD,TagOD.GetType());
+			}
+			set {
+				if(value==null) {
+					TagOD=null;
+					return;
+				}
+				TagOD=value.Obj;
+			}
 		}
 
 		private static int _maxAllowedPacket=0;
