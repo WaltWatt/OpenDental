@@ -1275,7 +1275,7 @@ namespace OpenDental{
 			if(_userPrefCurrentOnly != null && PIn.Bool(_userPrefCurrentOnly.ValueString)) {
 				checkShowCurrent.Checked=true;
 			}
-			FillGrid();
+			FillGrid(false);
 			Plugins.HookAddCode(this,"FormPerio.Load_end");
 		}
 
@@ -2087,7 +2087,7 @@ namespace OpenDental{
 		}
 
 		///<summary>Usually set the selected index first</summary>
-		private void FillGrid() {
+		private void FillGrid(bool doSelectCell=true) {
 			if(listExams.SelectedIndex!=-1){
 				gridP.perioEdit=true;
 				if(!Security.IsAuthorized(Permissions.PerioEdit,PerioExams.ListExams[listExams.SelectedIndex].ExamDate,true)) {
@@ -2097,7 +2097,7 @@ namespace OpenDental{
 			}
 			gridP.SelectedExam=listExams.SelectedIndex;
 			gridP.DoShowCurrentExamOnly=checkShowCurrent.Checked;
-			gridP.LoadData();
+			gridP.LoadData(doSelectCell);
 			FillIndexes();
 			FillCounts();
 			gridP.Invalidate();

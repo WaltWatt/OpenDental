@@ -826,7 +826,7 @@ namespace OpenDental
 		}
 
 		///<summary>Loads data from the PerioMeasures lists into the visible grid.</summary>
-		public void LoadData(){
+		public void LoadData(bool doSelectCell=true){
 			ClearDataArray();
 			selectedTeeth=new ArrayList();
 			skippedTeeth=new List<int>();
@@ -950,21 +950,23 @@ namespace OpenDental
 				}//for seqI
 			}//for examI
 			//Start in the very first cell on the first tooth and loop through teeth until we come across one that is not missing.
-			CurCell=new Point(1,GetTableRow(selectedExam,0,PerioSequenceType.Probing));
-			OnDirectionChangedLeft();//Always start looping to the left.
-			if(!PrefC.GetBool(PrefName.PerioTreatImplantsAsNotMissing) && skippedTeeth.Count==32) {
-				return;
-			}
-			int curTooth=GetToothNumCur(GetSection(CurCell.Y));
-			while(skippedTeeth.Contains(curTooth)) {
-				AdvanceCell();//Advance forward 3 times, since there are 3 measurements per tooth.
-				AdvanceCell();
-				AdvanceCell();
-				curTooth=GetToothNumCur(GetSection(CurCell.Y));
-				if(curTooth==32 && skippedTeeth.Count==32 && GetSection(CurCell.Y)==2) {//all teeth missing and new exam added or exisiting 
-					CurCell=new Point(1,GetTableRow(selectedExam,0,PerioSequenceType.Probing));
-					OnDirectionChangedLeft();
+			if(doSelectCell) {
+				CurCell=new Point(1,GetTableRow(selectedExam,0,PerioSequenceType.Probing));
+				OnDirectionChangedLeft();//Always start looping to the left.
+				if(!PrefC.GetBool(PrefName.PerioTreatImplantsAsNotMissing) && skippedTeeth.Count==32) {
 					return;
+				}
+				int curTooth = GetToothNumCur(GetSection(CurCell.Y));
+				while(skippedTeeth.Contains(curTooth)) {
+					AdvanceCell();//Advance forward 3 times, since there are 3 measurements per tooth.
+					AdvanceCell();
+					AdvanceCell();
+					curTooth=GetToothNumCur(GetSection(CurCell.Y));
+					if(curTooth==32 && skippedTeeth.Count==32 && GetSection(CurCell.Y)==2) {//all teeth missing and new exam added or exisiting 
+						CurCell=new Point(1,GetTableRow(selectedExam,0,PerioSequenceType.Probing));
+						OnDirectionChangedLeft();
+						return;
+					}
 				}
 			}
 		}
@@ -1554,6 +1556,9 @@ namespace OpenDental
 
 		///<summary>Accepts button clicks from window rather than the usual keyboard entry.  All validation MUST be done before the value is sent here.  Only valid values are numbers 0 through 19, and 101 to 109.</summary>
 		public void ButtonPressed(int keyValue){
+			if(CurCell.X==-1) {
+				return;
+			}
 			if(!perioEdit) {
 				return;
 			}
@@ -1579,6 +1584,9 @@ namespace OpenDental
 
 		///<summary>Only valid values are b,s,p, and c.</summary>
 		private void EnterValue(string keyValue){
+			if(CurCell.X==-1) {
+				return;
+			}
 			if(keyValue !="b" && keyValue !="s" && keyValue !="p" && keyValue !="c"){
 				MessageBox.Show("Only b,s,p, and c are allowed");//just for debugging
 				return;
@@ -1642,6 +1650,9 @@ namespace OpenDental
 
 		///<summary>Only valid values are numbers 0-19, and 101-109. Validation should be done before sending here.</summary>
 		private void EnterValue(int keyValue){
+			if(CurCell.X==-1) {
+				return;
+			}
 			if((keyValue < 0 || keyValue > 19) 
 				&& RowTypes[GetSection(CurCell.Y)][GetSectionRow(CurCell.Y)]!=PerioSequenceType.GingMargin){//large values are allowed for GingMargin to represent hyperplasia (e.g. 101 to 109 represent -1 to -9)
 				MessageBox.Show("Only values 0 through 19 allowed");//just for debugging
