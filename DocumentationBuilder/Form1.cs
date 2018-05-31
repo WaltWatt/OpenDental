@@ -4,6 +4,7 @@
 //FK to definition.DefNum is triggered by "FK to ".  It then looks for ".".  So anything can follow after.
 //and:
 //"Enum:" Then, the enum name must follow.  It must then be followed by a space or by nothing at all.  NO PERIOD allowed.
+//ExitCodes: 103=Missing required arguments from command line, 110=Missing tables, 111=Missing Enums, 112=Could not build
 
 using System;
 using System.Collections.Generic;
@@ -26,9 +27,12 @@ namespace DocumentationBuilder {
 		private XPathNavigator Navigator;
 		private List<string> MissingTables;
 		private List<string> _listTableNames;
+		private StringBuilder _errorMessage;
 
 		public Form1(string[] cla) {
 			InitializeComponent();
+			_errorMessage=new StringBuilder();
+			bool isCommandLine=false;
 			string version="";
 			string serverName="";
 			string database="";
@@ -52,23 +56,32 @@ namespace DocumentationBuilder {
 						mysqlPass=arg.Substring("MySQLPass=".Length).Trim('"');
 					}
 				}
-			}
-			if(string.IsNullOrEmpty(serverName)
-				|| string.IsNullOrEmpty(database)
-				|| string.IsNullOrEmpty(mysqlUser)
-				|| string.IsNullOrEmpty(mysqlPass))
-			{
-				dcon=new DataConnection();
-			}
-			else {
-				dcon=new DataConnection(serverName,database,mysqlUser,mysqlPass);
+				if(string.IsNullOrEmpty(version)
+					||string.IsNullOrEmpty(serverName)
+					|| string.IsNullOrEmpty(database)
+					|| string.IsNullOrEmpty(mysqlUser)
+					|| string.IsNullOrEmpty(mysqlPass))
+				{
+					Environment.Exit(103);//Missing required arguments from command line.
+					return;
+				}
+				isCommandLine=true;
 			}
 			_listTableNames=GetTableNames();
-			if(!string.IsNullOrEmpty(version)) {
+			if(isCommandLine) {
+				dcon=new DataConnection(serverName,database,mysqlUser,mysqlPass);
 				textVersion.Text=version;
-				Build();
+				try {
+					Build();
+				}
+				catch(Exception ex) {
+					ex.DoNothing();
+					Environment.Exit(112);//Could not build.
+				}
+				Environment.Exit(0);
 				return;
 			}
+			dcon=new DataConnection();
 		}
 
 		private void Form1_Load(object sender,EventArgs e) {
@@ -84,6 +97,7 @@ namespace DocumentationBuilder {
 			}
 			Cursor=Cursors.WaitCursor;
 			Build();
+			Cursor=Cursors.Default;
 		}
 
 		private void Build() {
@@ -122,7 +136,13 @@ namespace DocumentationBuilder {
 				}
 				MsgBoxCopyPaste msgbox=new MsgBoxCopyPaste(s);
 				msgbox.ShowDialog();
-				Application.Exit();
+				Environment.Exit(110);
+				return;
+			}
+			if(!string.IsNullOrEmpty(_errorMessage.ToString())) {
+				MsgBoxCopyPaste msgbox=new MsgBoxCopyPaste(_errorMessage.ToString());
+				msgbox.ShowDialog();
+				Environment.Exit(111);
 				return;
 			}
 			//ProcessStartInfo startInfo=new ProcessStartInfo();
@@ -234,7 +254,9 @@ namespace DocumentationBuilder {
 
 		private void WriteEnum(XmlWriter writer,string enumName) {
 			if(enumName.EndsWith(".")) {
-				throw new Exception("ERROR! enum: "+enumName+" ends with \".\" and this causes the documentation to fail.\r\nCorrect the enum summary in the table type and rebuild Open Dental in release mode to update the serialization file.");
+				_errorMessage.AppendLine("ERROR! enum: "+enumName+" ends with \".\" and this causes the documentation to fail.\r\nCorrect the enum summary "+ 
+					"in the table type and rebuild Open Dental in release mode to update the serialization file.");
+				return;
 			}
 			string summary="";
 			//get an ordered list from OpenDental.xml
@@ -252,7 +274,8 @@ namespace DocumentationBuilder {
 			//*[starts-with(name(),'B')]
 			XPathNodeIterator nodes=Navigator.Select("//member[contains(@name,'F:OpenDentBusiness."+enumName+".')]");
 			if(nodes.Count==0) {
-				throw new Exception("ERROR! enum: "+enumName+" was not found.  Something is wrong with the serialized xml documentation.");
+				_errorMessage.AppendLine("ERROR! enum: "+enumName+" was not found.  Something is wrong with the serialized xml documentation.");
+				return;
 			}
 				//("//member[@name='F:OpenDental."+enumName+".*']");
 			string itemName;
