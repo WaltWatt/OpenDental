@@ -368,6 +368,7 @@ namespace OpenDentBusiness{
 					continue;
 				}
 				if(patPlans[i].PatPlanNum==patPlanNum) {
+					RemoveAssignedUser(patPlans[i]);
 					command="DELETE FROM patplan WHERE PatPlanNum="+POut.Long(patPlanNum);
 					Db.NonQ(command);
 					command="DELETE FROM benefit WHERE PatPlanNum=" +POut.Long(patPlanNum);
@@ -388,6 +389,36 @@ namespace OpenDentBusiness{
 			Procedures.ComputeEstimatesForAll(patNum,listClaimProcsEsts,procs,planList,patPlans,benList,pat.Age,subList,claimProcs);
 			Patients.SetHasIns(patNum);
 //Cameron_ Possibly create outbound ADT message to update insurance info
+		}
+
+		///<summary>Removes the assigned user from the InsVerify of the InsPlan that is associated to the PatPlan passed in.
+		///Will only unassign if the user assigned to the patplan matches the user assigned to the insplan.</summary>
+		private static void RemoveAssignedUser(PatPlan patPlanCur) {
+			//No Remoting check; no call to db.
+			//Get the insurance verified assigned to the PatPlan.
+			InsVerify insVerifyForPatPlan=InsVerifies.GetOneByFKey(patPlanCur.PatPlanNum,VerifyTypes.PatientEnrollment);
+			if(insVerifyForPatPlan!=null && insVerifyForPatPlan.UserNum>0) {
+				//Get the insplan associated to the PatPlan.
+				InsSub inssub=null;
+				if(patPlanCur!=null) {
+					inssub=InsSubs.GetOne(patPlanCur.InsSubNum);
+				}
+				InsPlan insPlan=null;
+				if(inssub!=null) {
+					insPlan=InsPlans.RefreshOne(inssub.PlanNum);
+				}
+				if(insPlan!=null) {
+					//Get the insVerify for the insplan associated to the patplan we are about to delete.
+					InsVerify insVerifyForInsPlan=InsVerifies.GetOneByFKey(insPlan.PlanNum,VerifyTypes.InsuranceBenefit);
+					//Only unassign the user for the insplan if it matches the user for the patplan being dropped
+					if(insVerifyForInsPlan!=null && insVerifyForInsPlan.UserNum==insVerifyForPatPlan.UserNum) {
+						//Remove user and set DateLastVerified to MinValue.
+						insVerifyForInsPlan.UserNum=0;
+						insVerifyForInsPlan.DateLastVerified=DateTime.MinValue;
+						InsVerifies.Update(insVerifyForInsPlan);
+					}
+				}
+			}
 		}
 
 		///<summary>Deletes the patplan and benefits with the specified patPlanNum.  Does not rearrange the other patplans for the patient.  A patplan must be inserted after this function is called to take the place of the patplan being deleted.</summary>
