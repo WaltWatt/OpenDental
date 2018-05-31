@@ -472,7 +472,9 @@ namespace OpenDentalGraph {
 			if(color==Color.Empty) {
 				color=GenerateSeriesColor(name);
 			}
-			series.Color=color;	
+			if(!UseBuiltInColors) {
+				series.Color=color;
+			}
 			series.Points.DataBindXY(filteredData.Keys,filteredData.Values);
 			chart1.Series.Add(series);
 			#region y-axis calc

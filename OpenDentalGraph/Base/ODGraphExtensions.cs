@@ -90,7 +90,17 @@ namespace OpenDentalGraph.Extensions {
 
 		public static T GetValue<T>(this ComboBox combo) {
 			ComboItem<T> item=(ComboItem<T>)combo.SelectedItem;
+			if(item==null) {
+				return default(T);
+			}
 			return item.Value;
+		}
+
+		public static void SetValueAtIndex<T>(this ComboBox combo,int index,T val) {
+			ComboItem<T> item=(ComboItem<T>)combo.Items[index];
+			if(item!=null) {
+				item.Value=val;
+			}
 		}
 
 		public static string GetDisplay<T>(this ComboBox combo) {

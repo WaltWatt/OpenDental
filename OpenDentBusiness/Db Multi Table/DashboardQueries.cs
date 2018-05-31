@@ -573,11 +573,11 @@ namespace OpenDentBusiness {
 		}
 
 		#region OpenDentalGraph Queries
-		public static DataTable GetTable(string command) {
+		public static DataTable GetTable(string command,bool doRunOnReportServer=true) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				return Meth.GetTable(MethodBase.GetCurrentMethod(),command);
+				return Meth.GetTable(MethodBase.GetCurrentMethod(),command,doRunOnReportServer);
 			}
-			return ReportsComplex.RunFuncOnReportServer(() => Db.GetTable(command));
+			return ReportsComplex.RunFuncOnReportServer(() => Db.GetTable(command),doRunOnReportServer);
 		}
 		#endregion
 

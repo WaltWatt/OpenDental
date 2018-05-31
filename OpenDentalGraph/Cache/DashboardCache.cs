@@ -250,11 +250,12 @@ namespace OpenDentalGraph.Cache {
 
 	///<summary>Base class for implementing Graph cache which gets it's cache from a simple db query.</summary>
 	public abstract class DashboardCacheWithQuery<T>:DashboardCacheBase<T> where T : GraphQuantityOverTime.GraphPointBase {
+		protected virtual bool UseReportServer { get { return true; } }
 		protected abstract string GetCommand(DashboardFilter filter);
 		protected abstract T GetInstanceFromDataRow(DataRow x);
 
 		protected override List<T> GetCache(DashboardFilter filter) {
-			return DashboardQueries.GetTable(GetCommand(filter))
+			return DashboardQueries.GetTable(GetCommand(filter),UseReportServer)
 				.AsEnumerable()
 				.Select(x => GetInstanceFromDataRow(x))
 				.ToList();

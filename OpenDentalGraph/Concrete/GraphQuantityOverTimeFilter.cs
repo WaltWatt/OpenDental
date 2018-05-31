@@ -22,9 +22,9 @@ namespace OpenDentalGraph {
 
 		#region Delegates
 		public delegate List<GraphQuantityOverTime.GraphPointBase> GetGraphPointsForHQArgs(GraphQuantityOverTimeFilter filterCtrl);
-		private GetGraphPointsForHQArgs _onGetODGraphPointsArgs;
+		public GetGraphPointsForHQArgs _onGetODGraphPointsArgs;
 		///<summary>Allows override of default behavior of graph_OnGetGetColor(). Must be set by constructor.</summary>
-		private GraphQuantityOverTime.OnGetColorFromSeriesGraphTypeArgs _onGetSeriesColorOverride;
+		public GraphQuantityOverTime.OnGetColorFromSeriesGraphTypeArgs _onGetSeriesColorOverride;
 		#endregion
 
 		#region Properties
