@@ -14,7 +14,7 @@ namespace OpenDental{
 		private System.ComponentModel.Container components = null;
 		private OpenDental.UI.Button butCancel;
 		private OpenDental.UI.Button butOK;
-		private System.Windows.Forms.GroupBox groupBox1;
+		private System.Windows.Forms.GroupBox groupAgeOfAccount;
 		private System.Windows.Forms.Label label1;
 		private OpenDental.ValidDate textDate;
 		private System.Windows.Forms.ListBox listBillType;
@@ -74,7 +74,7 @@ namespace OpenDental{
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormRpAging));
 			this.butCancel = new OpenDental.UI.Button();
 			this.butOK = new OpenDental.UI.Button();
-			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.groupAgeOfAccount = new System.Windows.Forms.GroupBox();
 			this.radio30 = new System.Windows.Forms.RadioButton();
 			this.radio90 = new System.Windows.Forms.RadioButton();
 			this.radio60 = new System.Windows.Forms.RadioButton();
@@ -109,7 +109,7 @@ namespace OpenDental{
 			this.checkAgeNegAdjs = new System.Windows.Forms.CheckBox();
 			this.checkAgePatPayPlanPayments = new System.Windows.Forms.CheckBox();
 			this.labelFutureTrans = new System.Windows.Forms.Label();
-			this.groupBox1.SuspendLayout();
+			this.groupAgeOfAccount.SuspendLayout();
 			this.groupIncludePats.SuspendLayout();
 			this.groupGroupBy.SuspendLayout();
 			this.groupOnlyShow.SuspendLayout();
@@ -128,9 +128,8 @@ namespace OpenDental{
 			this.butCancel.Location = new System.Drawing.Point(867, 325);
 			this.butCancel.Name = "butCancel";
 			this.butCancel.Size = new System.Drawing.Size(75, 26);
-			this.butCancel.TabIndex = 17;
+			this.butCancel.TabIndex = 19;
 			this.butCancel.Text = "&Cancel";
-			this.butCancel.Click += new System.EventHandler(this.butCancel_Click);
 			// 
 			// butOK
 			// 
@@ -143,22 +142,22 @@ namespace OpenDental{
 			this.butOK.Location = new System.Drawing.Point(786, 325);
 			this.butOK.Name = "butOK";
 			this.butOK.Size = new System.Drawing.Size(75, 26);
-			this.butOK.TabIndex = 16;
+			this.butOK.TabIndex = 18;
 			this.butOK.Text = "&OK";
 			this.butOK.Click += new System.EventHandler(this.butOK_Click);
 			// 
-			// groupBox1
+			// groupAgeOfAccount
 			// 
-			this.groupBox1.Controls.Add(this.radio30);
-			this.groupBox1.Controls.Add(this.radio90);
-			this.groupBox1.Controls.Add(this.radio60);
-			this.groupBox1.Controls.Add(this.radioAny);
-			this.groupBox1.Location = new System.Drawing.Point(12, 42);
-			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(209, 110);
-			this.groupBox1.TabIndex = 3;
-			this.groupBox1.TabStop = false;
-			this.groupBox1.Text = "Age of Account";
+			this.groupAgeOfAccount.Controls.Add(this.radio30);
+			this.groupAgeOfAccount.Controls.Add(this.radio90);
+			this.groupAgeOfAccount.Controls.Add(this.radio60);
+			this.groupAgeOfAccount.Controls.Add(this.radioAny);
+			this.groupAgeOfAccount.Location = new System.Drawing.Point(12, 42);
+			this.groupAgeOfAccount.Name = "groupAgeOfAccount";
+			this.groupAgeOfAccount.Size = new System.Drawing.Size(209, 110);
+			this.groupAgeOfAccount.TabIndex = 2;
+			this.groupAgeOfAccount.TabStop = false;
+			this.groupAgeOfAccount.Text = "Age of Account";
 			// 
 			// radio30
 			// 
@@ -216,12 +215,13 @@ namespace OpenDental{
 			// 
 			// listBillType
 			// 
-			this.listBillType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.listBillType.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.listBillType.Location = new System.Drawing.Point(441, 48);
 			this.listBillType.Name = "listBillType";
 			this.listBillType.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-			this.listBillType.Size = new System.Drawing.Size(163, 238);
-			this.listBillType.TabIndex = 11;
+			this.listBillType.Size = new System.Drawing.Size(163, 264);
+			this.listBillType.TabIndex = 12;
 			// 
 			// label2
 			// 
@@ -251,7 +251,7 @@ namespace OpenDental{
 			this.groupIncludePats.Location = new System.Drawing.Point(227, 136);
 			this.groupIncludePats.Name = "groupIncludePats";
 			this.groupIncludePats.Size = new System.Drawing.Size(208, 66);
-			this.groupIncludePats.TabIndex = 4;
+			this.groupIncludePats.TabIndex = 9;
 			this.groupIncludePats.TabStop = false;
 			this.groupIncludePats.Text = "Include Patients With";
 			// 
@@ -271,7 +271,7 @@ namespace OpenDental{
 			this.checkOnlyNeg.Location = new System.Drawing.Point(6, 18);
 			this.checkOnlyNeg.Name = "checkOnlyNeg";
 			this.checkOnlyNeg.Size = new System.Drawing.Size(196, 18);
-			this.checkOnlyNeg.TabIndex = 1;
+			this.checkOnlyNeg.TabIndex = 0;
 			this.checkOnlyNeg.Text = "Negative balances";
 			this.checkOnlyNeg.Click += new System.EventHandler(this.checkOnlyNeg_Click);
 			// 
@@ -281,17 +281,18 @@ namespace OpenDental{
 			this.checkExcludeInactive.Location = new System.Drawing.Point(6, 18);
 			this.checkExcludeInactive.Name = "checkExcludeInactive";
 			this.checkExcludeInactive.Size = new System.Drawing.Size(196, 18);
-			this.checkExcludeInactive.TabIndex = 5;
+			this.checkExcludeInactive.TabIndex = 0;
 			this.checkExcludeInactive.Text = "Inactive status";
 			// 
 			// listProv
 			// 
-			this.listProv.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.listProv.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.listProv.Location = new System.Drawing.Point(610, 48);
 			this.listProv.Name = "listProv";
 			this.listProv.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-			this.listProv.Size = new System.Drawing.Size(163, 238);
-			this.listProv.TabIndex = 13;
+			this.listProv.Size = new System.Drawing.Size(163, 264);
+			this.listProv.TabIndex = 14;
 			// 
 			// label3
 			// 
@@ -312,7 +313,7 @@ namespace OpenDental{
 			this.checkProvAll.Location = new System.Drawing.Point(610, 27);
 			this.checkProvAll.Name = "checkProvAll";
 			this.checkProvAll.Size = new System.Drawing.Size(163, 18);
-			this.checkProvAll.TabIndex = 12;
+			this.checkProvAll.TabIndex = 13;
 			this.checkProvAll.Text = "All";
 			this.checkProvAll.Click += new System.EventHandler(this.checkProvAll_Click);
 			// 
@@ -325,7 +326,7 @@ namespace OpenDental{
 			this.checkBillTypesAll.Location = new System.Drawing.Point(441, 27);
 			this.checkBillTypesAll.Name = "checkBillTypesAll";
 			this.checkBillTypesAll.Size = new System.Drawing.Size(163, 18);
-			this.checkBillTypesAll.TabIndex = 10;
+			this.checkBillTypesAll.TabIndex = 11;
 			this.checkBillTypesAll.Text = "All";
 			this.checkBillTypesAll.Click += new System.EventHandler(this.checkBillTypesAll_Click);
 			// 
@@ -335,7 +336,7 @@ namespace OpenDental{
 			this.checkBadAddress.Location = new System.Drawing.Point(6, 62);
 			this.checkBadAddress.Name = "checkBadAddress";
 			this.checkBadAddress.Size = new System.Drawing.Size(196, 18);
-			this.checkBadAddress.TabIndex = 6;
+			this.checkBadAddress.TabIndex = 2;
 			this.checkBadAddress.Text = "Bad addresses (no zipcode)";
 			// 
 			// checkAllClin
@@ -345,18 +346,19 @@ namespace OpenDental{
 			this.checkAllClin.Location = new System.Drawing.Point(779, 27);
 			this.checkAllClin.Name = "checkAllClin";
 			this.checkAllClin.Size = new System.Drawing.Size(163, 18);
-			this.checkAllClin.TabIndex = 14;
+			this.checkAllClin.TabIndex = 15;
 			this.checkAllClin.Text = "All";
 			this.checkAllClin.Click += new System.EventHandler(this.checkAllClin_Click);
 			// 
 			// listClin
 			// 
-			this.listClin.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.listClin.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.listClin.Location = new System.Drawing.Point(779, 48);
 			this.listClin.Name = "listClin";
 			this.listClin.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-			this.listClin.Size = new System.Drawing.Size(163, 238);
-			this.listClin.TabIndex = 15;
+			this.listClin.Size = new System.Drawing.Size(163, 264);
+			this.listClin.TabIndex = 16;
 			this.listClin.Click += new System.EventHandler(this.listClin_Click);
 			// 
 			// labelClin
@@ -375,7 +377,7 @@ namespace OpenDental{
 			this.checkHasDateLastPay.Location = new System.Drawing.Point(18, 272);
 			this.checkHasDateLastPay.Name = "checkHasDateLastPay";
 			this.checkHasDateLastPay.Size = new System.Drawing.Size(203, 18);
-			this.checkHasDateLastPay.TabIndex = 7;
+			this.checkHasDateLastPay.TabIndex = 6;
 			this.checkHasDateLastPay.Text = "Show last payment date (landscape)";
 			// 
 			// groupGroupBy
@@ -386,7 +388,7 @@ namespace OpenDental{
 			this.groupGroupBy.Location = new System.Drawing.Point(12, 158);
 			this.groupGroupBy.Name = "groupGroupBy";
 			this.groupGroupBy.Size = new System.Drawing.Size(209, 64);
-			this.groupGroupBy.TabIndex = 2;
+			this.groupGroupBy.TabIndex = 3;
 			this.groupGroupBy.TabStop = false;
 			this.groupGroupBy.Text = "Group By";
 			// 
@@ -418,7 +420,7 @@ namespace OpenDental{
 			this.checkAgeWriteoffs.Location = new System.Drawing.Point(18, 228);
 			this.checkAgeWriteoffs.Name = "checkAgeWriteoffs";
 			this.checkAgeWriteoffs.Size = new System.Drawing.Size(203, 18);
-			this.checkAgeWriteoffs.TabIndex = 8;
+			this.checkAgeWriteoffs.TabIndex = 4;
 			this.checkAgeWriteoffs.Text = "Age writeoff estimates";
 			// 
 			// checkExcludeArchive
@@ -427,7 +429,7 @@ namespace OpenDental{
 			this.checkExcludeArchive.Location = new System.Drawing.Point(6, 40);
 			this.checkExcludeArchive.Name = "checkExcludeArchive";
 			this.checkExcludeArchive.Size = new System.Drawing.Size(196, 18);
-			this.checkExcludeArchive.TabIndex = 18;
+			this.checkExcludeArchive.TabIndex = 1;
 			this.checkExcludeArchive.Text = "Archived status";
 			// 
 			// butQuery
@@ -441,7 +443,7 @@ namespace OpenDental{
 			this.butQuery.Location = new System.Drawing.Point(12, 325);
 			this.butQuery.Name = "butQuery";
 			this.butQuery.Size = new System.Drawing.Size(90, 26);
-			this.butQuery.TabIndex = 19;
+			this.butQuery.TabIndex = 17;
 			this.butQuery.Text = "Generate Query";
 			this.butQuery.Click += new System.EventHandler(this.butGenerateQuery_Click);
 			// 
@@ -452,7 +454,7 @@ namespace OpenDental{
 			this.groupOnlyShow.Location = new System.Drawing.Point(227, 208);
 			this.groupOnlyShow.Name = "groupOnlyShow";
 			this.groupOnlyShow.Size = new System.Drawing.Size(208, 66);
-			this.groupOnlyShow.TabIndex = 20;
+			this.groupOnlyShow.TabIndex = 10;
 			this.groupOnlyShow.TabStop = false;
 			this.groupOnlyShow.Text = "Only Patients With";
 			// 
@@ -462,7 +464,7 @@ namespace OpenDental{
 			this.checkOnlyInsNoBal.Location = new System.Drawing.Point(6, 40);
 			this.checkOnlyInsNoBal.Name = "checkOnlyInsNoBal";
 			this.checkOnlyInsNoBal.Size = new System.Drawing.Size(196, 18);
-			this.checkOnlyInsNoBal.TabIndex = 2;
+			this.checkOnlyInsNoBal.TabIndex = 1;
 			this.checkOnlyInsNoBal.Text = "Insurance estimates and no balance";
 			this.checkOnlyInsNoBal.Click += new System.EventHandler(this.checkOnlyInsNoBal_Click);
 			// 
@@ -474,7 +476,7 @@ namespace OpenDental{
 			this.groupExcludePats.Location = new System.Drawing.Point(227, 42);
 			this.groupExcludePats.Name = "groupExcludePats";
 			this.groupExcludePats.Size = new System.Drawing.Size(208, 88);
-			this.groupExcludePats.TabIndex = 21;
+			this.groupExcludePats.TabIndex = 8;
 			this.groupExcludePats.TabStop = false;
 			this.groupExcludePats.Text = "Exclude Patients With";
 			// 
@@ -484,7 +486,7 @@ namespace OpenDental{
 			this.checkAgeNegAdjs.Location = new System.Drawing.Point(18, 250);
 			this.checkAgeNegAdjs.Name = "checkAgeNegAdjs";
 			this.checkAgeNegAdjs.Size = new System.Drawing.Size(203, 18);
-			this.checkAgeNegAdjs.TabIndex = 22;
+			this.checkAgeNegAdjs.TabIndex = 5;
 			this.checkAgeNegAdjs.Text = "Age negative adjustments";
 			// 
 			// checkAgePatPayPlanPayments
@@ -493,21 +495,20 @@ namespace OpenDental{
 			this.checkAgePatPayPlanPayments.Location = new System.Drawing.Point(18, 294);
 			this.checkAgePatPayPlanPayments.Name = "checkAgePatPayPlanPayments";
 			this.checkAgePatPayPlanPayments.Size = new System.Drawing.Size(225, 18);
-			this.checkAgePatPayPlanPayments.TabIndex = 23;
+			this.checkAgePatPayPlanPayments.TabIndex = 7;
 			this.checkAgePatPayPlanPayments.Text = "Age patient payments to payment plans";
 			this.checkAgePatPayPlanPayments.Visible = false;
 			// 
 			// labelFutureTrans
 			// 
-			this.labelFutureTrans.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.labelFutureTrans.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.labelFutureTrans.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
-			this.labelFutureTrans.Location = new System.Drawing.Point(513, 328);
+			this.labelFutureTrans.Location = new System.Drawing.Point(513, 329);
 			this.labelFutureTrans.Name = "labelFutureTrans";
-			this.labelFutureTrans.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
-			this.labelFutureTrans.Size = new System.Drawing.Size(267, 21);
-			this.labelFutureTrans.TabIndex = 24;
+			this.labelFutureTrans.Size = new System.Drawing.Size(267, 18);
+			this.labelFutureTrans.TabIndex = 0;
 			this.labelFutureTrans.Text = "Future dated transactions are allowed";
-			this.labelFutureTrans.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			this.labelFutureTrans.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			this.labelFutureTrans.Visible = false;
 			// 
 			// FormRpAging
@@ -538,16 +539,16 @@ namespace OpenDental{
 			this.Controls.Add(this.label2);
 			this.Controls.Add(this.listBillType);
 			this.Controls.Add(this.label1);
-			this.Controls.Add(this.groupBox1);
+			this.Controls.Add(this.groupAgeOfAccount);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
-			this.MinimumSize = new System.Drawing.Size(970, 380);
+			this.MinimumSize = new System.Drawing.Size(970, 395);
 			this.Name = "FormRpAging";
 			this.ShowInTaskbar = false;
 			this.Text = "Aging of Accounts Receivable Report";
 			this.Load += new System.EventHandler(this.FormAging_Load);
-			this.groupBox1.ResumeLayout(false);
+			this.groupAgeOfAccount.ResumeLayout(false);
 			this.groupIncludePats.ResumeLayout(false);
 			this.groupGroupBy.ResumeLayout(false);
 			this.groupOnlyShow.ResumeLayout(false);
@@ -597,19 +598,8 @@ namespace OpenDental{
 				if(!listClinics.Exists(x => x.ClinicNum==Clinics.ClinicNum)) {//Could have a hidden clinic selected
 					listClinics.Add(Clinics.GetClinic(Clinics.ClinicNum));
 				}
-				foreach(Clinic clin in listClinics) {
-					ODBoxItem<Clinic> boxItemCur;
-					if(clin.IsHidden) {
-						boxItemCur=new ODBoxItem<Clinic>(clin.Abbr+" "+Lan.g(this,"(hidden)"),clin);
-					}
-					else {
-						boxItemCur=new ODBoxItem<Clinic>(clin.Abbr,clin);
-					}
-					listClin.Items.Add(boxItemCur);
-					if(clin.ClinicNum == Clinics.ClinicNum) {
-						listClin.SelectedItem = boxItemCur;
-					}
-				}
+				listClin.Items.AddRange(listClinics.Select(x => new ODBoxItem<Clinic>(x.Abbr+(x.IsHidden?(" "+Lan.g(this,"(hidden)")):""),x)).ToArray());
+				listClin.SelectedIndex=listClinics.FindIndex(x => x.ClinicNum==Clinics.ClinicNum);//FindIndex could return -1, which is fine
 				if(Clinics.ClinicNum==0) {
 					checkAllClin.Checked=true;
 					listClin.Visible=false;
@@ -702,56 +692,62 @@ namespace OpenDental{
 			return true;
 		}
 
-		private AgeOfAccount GenerateLists(List<long> listProvNums, List<long> listClinicNums, List<long> listBillingTypeDefNums) {
+		///<summary>Sets parameters/fills lists based on form controls.</summary>
+		private RpAgingParamObject GetParamsFromForm() {
+			RpAgingParamObject rpo=new RpAgingParamObject();
+			rpo.AsOfDate=PIn.Date(textDate.Text);
+			if(rpo.AsOfDate.Year<1880) {
+				rpo.AsOfDate=DateTime.Today;
+			}
+			rpo.IsHistoric=(rpo.AsOfDate.Date!=DateTime.Today);
+			rpo.IsWoAged=checkAgeWriteoffs.Checked;
+			rpo.HasDateLastPay=checkHasDateLastPay.Checked;
+			rpo.IsGroupByFam=radioGroupByFam.Checked;
+			rpo.IsOnlyNeg=checkOnlyNeg.Checked;
+			rpo.IsIncludeNeg=checkIncludeNeg.Checked;
+			rpo.IsExcludeInactive=checkExcludeInactive.Checked;
+			rpo.IsExcludeBadAddress=checkBadAddress.Checked;
+			rpo.IsExcludeArchive=checkExcludeArchive.Checked;
+			rpo.IsIncludeInsNoBal=checkIncludeInsNoBal.Checked;
+			rpo.IsOnlyInsNoBal=checkOnlyInsNoBal.Checked;
+			rpo.IsForceAgeNegAdj=checkAgeNegAdjs.Checked;
+			rpo.DoAgePatPayPlanPayments=checkAgePatPayPlanPayments.Checked;
+			rpo.IsInsPayWoCombined=false;
+			if(!checkBillTypesAll.Checked) {
+				rpo.ListBillTypes=listBillType.SelectedIndices.OfType<int>().Select(x => _listBillingTypeDefs[x].DefNum).ToList();
+			}
 			if(!checkProvAll.Checked) {
-				listProvNums.AddRange(listProv.SelectedIndices.OfType<int>().Select(x => _listProviders[x].ProvNum).ToList());
+				rpo.ListProvNums=listProv.SelectedIndices.OfType<int>().Select(x => _listProviders[x].ProvNum).ToList();
 			}
 			if(PrefC.HasClinicsEnabled) {
 				//if "All" is selected and the user is not restricted, show ALL clinics, including the 0 clinic.
 				if(checkAllClin.Checked && !Security.CurUser.ClinicIsRestricted){
-					listClinicNums.Clear();
-					listClinicNums.Add(0);
-					Clinics.GetDeepCopy().ForEach(x => listClinicNums.Add(x.ClinicNum));
+					rpo.ListClinicNums.Clear();
+					rpo.ListClinicNums.Add(0);
+					rpo.ListClinicNums.AddRange(Clinics.GetDeepCopy().Select(x => x.ClinicNum));
 				}
 				else {
-					listClinicNums.AddRange(listClin.SelectedItems.OfType<ODBoxItem<Clinic>>().Select(x => x.Tag.ClinicNum).ToList());
+					rpo.ListClinicNums=listClin.SelectedTags<Clinic>().Select(x => x.ClinicNum).ToList();
 				}
 			}
-			if(!checkBillTypesAll.Checked) {
-				for(int i=0;i<listBillType.SelectedIndices.Count;i++) {
-					listBillingTypeDefNums.Add(_listBillingTypeDefs[listBillType.SelectedIndices[i]].DefNum);
-				}
-			}
-			AgeOfAccount accountAge=AgeOfAccount.Any;
-			if(radioAny.Checked) {
-				accountAge=AgeOfAccount.Any;
-			}
-			else if(radio30.Checked) {
-				accountAge=AgeOfAccount.Over30;
+			rpo.AccountAge=AgeOfAccount.Any;
+			if(radio30.Checked) {
+				rpo.AccountAge=AgeOfAccount.Over30;
 			}
 			else if(radio60.Checked) {
-				accountAge=AgeOfAccount.Over60;
+				rpo.AccountAge=AgeOfAccount.Over60;
 			}
 			else if(radio90.Checked) {
-				accountAge=AgeOfAccount.Over90;
+				rpo.AccountAge=AgeOfAccount.Over90;
 			}
-			return accountAge;
+			return rpo;
 		}
 
 		private void butGenerateQuery_Click(object sender,EventArgs e) {
 			if(!Validation()) {
 				return;
 			}
-			DateTime asOfDate=PIn.Date(textDate.Text);
-			List<long> listProvNums=new List<long>();
-			List<long> listClinicNums=new List<long>();
-			List<long> listBillingTypeDefNums=new List<long>();
-			AgeOfAccount accountAge=GenerateLists(listProvNums,listClinicNums,listBillingTypeDefNums);
-			bool isForInsAging=false;
-			string queryStr=RpAging.GetQueryString(asOfDate,checkAgeWriteoffs.Checked,checkHasDateLastPay.Checked,radioGroupByFam.Checked,checkOnlyNeg.Checked,
-				accountAge,checkIncludeNeg.Checked,checkExcludeInactive.Checked,checkBadAddress.Checked,listProvNums,listClinicNums,listBillingTypeDefNums,
-				checkExcludeArchive.Checked,checkIncludeInsNoBal.Checked,checkOnlyInsNoBal.Checked,checkAgeNegAdjs.Checked,isForInsAging,
-				checkAgePatPayPlanPayments.Checked);
+			string queryStr=RpAging.GetQueryString(GetParamsFromForm());
 			MsgBoxCopyPaste msgBox=new MsgBoxCopyPaste(queryStr);
 			msgBox.Show(this);
 		}
@@ -760,21 +756,11 @@ namespace OpenDental{
 			if(!Validation()) {
 				return;
 			}
-			DateTime asOfDate=PIn.Date(textDate.Text);
-			List<long> listProvNums=new List<long>();
-			List<long> listClinicNums=new List<long>();
-			List<long> listBillingTypeDefNums=new List<long>();
-			AgeOfAccount accountAge = GenerateLists(listProvNums,listClinicNums,listBillingTypeDefNums);
-			DataTable tableAging=new DataTable();
-			bool isForInsAging=false;
-			tableAging=RpAging.GetAgingTable(asOfDate,checkAgeWriteoffs.Checked,checkHasDateLastPay.Checked,radioGroupByFam.Checked,checkOnlyNeg.Checked,
-				accountAge,checkIncludeNeg.Checked,checkExcludeInactive.Checked,checkBadAddress.Checked,listProvNums,listClinicNums,listBillingTypeDefNums,
-				checkExcludeArchive.Checked,checkIncludeInsNoBal.Checked,checkOnlyInsNoBal.Checked,checkAgeNegAdjs.Checked,isForInsAging,
-				checkAgePatPayPlanPayments.Checked);
 			ReportComplex report=new ReportComplex(true,false); 
+			DataTable tableAging=RpAging.GetAgingTable(GetParamsFromForm());
 			report.IsLandscape=checkHasDateLastPay.Checked;
 			report.ReportName=Lan.g(this,"AGING OF ACCOUNTS RECEIVABLE REPORT");
-			report.AddTitle("Aging Report",Lan.g(this, "AGING OF ACCOUNTS RECEIVABLE"));
+			report.AddTitle("Aging Report",Lan.g(this,"AGING OF ACCOUNTS RECEIVABLE"));
 			report.AddSubTitle("PracTitle",PrefC.GetString(PrefName.PracticeTitle));
 			report.AddSubTitle("AsOf",Lan.g(this,"As of ")+textDate.Text);
 			if(radioAny.Checked){
@@ -793,26 +779,19 @@ namespace OpenDental{
 				report.AddSubTitle("AllBillingTypes",Lan.g(this,"All Billing Types"));
 			}
 			else{
-				string subt=_listBillingTypeDefs[listBillType.SelectedIndices[0]].ItemName;
-				for(int i=1;i<listBillType.SelectedIndices.Count;i++){
-					subt+=", "+_listBillingTypeDefs[listBillType.SelectedIndices[i]].ItemName;
-				}
-				report.AddSubTitle("",subt);
+				report.AddSubTitle("",string.Join(", ",listBillType.SelectedIndices.OfType<int>().Select(x => _listBillingTypeDefs[x].ItemName)));
 			}
-			string subtitleProvs="";
 			if(checkProvAll.Checked) {
-				subtitleProvs=Lan.g(this,"All Providers");
+				report.AddSubTitle("Providers",Lan.g(this,"All Providers"));
 			}
 			else {
-				subtitleProvs+=string.Join(", ",listProv.SelectedIndices.OfType<int>().ToList().Select(x => _listProviders[x].Abbr));
+				report.AddSubTitle("Providers",string.Join(", ",listProv.SelectedIndices.OfType<int>().Select(x => _listProviders[x].Abbr)));
 			}
-			report.AddSubTitle("Providers",subtitleProvs);
 			if(checkAllClin.Checked) {
 				report.AddSubTitle("Clinics",Lan.g(this,"All Clinics"));
 			}
 			else {
-				string subt = string.Join(", ",listClin.SelectedItems.OfType<ODBoxItem<Clinic>>().Select(x => x.Tag.Abbr));
-				report.AddSubTitle("Clinics",subt);
+				report.AddSubTitle("Clinics",string.Join(", ",listClin.SelectedTags<Clinic>().Select(x => x.Abbr)));
 			}
 			//Patient Account Aging Query-----------------------------------------------
 			bool isWoEstIncluded=true;
@@ -821,20 +800,20 @@ namespace OpenDental{
 				isWoEstIncluded=false;
 			}
 			QueryObject query=report.AddQuery(tableAging,"Date "+DateTime.Today.ToShortDateString());
-			query.AddColumn((radioGroupByFam.Checked?"GUARANTOR":"PATIENT"),160,FieldValueType.String);
-			query.AddColumn("0-30 DAYS",75,FieldValueType.Number);
-			query.AddColumn("31-60 DAYS",75,FieldValueType.Number);
-			query.AddColumn("61-90 DAYS",75,FieldValueType.Number);
-			query.AddColumn("> 90 DAYS",75,FieldValueType.Number);
-			query.AddColumn("TOTAL", 80, FieldValueType.Number);
+			query.AddColumn((radioGroupByFam.Checked?"Guarantor":"Patient"),160,FieldValueType.String);
+			query.AddColumn("0-30 Days",75,FieldValueType.Number);
+			query.AddColumn("31-60 Days",75,FieldValueType.Number);
+			query.AddColumn("61-90 Days",75,FieldValueType.Number);
+			query.AddColumn("> 90 Days",75,FieldValueType.Number);
+			query.AddColumn("Total", 80, FieldValueType.Number);
 			if(isWoEstIncluded) {
-				query.AddColumn("-W/O EST",75,FieldValueType.Number);
+				query.AddColumn("-W/O "+(checkAgeWriteoffs.Checked?"Change":"Est"),85,FieldValueType.Number);
 			}
-			query.AddColumn("-INS EST",75,FieldValueType.Number);
-			query.AddColumn("=PATIENT",80,FieldValueType.Number);
+			query.AddColumn("-Ins Est",75,FieldValueType.Number);
+			query.AddColumn("=Patient",80,FieldValueType.Number);
 			if(checkHasDateLastPay.Checked) {
 				query.AddColumn("",10);//add some space between the right alligned amounts and the left alligned date
-				query.AddColumn("LAST PAY DATE",100,FieldValueType.Date);
+				query.AddColumn("Last Pay Date",90,FieldValueType.Date);
 			}
 			report.AddPageNum();
 			report.AddGridLines();
@@ -843,11 +822,7 @@ namespace OpenDental{
 			}
 			FormReportComplex FormR=new FormReportComplex(report);
 			FormR.ShowDialog();
-			DialogResult=DialogResult.OK;		
-		}
-
-		private void butCancel_Click(object sender, System.EventArgs e) {
-		
+			DialogResult=DialogResult.OK;
 		}
 
 	}

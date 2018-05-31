@@ -330,16 +330,17 @@ namespace OpenDentBusiness{
 			//Only included if writeoffs are aged.  Requires joining to the claimsnapshot table.
 			if(isWoAged) {
 				command+="UNION ALL "
-					+"SELECT 'WriteoffOrig' TranType,cp.ClaimProcNum PriKey,cp.PatNum,cp.ProcDate TranDate,"
-					+"COALESCE(CASE WHEN css.Writeoff = -1 THEN 0 ELSE -css.Writeoff END,"//if snapshot exists and writeoff != -1, age snapshot writeoff
-						+"CASE WHEN cp.Status!=0 THEN -cp.WriteOff ELSE 0 END) TranAmount,"//if no snapshot exists and claim is received, age claimproc writeoff
+					//This union is for aging the snapshot w/o if one exists, otherwise the claimproc w/o, using ProcDate.
+					+"SELECT 'WriteoffOrig' TranType,cp.ClaimProcNum PriKey,cp.PatNum,cp.ProcDate TranDate,"//use ProcDate
+					+"COALESCE(CASE WHEN css.Writeoff = -1 THEN 0 ELSE -css.Writeoff END,"//Rcvd and NotRcvd, age snapshot w/o if snapshot exists and w/o != -1
+						+"CASE WHEN cp.Status!=0 THEN -cp.WriteOff ELSE 0 END) TranAmount,"//if Rcvd and no snapshot exists, age claimproc w/o
 					+"0 PayPlanAmount,"
-					//if no snapshot and the claim is not received, or for historic reports, if the claim is received and the ProcDate is on or before asOfDate
-					//but the DateCp is after the asOfDate (meaning received now, but on the historic date it was not yet received),
-					//include claimproc writeoff in InsWoEst column
-					+"(CASE WHEN css.Writeoff IS NULL AND "+(isHistoric?("cp.ProcDate <= "+asOfDateStr+" "//historic=NotRcvd OR Rcvd and DateCp>asOfDate
-					+"AND (cp.Status = 0 OR (cp.Status = 1 AND cp.DateCP > "+asOfDateStr+")) "):"cp.Status = 0 ")//not historic=NotReceived
-					+"THEN cp.Writeoff ELSE 0 END) InsWoEst,"
+					//Include in InsWoEst column either claimproc w/o if no snapshot or claimproc w/o - snapshot w/o (delta) if snapshot exists and either
+						//1. not historic and NotRcvd or
+						//2. historic and ProcDate<=asOfDate and either NotRcvd or Rcvd with DateCp>asOfDate (i.e. Rcvd after the asOfDate)
+					+"(CASE WHEN "+(isHistoric?("cp.ProcDate <= "+asOfDateStr+" "//historic=ProcDate<=asOfDate and either NotRcvd OR Rcvd with DateCp>asOfDate
+						+"AND (cp.Status = 0 OR (cp.Status = 1 AND cp.DateCP > "+asOfDateStr+")) "):"cp.Status = 0 ")//not historic=NotReceived
+						+"THEN cp.Writeoff - COALESCE(CASE WHEN css.Writeoff=-1 THEN 0 ELSE css.Writeoff END,0) ELSE 0 END) InsWoEst,"
 					+"0 InsPayEst "
 					+"FROM claimproc cp "
 					+"LEFT JOIN claimsnapshot css ON cp.ClaimProcNum=css.ClaimProcNum "
@@ -347,11 +348,13 @@ namespace OpenDentBusiness{
 					+(isAllPats?"":("AND cp.PatNum IN ("+familyPatNums+") "))
 					+(DataConnection.DBtype==DatabaseType.MySql?"HAVING TranAmount != 0 OR InsWoEst != 0 ":"")//efficiency improvement for MySQL only.
 					+"UNION ALL "
-					+"SELECT 'Writeoff' TranType,cp.ClaimProcNum PriKey,cp.PatNum,cp.DateCP TranDate,"
-					+"-COALESCE(cp.Writeoff - (CASE WHEN css.Writeoff = -1 THEN 0 ELSE css.Writeoff END),0) TranAmount,"
+					//This union is for Rcvd claims with snapshots only and is the claimproc w/o's - snapshot w/o's (delta) using DateCp
+					+"SELECT 'Writeoff' TranType,cp.ClaimProcNum PriKey,cp.PatNum,cp.DateCP TranDate,"//use DateCP
+					//If Rcvd and snapshot exists, age claimproc w/o - snapshot w/o (delta)
+					+"-(cp.Writeoff - (CASE WHEN css.Writeoff = -1 THEN 0 ELSE css.Writeoff END)) TranAmount,"
 					+"0 PayPlanAmount,0 InsWoEst,0 InsPayEst "
 					+"FROM claimproc cp "
-					+"LEFT JOIN claimsnapshot css ON cp.ClaimProcNum=css.ClaimProcNum "
+					+"INNER JOIN claimsnapshot css ON cp.ClaimProcNum=css.ClaimProcNum "
 					+"WHERE cp.status IN (1,4,5,7) "//Received,Supplemental,CapClaim,CapComplete
 					+(isAllPats?"":("AND cp.PatNum IN ("+familyPatNums+") "))
 					+(DataConnection.DBtype==DatabaseType.MySql?"HAVING TranAmount != 0 ":"");//efficiency improvement for MySQL only.

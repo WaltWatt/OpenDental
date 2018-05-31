@@ -8,35 +8,23 @@ using System.Threading.Tasks;
 
 namespace OpenDentBusiness {
 	public class RpAging {
-		public static DataTable GetAgingTable(DateTime asOfDate,bool isWoAged,bool hasDateLastPay,bool isGroupByFam,bool isOnlyNeg,AgeOfAccount accountAge,
-			bool isIncludeNeg,bool isExcludeInactive,bool isExcludeBadAddress,List<long> listProv,List<long> listClinicNums,List<long> listBillType,
-			bool isExcludeArchive,bool isIncludeInsNoBal,bool isOnlyInsNoBal,bool? isForceAgeNegAdj,bool isForInsAging,bool doAgePatPayPlanPayments) 
-		{
+		public static DataTable GetAgingTable(RpAgingParamObject rpo) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				return Meth.GetTable(MethodBase.GetCurrentMethod(),asOfDate,isWoAged,hasDateLastPay,isGroupByFam,isOnlyNeg,accountAge,isIncludeNeg,
-					isExcludeInactive,isExcludeBadAddress,listProv,listClinicNums,listBillType,isExcludeArchive,isIncludeInsNoBal,isOnlyInsNoBal,
-					isForceAgeNegAdj,isForInsAging,doAgePatPayPlanPayments);
+				return Meth.GetTable(MethodBase.GetCurrentMethod(),rpo);
 			}
-			string queryAg=GetQueryString(asOfDate,isWoAged,hasDateLastPay,isGroupByFam,isOnlyNeg,accountAge,isIncludeNeg,isExcludeInactive,
-				isExcludeBadAddress,listProv,listClinicNums,listBillType,isExcludeArchive,isIncludeInsNoBal,isOnlyInsNoBal,isForceAgeNegAdj,isForInsAging
-				,doAgePatPayPlanPayments);
+			string queryAg=GetQueryString(rpo);
 			return ReportsComplex.RunFuncOnReportServer(() => Db.GetTable(queryAg));
 		}
 
-		public static string GetQueryString(DateTime asOfDate,bool isWoAged,bool hasDateLastPay,bool isGroupByFam,bool isOnlyNeg,AgeOfAccount accountAge,
-			bool isIncludeNeg,bool isExcludeInactive,bool isExcludeBadAddress,List<long> listProv,List<long> listClinicNums,List<long> listBillType,
-			bool isExcludeArchive,bool isIncludeInsNoBal,bool isOnlyInsNoBal,bool? isForceAgeNegAdj,bool isForInsAging,bool doAgePatPayPlanPayments) 
-		{
+		public static string GetQueryString(RpAgingParamObject rpo) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				return Meth.GetString(MethodBase.GetCurrentMethod(),asOfDate,isWoAged,hasDateLastPay,isGroupByFam,isOnlyNeg,accountAge,isIncludeNeg,
-					isExcludeInactive,isExcludeBadAddress,listProv,listClinicNums,listBillType,isExcludeArchive,isIncludeInsNoBal,isOnlyInsNoBal,
-					isForceAgeNegAdj,isForInsAging,doAgePatPayPlanPayments);
+				return Meth.GetString(MethodBase.GetCurrentMethod(),rpo);
 			}
 			//patient aging---------------------------------------------------------------------------
 			//The aging report always shows historical numbers based on the date entered.
 			//the selected columns have to remain in this order due to the way the report complex populates the returned sheet
 			string queryAg = "SELECT ";
-			if(isForInsAging) { //get patNum for insAgingReport only
+			if(rpo.IsForInsAging) { //get patNum for insAgingReport only
 				queryAg+="patient.PatNum, ";
 			}
 			if(ReportsComplex.RunFuncOnReportServer(() => (Prefs.GetBoolNoCache(PrefName.ReportsShowPatNum)))) {
@@ -45,7 +33,7 @@ namespace OpenDentBusiness {
 			else {
 				queryAg+=DbHelper.Concat("patient.LName","', '","patient.FName","' '","patient.MiddleI");
 			}
-			queryAg+="patName,guarAging.Bal_0_30,guarAging.Bal_31_60,guarAging.Bal_61_90,guarAging.BalOver90,guarAging.BalTotal,"
+			queryAg+=" patName,guarAging.Bal_0_30,guarAging.Bal_31_60,guarAging.Bal_61_90,guarAging.BalOver90,guarAging.BalTotal,"
 				+"guarAging.InsWoEst,guarAging.InsPayEst,guarAging.BalTotal-guarAging.InsPayEst-guarAging.InsWoEst AS ";
 			if(DataConnection.DBtype==DatabaseType.MySql) {
 				queryAg+="$pat";
@@ -53,57 +41,60 @@ namespace OpenDentBusiness {
 			else { //Oracle needs quotes.
 				queryAg+="\"$pat\"";
 			}
-			bool isHistoric=(asOfDate.Date!=DateTime.Today);
-			bool isInsPayWoCombined=false;
 			//Must select "blankCol" for use with reportComplex to fix spacing of final column
-			queryAg+=(hasDateLastPay ? ",'' blankCol,guarAging.DateLastPay " : " ")
+			queryAg+=(rpo.HasDateLastPay ? ",'' blankCol,guarAging.DateLastPay " : " ")
 				+"FROM ("
-					+ReportsComplex.RunFuncOnReportServer(() => Ledgers.GetAgingQueryString(asOfDate,null,isHistoric,isInsPayWoCombined,hasDateLastPay,
-						isGroupByFam,isWoAged,isForceAgeNegAdj,doAgePatPayPlanPayments))
+					+ReportsComplex.RunFuncOnReportServer(() => Ledgers.GetAgingQueryString(asOfDate:rpo.AsOfDate,isHistoric:rpo.IsHistoric,
+						isInsPayWoCombined:rpo.IsInsPayWoCombined,hasDateLastPay:rpo.HasDateLastPay,isGroupByGuar:rpo.IsGroupByFam,isWoAged:rpo.IsWoAged,
+						isForceAgeNegAdj:rpo.IsForceAgeNegAdj,doAgePatPayPlanPayments:rpo.DoAgePatPayPlanPayments))
 				+") guarAging "
-				+"INNER JOIN patient ON patient.PatNum=guarAging.PatNum "
-				+"WHERE ";
-			List<string> listAgeOrs=new List<string>();
-			if(isIncludeNeg || isOnlyNeg) {
-				listAgeOrs.Add("guarAging.BalTotal < -0.005");
-			}
-			if(isIncludeInsNoBal || isOnlyInsNoBal) {
-				listAgeOrs.Add("((guarAging.InsPayEst > 0.005 OR guarAging.InsWoEst > 0.005) AND guarAging.Bal_0_30 < 0.005 AND guarAging.Bal_31_60 < 0.005 "
-					+"AND guarAging.Bal_61_90 < 0.005 AND guarAging.BalOver90 < 0.005)");
-			}
-			if(!isOnlyNeg && !isOnlyInsNoBal) {
-				if(accountAge<=AgeOfAccount.Over90) {
-					listAgeOrs.Add("guarAging.BalOver90 > 0.005");
+				+"INNER JOIN patient ON patient.PatNum=guarAging.PatNum ";
+			List<string> listWhereAnds=new List<string>();
+			//InsAging will filter for age, but we need to return all in here order for the filtering to be correct
+			if(!rpo.IsForInsAging) {
+				List<string> listAgeOrs=new List<string>();
+				if(rpo.IsIncludeNeg || rpo.IsOnlyNeg) {
+					listAgeOrs.Add("guarAging.BalTotal <= -0.005");
 				}
-				if(accountAge<=AgeOfAccount.Over60) {
-					listAgeOrs.Add("guarAging.Bal_61_90 > 0.005");
+				if(rpo.IsIncludeInsNoBal || rpo.IsOnlyInsNoBal) {
+					listAgeOrs.Add("((ABS(guarAging.InsPayEst) >= 0.005 OR ABS(guarAging.InsWoEst) >= 0.005) "
+						+"AND guarAging.Bal_0_30 < 0.005 AND guarAging.Bal_31_60 < 0.005 AND guarAging.Bal_61_90 < 0.005 AND guarAging.BalOver90 < 0.005)");
 				}
-				if(accountAge<=AgeOfAccount.Over30) {
-					listAgeOrs.Add("guarAging.Bal_31_60 > 0.005");
+				if(!rpo.IsOnlyNeg && !rpo.IsOnlyInsNoBal) {
+					listAgeOrs.Add("guarAging.BalOver90 >= 0.005");//applies to all ages
+					if(rpo.AccountAge<=AgeOfAccount.Over60) {
+						listAgeOrs.Add("guarAging.Bal_61_90 >= 0.005");
+					}
+					if(rpo.AccountAge<=AgeOfAccount.Over30) {
+						listAgeOrs.Add("guarAging.Bal_31_60 >= 0.005");
+					}
+					if(rpo.AccountAge==AgeOfAccount.Any) {//only applies to Any age
+						listAgeOrs.Add("guarAging.Bal_0_30 >= 0.005");
+					}
 				}
-				if(accountAge<=AgeOfAccount.Any) {
-					listAgeOrs.Add("guarAging.Bal_0_30 > 0.005");
-				}
+				listWhereAnds.Add("("+string.Join(" OR ",listAgeOrs)+")");
 			}
-			queryAg+="("+string.Join(" OR ",listAgeOrs)+") ";
-			if(isExcludeInactive) {
-				queryAg+="AND patient.PatStatus != "+ (int)PatientStatus.Inactive + " ";
+			if(rpo.IsExcludeInactive) {
+				listWhereAnds.Add("patient.PatStatus != "+ (int)PatientStatus.Inactive);
 			}
-			if(isExcludeArchive) {
-				queryAg+="AND patient.PatStatus != "+ (int)PatientStatus.Archived + " ";
+			if(rpo.IsExcludeArchive) {
+				listWhereAnds.Add("patient.PatStatus != "+ (int)PatientStatus.Archived);
 			}
-			if(isExcludeBadAddress) {
-				queryAg+="AND patient.Zip != '' ";
+			if(rpo.IsExcludeBadAddress) {
+				listWhereAnds.Add("patient.Zip != ''");
 			}
-			if(listBillType.Count>0) {//if all bill types is selected, list will be empty
-				queryAg+="AND patient.BillingType IN ("+string.Join(",",listBillType.Select(x => POut.Long(x)))+") ";
+			if(rpo.ListBillTypes.Count>0) {//if all bill types is selected, list will be empty
+				listWhereAnds.Add("patient.BillingType IN ("+string.Join(",",rpo.ListBillTypes.Select(x => POut.Long(x)))+")");
 			}
-			if(listProv.Count>0) {//if all provs is selected, list will be empty
-				queryAg+="AND patient.PriProv IN ("+string.Join(",",listProv.Select(x => POut.Long(x)))+") ";
+			if(rpo.ListProvNums.Count>0) {//if all provs is selected, list will be empty
+				listWhereAnds.Add("patient.PriProv IN ("+string.Join(",",rpo.ListProvNums.Select(x => POut.Long(x)))+")");
 			}
-			if(ReportsComplex.RunFuncOnReportServer(() => (!Prefs.GetBoolNoCache(PrefName.EasyNoClinics)))) {//validated to have at least one clinic selected if clinics are enabled above
-																																																			 //listClin may contain "Unassigned" clinic with ClinicNum 0, in which case it will also be in the query string
-				queryAg+="AND patient.ClinicNum IN ("+string.Join(",",listClinicNums.Select(x => POut.Long(x)))+") ";
+			if(ReportsComplex.RunFuncOnReportServer(() => (!Prefs.GetBoolNoCache(PrefName.EasyNoClinics)))) {//if clinics enabled, at least one clinic will be selected
+				//listClin may contain "Unassigned" clinic with ClinicNum 0, in which case it will also be in the query string
+				listWhereAnds.Add("patient.ClinicNum IN ("+string.Join(",",rpo.ListClinicNums.Select(x => POut.Long(x)))+")");
+			}
+			if(listWhereAnds.Count>0) {
+				queryAg+="WHERE "+string.Join(" AND ",listWhereAnds)+" ";
 			}
 			queryAg+="ORDER BY patient.LName,patient.FName";
 			return queryAg;
@@ -120,5 +111,37 @@ namespace OpenDentBusiness {
 		Over60,
 		///<summary>3</summary>
 		Over90,
+	}
+
+	[Serializable]
+	public class RpAgingParamObject {
+		public DateTime AsOfDate=DateTime.Today;
+		public bool IsWoAged=false;
+		public bool HasDateLastPay=false;
+		public bool IsGroupByFam=true;
+		public bool IsOnlyNeg=false;
+		public AgeOfAccount AccountAge;
+		public bool IsIncludeNeg=false;
+		public bool IsExcludeInactive=false;
+		public bool IsExcludeBadAddress=false;
+		public List<long> ListProvNums=new List<long>();
+		public List<long> ListClinicNums=new List<long>();
+		public List<long> ListBillTypes=new List<long>();
+		public bool IsExcludeArchive=false;
+		public bool IsIncludeInsNoBal=false;
+		public bool IsOnlyInsNoBal=false;
+		public bool? IsForceAgeNegAdj=null;
+		public bool IsForInsAging=false;
+		public bool DoAgePatPayPlanPayments=false;
+		public bool IsInsPayWoCombined=true;
+		public bool IsHistoric=false;
+
+		public RpAgingParamObject Copy() {
+			RpAgingParamObject retval=(RpAgingParamObject)this.MemberwiseClone();
+			retval.ListProvNums=this.ListProvNums.ToList();
+			retval.ListClinicNums=this.ListClinicNums.ToList();
+			retval.ListBillTypes=this.ListBillTypes.ToList();
+			return retval;
+		}
 	}
 }
