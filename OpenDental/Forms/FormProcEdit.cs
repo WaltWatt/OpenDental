@@ -744,6 +744,7 @@ namespace OpenDental{
 			this.groupArch.TabStop = false;
 			this.groupArch.Text = "Arch";
 			this.groupArch.Visible = false;
+			this.groupArch.Validating += new System.ComponentModel.CancelEventHandler(this.groupArch_Validating);
 			// 
 			// radioL
 			// 
@@ -891,6 +892,7 @@ namespace OpenDental{
 			this.groupSextant.TabStop = false;
 			this.groupSextant.Text = "Sextant";
 			this.groupSextant.Visible = false;
+			this.groupSextant.Validating += new System.ComponentModel.CancelEventHandler(this.groupSextant_Validating);
 			// 
 			// radioS6
 			// 
@@ -3783,7 +3785,13 @@ namespace OpenDental{
 						case "4": this.radioS4.Checked=true; break;
 						case "5": this.radioS5.Checked=true; break;
 						case "6": this.radioS6.Checked=true; break;
-						//default:
+							//default:
+					}
+					if(IsSextantSelected()) {
+						errorProvider2.SetError(groupSextant,"");
+					}
+					else {
+						errorProvider2.SetError(groupSextant,Lan.g(this,"Please select a sextant treatment area."));
 					}
 					break;
 				case TreatmentArea.Arch:
@@ -3791,6 +3799,12 @@ namespace OpenDental{
 					switch (ProcCur.Surf){
 						case "U": this.radioU.Checked=true; break;
 						case "L": this.radioL.Checked=true; break;
+					}
+					if(IsArchSelected()) {
+						errorProvider2.SetError(groupArch,"");
+					}
+					else {
+						errorProvider2.SetError(groupArch,Lan.g(this,"Please select a arch treatment area."));
 					}
 					break;
 				case TreatmentArea.ToothRange:
@@ -4353,6 +4367,32 @@ namespace OpenDental{
 				errorProvider2.SetError(textSurfaces,"");
 		}
 
+		private void groupSextant_Validating(object sender,CancelEventArgs e) {
+			if(IsSextantSelected()) {
+				errorProvider2.SetError(groupSextant,"");
+			}
+			else {
+				errorProvider2.SetError(groupSextant,Lan.g(this,"Please select a sextant treatment area."));
+			}
+		}
+
+		private bool IsSextantSelected() {
+			return groupSextant.Controls.OfType<RadioButton>().Any(x => x.Checked);
+		}
+
+		private void groupArch_Validating(object sender,CancelEventArgs e) {
+			if(IsArchSelected()) {
+				errorProvider2.SetError(groupArch,"");
+			}
+			else {
+				errorProvider2.SetError(groupArch,Lan.g(this,"Please select a arch treatment area."));
+			}
+		}
+
+		private bool IsArchSelected() {
+			return groupArch.Controls.OfType<RadioButton>().Any(x => x.Checked);
+		}
+
 		private void listBoxTeeth2_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e) {
 		  listBoxTeeth.SelectedIndex=-1;
 		}
@@ -4646,34 +4686,42 @@ namespace OpenDental{
 
 		private void radioU_Click(object sender, System.EventArgs e) {
 			ProcCur.Surf="U";
+			errorProvider2.SetError(groupArch,"");
 		}
 
 		private void radioL_Click(object sender, System.EventArgs e) {
 			ProcCur.Surf="L";
+			errorProvider2.SetError(groupArch,"");
 		}
 
 		private void radioS1_Click(object sender, System.EventArgs e) {
 			ProcCur.Surf="1";
+			errorProvider2.SetError(groupSextant,"");
 		}
 
 		private void radioS2_Click(object sender, System.EventArgs e) {
 			ProcCur.Surf="2";
+			errorProvider2.SetError(groupSextant,"");
 		}
 
 		private void radioS3_Click(object sender, System.EventArgs e) {
 			ProcCur.Surf="3";
+			errorProvider2.SetError(groupSextant,"");
 		}
 
 		private void radioS4_Click(object sender, System.EventArgs e) {
 			ProcCur.Surf="4";
+			errorProvider2.SetError(groupSextant,"");
 		}
 
 		private void radioS5_Click(object sender, System.EventArgs e) {
 			ProcCur.Surf="5";
+			errorProvider2.SetError(groupSextant,"");
 		}
 
 		private void radioS6_Click(object sender, System.EventArgs e) {
 			ProcCur.Surf="6";
+			errorProvider2.SetError(groupSextant,"");
 		}
 
 		private void checkNoBillIns_Click(object sender, System.EventArgs e) {
@@ -5407,6 +5455,12 @@ namespace OpenDental{
 				|| errorProvider2.GetError(textTooth)!="")
 			{
 				MsgBox.Show(this,"Please fix tooth number or surfaces first.");
+				return false;
+			}
+			if(errorProvider2.GetError(groupSextant)!=""
+			 || errorProvider2.GetError(groupArch)!="") 
+			{
+				MsgBox.Show(this,"Please fix arch or sextant first.");
 				return false;
 			}
 			if(textMedicalCode.Text!="" && !ProcedureCodes.GetContainsKey(textMedicalCode.Text)){
