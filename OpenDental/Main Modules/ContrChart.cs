@@ -12450,9 +12450,13 @@ namespace OpenDental {
 
 		/// <summary>Event handler for closing FormSheetFillEdit when it is non-modal.</summary>
 		private void FormSheetFillEdit_FormClosing(object sender,FormClosingEventArgs e) {
-			FormSheetFillEdit form=((FormSheetFillEdit)sender);
-			if(form.DialogResult==DialogResult.OK && PatCur!=null && form.SheetCur.PatNum==PatCur.PatNum) {
-				ModuleSelected(PatCur.PatNum);
+			FormSheetFillEdit FormSFE=((FormSheetFillEdit)sender);
+			if(FormSFE.DialogResult==DialogResult.OK && PatCur!=null) {
+				//If the user deleted the sheet, forcefully refresh the chart module regardless of what patient is selected.
+				//Otherwise; only refresh the chart module if the same patient is selected.
+				if(FormSFE.SheetCur==null || FormSFE.SheetCur.PatNum==PatCur.PatNum) {
+					ModuleSelected(PatCur.PatNum);
+				}
 			}
 		}
 
