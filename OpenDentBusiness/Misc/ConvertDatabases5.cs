@@ -8430,5 +8430,29 @@ No Action Required in many cases, check your new patient Web Sched on your web s
 			Db.NonQ(command);
 		}
 
+		private static void To18_1_19() {
+			string command;
+			//Insert iRYS bridge program property-----------------------------------------------------------------
+			command="SELECT ProgramNum FROM program WHERE ProgName = 'iRYS'";
+			long iRYSProgNum=PIn.Long(Db.GetScalar(command));
+			if(DataConnection.DBtype==DatabaseType.MySql) {
+				command="INSERT INTO programproperty (ProgramNum,PropertyDesc,PropertyValue"
+					+") VALUES("
+					+"'"+POut.Long(iRYSProgNum)+"', "
+					+"'Birthdate format (default dd,MM,yyyy)', "
+					+"'dd,MM,yyyy')";
+				Db.NonQ(command);
+			}
+			else {//oracle
+				command="INSERT INTO programproperty (ProgramPropertyNum,ProgramNum,PropertyDesc,PropertyValue,ClinicNum"
+					+") VALUES("
+					+"(SELECT COALESCE(MAX(ProgramPropertyNum),0)+1 FROM programproperty),"
+					+"'"+POut.Long(iRYSProgNum)+"', "
+					+"'Birthdate format (default dd,MM,yyyy)', "
+					+"'dd,MM,yyyy', "
+					+"'0')";
+				Db.NonQ(command);
+			}//End iRYS
+		}
 	}
 }

@@ -35,7 +35,7 @@ namespace OpenDental.Bridges {
 					info+=pat.ChartNumber;
 				}
 				info+="\" /NAME \""+Tidy(pat.FName)+"\" /SURNAME \""+Tidy(pat.LName)+"\"";
-				info+=" /DATEB \""+pat.Birthdate.ToString("dd,MM,yyyy")+"\"";
+				info+=" /DATEB \""+pat.Birthdate.ToString(ProgramProperties.GetPropVal(ProgramCur.ProgramNum,"Birthdate format (default dd,MM,yyyy)"))+"\"";
 				if(pat.Gender.ToString()=="Female"){
 					info+=" /SEX \"F\"";
 				}
