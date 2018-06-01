@@ -1857,6 +1857,7 @@ namespace OpenDental{
 				textAPR.Text="0";
 			}
 			if(textPaymentCount.Text=="" && textPeriodPayment.Text=="") {
+				//message box also used when butRecalculate is clicked
 				MsgBox.Show(this,"Please enter a term or payment amount first.");
 				return;
 			}
@@ -1906,6 +1907,11 @@ namespace OpenDental{
 			}
 			if(IsInsPayPlan) {
 				MsgBox.Show(this,"Insurance payment plans can't be recalculated.");
+				return;
+			}
+			if(textPaymentCount.Text=="" && textPeriodPayment.Text=="") {
+				//message box also used when butCreateSched is clicked
+				MsgBox.Show(this,"Please enter a term or payment amount first.");
 				return;
 			}
 			if(PIn.Double(textTotalCost.Text)<=PIn.Double(textAmtPaid.Text)) {
