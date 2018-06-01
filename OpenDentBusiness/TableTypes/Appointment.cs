@@ -72,10 +72,12 @@ namespace OpenDentBusiness{
 		///<summary>Stores XML for the procs colors</summary>
 		[CrudColumn(SpecialType=CrudSpecialColType.TextIsClob)]
 		public String ProcsColored;
-		///<summary>If set to anything but 0, then this will override the graphic color for the appointment.</summary>
+		///<summary>If set to anything but 0, then this will override the graphic color for the appointment.
+		///Typically set to the color of the corresponding appointment type (if one is set) or a color manually picked by the user.</summary>
 		[XmlIgnore]
 		public Color ColorOverride;
-		///<summary>FK to appointmenttype.AppointmentTypeNum.</summary>
+		///<summary>FK to appointmenttype.AppointmentTypeNum.
+		///Make sure to update ColorOverride to the corresponding color associated to this appointment type when changing the appointment type.</summary>
 		public long AppointmentTypeNum;
 		///<summary>FK to userod.UserNum.  Set to the user logged in when the row was inserted at SecDateEntry date and time.</summary>
 		[CrudColumn(SpecialType=CrudSpecialColType.ExcludeFromUpdate)]

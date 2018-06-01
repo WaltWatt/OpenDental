@@ -2111,7 +2111,7 @@ namespace OpenDentBusiness{
 		///Also, does not flag the patient as prospective.  That must be done outside this method as well.
 		///Used by multiple applications so be very careful when changing this method.  E.g. Open Dental and Web Sched.</summary>
 		public static Appointment CreateApptForNewPatient(Patient patCur,Operatory operatory,DateTime dateTimeStart,DateTime dateTimeAskedToArrive
-			,string pattern,List<Schedule> listSchedPeriod,string apptNote="",long apptConfirmed=0,long appointmentTypeNum=0) 
+			,string pattern,List<Schedule> listSchedPeriod,string apptNote="",long apptConfirmed=0,AppointmentType appointmentType=null) 
 		{
 			//No need to check RemotingRole; no call to db.
 			Appointment appointment=new Appointment();
@@ -2155,7 +2155,11 @@ namespace OpenDentBusiness{
 				appointment.ClinicNum=operatory.ClinicNum;
 			}
 			appointment.Note=apptNote;
-			appointment.AppointmentTypeNum=appointmentTypeNum;
+			if(appointmentType!=null) {
+				//Set the appointment's AppointmentTypeNum and ColorOverride to the corresponding values of the appointment type passed in.
+				appointment.AppointmentTypeNum=appointmentType.AppointmentTypeNum;
+				appointment.ColorOverride=appointmentType.AppointmentTypeColor;
+			}
 			Appointments.Insert(appointment);//Handles inserting signal
 			return appointment;
 		}
