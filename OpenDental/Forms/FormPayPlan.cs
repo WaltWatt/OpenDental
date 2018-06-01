@@ -2564,6 +2564,7 @@ namespace OpenDental{
 			decimal periodPaymentAmt=0;
 			if(textPaymentCount.Text=="") {//Use a specified payment amount.
 				periodPaymentAmt=PIn.Decimal(textPeriodPayment.Text);
+				_payPlanCur.NumberOfPayments=0;
 				_payPlanCur.PayAmt=(double)periodPaymentAmt;
 			}
 			else {//Use the given number of payments.
@@ -2581,6 +2582,7 @@ namespace OpenDental{
 				//Round up to the nearest penny (or international equivalent).  
 				//This causes the principal on the last payment to be less than or equal to the other principal amounts.
 				periodPaymentAmt=(decimal)(Math.Ceiling(periodExactAmt*Math.Pow(10,_roundDec))/Math.Pow(10,_roundDec));
+				_payPlanCur.PayAmt=0;
 				_payPlanCur.NumberOfPayments=paymentCount+payPlanChargesCount;//countPayPlanCharges will 0 unless isRecalculate=true
 			}
 			return periodPaymentAmt;
@@ -2706,7 +2708,7 @@ namespace OpenDental{
 				new InputBoxParam(InputBoxType.CheckBox,"",Lan.g(this,"Also make line item in Account Module"),new Size(250,30)),
 			}
 				,new Func<string,bool>((text) => {
-					Double amount=PIn.Double(text);
+					double amount=PIn.Double(text);
 					if(amount==0) {
 						MsgBox.Show(this,"Please enter a valid value");
 						return false;
