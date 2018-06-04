@@ -203,6 +203,10 @@ namespace OpenDentBusiness{
 		public DateTime TranDate;
 		public double TranAmt;
 
+		///<summary>For serialization.</summary>
+		public TsiTrans() {
+		}
+
 		public TsiTrans(long priKey,TsiFKeyType keyType,long patNum,long guarantor,DateTime tranDate,double tranAmt) {
 			KeyType=keyType;
 			PriKey=priKey;
