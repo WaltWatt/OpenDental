@@ -16,7 +16,7 @@ namespace OpenDentBusiness{
 
 		public static List<Etrans835Attach> GetForEtransNumOrClaimNums(bool isSimple,long etransNum=0,params long[] listClaimNums) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				return Meth.GetObject<List<Etrans835Attach>>(MethodBase.GetCurrentMethod(),listClaimNums);
+				return Meth.GetObject<List<Etrans835Attach>>(MethodBase.GetCurrentMethod(),isSimple,etransNum,listClaimNums);
 			}
 			List<string> listWhereClauses=new List<string>();
 			if(listClaimNums.Length!=0) {
