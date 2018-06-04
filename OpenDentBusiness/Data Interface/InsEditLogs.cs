@@ -169,7 +169,7 @@ namespace OpenDentBusiness {
 			}
 		}
 
-		private static long Insert(InsEditLog logCur) {
+		public static long Insert(InsEditLog logCur) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
 				logCur.InsEditLogNum=Meth.GetLong(MethodBase.GetCurrentMethod(),logCur);
 				return logCur.InsEditLogNum;
