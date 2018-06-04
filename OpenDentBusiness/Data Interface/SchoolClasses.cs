@@ -84,7 +84,7 @@ namespace OpenDentBusiness{
 		#endregion
 
 		///<summary></summary>
-		private static void Update(SchoolClass sc){
+		public static void Update(SchoolClass sc){
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
 				Meth.GetVoid(MethodBase.GetCurrentMethod(),sc);
 				return;
@@ -93,7 +93,7 @@ namespace OpenDentBusiness{
 		}
 
 		///<summary></summary>
-		private static long Insert(SchoolClass sc) {
+		public static long Insert(SchoolClass sc) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
 				sc.SchoolClassNum=Meth.GetLong(MethodBase.GetCurrentMethod(),sc);
 				return sc.SchoolClassNum;
