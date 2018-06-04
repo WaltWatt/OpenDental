@@ -311,7 +311,7 @@ namespace OpenDental {
 					if(!_isComposing) {
 						string smimeP7sFilePath=FileAtoZ.CombinePaths(EmailAttaches.GetAttachPath(),_emailMessage.Attachments[i].ActualFileName);
 						string localFile=PrefC.GetRandomTempFile(".p7s");
-						FileAtoZ.Copy(smimeP7sFilePath,localFile,FileAtoZSourceDestination.AtoZToLocal);
+						FileAtoZ.Copy(smimeP7sFilePath,localFile,FileAtoZSourceDestination.AtoZToLocal,doOverwrite:true);
 						SetSig(EmailMessages.GetEmailSignatureFromSmimeP7sFile(localFile));
 					}
 					//Do not display email signatures in the attachment list, because "smime.p7s" has no meaning to a user

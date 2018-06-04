@@ -152,7 +152,7 @@ namespace OpenDental {
 
 		///<summary>The first parameter, 'sourceFileName', must be a file that exists.</summary>
 		public static void Copy(string sourceFileName,string destinationFileName,FileAtoZSourceDestination sourceDestination,
-			string uploadMessage="Copying file...",bool isFolder=false) 
+			string uploadMessage="Copying file...",bool isFolder=false,bool doOverwrite=false) 
 		{
 			if(CloudStorage.IsCloudStorage) {
 				sourceFileName=CloudStorage.PathTidy(sourceFileName);
@@ -183,7 +183,7 @@ namespace OpenDental {
 				}
 			}
 			else {//Not cloud
-				File.Copy(sourceFileName,destinationFileName);
+				File.Copy(sourceFileName,destinationFileName,doOverwrite);
 			}
 		}
 
