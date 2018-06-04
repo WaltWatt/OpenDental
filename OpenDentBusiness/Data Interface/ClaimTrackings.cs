@@ -4,6 +4,7 @@ using System.Data;
 using System.Reflection;
 using System.Text;
 using System.Linq;
+using CodeBase;
 
 namespace OpenDentBusiness{
 	///<summary></summary>
@@ -121,7 +122,10 @@ namespace OpenDentBusiness{
 		///<summary>Attempts to create or update ClaimTrackings and calls sync to update the database at the end.
 		///Will update ClaimTracking if one has been inserted for a given claim that did not have one prior to calling this method.
 		///When called please ensure dictClaimTracking has entries.</summary>
-		public static List<ClaimTracking> Assign(List<Tuple<long,long>>listTrackingNumsAndClaimNums,long assignUserNum) {
+		public static List<ClaimTracking> Assign(List<ODTuple<long,long>> listTrackingNumsAndClaimNums,long assignUserNum) {
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				return Meth.GetObject<List<ClaimTracking>>(MethodBase.GetCurrentMethod(),listTrackingNumsAndClaimNums,assignUserNum);
+			}
 			string command="SELECT * FROM claimtracking WHERE claimtracking.TrackingType='"+POut.String(ClaimTrackingType.ClaimUser.ToString())+"' "
 				+"AND claimTracking.ClaimNum IN("+string.Join(",",listTrackingNumsAndClaimNums.Select(x => x.Item2).ToList())+")";
 			List<ClaimTracking> listClaimTrackingDb=Crud.ClaimTrackingCrud.SelectMany(command);//up to date copy from the database
