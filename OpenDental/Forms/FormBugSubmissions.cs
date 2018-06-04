@@ -396,9 +396,6 @@ namespace OpenDental {
 		
 		private void gridSubs_CellClick(object sender,UI.ODGridClickEventArgs e) {
 			butAddJob.Text="Add Job";//Always reset
-			if(_viewMode.In(FormBugSubmissionMode.SelectionMode,FormBugSubmissionMode.ValidationMode)) {
-				butAddJob.Text="OK";
-			}
 			if(e.Row==-1 || gridSubs.SelectedIndices.Length!=1) {
 				bugSubmissionControl.ClearCustomerInfo();
 				_subCur=null;
@@ -435,6 +432,9 @@ namespace OpenDental {
 					butAddJob.Text="View Job";
 					butAddJob.Tag=_listLinks.First();
 				}
+			}
+			if(_viewMode.In(FormBugSubmissionMode.SelectionMode,FormBugSubmissionMode.ValidationMode)) {
+				butAddJob.Text="OK";
 			}
 		}
 		
