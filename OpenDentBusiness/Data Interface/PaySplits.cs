@@ -449,8 +449,8 @@ namespace OpenDentBusiness{
 			PayPlanCharge payPlanChargeCur=(PayPlanCharge)payPlanEntry.Tag;
 			//amtUnattached will also include principal payments if those payments are not allocated to a procedure. 
 			//This is accounted for when creating an unattached split.
-			double amtUnattachedAlreadyPaid=(double)payPlanEntry.SplitCollection.Where(x => x.ProcNum == 0).Sum(y => y.SplitAmt);
-			double amtAttachedAlreadyPaid=(double)payPlanEntry.SplitCollection.Where(x => x.ProcNum != 0).Sum(y => y.SplitAmt);
+			double amtUnattachedAlreadyPaid=(double)payPlanEntry.SplitCollection.Where(x => x.ProcNum == 0).Sum(y => y.AccountEntryAmtPaid);
+			double amtAttachedAlreadyPaid=(double)payPlanEntry.SplitCollection.Where(x => x.ProcNum != 0).Sum(y => y.AccountEntryAmtPaid);
 			//Below is the logic of this method: For the passed in charge
 			//create a split for the amount of the interest
 			//create a split for the amount of the charge, attach it to the procedure if possible.

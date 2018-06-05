@@ -84,7 +84,9 @@ namespace OpenDentBusiness {
 
 		#region constructing and linking charges and credits
 		///<summary>Gets the data needed to construct a list of charges on FormPayment.</summary>
-		public static ConstructChargesData GetConstructChargesData(List<long> listPatNums,long patNum,List<PaySplit> listSplitsCur,long payCurNum,bool isIncomeTransfer) {
+		public static ConstructChargesData GetConstructChargesData(List<long> listPatNums,long patNum,List<PaySplit> listSplitsCur,long payCurNum
+			,bool isIncomeTransfer) 
+		{
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
 				return Meth.GetObject<ConstructChargesData>(MethodBase.GetCurrentMethod(),listPatNums,patNum,listSplitsCur,payCurNum,isIncomeTransfer);
 			}
@@ -268,9 +270,11 @@ namespace OpenDentBusiness {
 						decimal amtStart=(decimal)splitCurCopy.SplitAmt;//Overpayment on procedures is handled later
 						if(splitCurCopy.PayNum!=payNum) {
 							chargeCur.AmountStart-=amtStart;
-						} 
+						}
+						PaySplit splitForCollection=splitCur.Copy();//take copy so we can get amtPaid without overwriting.
+						splitForCollection.AccountEntryAmtPaid=(decimal)amtStart;
 						chargeCur.AmountEnd-=amtStart;
-						chargeCur.SplitCollection.Add(splitCur);
+						chargeCur.SplitCollection.Add(splitForCollection);
 						splitCurCopy.SplitAmt-=(double)amtStart;//We use a copy here so SplitCur retains its amount (which is what shows up in left grid and paysplit edit window)
 						AccountEntry acctEntry=listAccountCharges.Find(x => x.GetType()==typeof(PaySplit) && x.SplitCollection.Contains(splitCur));
 						if(acctEntry==null) {
@@ -288,11 +292,12 @@ namespace OpenDentBusiness {
 						if(splitCurCopy.PayNum!=payNum) {
 							chargeCur.AmountStart-=(decimal)amt;
 						}
+						PaySplit splitForCollection=splitCur.Copy();//take copy so we can get amtPaid without overwriting (for autosplitting payplancharges)
+						splitForCollection.AccountEntryAmtPaid=(decimal)amt;
 						chargeCur.AmountEnd-=(decimal)amt;
 						splitCurCopy.SplitAmt-=amt;
-						//add a copy of the paysplit to the charge so that we can keep track of principal and interest payments.
-						//we need to add the actual split to the list of paysplits because we call Contains() and Remove() on it.
-						chargeCur.SplitCollection.Add(splitCur);
+						//add a copy of the paysplit to the charge so that we can keep track of AccountEntryAmtPaid
+						chargeCur.SplitCollection.Add(splitForCollection);
 					}
 					else if(chargeCur.Tag.GetType()==typeof(PaySplit) && splitCurCopy.FSplitNum==chargeCur.PriKey) {
 						if(hasPayTypeNone) {
@@ -301,8 +306,10 @@ namespace OpenDentBusiness {
 						if(splitCurCopy.PayNum!=payNum) {
 							chargeCur.AmountStart-=(decimal)splitCurCopy.SplitAmt;//splits counteracting prepay are negative
 						}
+						PaySplit splitForCollection=splitCur.Copy();
+						splitForCollection.AccountEntryAmtPaid=(decimal)splitCurCopy.SplitAmt;
 						chargeCur.AmountEnd-=(decimal)splitCurCopy.SplitAmt;
-						chargeCur.SplitCollection.Add(splitCur);
+						chargeCur.SplitCollection.Add(splitForCollection);
 						break;
 					}
 				}

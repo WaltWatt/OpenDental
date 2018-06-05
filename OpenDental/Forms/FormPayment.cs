@@ -3865,7 +3865,9 @@ namespace OpenDental {
 				}
 				if(isMatchFound) {
 					charge.AmountEnd=charge.AmountEnd-(decimal)paySplit.SplitAmt;
-					charge.SplitCollection.Add(paySplit);
+					PaySplit splitForCollection=paySplit.Copy();
+					splitForCollection.AccountEntryAmtPaid=(decimal)paySplit.SplitAmt;
+					charge.SplitCollection.Add(splitForCollection);
 				}
 				//If none of these, it's unattached to the best of our knowledge.
 			}

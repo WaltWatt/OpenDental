@@ -52,6 +52,9 @@ namespace OpenDentBusiness{
 
 		[CrudColumn(IsNotDbColumn=true)]
 		public bool IsInterestSplit;
+		///<summary>The amount of this split that is applied to an Outstanding Charge (AccountEntry).</summary>
+		[CrudColumn(IsNotDbColumn=true)]
+		public decimal AccountEntryAmtPaid;
 
 		///<summary>Returns a copy of this PaySplit.</summary>
 		public PaySplit Copy(){
