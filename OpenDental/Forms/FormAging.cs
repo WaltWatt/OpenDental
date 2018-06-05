@@ -178,7 +178,7 @@ namespace OpenDental{
 			DateTime dateLastAging=PrefC.GetDate(PrefName.DateLastAging);
 			if(dateLastAging.Date==dateCalc.Date) {
 				if(MessageBox.Show(this,Lan.g(this,"Aging has already been calculated for")+" "+dateCalc.ToShortDateString()+" "
-					+Lan.g(this,"and does not normally need to run more than once per day.\r\n\r\nRun anway?"),"",MessageBoxButtons.YesNo)!=DialogResult.Yes)
+					+Lan.g(this,"and does not normally need to run more than once per day.\r\n\r\nRun anyway?"),"",MessageBoxButtons.YesNo)!=DialogResult.Yes)
 				{
 					return false;
 				}
