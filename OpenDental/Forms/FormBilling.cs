@@ -962,6 +962,7 @@ namespace OpenDental{
 				.Select(x => PIn.Long(x["StatementNum"].ToString())).ToList());
 			_dictFams=Patients.GetFamilies(listStatements.Select(x => x.PatNum).ToList())
 				.SelectMany(fam => fam.ListPats.Select(y => new { y.PatNum,fam }))
+				.Distinct()
 				.ToDictionary(x => x.PatNum,x => x.fam);
 			AddInstallmentPlansToStatements(listStatements);
 			//A dictionary of batches of statements.  The key is the batch num which is 1 based (helpful when displaying to the user).
