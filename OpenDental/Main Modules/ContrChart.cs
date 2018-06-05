@@ -184,7 +184,6 @@ namespace OpenDental {
 		//<summary>This date will usually have minVal except while the hospital print function is running.</summary>
 		//private DateTime hospitalDate;
 		private PatientNote PatientNoteCur;
-		private DataSet DataSetMain;
 		private MenuItem menuItemLabFee;
 		private MenuItem menuItemLabFeeDetach;
 		private MenuItem menuItemPrintRouteSlip;
@@ -6496,7 +6495,12 @@ namespace OpenDental {
 			}
 			DataTable table=_loadData.TableProgNotes;
 			if(doRefreshData || _loadData.ListProcGroupItems==null) {
-				_loadData.ListProcGroupItems=ProcGroupItems.Refresh(PatCur.PatNum);
+				if(PatCur!=null) {
+					_loadData.ListProcGroupItems=ProcGroupItems.Refresh(PatCur.PatNum);
+				}
+				else {
+					_loadData.ListProcGroupItems=new List<ProcGroupItem>();
+				}
 			}
 			List<ProcGroupItem> procGroupItems=_loadData.ListProcGroupItems;
 			_procList=new List<DataRow>();
