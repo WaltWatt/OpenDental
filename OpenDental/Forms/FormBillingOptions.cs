@@ -694,6 +694,7 @@ namespace OpenDental{
 			this.checkSinglePatient.TabIndex = 27;
 			this.checkSinglePatient.Text = "Single patient only";
 			this.checkSinglePatient.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.checkSinglePatient.Visible = false;
 			this.checkSinglePatient.Click += new System.EventHandler(this.checkSinglePatient_Click);
 			// 
 			// labelModesToText

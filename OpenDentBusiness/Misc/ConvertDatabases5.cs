@@ -8454,5 +8454,13 @@ No Action Required in many cases, check your new patient Web Sched on your web s
 				Db.NonQ(command);
 			}//End iRYS
 		}
+
+		private static void To18_1_20() {
+			string command;
+			//turn off single patient statements
+			command="UPDATE preference SET ValueString = 0 WHERE PrefName LIKE 'BillingDefaultsSinglePatient'";
+			Db.NonQ(command);
+		}
+
 	}
 }
