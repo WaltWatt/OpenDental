@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet type="text/xsl" href="OpenDentalDocumentation.xsl"?>
-<database version="18.1.16.0">
+<database version="18.1.19.0">
     <table name="account">
         <summary>Used in the accounting section in chart of accounts.  Not related to patient accounts in any way.</summary>
         <column order="0" name="AccountNum" type="bigint(20)">
@@ -388,10 +388,12 @@
             <summary>Stores XML for the procs colors</summary>
         </column>
         <column order="26" name="ColorOverride" type="int(11)">
-            <summary>If set to anything but 0, then this will override the graphic color for the appointment.</summary>
+            <summary>If set to anything but 0, then this will override the graphic color for the appointment.
+            Typically set to the color of the corresponding appointment type (if one is set) or a color manually picked by the user.</summary>
         </column>
         <column order="27" name="AppointmentTypeNum" type="bigint(20)" fk="appointmenttype">
-            <summary>FK to appointmenttype.AppointmentTypeNum.</summary>
+            <summary>FK to appointmenttype.AppointmentTypeNum.
+            Make sure to update ColorOverride to the corresponding color associated to this appointment type when changing the appointment type.</summary>
         </column>
         <column order="28" name="SecUserNumEntry" type="bigint(20)" fk="userod">
             <summary>FK to userod.UserNum.  Set to the user logged in when the row was inserted at SecDateEntry date and time.</summary>
@@ -6082,10 +6084,12 @@
             <summary>Stores XML for the procs colors</summary>
         </column>
         <column order="31" name="ColorOverride" type="int(11)">
-            <summary>If set to anything but 0, then this will override the graphic color for the appointment.</summary>
+            <summary>If set to anything but 0, then this will override the graphic color for the appointment.
+            Typically set to the color of the corresponding appointment type (if one is set) or a color manually picked by the user.</summary>
         </column>
         <column order="32" name="AppointmentTypeNum" type="bigint(20)" fk="appointmenttype">
-            <summary>FK to appointmenttype.AppointmentTypeNum.</summary>
+            <summary>FK to appointmenttype.AppointmentTypeNum.
+            Make sure to update ColorOverride to the corresponding color associated to this appointment type when changing the appointment type.</summary>
         </column>
         <column order="33" name="SecUserNumEntry" type="bigint(20)" fk="userod">
             <summary>FK to userod.UserNum.  Set to the user logged in when the row was inserted at SecDateEntry date and time.</summary>
