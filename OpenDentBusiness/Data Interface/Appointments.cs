@@ -2897,11 +2897,11 @@ namespace OpenDentBusiness{
 			if(canShortenPattern) { //If we are allowed to shorten the pattern then we will not change ops, we will shorten the pattern down to no less than 1 and return it.
 				isPatternChanged=true;
 				do {
+					if(apt.Pattern.Length==1) { //Pattern has been reduced to smallest allowed size.
+						return funcHasOverlap(apt.Op);
+					}
 					//Reduce the pattern by 1.
 					apt.Pattern=apt.Pattern.Substring(0,apt.Pattern.Length-1);
-					if(apt.Pattern.Length==1) { //Pattern has been reduced to smallest allowed size so this will have to be good enough.
-						break;
-					}
 				} while(funcHasOverlap(apt.Op));
 				//If canShortenPattern==true then caller is always expecting false.
 				return false;

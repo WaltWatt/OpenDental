@@ -3906,7 +3906,7 @@ namespace OpenDental {
 						MsgBox.Show(this,"You cannot have an appointment that starts and ends on different days.");
 						return;
 					}
-					int newpatternL=(int)newspan.TotalMinutes/5;
+					int newpatternL=Math.Max((int)newspan.TotalMinutes/5,1);
 					if(newpatternL<ApptDrawing.MinPerIncr/5) {//eg. if 1 < 10/5, would make appt too short. 
 						newpatternL=ApptDrawing.MinPerIncr/5;//sets new pattern length at one increment, typically 2 or 3 5min blocks
 					}
@@ -3932,10 +3932,10 @@ namespace OpenDental {
 							continue;//we don't care about appointments that are earlier than this one
 						}
 						if(aptDateTimeInSameOp.TimeOfDay<aptDateTimeBeingChanged.TimeOfDay+TimeSpan.FromMinutes(5*pattern.Length)) {
-							//New pattern overlaps so back it up to butt up against this appt. This will shorten the desired pattern to preven overlap.
+							//New pattern overlaps so back it up to butt up against this appt. This will shorten the desired pattern to prevent overlap.
 							newspan=aptDateTimeInSameOp.TimeOfDay-aptDateTimeBeingChanged.TimeOfDay;
-							newpatternL=(int)newspan.TotalMinutes/5;
-							pattern=pattern.Substring(0,newpatternL);
+							newpatternL=Math.Max((int)newspan.TotalMinutes/5,1);
+							pattern=pattern.Substring(0,newpatternL);						
 						}
 					}
 					//Check for any overlap with blockouts with the "No Schedule" flag and shorten the pattern
@@ -3946,9 +3946,13 @@ namespace OpenDental {
 					Schedule overlappingBlockout=Appointments.GetOverlappingBlockouts(curApt).OrderBy(x => x.StartTime).FirstOrDefault();
 					if(overlappingBlockout!=null) {
 						//Figure out the amount of time between them and divide by 5 because of how time patterns are stored for appointments.  
-						//This happens when resizing, so we assume the appointment doesn't start on the blockout.
-						newpatternL=(int)(overlappingBlockout.SchedDate.Add(overlappingBlockout.StartTime)-curApt.AptDateTime).TotalMinutes/5;
-						pattern=pattern.Substring(0,newpatternL);	//Minimum newpatternL is 1, because an appointment can't be places on a valid blockout
+						//This happens when resizing.
+						//Appointments can be in the middle of a blocking blockout if the blockout type is changed after the appointment is placed.  
+						//In this case we are going to leave the appointment because it has precedence.
+						if(!(overlappingBlockout.SchedDate.Add(overlappingBlockout.StartTime)<=curApt.AptDateTime)) {
+							newpatternL=(int)(overlappingBlockout.SchedDate.Add(overlappingBlockout.StartTime)-curApt.AptDateTime).TotalMinutes/5;
+							pattern=pattern.Substring(0,newpatternL);	//Minimum newpatternL is 1, because an appointment can't be places on a valid blockout
+						}
 					}
 					if(pattern=="") {
 						pattern="///";
