@@ -10214,7 +10214,9 @@ namespace OpenDental {
 		}
 
 		private void toothChart_ToothSelectionsChanged(object sender) {
-			FillProgNotes(true);
+			if(checkShowTeeth.Checked) {
+				FillProgNotes(true,false);
+			}
 		}
 
 		private void panelTPdark_Click(object sender,EventArgs e) {
