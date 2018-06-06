@@ -1488,8 +1488,14 @@ namespace OpenDental{
 							selectedDir=Path.GetDirectoryName(filePath);
 						}
 						if(PrefC.HasClinicsEnabled) {
-							//Key exists, so GetClinic should never return null.
-							string clinicAbbr=Clinics.GetClinic(entryForClinic.Key).Abbr;//Abbr is required by our interface, so no need to check if blank.
+							string clinicAbbr;
+							//Check for zero clinic
+							if(entryForClinic.Key==0) {
+								clinicAbbr="Unassigned";
+							}
+							else {
+								clinicAbbr=Clinics.GetClinic(entryForClinic.Key).Abbr;//Abbr is required by our interface, so no need to check if blank.
+							}
 							string fileName=Path.GetFileNameWithoutExtension(filePath)+'-'+clinicAbbr+Path.GetExtension(filePath);
 							filePath=ODFileUtils.CombinePaths(Path.GetDirectoryName(filePath),fileName);
 						}
