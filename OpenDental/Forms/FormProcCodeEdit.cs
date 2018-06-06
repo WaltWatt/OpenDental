@@ -59,7 +59,7 @@ namespace OpenDental{
 		private Label label2;
 		private CheckBox checkIsCanadianLab;
 		private Label label16;
-		private TextBox textBaseUnits;
+		private ValidNum textBaseUnits;
 		private Label label17;
 		private Label label18;
 		private TextBox textSubstitutionCode;
@@ -83,7 +83,7 @@ namespace OpenDental{
 		private Label label4;
 		private Label label23;
 		private Label labelTimeUnits;
-		private TextBox textTimeUnits;
+		private ValidDouble textTimeUnits;
 		private CheckBox checkIsRadiology;
 		private Label label24;
 		private ODtextBox textDefaultClaimNote;
@@ -167,7 +167,7 @@ namespace OpenDental{
 			this.label2 = new System.Windows.Forms.Label();
 			this.checkIsCanadianLab = new System.Windows.Forms.CheckBox();
 			this.label16 = new System.Windows.Forms.Label();
-			this.textBaseUnits = new System.Windows.Forms.TextBox();
+			this.textBaseUnits = new OpenDental.ValidNum();
 			this.label17 = new System.Windows.Forms.Label();
 			this.label18 = new System.Windows.Forms.Label();
 			this.textSubstitutionCode = new System.Windows.Forms.TextBox();
@@ -185,7 +185,7 @@ namespace OpenDental{
 			this.label4 = new System.Windows.Forms.Label();
 			this.label23 = new System.Windows.Forms.Label();
 			this.labelTimeUnits = new System.Windows.Forms.Label();
-			this.textTimeUnits = new System.Windows.Forms.TextBox();
+			this.textTimeUnits = new OpenDental.ValidDouble();
 			this.checkIsRadiology = new System.Windows.Forms.CheckBox();
 			this.label24 = new System.Windows.Forms.Label();
 			this.butMore = new OpenDental.UI.Button();
@@ -1510,6 +1510,10 @@ namespace OpenDental{
 					return;
 				}
 			}*/
+			if(!textBaseUnits.IsValid || (CultureInfo.CurrentCulture.Name.EndsWith("CA") && !textTimeUnits.IsValid)) {
+				MsgBox.Show(this,"Please fix data entry errors first.");
+				return;
+			}
 			ProcCode.AlternateCode1=textAlternateCode1.Text;
 			ProcCode.MedicalCode=textMedicalCode.Text;
 			ProcCode.SubstitutionCode=textSubstitutionCode.Text;
