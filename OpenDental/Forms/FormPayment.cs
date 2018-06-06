@@ -4497,13 +4497,12 @@ namespace OpenDental {
 				}
 			}
 			else {
-				if(textAmount.Text=="" || (PrefC.GetInt(PrefName.RigorousAccounting) < (int)RigorousAccounting.DontEnforce 
-						&& PIn.Decimal(textAmount.Text)==0)) 
-				{
-					MessageBox.Show(Lan.g(this,"Please enter an amount."));
+				double amt=PIn.Double(textAmount.Text);
+				if(amt==0 && _listSplitsCur.Count==0) {
+					MessageBox.Show(Lan.g(this,"Please enter an amount or create payment splits."));
 					return false;
 				}
-				if(listPayType.SelectedIndex==-1) {
+				if(amt!=0 && listPayType.SelectedIndex==-1) {
 					MsgBox.Show(this,"A payment type must be selected.");
 					return false;
 				}
