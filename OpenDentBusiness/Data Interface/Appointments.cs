@@ -3669,7 +3669,8 @@ namespace OpenDentBusiness{
 						FromAddress=addr.SenderAddress,
 						Subject=emailSubj,
 						BodyText=emailBody,
-						MsgDateTime=DateTime.Now
+						MsgDateTime=DateTime.Now,
+						SentOrReceived=EmailSentOrReceived.Sent,
 					};
 					EmailMessages.SendEmailUnsecure(msg,addr);
 					OpenDentBusiness.EmailMessages.Insert(msg);
