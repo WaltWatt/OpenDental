@@ -331,6 +331,7 @@ namespace OpenDentBusiness {
 			if(dateStop.Year>1880) {
 				retVal.RemoveAll(x => x > dateStop.AddMonths(monthAdd));
 			}
+			retVal.Sort();//Order by oldest first
 			return retVal;
 		}
 
@@ -568,7 +569,8 @@ namespace OpenDentBusiness {
 				pat=pat??Patients.GetPat(repeatCharge.PatNum);
 				if(pat.BillingCycleDay!=existingProcedureDate.Day
 					&& possibleBillingDate.AddMonths(-1).Month==existingProcedureDate.Month
-					&& possibleBillingDate.AddMonths(-1).Year==existingProcedureDate.Year) 
+					&& possibleBillingDate.AddMonths(-1).Year==existingProcedureDate.Year
+					&& existingProcedureDate>=repeatCharge.DateStart) 
 				{
 					//This is needed in case the patient's billing day changed after procedures had been added for a repeat charge.
 					return true;

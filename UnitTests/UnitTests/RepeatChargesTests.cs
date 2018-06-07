@@ -575,5 +575,35 @@ namespace UnitTests.UnitTests {
 			List<Procedure> listProcs=Procedures.Refresh(pat.PatNum);
 			Assert.AreEqual(5,listProcs.Count);
 		}
+
+		///<summary>Add a manual repeat charge after the repeat charge start date, then change the start date to after the proc date.</summary>
+		[TestMethod]
+		public void RepeatCharges_RunRepeatingCharges_ChangeRepeatChargeStartDateWithManuallyAddedProc() {
+			Patient pat=CreatePatForRepeatCharge("RepeatCharge",15);
+			//add a repeat charge with start 01/15/2017
+			RepeatCharge rc=new RepeatCharge();
+			rc.ChargeAmt=99;
+			rc.PatNum=pat.PatNum;
+			rc.ProcCode="D2750";
+			rc.IsEnabled=true;
+			rc.DateStart=new DateTime(2017,01,pat.BillingCycleDay);
+			rc.RepeatChargeNum=RepeatCharges.Insert(rc);
+			//add a procedures with procdate 01/18/2017
+			Procedure p=new Procedure();
+			p.PatNum=pat.PatNum;
+			p.ProcStatus=ProcStat.C;
+			p.ProcDate=new DateTime(2017,01,18);
+			p.ProcFee=99;
+			p.CodeNum=ProcedureCodes.GetCodeNum("D2750");
+			p.RepeatChargeNum=rc.RepeatChargeNum;
+			Procedures.Insert(p);
+			//change the repeatcharge start date to 02/15/2017
+			rc.DateStart=new DateTime(2017,02,pat.BillingCycleDay);
+			RepeatCharges.Update(rc);
+			DateTime dateRun=new DateTime(2017,02,pat.BillingCycleDay);
+			RepeatCharges.RunRepeatingCharges(dateRun);
+			List<Procedure> listProcs=Procedures.Refresh(pat.PatNum);
+			Assert.AreEqual(2,listProcs.Count);
+		}
 	}
 }
