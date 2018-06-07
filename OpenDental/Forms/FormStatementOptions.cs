@@ -1231,7 +1231,7 @@ namespace OpenDental{
 					Cursor=Cursors.Default;
 					return;
 				}
-				if(!SaveAsDocument(StmtCur,true)) {
+				if(!SaveAsDocument(true)) {
 					return;
 				}
 				Cursor=Cursors.Default;
@@ -1239,11 +1239,13 @@ namespace OpenDental{
 			DialogResult=DialogResult.OK;
 		}
 
-		private bool SaveAsDocument(Statement stmtCur,bool printSheet=false,string pdfFileName="") {
+		///<summary>Creates a PDF if necessary and attaches the statement document to the statement.</summary>
+		///<param name="pdfFileName">If this is blank, a PDF will be created.</param>
+		///<param name="sheet">This sheet will be used to create the PDF. If it is null, the default Statement sheet will be used instead.</param>
+		private bool SaveAsDocument(bool printSheet=false,string pdfFileName="",Sheet sheet=null) {
 			SheetDef sheetDef=SheetUtil.GetStatementSheetDef();
 			DataSet dataSet=null;
 			string tempPath;
-			Sheet sheet;
 			if(pdfFileName=="" || printSheet) {
 				if(checkSuperStatement.Checked) {
 					//handled in SaveToDb()
@@ -1254,10 +1256,12 @@ namespace OpenDental{
 				else {
 					dataSet=AccountModules.GetAccount(StmtCur.PatNum,StmtCur,doIncludePatLName:checkShowLName.Checked);
 				}
-				sheet=SheetUtil.CreateSheet(sheetDef,StmtCur.PatNum,StmtCur.HidePayment);
-				sheet.Parameters.Add(new SheetParameter(true,"Statement") { ParamValue=StmtCur });
-				SheetFiller.FillFields(sheet,dataSet,StmtCur);
-				SheetUtil.CalculateHeights(sheet,dataSet,StmtCur);
+				if(sheet==null) {
+					sheet=SheetUtil.CreateSheet(sheetDef,StmtCur.PatNum,StmtCur.HidePayment);
+					sheet.Parameters.Add(new SheetParameter(true,"Statement") { ParamValue=StmtCur });
+					SheetFiller.FillFields(sheet,dataSet,StmtCur);
+					SheetUtil.CalculateHeights(sheet,dataSet,StmtCur);
+				}
 				tempPath=ODFileUtils.CombinePaths(PrefC.GetTempFolderPath(),StmtCur.PatNum.ToString()+".pdf");
 				SheetPrinting.CreatePdf(sheet,tempPath,StmtCur,dataSet,null);
 			}
@@ -1709,9 +1713,9 @@ namespace OpenDental{
 				}
 			}
 		}
-
-		private void SaveStatementAsDocument(Statement stmt,string pdfFileName) {
-			checkIsSent.Checked=SaveAsDocument(stmt,pdfFileName:pdfFileName);
+		
+		private void SaveStatementAsDocument(Statement stmt,Sheet sheet,string pdfFileName) {
+			checkIsSent.Checked=SaveAsDocument(pdfFileName:pdfFileName,sheet:sheet);
 		}
 
 		///<summary>Opens the saved PDF for the document.</summary>

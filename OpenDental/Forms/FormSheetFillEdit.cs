@@ -14,7 +14,7 @@ using OpenDental.UI;
 using OpenDentBusiness;
 
 namespace OpenDental {
-	public delegate void SaveStatementToDocDelegate(Statement stmt,string pdfFileName="");
+	public delegate void SaveStatementToDocDelegate(Statement stmt,Sheet sheet,string pdfFileName="");
 	public partial class FormSheetFillEdit:ODForm {
 		///<summary>Will be null if deleted.</summary>
 		public Sheet SheetCur;
@@ -39,6 +39,7 @@ namespace OpenDental {
 		public bool IsReadOnly;
 		///<summary>True if the user sent an email from this window.</summary>
 		public bool HasEmailBeenSent;
+		///<summary>A method that will be invoked when printing/email/creating PDF of a statement.</summary>
 		public SaveStatementToDocDelegate SaveStatementToDocDelegate;
 
 		public void ForceClose() {
@@ -832,7 +833,7 @@ namespace OpenDental {
 				pdfFile=EmailSheet(FormS.Email2Address,Lan.g(this,"RE: ")+Patients.GetLim(SheetCur.PatNum).GetNameLF());//subject will work even if patnum invalid
 			}
 			if(SheetCur.SheetType==SheetTypeEnum.Statement && SaveStatementToDocDelegate!=null) {
-				SaveStatementToDocDelegate(Stmt,pdfFile);
+				SaveStatementToDocDelegate(Stmt,SheetCur,pdfFile);
 			}
 			OkClose();
 		}
@@ -854,7 +855,7 @@ namespace OpenDental {
 			}
 			SheetPrinting.Print(SheetCur,1,RxIsControlled,Stmt,MedLabCur);
 			if(SheetCur.SheetType==SheetTypeEnum.Statement && SaveStatementToDocDelegate!=null) {
-				SaveStatementToDocDelegate(Stmt);
+				SaveStatementToDocDelegate(Stmt,SheetCur);
 			}
 			OkClose();
 		}
@@ -960,7 +961,7 @@ namespace OpenDental {
 			}
 			string pdfFile=EmailSheet(emailAddress,subject);
 			if(SheetCur.SheetType==SheetTypeEnum.Statement && SaveStatementToDocDelegate!=null) {
-				SaveStatementToDocDelegate(Stmt,pdfFile);
+				SaveStatementToDocDelegate(Stmt,SheetCur,pdfFile);
 			}
 		}
 
@@ -983,7 +984,7 @@ namespace OpenDental {
 			Process.Start(filePathAndName);
 			SecurityLogs.MakeLogEntry(Permissions.SheetEdit,SheetCur.PatNum,SheetCur.Description+" from "+SheetCur.DateTimeSheet.ToShortDateString()+" pdf was created");
 			if(SheetCur.SheetType==SheetTypeEnum.Statement && SaveStatementToDocDelegate!=null) {
-				SaveStatementToDocDelegate(Stmt,filePathAndName);
+				SaveStatementToDocDelegate(Stmt,SheetCur,filePathAndName);
 			}
 			OkClose();
 		}
