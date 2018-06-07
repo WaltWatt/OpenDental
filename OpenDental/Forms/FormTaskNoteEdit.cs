@@ -51,6 +51,7 @@ namespace OpenDental {
 				return;
 			}
 			TaskNotes.Delete(TaskNoteCur.TaskNoteNum);
+			DataValid.SetInvalidTask(TaskNoteCur.TaskNum,true);//popup
 			DialogResult=DialogResult.OK;
 			OnEditComplete();
 			Tasks.TaskEditCreateLog(Permissions.TaskNoteEdit,Lan.g(this,"Deleted note from task"),Tasks.GetOne(TaskNoteCur.TaskNum));
