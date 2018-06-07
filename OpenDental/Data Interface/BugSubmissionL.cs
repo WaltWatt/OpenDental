@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using CodeBase;
@@ -172,14 +173,18 @@ namespace OpenDental {
 			List<long> listBugIds=listAllSubs.Where(x => x.BugId!=0).Select(x => x.BugId).ToList();
 			List<JobLink> listLinks=JobLinks.GetManyForType(JobLinkType.Bug,listBugIds);
 			List<Bug> listBugs=Bugs.GetMany(listBugIds);
+			StringBuilder issueSubmissionPrompt=new StringBuilder();
 			foreach(KeyValuePair<long,List<BugSubmission>> pair in dictSimilarBugSubs) {
 				Bug bugFixed=listBugs.FirstOrDefault(x => x.BugId==pair.Key && !string.IsNullOrEmpty(x.VersionsFixed));
 				if(bugFixed!=null) {
 					List<BugSubmission> listIssueSubs=pair.Value.Where(x => new Version(x.Info.DictPrefValues[PrefName.ProgramVersion])>=new Version(bugFixed.VersionsFixed.Split(';').Last())).ToList();
 					if(listIssueSubs.Count>0) {
-						MsgBox.Show("FormBugSubmissions","There appears to be a submission on a version that is newer than the previous fixed bug version (BugId: "+POut.Long(bugFixed.BugId)+").  "
-							+"These will be excluded.");
-						//TODO: Allow user to view these excluded submissions somehow.
+						List<JobLink> listBugJobLinks=listLinks.FindAll(x => x.FKey==bugFixed.BugId);
+						List<Job> listBugJobs=Jobs.GetMany(listBugJobLinks.Select(x => x.JobNum).ToList());
+						if(issueSubmissionPrompt.Length==0) {
+							issueSubmissionPrompt.AppendLine("The following completed jobs have submissions from newer versions then the jobs reported fixed version: ");
+						}
+						listBugJobs.ForEach(x => issueSubmissionPrompt.AppendLine("- "+" ("+x.Category.ToString().Substring(0,1)+x.JobNum+")"+x.Title));
 						pair.Value.RemoveAll(x => listIssueSubs.Contains(x));
 						if(pair.Value.Count==0) {
 							continue;
@@ -201,7 +206,13 @@ namespace OpenDental {
 				}
 				BugSubmissions.UpdateBugIds(pair.Key,pair.Value.Select(x => x.BugSubmissionNum).ToList());
 			}
-			MsgBox.Show("FormBugSubmissions","Done.");
+			string msg="";
+			dictSimilarBugSubs.Keys.ToList().FindAll(x => dictSimilarBugSubs[x].Count>0)
+				.ForEach(x => msg+="Bug: "+x+" Found submissions: "+dictSimilarBugSubs[x].Count+"\r\n");
+			msg+=issueSubmissionPrompt.ToString();
+			new MsgBoxCopyPaste(msg) { 
+				Text="Done"
+			}.ShowDialog();
 			return true;
 		}
 
