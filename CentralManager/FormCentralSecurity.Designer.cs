@@ -71,7 +71,7 @@
 			this.groupBox1.Controls.Add(this.textDays);
 			this.groupBox1.Controls.Add(this.textDate);
 			this.groupBox1.Controls.Add(this.label2);
-			this.groupBox1.Location = new System.Drawing.Point(12, 424);
+			this.groupBox1.Location = new System.Drawing.Point(12, 472);
 			this.groupBox1.Name = "groupBox1";
 			this.groupBox1.Size = new System.Drawing.Size(395, 197);
 			this.groupBox1.TabIndex = 106;
@@ -178,7 +178,7 @@
 			this.groupBox2.Controls.Add(this.textSyncCode);
 			this.groupBox2.Controls.Add(this.butSyncUsers);
 			this.groupBox2.Controls.Add(this.butSyncAll);
-			this.groupBox2.Location = new System.Drawing.Point(413, 424);
+			this.groupBox2.Location = new System.Drawing.Point(413, 472);
 			this.groupBox2.Name = "groupBox2";
 			this.groupBox2.Size = new System.Drawing.Size(163, 197);
 			this.groupBox2.TabIndex = 107;
@@ -204,7 +204,7 @@
 			this.userControlSecurityTabs.Name = "userControlSecurityTabs";
 			this.userControlSecurityTabs.SelectedUser = null;
 			this.userControlSecurityTabs.SelectedUserGroup = null;
-			this.userControlSecurityTabs.Size = new System.Drawing.Size(740, 416);
+			this.userControlSecurityTabs.Size = new System.Drawing.Size(969, 464);
 			this.userControlSecurityTabs.TabIndex = 253;
 			this.userControlSecurityTabs.AddUserClick += new OpenDental.UserControlSecurityUserGroup.SecurityTabsEventHandler(this.userControlSecurityTabs_AddUserClick);
 			this.userControlSecurityTabs.EditUserClick += new OpenDental.UserControlSecurityUserGroup.SecurityTabsEventHandler(this.userControlSecurityTabs_EditUserClick);
@@ -263,7 +263,7 @@
 			this.butOK.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
 			this.butOK.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
 			this.butOK.CornerRadius = 4F;
-			this.butOK.Location = new System.Drawing.Point(657, 562);
+			this.butOK.Location = new System.Drawing.Point(897, 610);
 			this.butOK.Name = "butOK";
 			this.butOK.Size = new System.Drawing.Size(75, 24);
 			this.butOK.TabIndex = 107;
@@ -286,7 +286,7 @@
 			this.butClose.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
 			this.butClose.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
 			this.butClose.CornerRadius = 4F;
-			this.butClose.Location = new System.Drawing.Point(657, 592);
+			this.butClose.Location = new System.Drawing.Point(897, 640);
 			this.butClose.Name = "butClose";
 			this.butClose.Size = new System.Drawing.Size(75, 24);
 			this.butClose.TabIndex = 65;
@@ -297,7 +297,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(744, 628);
+			this.ClientSize = new System.Drawing.Size(984, 676);
 			this.Controls.Add(this.userControlSecurityTabs);
 			this.Controls.Add(this.groupBox2);
 			this.Controls.Add(this.butOK);
@@ -305,7 +305,7 @@
 			this.Controls.Add(this.butClose);
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
-			this.MinimumSize = new System.Drawing.Size(669, 393);
+			this.MinimumSize = new System.Drawing.Size(1000, 714);
 			this.Name = "FormCentralSecurityEdit";
 			this.ShowInTaskbar = false;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;

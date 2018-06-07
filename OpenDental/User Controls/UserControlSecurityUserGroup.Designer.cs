@@ -23,11 +23,14 @@
 		/// the contents of this method with the code editor.
 		/// </summary>
 		private void InitializeComponent() {
-			this.tabControlMain = new System.Windows.Forms.TabControl();
+			this.tabPageUserGroups = new System.Windows.Forms.TabPage();
+			this.label3 = new System.Windows.Forms.Label();
+			this.listAssociatedUsers = new System.Windows.Forms.ListBox();
+			this.label4 = new System.Windows.Forms.Label();
+			this.label6 = new System.Windows.Forms.Label();
+			this.listUserGroupTabUserGroups = new System.Windows.Forms.ListBox();
 			this.tabPageUsers = new System.Windows.Forms.TabPage();
-			this.butEditUser = new OpenDental.UI.Button();
-			this.butAddUser = new OpenDental.UI.Button();
-			this.securityTreeUser = new OpenDental.UserControlSecurityTree();
+			this.gridUsers = new OpenDental.UI.ODGrid();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
 			this.checkShowHidden = new System.Windows.Forms.CheckBox();
 			this.labelFilterType = new System.Windows.Forms.Label();
@@ -40,102 +43,134 @@
 			this.labelPermission = new System.Windows.Forms.Label();
 			this.comboSchoolClass = new System.Windows.Forms.ComboBox();
 			this.labelSchoolClass = new System.Windows.Forms.Label();
-			this.listUserTabUsers = new System.Windows.Forms.ListBox();
 			this.listUserTabUserGroups = new System.Windows.Forms.ListBox();
-			this.labelUserTabUsers = new System.Windows.Forms.Label();
 			this.labelPerm = new System.Windows.Forms.Label();
 			this.labelUserTabUserGroups = new System.Windows.Forms.Label();
-			this.tabPageUserGroups = new System.Windows.Forms.TabPage();
+			this.tabControlMain = new System.Windows.Forms.TabControl();
+			this.securityTreeUser = new OpenDental.UserControlSecurityTree();
 			this.butEditGroup = new OpenDental.UI.Button();
-			this.label3 = new System.Windows.Forms.Label();
-			this.securityTreeUserGroup = new OpenDental.UserControlSecurityTree();
-			this.listAssociatedUsers = new System.Windows.Forms.ListBox();
-			this.label4 = new System.Windows.Forms.Label();
 			this.butSetAll = new OpenDental.UI.Button();
-			this.label6 = new System.Windows.Forms.Label();
 			this.butAddGroup = new OpenDental.UI.Button();
-			this.listUserGroupTabUserGroups = new System.Windows.Forms.ListBox();
-			this.tabControlMain.SuspendLayout();
+			this.securityTreeUserGroup = new OpenDental.UserControlSecurityTree();
+			this.tabPageUserGroups.SuspendLayout();
 			this.tabPageUsers.SuspendLayout();
 			this.groupBox2.SuspendLayout();
-			this.tabPageUserGroups.SuspendLayout();
+			this.tabControlMain.SuspendLayout();
 			this.SuspendLayout();
 			// 
-			// tabControlMain
+			// tabPageUserGroups
 			// 
-			this.tabControlMain.Controls.Add(this.tabPageUsers);
-			this.tabControlMain.Controls.Add(this.tabPageUserGroups);
-			this.tabControlMain.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.tabControlMain.Location = new System.Drawing.Point(0, 0);
-			this.tabControlMain.Name = "tabControlMain";
-			this.tabControlMain.SelectedIndex = 0;
-			this.tabControlMain.Size = new System.Drawing.Size(860, 667);
-			this.tabControlMain.TabIndex = 251;
-			this.tabControlMain.SelectedIndexChanged += new System.EventHandler(this.tabControlMain_SelectedIndexChanged);
+			this.tabPageUserGroups.Controls.Add(this.butEditGroup);
+			this.tabPageUserGroups.Controls.Add(this.butSetAll);
+			this.tabPageUserGroups.Controls.Add(this.butAddGroup);
+			this.tabPageUserGroups.Controls.Add(this.label3);
+			this.tabPageUserGroups.Controls.Add(this.securityTreeUserGroup);
+			this.tabPageUserGroups.Controls.Add(this.listAssociatedUsers);
+			this.tabPageUserGroups.Controls.Add(this.label4);
+			this.tabPageUserGroups.Controls.Add(this.label6);
+			this.tabPageUserGroups.Controls.Add(this.listUserGroupTabUserGroups);
+			this.tabPageUserGroups.Location = new System.Drawing.Point(4, 22);
+			this.tabPageUserGroups.Name = "tabPageUserGroups";
+			this.tabPageUserGroups.Padding = new System.Windows.Forms.Padding(3);
+			this.tabPageUserGroups.Size = new System.Drawing.Size(961, 641);
+			this.tabPageUserGroups.TabIndex = 0;
+			this.tabPageUserGroups.Text = "User Groups";
+			this.tabPageUserGroups.UseVisualStyleBackColor = true;
+			// 
+			// label3
+			// 
+			this.label3.Location = new System.Drawing.Point(3, 1);
+			this.label3.Name = "label3";
+			this.label3.Size = new System.Drawing.Size(225, 15);
+			this.label3.TabIndex = 24;
+			this.label3.Text = "User Group:";
+			this.label3.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
+			// 
+			// listAssociatedUsers
+			// 
+			this.listAssociatedUsers.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.listAssociatedUsers.FormattingEnabled = true;
+			this.listAssociatedUsers.IntegralHeight = false;
+			this.listAssociatedUsers.Location = new System.Drawing.Point(714, 19);
+			this.listAssociatedUsers.Name = "listAssociatedUsers";
+			this.listAssociatedUsers.SelectionMode = System.Windows.Forms.SelectionMode.None;
+			this.listAssociatedUsers.Size = new System.Drawing.Size(242, 589);
+			this.listAssociatedUsers.TabIndex = 22;
+			// 
+			// label4
+			// 
+			this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.label4.Location = new System.Drawing.Point(711, 1);
+			this.label4.Name = "label4";
+			this.label4.Size = new System.Drawing.Size(210, 15);
+			this.label4.TabIndex = 21;
+			this.label4.Text = "Users currently associated:";
+			this.label4.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
+			// 
+			// label6
+			// 
+			this.label6.Location = new System.Drawing.Point(279, 1);
+			this.label6.Name = "label6";
+			this.label6.Size = new System.Drawing.Size(258, 15);
+			this.label6.TabIndex = 19;
+			this.label6.Text = "Permissions for group:";
+			this.label6.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
+			// 
+			// listUserGroupTabUserGroups
+			// 
+			this.listUserGroupTabUserGroups.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+			this.listUserGroupTabUserGroups.FormattingEnabled = true;
+			this.listUserGroupTabUserGroups.IntegralHeight = false;
+			this.listUserGroupTabUserGroups.Location = new System.Drawing.Point(6, 19);
+			this.listUserGroupTabUserGroups.Name = "listUserGroupTabUserGroups";
+			this.listUserGroupTabUserGroups.Size = new System.Drawing.Size(270, 589);
+			this.listUserGroupTabUserGroups.TabIndex = 17;
+			this.listUserGroupTabUserGroups.SelectedIndexChanged += new System.EventHandler(this.listUserGroupTabUserGroups_SelectedIndexChanged);
+			this.listUserGroupTabUserGroups.DoubleClick += new System.EventHandler(this.listUserGroupTabUserGroups_DoubleClick);
 			// 
 			// tabPageUsers
 			// 
-			this.tabPageUsers.Controls.Add(this.butEditUser);
-			this.tabPageUsers.Controls.Add(this.butAddUser);
+			this.tabPageUsers.Controls.Add(this.gridUsers);
 			this.tabPageUsers.Controls.Add(this.securityTreeUser);
 			this.tabPageUsers.Controls.Add(this.groupBox2);
-			this.tabPageUsers.Controls.Add(this.listUserTabUsers);
 			this.tabPageUsers.Controls.Add(this.listUserTabUserGroups);
-			this.tabPageUsers.Controls.Add(this.labelUserTabUsers);
 			this.tabPageUsers.Controls.Add(this.labelPerm);
 			this.tabPageUsers.Controls.Add(this.labelUserTabUserGroups);
 			this.tabPageUsers.Location = new System.Drawing.Point(4, 22);
 			this.tabPageUsers.Name = "tabPageUsers";
 			this.tabPageUsers.Padding = new System.Windows.Forms.Padding(3);
-			this.tabPageUsers.Size = new System.Drawing.Size(852, 641);
+			this.tabPageUsers.Size = new System.Drawing.Size(961, 641);
 			this.tabPageUsers.TabIndex = 1;
 			this.tabPageUsers.Text = "Users";
 			this.tabPageUsers.UseVisualStyleBackColor = true;
 			// 
-			// butEditUser
+			// gridUsers
 			// 
-			this.butEditUser.AdjustImageLocation = new System.Drawing.Point(0, 0);
-			this.butEditUser.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.butEditUser.Autosize = true;
-			this.butEditUser.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
-			this.butEditUser.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
-			this.butEditUser.CornerRadius = 4F;
-			this.butEditUser.Image = global::OpenDental.Properties.Resources.editPencil;
-			this.butEditUser.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.butEditUser.Location = new System.Drawing.Point(114, 612);
-			this.butEditUser.Name = "butEditUser";
-			this.butEditUser.Size = new System.Drawing.Size(87, 24);
-			this.butEditUser.TabIndex = 249;
-			this.butEditUser.Text = "Edit User";
-			this.butEditUser.Click += new System.EventHandler(this.butEditUser_Click);
-			// 
-			// butAddUser
-			// 
-			this.butAddUser.AdjustImageLocation = new System.Drawing.Point(0, 0);
-			this.butAddUser.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.butAddUser.Autosize = true;
-			this.butAddUser.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
-			this.butAddUser.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
-			this.butAddUser.CornerRadius = 4F;
-			this.butAddUser.Image = global::OpenDental.Properties.Resources.Add;
-			this.butAddUser.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.butAddUser.Location = new System.Drawing.Point(7, 612);
-			this.butAddUser.Name = "butAddUser";
-			this.butAddUser.Size = new System.Drawing.Size(87, 24);
-			this.butAddUser.TabIndex = 14;
-			this.butAddUser.Text = "Add User";
-			this.butAddUser.Click += new System.EventHandler(this.butAddUser_Click);
-			// 
-			// securityTreeUser
-			// 
-			this.securityTreeUser.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.securityTreeUser.Location = new System.Drawing.Point(407, 22);
-			this.securityTreeUser.Name = "securityTreeUser";
-			this.securityTreeUser.ReadOnly = true;
-			this.securityTreeUser.Size = new System.Drawing.Size(434, 612);
-			this.securityTreeUser.TabIndex = 11;
+			this.gridUsers.AllowSortingByColumn = true;
+			this.gridUsers.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+			this.gridUsers.AutoScroll = true;
+			this.gridUsers.CellFont = new System.Drawing.Font("Microsoft Sans Serif", 8.5F);
+			this.gridUsers.HasAddButton = true;
+			this.gridUsers.HasDropDowns = false;
+			this.gridUsers.HasMultilineHeaders = true;
+			this.gridUsers.HeaderFont = new System.Drawing.Font("Microsoft Sans Serif", 8.5F, System.Drawing.FontStyle.Bold);
+			this.gridUsers.HeaderHeight = 15;
+			this.gridUsers.HScrollVisible = true;
+			this.gridUsers.Location = new System.Drawing.Point(0, 103);
+			this.gridUsers.Name = "gridUsers";
+			this.gridUsers.ScrollValue = 0;
+			this.gridUsers.Size = new System.Drawing.Size(454, 537);
+			this.gridUsers.TabIndex = 254;
+			this.gridUsers.Title = "Users";
+			this.gridUsers.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
+			this.gridUsers.TitleHeight = 18;
+			this.gridUsers.TranslationName = "TableUsers";
+			this.gridUsers.CellDoubleClick += new OpenDental.UI.ODGridClickEventHandler(this.gridUsers_CellDoubleClick);
+			this.gridUsers.CellClick += new OpenDental.UI.ODGridClickEventHandler(this.gridUsers_CellClick);
+			this.gridUsers.TitleAddClick += new System.EventHandler(this.gridUsers_TitleAddClick);
 			// 
 			// groupBox2
 			// 
@@ -152,7 +187,7 @@
 			this.groupBox2.Controls.Add(this.labelSchoolClass);
 			this.groupBox2.Location = new System.Drawing.Point(6, 6);
 			this.groupBox2.Name = "groupBox2";
-			this.groupBox2.Size = new System.Drawing.Size(395, 94);
+			this.groupBox2.Size = new System.Drawing.Size(410, 94);
 			this.groupBox2.TabIndex = 248;
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "User Filters";
@@ -162,7 +197,7 @@
 			this.checkShowHidden.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.checkShowHidden.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
 			this.checkShowHidden.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.checkShowHidden.Location = new System.Drawing.Point(260, 56);
+			this.checkShowHidden.Location = new System.Drawing.Point(280, 56);
 			this.checkShowHidden.Name = "checkShowHidden";
 			this.checkShowHidden.Size = new System.Drawing.Size(118, 32);
 			this.checkShowHidden.TabIndex = 248;
@@ -197,12 +232,12 @@
 			this.comboShowOnly.Name = "comboShowOnly";
 			this.comboShowOnly.Size = new System.Drawing.Size(118, 21);
 			this.comboShowOnly.TabIndex = 1;
-			this.comboShowOnly.SelectionChangeCommitted += new System.EventHandler(this.comboShowOnly_SelectionChangeCommitted);
+			this.comboShowOnly.SelectedIndexChanged += new System.EventHandler(this.comboShowOnly_SelectionIndexChanged);
 			// 
 			// comboClinic
 			// 
 			this.comboClinic.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.comboClinic.Location = new System.Drawing.Point(260, 29);
+			this.comboClinic.Location = new System.Drawing.Point(280, 29);
 			this.comboClinic.MaxDropDownItems = 30;
 			this.comboClinic.Name = "comboClinic";
 			this.comboClinic.Size = new System.Drawing.Size(118, 21);
@@ -220,7 +255,7 @@
 			// 
 			// labelClinic
 			// 
-			this.labelClinic.Location = new System.Drawing.Point(257, 13);
+			this.labelClinic.Location = new System.Drawing.Point(277, 13);
 			this.labelClinic.Name = "labelClinic";
 			this.labelClinic.Size = new System.Drawing.Size(115, 15);
 			this.labelClinic.TabIndex = 246;
@@ -231,7 +266,7 @@
 			// comboGroups
 			// 
 			this.comboGroups.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.comboGroups.Location = new System.Drawing.Point(133, 29);
+			this.comboGroups.Location = new System.Drawing.Point(143, 29);
 			this.comboGroups.MaxDropDownItems = 30;
 			this.comboGroups.Name = "comboGroups";
 			this.comboGroups.Size = new System.Drawing.Size(118, 21);
@@ -240,7 +275,7 @@
 			// 
 			// labelPermission
 			// 
-			this.labelPermission.Location = new System.Drawing.Point(130, 13);
+			this.labelPermission.Location = new System.Drawing.Point(140, 13);
 			this.labelPermission.Name = "labelPermission";
 			this.labelPermission.Size = new System.Drawing.Size(115, 15);
 			this.labelPermission.TabIndex = 246;
@@ -250,7 +285,7 @@
 			// comboSchoolClass
 			// 
 			this.comboSchoolClass.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.comboSchoolClass.Location = new System.Drawing.Point(133, 67);
+			this.comboSchoolClass.Location = new System.Drawing.Point(143, 67);
 			this.comboSchoolClass.MaxDropDownItems = 30;
 			this.comboSchoolClass.Name = "comboSchoolClass";
 			this.comboSchoolClass.Size = new System.Drawing.Size(118, 21);
@@ -260,7 +295,7 @@
 			// 
 			// labelSchoolClass
 			// 
-			this.labelSchoolClass.Location = new System.Drawing.Point(130, 51);
+			this.labelSchoolClass.Location = new System.Drawing.Point(140, 51);
 			this.labelSchoolClass.Name = "labelSchoolClass";
 			this.labelSchoolClass.Size = new System.Drawing.Size(115, 15);
 			this.labelSchoolClass.TabIndex = 91;
@@ -268,77 +303,59 @@
 			this.labelSchoolClass.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			this.labelSchoolClass.Visible = false;
 			// 
-			// listUserTabUsers
-			// 
-			this.listUserTabUsers.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
-			this.listUserTabUsers.FormattingEnabled = true;
-			this.listUserTabUsers.IntegralHeight = false;
-			this.listUserTabUsers.Location = new System.Drawing.Point(7, 121);
-			this.listUserTabUsers.Name = "listUserTabUsers";
-			this.listUserTabUsers.Size = new System.Drawing.Size(194, 485);
-			this.listUserTabUsers.TabIndex = 4;
-			this.listUserTabUsers.SelectedIndexChanged += new System.EventHandler(this.listUserTabUsers_SelectedIndexChanged);
-			this.listUserTabUsers.DoubleClick += new System.EventHandler(this.listUserTabUsers_DoubleClick);
-			// 
 			// listUserTabUserGroups
 			// 
 			this.listUserTabUserGroups.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
 			this.listUserTabUserGroups.FormattingEnabled = true;
 			this.listUserTabUserGroups.IntegralHeight = false;
-			this.listUserTabUserGroups.Location = new System.Drawing.Point(207, 121);
+			this.listUserTabUserGroups.Location = new System.Drawing.Point(456, 103);
 			this.listUserTabUserGroups.Name = "listUserTabUserGroups";
 			this.listUserTabUserGroups.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-			this.listUserTabUserGroups.Size = new System.Drawing.Size(194, 511);
+			this.listUserTabUserGroups.Size = new System.Drawing.Size(147, 537);
 			this.listUserTabUserGroups.TabIndex = 5;
 			this.listUserTabUserGroups.SelectedIndexChanged += new System.EventHandler(this.listUserTabUserGroups_SelectedIndexChanged);
 			// 
-			// labelUserTabUsers
-			// 
-			this.labelUserTabUsers.Location = new System.Drawing.Point(7, 103);
-			this.labelUserTabUsers.Name = "labelUserTabUsers";
-			this.labelUserTabUsers.Size = new System.Drawing.Size(194, 15);
-			this.labelUserTabUsers.TabIndex = 13;
-			this.labelUserTabUsers.Text = "User:";
-			this.labelUserTabUsers.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
-			// 
 			// labelPerm
 			// 
-			this.labelPerm.Location = new System.Drawing.Point(407, 4);
+			this.labelPerm.Location = new System.Drawing.Point(602, 5);
 			this.labelPerm.Name = "labelPerm";
-			this.labelPerm.Size = new System.Drawing.Size(417, 15);
+			this.labelPerm.Size = new System.Drawing.Size(354, 15);
 			this.labelPerm.TabIndex = 10;
 			this.labelPerm.Text = "Effective permissions for user: (Edit from the User Groups tab)";
 			this.labelPerm.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
 			// 
 			// labelUserTabUserGroups
 			// 
-			this.labelUserTabUserGroups.Location = new System.Drawing.Point(204, 103);
+			this.labelUserTabUserGroups.Location = new System.Drawing.Point(453, 85);
 			this.labelUserTabUserGroups.Name = "labelUserTabUserGroups";
-			this.labelUserTabUserGroups.Size = new System.Drawing.Size(197, 15);
+			this.labelUserTabUserGroups.Size = new System.Drawing.Size(147, 15);
 			this.labelUserTabUserGroups.TabIndex = 12;
 			this.labelUserTabUserGroups.Text = "User Groups for User:";
 			this.labelUserTabUserGroups.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
 			// 
-			// tabPageUserGroups
+			// tabControlMain
 			// 
-			this.tabPageUserGroups.Controls.Add(this.butEditGroup);
-			this.tabPageUserGroups.Controls.Add(this.label3);
-			this.tabPageUserGroups.Controls.Add(this.securityTreeUserGroup);
-			this.tabPageUserGroups.Controls.Add(this.listAssociatedUsers);
-			this.tabPageUserGroups.Controls.Add(this.label4);
-			this.tabPageUserGroups.Controls.Add(this.butSetAll);
-			this.tabPageUserGroups.Controls.Add(this.label6);
-			this.tabPageUserGroups.Controls.Add(this.butAddGroup);
-			this.tabPageUserGroups.Controls.Add(this.listUserGroupTabUserGroups);
-			this.tabPageUserGroups.Location = new System.Drawing.Point(4, 22);
-			this.tabPageUserGroups.Name = "tabPageUserGroups";
-			this.tabPageUserGroups.Padding = new System.Windows.Forms.Padding(3);
-			this.tabPageUserGroups.Size = new System.Drawing.Size(852, 641);
-			this.tabPageUserGroups.TabIndex = 0;
-			this.tabPageUserGroups.Text = "User Groups";
-			this.tabPageUserGroups.UseVisualStyleBackColor = true;
+			this.tabControlMain.Controls.Add(this.tabPageUsers);
+			this.tabControlMain.Controls.Add(this.tabPageUserGroups);
+			this.tabControlMain.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.tabControlMain.Location = new System.Drawing.Point(0, 0);
+			this.tabControlMain.Name = "tabControlMain";
+			this.tabControlMain.SelectedIndex = 0;
+			this.tabControlMain.Size = new System.Drawing.Size(969, 667);
+			this.tabControlMain.TabIndex = 251;
+			this.tabControlMain.SelectedIndexChanged += new System.EventHandler(this.tabControlMain_SelectedIndexChanged);
+			// 
+			// securityTreeUser
+			// 
+			this.securityTreeUser.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.securityTreeUser.Location = new System.Drawing.Point(605, 23);
+			this.securityTreeUser.Name = "securityTreeUser";
+			this.securityTreeUser.ReadOnly = true;
+			this.securityTreeUser.Size = new System.Drawing.Size(354, 617);
+			this.securityTreeUser.TabIndex = 11;
 			// 
 			// butEditGroup
 			// 
@@ -350,56 +367,12 @@
 			this.butEditGroup.CornerRadius = 4F;
 			this.butEditGroup.Image = global::OpenDental.Properties.Resources.editPencil;
 			this.butEditGroup.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.butEditGroup.Location = new System.Drawing.Point(144, 613);
+			this.butEditGroup.Location = new System.Drawing.Point(189, 612);
 			this.butEditGroup.Name = "butEditGroup";
 			this.butEditGroup.Size = new System.Drawing.Size(87, 24);
 			this.butEditGroup.TabIndex = 25;
 			this.butEditGroup.Text = "Edit Group";
 			this.butEditGroup.Click += new System.EventHandler(this.butEditGroup_Click);
-			// 
-			// label3
-			// 
-			this.label3.Location = new System.Drawing.Point(6, 1);
-			this.label3.Name = "label3";
-			this.label3.Size = new System.Drawing.Size(225, 15);
-			this.label3.TabIndex = 24;
-			this.label3.Text = "User Group:";
-			this.label3.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
-			// 
-			// securityTreeUserGroup
-			// 
-			this.securityTreeUserGroup.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.securityTreeUserGroup.Location = new System.Drawing.Point(237, 19);
-			this.securityTreeUserGroup.Name = "securityTreeUserGroup";
-			this.securityTreeUserGroup.ReadOnly = false;
-			this.securityTreeUserGroup.Size = new System.Drawing.Size(396, 591);
-			this.securityTreeUserGroup.TabIndex = 23;
-			this.securityTreeUserGroup.ReportPermissionChecked += new OpenDental.UserControlSecurityTree.SecurityTreeEventHandler(this.securityTreeUserGroup_ReportPermissionChecked);
-			this.securityTreeUserGroup.GroupPermissionChecked += new OpenDental.UserControlSecurityTree.SecurityTreeEventHandler(this.securityTreeUserGroup_GroupPermissionChecked);
-			// 
-			// listAssociatedUsers
-			// 
-			this.listAssociatedUsers.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.listAssociatedUsers.FormattingEnabled = true;
-			this.listAssociatedUsers.IntegralHeight = false;
-			this.listAssociatedUsers.Location = new System.Drawing.Point(639, 19);
-			this.listAssociatedUsers.Name = "listAssociatedUsers";
-			this.listAssociatedUsers.SelectionMode = System.Windows.Forms.SelectionMode.None;
-			this.listAssociatedUsers.Size = new System.Drawing.Size(207, 589);
-			this.listAssociatedUsers.TabIndex = 22;
-			// 
-			// label4
-			// 
-			this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.label4.Location = new System.Drawing.Point(636, 2);
-			this.label4.Name = "label4";
-			this.label4.Size = new System.Drawing.Size(168, 15);
-			this.label4.TabIndex = 21;
-			this.label4.Text = "Users currently associated:";
-			this.label4.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
 			// 
 			// butSetAll
 			// 
@@ -409,21 +382,12 @@
 			this.butSetAll.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
 			this.butSetAll.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
 			this.butSetAll.CornerRadius = 4F;
-			this.butSetAll.Location = new System.Drawing.Point(237, 613);
+			this.butSetAll.Location = new System.Drawing.Point(282, 612);
 			this.butSetAll.Name = "butSetAll";
 			this.butSetAll.Size = new System.Drawing.Size(79, 24);
 			this.butSetAll.TabIndex = 20;
 			this.butSetAll.Text = "Set All";
 			this.butSetAll.Click += new System.EventHandler(this.butSetAll_Click);
-			// 
-			// label6
-			// 
-			this.label6.Location = new System.Drawing.Point(237, 1);
-			this.label6.Name = "label6";
-			this.label6.Size = new System.Drawing.Size(285, 15);
-			this.label6.TabIndex = 19;
-			this.label6.Text = "Permissions for group:";
-			this.label6.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
 			// 
 			// butAddGroup
 			// 
@@ -435,49 +399,58 @@
 			this.butAddGroup.CornerRadius = 4F;
 			this.butAddGroup.Image = global::OpenDental.Properties.Resources.Add;
 			this.butAddGroup.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.butAddGroup.Location = new System.Drawing.Point(6, 613);
+			this.butAddGroup.Location = new System.Drawing.Point(6, 612);
 			this.butAddGroup.Name = "butAddGroup";
 			this.butAddGroup.Size = new System.Drawing.Size(87, 24);
 			this.butAddGroup.TabIndex = 18;
 			this.butAddGroup.Text = "Add Group";
 			this.butAddGroup.Click += new System.EventHandler(this.butAddGroup_Click);
 			// 
-			// listUserGroupTabUserGroups
+			// securityTreeUserGroup
 			// 
-			this.listUserGroupTabUserGroups.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
-			this.listUserGroupTabUserGroups.FormattingEnabled = true;
-			this.listUserGroupTabUserGroups.IntegralHeight = false;
-			this.listUserGroupTabUserGroups.Location = new System.Drawing.Point(6, 19);
-			this.listUserGroupTabUserGroups.Name = "listUserGroupTabUserGroups";
-			this.listUserGroupTabUserGroups.Size = new System.Drawing.Size(225, 589);
-			this.listUserGroupTabUserGroups.TabIndex = 17;
-			this.listUserGroupTabUserGroups.SelectedIndexChanged += new System.EventHandler(this.listUserGroupTabUserGroups_SelectedIndexChanged);
-			this.listUserGroupTabUserGroups.DoubleClick += new System.EventHandler(this.listUserGroupTabUserGroups_DoubleClick);
+			this.securityTreeUserGroup.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.securityTreeUserGroup.Location = new System.Drawing.Point(282, 19);
+			this.securityTreeUserGroup.Name = "securityTreeUserGroup";
+			this.securityTreeUserGroup.ReadOnly = false;
+			this.securityTreeUserGroup.Size = new System.Drawing.Size(426, 589);
+			this.securityTreeUserGroup.TabIndex = 23;
+			this.securityTreeUserGroup.ReportPermissionChecked += new OpenDental.UserControlSecurityTree.SecurityTreeEventHandler(this.securityTreeUserGroup_ReportPermissionChecked);
+			this.securityTreeUserGroup.GroupPermissionChecked += new OpenDental.UserControlSecurityTree.SecurityTreeEventHandler(this.securityTreeUserGroup_GroupPermissionChecked);
 			// 
 			// UserControlSecurityUserGroup
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.Controls.Add(this.tabControlMain);
+			this.MinimumSize = new System.Drawing.Size(914, 217);
 			this.Name = "UserControlSecurityUserGroup";
-			this.Size = new System.Drawing.Size(860, 667);
+			this.Size = new System.Drawing.Size(969, 667);
 			this.Load += new System.EventHandler(this.UserControlUserGroupSecurity_Load);
-			this.tabControlMain.ResumeLayout(false);
+			this.tabPageUserGroups.ResumeLayout(false);
 			this.tabPageUsers.ResumeLayout(false);
 			this.groupBox2.ResumeLayout(false);
 			this.groupBox2.PerformLayout();
-			this.tabPageUserGroups.ResumeLayout(false);
+			this.tabControlMain.ResumeLayout(false);
 			this.ResumeLayout(false);
 
 		}
 
 		#endregion
 
-		private System.Windows.Forms.TabControl tabControlMain;
+		private System.Windows.Forms.TabPage tabPageUserGroups;
+		private UI.Button butEditGroup;
+		private UI.Button butSetAll;
+		private UI.Button butAddGroup;
+		private System.Windows.Forms.Label label3;
+		private UserControlSecurityTree securityTreeUserGroup;
+		private System.Windows.Forms.ListBox listAssociatedUsers;
+		private System.Windows.Forms.Label label4;
+		private System.Windows.Forms.Label label6;
+		private System.Windows.Forms.ListBox listUserGroupTabUserGroups;
 		private System.Windows.Forms.TabPage tabPageUsers;
-		private UI.Button butEditUser;
-		private UI.Button butAddUser;
+		private UI.ODGrid gridUsers;
 		private UserControlSecurityTree securityTreeUser;
 		private System.Windows.Forms.GroupBox groupBox2;
 		private System.Windows.Forms.CheckBox checkShowHidden;
@@ -491,20 +464,9 @@
 		private System.Windows.Forms.Label labelPermission;
 		private System.Windows.Forms.ComboBox comboSchoolClass;
 		private System.Windows.Forms.Label labelSchoolClass;
-		private System.Windows.Forms.ListBox listUserTabUsers;
 		private System.Windows.Forms.ListBox listUserTabUserGroups;
-		private System.Windows.Forms.Label labelUserTabUsers;
 		private System.Windows.Forms.Label labelPerm;
 		private System.Windows.Forms.Label labelUserTabUserGroups;
-		private System.Windows.Forms.TabPage tabPageUserGroups;
-		private UI.Button butEditGroup;
-		private System.Windows.Forms.Label label3;
-		private UserControlSecurityTree securityTreeUserGroup;
-		private System.Windows.Forms.ListBox listAssociatedUsers;
-		private System.Windows.Forms.Label label4;
-		private UI.Button butSetAll;
-		private System.Windows.Forms.Label label6;
-		private UI.Button butAddGroup;
-		private System.Windows.Forms.ListBox listUserGroupTabUserGroups;
+		private System.Windows.Forms.TabControl tabControlMain;
 	}
 }

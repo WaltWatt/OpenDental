@@ -38,10 +38,11 @@ namespace OpenDental{
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.userControlSecurityTabs.IsForCEMT = false;
 			this.userControlSecurityTabs.Location = new System.Drawing.Point(3, 26);
+			this.userControlSecurityTabs.MinimumSize = new System.Drawing.Size(914, 217);
 			this.userControlSecurityTabs.Name = "userControlSecurityTabs";
 			this.userControlSecurityTabs.SelectedUser = null;
 			this.userControlSecurityTabs.SelectedUserGroup = null;
-			this.userControlSecurityTabs.Size = new System.Drawing.Size(860, 667);
+			this.userControlSecurityTabs.Size = new System.Drawing.Size(969, 667);
 			this.userControlSecurityTabs.TabIndex = 252;
 			this.userControlSecurityTabs.AddUserClick += new OpenDental.UserControlSecurityUserGroup.SecurityTabsEventHandler(this.userControlSecurityTabs_AddUserClick);
 			this.userControlSecurityTabs.EditUserClick += new OpenDental.UserControlSecurityUserGroup.SecurityTabsEventHandler(this.userControlSecurityTabs_EditUserClick);
@@ -58,7 +59,7 @@ namespace OpenDental{
 			this.butOK.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
 			this.butOK.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
 			this.butOK.CornerRadius = 4F;
-			this.butOK.Location = new System.Drawing.Point(770, 699);
+			this.butOK.Location = new System.Drawing.Point(891, 699);
 			this.butOK.Name = "butOK";
 			this.butOK.Size = new System.Drawing.Size(75, 24);
 			this.butOK.TabIndex = 3;
@@ -71,7 +72,7 @@ namespace OpenDental{
             this.globalSecuritySettingsToolStripMenuItem});
 			this.menuStrip1.Location = new System.Drawing.Point(0, 0);
 			this.menuStrip1.Name = "menuStrip1";
-			this.menuStrip1.Size = new System.Drawing.Size(863, 24);
+			this.menuStrip1.Size = new System.Drawing.Size(984, 24);
 			this.menuStrip1.TabIndex = 251;
 			this.menuStrip1.Text = "menuStrip1";
 			// 
@@ -85,12 +86,13 @@ namespace OpenDental{
 			// FormSecurity
 			// 
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
-			this.ClientSize = new System.Drawing.Size(863, 735);
+			this.ClientSize = new System.Drawing.Size(984, 735);
 			this.Controls.Add(this.userControlSecurityTabs);
 			this.Controls.Add(this.butOK);
 			this.Controls.Add(this.menuStrip1);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MainMenuStrip = this.menuStrip1;
+			this.MinimumSize = new System.Drawing.Size(940, 365);
 			this.Name = "FormSecurity";
 			this.Text = "Security";
 			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FormSecurityEdit_FormClosing);

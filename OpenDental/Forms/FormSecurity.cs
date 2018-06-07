@@ -30,9 +30,9 @@ namespace OpenDental {
 			FormU.IsNew=true;
 			FormU.ShowDialog();
 			if(FormU.DialogResult == DialogResult.OK) {//update to reflect changes that were made in FormUserEdit.
-				userControlSecurityTabs.FillUserTabUsers();
-				userControlSecurityTabs.RefreshUserTabGroups();
-				userControlSecurityTabs.SelectedUser=FormU.UserCur; //select the user that was just added.
+				userControlSecurityTabs.FillGridUsers();//New user is not in grid yet, add them.
+				userControlSecurityTabs.SelectedUser=FormU.UserCur;//Selects the user that was just added in the grid.
+				userControlSecurityTabs.RefreshUserTabGroups();//Previously selected users User Groups are still selected, refresh for UserCur.
 			}
 		}
 
@@ -40,7 +40,7 @@ namespace OpenDental {
 			FormUserEdit FormUE = new FormUserEdit(e.User);
 			FormUE.ShowDialog();
 			if(FormUE.DialogResult == DialogResult.OK) {//update to reflect changes that were made in FormUserEdit.
-				userControlSecurityTabs.FillUserTabUsers();
+				userControlSecurityTabs.FillGridUsers();
 				userControlSecurityTabs.RefreshUserTabGroups();
 			}
 		}

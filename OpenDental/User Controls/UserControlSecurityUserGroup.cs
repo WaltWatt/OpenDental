@@ -14,8 +14,8 @@ namespace OpenDental {
 	///The implementing class should handle all the "Security Events" listed in the designer.</summary>
 	public partial class UserControlSecurityUserGroup:UserControl {
 		#region Private Variables
-		///<summary>When true, the listBox_SelectedIndexChanged method will not be executed. 
-		///Set to true when loading/filling lists.
+		///<summary>When true, various selection and click methods will not be executed. 
+		///Set to true when loading/filling lists/grids.
 		/// If this is set to true, ALWAYS set it back to false when you are done.</summary>
 		private bool _isFillingList;
 		///<summary>Used to filter the list of users shown in the "Users" tab.</summary>
@@ -52,14 +52,17 @@ namespace OpenDental {
 		#region Private
 		///<summary>The user selected in the "Users" tab. Setting the SelectedUser to null or a user that does not exist in the listbox does nothing.</summary>
 		public Userod SelectedUser {
-			get { return ((ODBoxItem<Userod>)listUserTabUsers.SelectedItem)?.Tag; }
+			get {
+				return (gridUsers.SelectedTag<Userod>());//Returns null if no selections
+			}
 			set {
 				if(value == null) {
 					return;
 				}
-				foreach(ODBoxItem<Userod> boxItemUserCur in listUserTabUsers.Items) {
-					if(boxItemUserCur.Tag.UserNum == value.UserNum) {
-						listUserTabUsers.SelectedItem=boxItemUserCur;
+				for(int i=0;i<gridUsers.Rows.Count;i++){
+					gridUsers.SetSelected(i,false);
+					if(((Userod)(gridUsers.Rows[i].Tag)).UserNum==value.UserNum) {
+						gridUsers.SetSelected(i,true);
 						break;
 					}
 				}
@@ -92,18 +95,17 @@ namespace OpenDental {
 		private void UserControlUserGroupSecurity_Load(object sender,EventArgs e) {
 			if(IsForCEMT) {
 				groupBox2.Visible=false;
-				listUserTabUsers.Bounds = new Rectangle(listUserTabUsers.Bounds.X,securityTreeUser.Bounds.Y,listUserTabUsers.Bounds.Width,securityTreeUser.Bounds.Height - butAddUser.Height);
+				gridUsers.Bounds = new Rectangle(gridUsers.Bounds.X,securityTreeUser.Bounds.Y,gridUsers.Bounds.Width,securityTreeUser.Bounds.Height);
 				listUserTabUserGroups.Bounds = new Rectangle(listUserTabUserGroups.Bounds.X,securityTreeUser.Bounds.Y,listUserTabUserGroups.Bounds.Width,securityTreeUser.Bounds.Height);
-				labelUserTabUsers.Location = new Point(labelUserTabUsers.Location.X,labelPerm.Location.Y);
 				labelUserTabUserGroups.Location = new Point(labelUserTabUserGroups.Location.X,labelPerm.Location.Y);
 			}
 			if(!this.DesignMode) {
 				securityTreeUser.FillTreePermissionsInitial();
 				#region Load Users Tab
 				FillFilters();
-				FillUserTabUsers();
+				FillGridUsers();
 				FillUserTabGroups();
-				listUserTabUsers.SetSelected(0,true);
+				gridUsers.SetSelected(0,true);//Default to top user in grid.
 				#endregion
 				#region Load UserGroups Tab
 				securityTreeUserGroup.FillTreePermissionsInitial();
@@ -155,31 +157,7 @@ namespace OpenDental {
 				listUserTabUserGroups.Items.Add(new ODBoxItem<UserGroup>(groupCur.Description,groupCur));
 			}
 			_isFillingList=false;
-		}
-
-		///<summary>Fills listUserTabUsers. Public so that it can be called from the Form that implements this control.</summary>
-		public void FillUserTabUsers() {
-			_isFillingList=true;
-			Userod selectedUser = SelectedUser;//preserve user selection.
-			listUserTabUserGroups.Enabled=true;
-			listUserTabUsers.Items.Clear();
-			foreach(Userod userCur in GetFilteredUsersHelper()) {
-				ODBoxItem<Userod> boxItemCur = new ODBoxItem<Userod>(userCur.UserName,userCur);
-				listUserTabUsers.Items.Add(boxItemCur);
-				if(selectedUser != null && userCur.UserNum == selectedUser.UserNum) {
-					listUserTabUsers.SelectedItem = boxItemCur;
-				}
-			}
-			if(listUserTabUsers.Items.Count == 0) {
-				listUserTabUserGroups.Enabled=false;
-				listUserTabUserGroups.ClearSelected();
-				RefreshUserTree();
-			}
-			else if(SelectedUser == null) {
-				_isFillingList=false; //We want the listUsers_SelectedIndexChanged method to get called to refresh the tree.
-				listUserTabUsers.SelectedIndex=0;
-			}
-			_isFillingList=false;
+			RefreshUserTabGroups();
 		}
 
 		///<summary>Returns a filtered list of userods that should be displayed. Returns all users when IsCEMT is true.</summary>
@@ -262,7 +240,11 @@ namespace OpenDental {
 		public void RefreshUserTabGroups() {
 			_isFillingList=true;
 			listUserTabUserGroups.ClearSelected();
-			if(SelectedUser!=null) {
+			if(SelectedUser==null) {//No selected user, disable because modifying selections woudn't make sense.
+				listUserTabUserGroups.Enabled=false;
+			}
+			else {
+				listUserTabUserGroups.Enabled=true;
 				List<long> listUserGroupNums = SelectedUser.GetGroups(IsForCEMT).Select(x => x.UserGroupNum).ToList();
 				for(int i = 0;i < listUserTabUserGroups.Items.Count;i++) {
 					if(listUserGroupNums.Contains(((ODBoxItem<UserGroup>)listUserTabUserGroups.Items[i]).Tag.UserGroupNum)) {
@@ -277,7 +259,7 @@ namespace OpenDental {
 		}
 
 		private void listUserTabUserGroups_SelectedIndexChanged(object sender,EventArgs e) {
-			if(_isFillingList) {
+			if(_isFillingList || SelectedUser==null) {
 				return;
 			}
 			if(listUserTabUserGroups.SelectedItems.OfType<ODBoxItem<UserGroup>>().Select(x => x.Tag.UserGroupNum).Count() == 0) {
@@ -305,34 +287,7 @@ namespace OpenDental {
 			RefreshUserTree();
 		}
 
-		private void listUserTabUsers_SelectedIndexChanged(object sender,EventArgs e) {
-			if(_isFillingList) {
-				return;
-			}
-			//Refresh the selected groups and the security tree
-			RefreshUserTabGroups();//also refreshes the tree
-		}
-
-		private void listUserTabUsers_DoubleClick(object sender,EventArgs e) {
-			//Call an event that bubbles back up to the calling Form.
-			EditUserClick?.Invoke(this,new SecurityEventArgs(SelectedUser));
-		}
-		
-		private void butAddUser_Click(object sender,EventArgs e) {
-			//Call an event that bubbles back up to the calling Form.
-			AddUserClick?.Invoke(this,new SecurityEventArgs(new Userod()));
-		}
-
-		private void butEditUser_Click(object sender,EventArgs e) {
-			if(listUserTabUsers.SelectedIndex==-1) {
-				MsgBox.Show(this,"Please select a User to edit.");
-				return;
-			}
-			//Call an event that bubbles back up to the calling Form.
-			EditUserClick?.Invoke(this,new SecurityEventArgs(SelectedUser));
-		}
-
-		private void comboShowOnly_SelectionChangeCommitted(object sender,EventArgs e) {
+		private void comboShowOnly_SelectionIndexChanged(object sender,EventArgs e) {
 			string filterType;
 			switch(((ODBoxItem<UserFilters>)comboShowOnly.SelectedItem).Tag) {
 				case UserFilters.Employees:
@@ -358,12 +313,81 @@ namespace OpenDental {
 				comboSchoolClass.Visible=false;
 			}
 			labelFilterType.Text=Lan.g(this,filterType);
-			FillUserTabUsers();
+			textPowerSearch.Text=string.Empty;
+			FillGridUsers();
 		}
 
 		private void Filter_Changed(object sender,EventArgs e) {
-			FillUserTabUsers();
+			FillGridUsers();
 		}
+
+		///<summary>Fills gridUsers. Public so that it can be called from the Form that implements this control.</summary>
+		public void FillGridUsers() {
+			_isFillingList=true;
+			Userod selectedUser=SelectedUser;//preserve user selection.
+			gridUsers.BeginUpdate();
+			gridUsers.Columns.Clear();
+			string tableName="TableSecurity";
+			gridUsers.Columns.Add(new ODGridColumn(Lan.g(tableName,"Username"),90));
+			gridUsers.Columns.Add(new ODGridColumn(Lan.g(tableName,"Employee"),90));
+			gridUsers.Columns.Add(new ODGridColumn(Lan.g(tableName,"Provider"),90));
+			if(!PrefC.GetBool(PrefName.EasyNoClinics)) {
+				gridUsers.Columns.Add(new ODGridColumn(Lan.g(tableName,"Clinic"),80));
+				gridUsers.Columns.Add(new ODGridColumn(Lan.g(tableName,"Clinic\r\nRestr"),38,HorizontalAlignment.Center));
+			}
+			gridUsers.Columns.Add(new ODGridColumn(Lan.g(tableName,"Strong\r\nPwd"),45,HorizontalAlignment.Center));
+			gridUsers.Rows.Clear();
+			List<Userod> listFilteredUsers=GetFilteredUsersHelper();
+			foreach(Userod user in listFilteredUsers) {
+				ODGridRow row=new ODGridRow();
+				row.Cells.Add(user.UserName);
+				row.Cells.Add(Employees.GetNameFL(user.EmployeeNum));
+				row.Cells.Add(Providers.GetLongDesc(user.ProvNum));
+				if(!PrefC.GetBool(PrefName.EasyNoClinics)) {
+					row.Cells.Add(Clinics.GetAbbr(user.ClinicNum));
+					row.Cells.Add(user.ClinicIsRestricted?"X":"");
+				}
+				row.Cells.Add(user.PasswordIsStrong?"X":"");
+				row.Tag=user;
+				gridUsers.Rows.Add(row);
+			}
+			gridUsers.EndUpdate();
+			_isFillingList=false;//Done filling the grid.
+			//Selection logic has to occur after ODGrid.EndUpdate().
+			if(selectedUser==null || !listFilteredUsers.Any(x => x.UserNum==selectedUser.UserNum)) {
+				//No previously selected user, or previous selection not in filtered list.
+				gridUsers.SetSelected(0,true);//Default to first user.
+			}
+			else {//Previous selection still exists in grid, so select it again.
+				SelectedUser=selectedUser;//Reselect previously selected user.
+			}
+			RefreshUserTabGroups();
+		}
+
+		private void gridUsers_TitleAddClick(object sender,EventArgs e) {
+			if(_isFillingList) {
+				return;
+			}
+			//Call an event that bubbles back up to the calling Form.
+			AddUserClick?.Invoke(this,new SecurityEventArgs(new Userod()));
+		}
+
+		private void gridUsers_CellClick(object sender,ODGridClickEventArgs e) {
+			if(_isFillingList) {
+				return;
+			}
+			//Refresh the selected groups and the security tree
+			RefreshUserTabGroups();
+		}
+
+		private void gridUsers_CellDoubleClick(object sender,ODGridClickEventArgs e) {
+			if(_isFillingList) {
+				return;
+			}
+			//Call an event that bubbles back up to the calling Form.
+			EditUserClick?.Invoke(this,new SecurityEventArgs(SelectedUser));
+		}
+
 		#endregion
 
 		#region UserGroup Tab Methods
@@ -433,8 +457,8 @@ namespace OpenDental {
 		///<summary>We need to refresh the selected tab to display updated information.</summary>
 		private void tabControlMain_SelectedIndexChanged(object sender,EventArgs e) {
 			if(tabControlMain.SelectedTab == tabPageUsers) {
+				FillGridUsers();
 				FillUserTabGroups(); //a usergroup could have been added, so refresh.
-				RefreshUserTabGroups();//selects the user groups that are associated to the selected user. also refreshes the security tree.
 			}
 			else if(tabControlMain.SelectedTab == tabPageUserGroups) {
 				FillAssociatedUsers(); //the only thing that could have changed are the users associated to the user groups.

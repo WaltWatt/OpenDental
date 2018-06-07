@@ -120,9 +120,9 @@ namespace CentralManager {
 			FormCentralUserEdit FormCU = new FormCentralUserEdit(user);
 			FormCU.ShowDialog();
 			if(FormCU.DialogResult == DialogResult.OK) {//update to reflect changes that were made in FormUserEdit.
-				userControlSecurityTabs.FillUserTabUsers();
-				userControlSecurityTabs.RefreshUserTabGroups();
-				userControlSecurityTabs.SelectedUser=FormCU.UserCur; //select the user that was just added.
+				userControlSecurityTabs.FillGridUsers();//New user is not in grid yet, add them.
+				userControlSecurityTabs.SelectedUser=FormCU.UserCur;//Selects the user that was just added in the grid.
+				userControlSecurityTabs.RefreshUserTabGroups();//Previously selected users User Groups are still selected, refresh for UserCur.
 			}
 		}
 
@@ -131,7 +131,7 @@ namespace CentralManager {
 			FormCentralUserEdit FormCUE = new FormCentralUserEdit(e.User);
 			FormCUE.ShowDialog();
 			if(FormCUE.DialogResult == DialogResult.OK) {
-				userControlSecurityTabs.FillUserTabUsers();
+				userControlSecurityTabs.FillGridUsers();
 				userControlSecurityTabs.RefreshUserTabGroups();
 			}
 		}
