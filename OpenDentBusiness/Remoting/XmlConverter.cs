@@ -179,7 +179,8 @@ namespace OpenDentBusiness {
 			else if(!type.IsValueType) {
 				//if the object is not a value type and is not in the System namespace (besides strings, lists, and arrays) then it must be a class object,
 				//i.e. a Patient or an Appointment object, escape all string fields and properties
-				FieldInfo[] fiArray=type.GetFields().Where(x => x!=null).ToArray();
+				FieldInfo[] fiArray=type.GetFields().Where(x => x!=null)
+					.Where(x => x.GetCustomAttributes<XmlIgnoreAttribute>().Count()==0).ToArray();
 				foreach(FieldInfo fi in fiArray) {
 					try {
 						object objCur=fi.GetValue(obj);
@@ -281,7 +282,8 @@ namespace OpenDentBusiness {
 			else if(!type.IsValueType) {
 				//if the object is not a value type and is not in the System namespace (besides strings, lists, and arrays) then it must be a class object,
 				//i.e. a Patient or an Appointment object, escape all string fields and properties
-				FieldInfo[] fiArray=type.GetFields().Where(x => x!=null).ToArray();
+				FieldInfo[] fiArray=type.GetFields().Where(x => x!=null)
+					.Where(x => x.GetCustomAttributes<XmlIgnoreAttribute>().Count()==0).ToArray();
 				foreach(FieldInfo fi in fiArray) {
 					try {
 						object objCur=fi.GetValue(obj);

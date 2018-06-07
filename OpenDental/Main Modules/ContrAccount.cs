@@ -2371,8 +2371,7 @@ namespace OpenDental {
 			Logger.LogAction("Patients.GetFamily",LogPath.AccountModule,() => _loadData=AccountModules.GetAll(patNum,viewingInRecall,fromDate,toDate,isSelectingFamily
 				,checkShowDetail.Checked,	true,true,doMakeSecLog,doGetOrtho));
 			lock(_lockDataSetMain) {
-				DataSetMain=new DataSet();
-				_loadData.ListTables.ForEach(x => DataSetMain.Tables.Add(x));
+				DataSetMain=_loadData.DataSetMain;
 			}
 			FamCur=_loadData.Fam;
 			PatCur=FamCur.GetPatient(patNum);

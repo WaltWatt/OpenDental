@@ -7,6 +7,7 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Xml.Serialization;
 using CodeBase;
 
 namespace OpenDentBusiness {
@@ -14,7 +15,8 @@ namespace OpenDentBusiness {
 
 		///<summary>Data that is needed to load the Account module.</summary>
 		public class LoadData {
-			public List<DataTable> ListTables;
+			[XmlIgnore]
+			public DataSet DataSetMain;
 			public Family Fam;
 			public PatientNote PatNote;
 			public PatField[] ArrPatFields;
@@ -30,6 +32,23 @@ namespace OpenDentBusiness {
 			public SerializableDictionary<long,DateTime> DictDateLastOrthoClaims;
 			public DateTime FirstOrthoProcDate;
 			public List<FieldDefLink> ListFieldDefLinksAcct;
+
+			[XmlElement(nameof(DataSetMain))]
+			public string DataSetMainXml {
+				get {
+					if(DataSetMain==null) {
+						return null;
+					}
+					return XmlConverter.DsToXml(DataSetMain);
+				}
+				set {
+					if(value==null) {
+						DataSetMain=null;
+						return;
+					}
+					DataSetMain=XmlConverter.XmlToDs(value);
+				}
+			}
 		}
 
 		///<summary>If intermingled=true, the patnum of any family member will get entire family intermingled.</summary>
@@ -47,13 +66,13 @@ namespace OpenDentBusiness {
 				patNum=fam.ListPats[0].PatNum;//guarantor
 			}
 			LoadData retVal=new LoadData();
-			retVal.ListTables=new List<DataTable>();//Not using a DataSet because Middle Tier has trouble serializing them.
+			retVal.DataSetMain=new DataSet();
 			if(viewingInRecall) {
-				Logger.LogAction("GetProgNotes",LogPath.AccountModule,() => retVal.ListTables.Add(
+				Logger.LogAction("GetProgNotes",LogPath.AccountModule,() => retVal.DataSetMain.Tables.Add(
 					ChartModules.GetProgNotes(patNum,false,new ChartModuleComponentsToLoad())));
 			}
 			else {
-				Logger.LogAction("GetCommLog",LogPath.AccountModule,() => retVal.ListTables.Add(GetCommLog(pat,fam)));
+				Logger.LogAction("GetCommLog",LogPath.AccountModule,() => retVal.DataSetMain.Tables.Add(GetCommLog(pat,fam)));
 			}
 			bool singlePatient=!intermingled;//so one or the other will be true
 			decimal payPlanDue=0;
@@ -68,10 +87,11 @@ namespace OpenDentBusiness {
 				for(int j=0;j<dataSetAccount.Tables[i].Rows.Count;j++) {
 					table.ImportRow(dataSetAccount.Tables[i].Rows[j]);
 				}
-				retVal.ListTables.Add(table);
+				retVal.DataSetMain.Tables.Add(table);
 			}
 			//table=misc.  Just holds some info that we can't find anywhere else.
-			Logger.LogAction("GetMisc",LogPath.AccountModule,() => retVal.ListTables.Add(GetMisc(fam,patNum,payPlanDue,balanceForward,StmtType.NotSet,null)));
+			Logger.LogAction("GetMisc",LogPath.AccountModule,() => 
+				retVal.DataSetMain.Tables.Add(GetMisc(fam,patNum,payPlanDue,balanceForward,StmtType.NotSet,null)));
 			Logger.LogAction("Patients.GetFamily",LogPath.AccountModule,() => retVal.Fam=Patients.GetFamily(patNum));//have to get family after dataset due to aging calc.
 			Logger.LogAction("PatPlans.Refresh",LogPath.AccountModule,() => {
 				retVal.ListPatPlans=PatPlans.Refresh(pat.PatNum);
