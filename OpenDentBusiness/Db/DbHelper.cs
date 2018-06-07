@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -650,6 +653,35 @@ namespace OpenDentBusiness {
 				return "CASE WHEN ("+expr+") IS NULL THEN "+valWhenNull+" ELSE "+expr+" END";
 			}
 			return "IFNULL("+expr+","+valWhenNull+")";
+		}
+
+		///<summary>Queries information_schema.COLUMNS and returns all column names of given table.</summary>
+		public static List<string> GetColumnNamesFromTableMySql(string tableName) {
+			return Db.GetListString(@"
+				SELECT COLUMN_NAME 
+				FROM information_schema.COLUMNS
+				WHERE TABLE_SCHEMA = '"+DataConnection.GetDatabaseName()+"' AND TABLE_NAME='"+tableName+"'");
+		}
+
+		///<summary>Build a select statement with omitted columns.</summary>
+		public static string GetSelectCommandStringFromTableMySql(string tableName,params string[] omitColumns) {
+			if(omitColumns==null || omitColumns.Length<=0 || omitColumns.All(x => string.IsNullOrEmpty(x))) {
+				return "SELECT * FROM "+tableName;
+			}
+			List<string> listAllColumns=DbHelper.GetColumnNamesFromTableMySql(tableName);
+			string commandColumns="";
+			foreach(string column in listAllColumns) {
+				if(!string.IsNullOrEmpty(commandColumns)) {
+					commandColumns+=",";
+				}
+				if(omitColumns.Any(x => string.Compare(x,column,true)==0)) {
+					commandColumns+="'' AS "+column;
+				}
+				else {
+					commandColumns+=column;
+				}
+			}
+			return "SELECT "+commandColumns+" FROM "+tableName;
 		}
 
 	}
