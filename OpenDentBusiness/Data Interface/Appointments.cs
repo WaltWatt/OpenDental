@@ -186,10 +186,12 @@ namespace OpenDentBusiness{
 			if(opNums!=null && opNums.Count > 0) {
 				command+="AND Op IN("+String.Join(",",opNums)+") ";
 			}
+			//It is very important to format these filters as DateT. That will allow the index to be used. 
+			//Truncate dateStart/dateEnd down to .Date in order to mimic the behavior of DbHelper.DtimeToDate().
 			command+="AND AptStatus!="+POut.Int((int)ApptStatus.UnschedList)+" "
-				+"AND "+DbHelper.DtimeToDate("AptDateTime")+">="+POut.Date(dateStart)+" ";
+				+"AND AptDateTime>="+POut.DateT(dateStart.Date)+" ";
 			if(dateEnd.Year > 1880) {
-				command+="AND "+DbHelper.DtimeToDate("AptDateTime")+"<="+POut.Date(dateEnd)+" ";
+				command+="AND AptDateTime<="+POut.DateT(dateEnd.Date)+" ";
 			}
 			command+="ORDER BY AptDateTime,Op";//Ordering by AptDateTime then Op is important for speed when checking for collisions in Web Sched.
 			log?.WriteLine("command: "+command,LogLevel.Verbose);

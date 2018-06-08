@@ -826,6 +826,8 @@ namespace OpenDentBusiness{
 			if(PrefC.HasClinicsEnabled) {
 				clinicFilter=" AND operatory.ClinicNum="+POut.Long(clinicNum);
 			}
+			//It is very important not to format these filters using DbHelper.DtimeToDate(). This would remove the index but yield the exact same results. 
+			//It is already a Date column (no time) so no need to truncate the filter.
 			string command=@"-- First, get all schedules associated to operatories.
 				(SELECT schedule.* FROM schedule 
 					INNER JOIN scheduleop ON schedule.ScheduleNum=scheduleop.ScheduleNum
@@ -835,8 +837,8 @@ namespace OpenDentBusiness{
 					AND schedule.ProvNum IN ("+String.Join(",",listProvNumsWithZero)+@")
 					AND schedule.BlockoutType > -1 -- We need to include all blockouts and non-blockouts.
 					"+(blockoutsToIgnore=="" ? "" : " AND schedule.BlockoutType NOT IN ("+blockoutsToIgnore+")")+@"
-					AND "+DbHelper.DtimeToDate("schedule.SchedDate")+">="+POut.Date(dateStart)+@" 
-					AND "+DbHelper.DtimeToDate("schedule.SchedDate")+"<="+POut.Date(dateEnd)+@"
+					AND schedule.SchedDate>="+POut.Date(dateStart)+@" 
+					AND schedule.SchedDate<="+POut.Date(dateEnd)+@"
 					AND schedule.SchedType IN("+POut.Int((int)ScheduleType.Provider)+","+POut.Int((int)ScheduleType.Blockout)+@"))
 				UNION -- Using UNION instead of UNION ALL because we want duplicate entries to be removed.
 				-- Next, get all schedules that are not associated to any operatories
@@ -850,8 +852,8 @@ namespace OpenDentBusiness{
 					"+clinicFilter+@"
 					AND schedule.BlockoutType = 0 -- Blockouts should be ignored because they HAVE to be assigned to an operatory.
 					AND scheduleop.OperatoryNum IS NULL -- Only consider schedules that are NOT assigned to any operatories (dynamic schedules)
-					AND "+DbHelper.DtimeToDate("schedule.SchedDate")+">="+POut.Date(dateStart)+@" 
-					AND "+DbHelper.DtimeToDate("schedule.SchedDate")+"<="+POut.Date(dateEnd)+@"
+					AND schedule.SchedDate>="+POut.Date(dateStart)+@" 
+					AND schedule.SchedDate<="+POut.Date(dateEnd)+@"
 					AND schedule.SchedType IN("+POut.Int((int)ScheduleType.Provider)+","+POut.Int((int)ScheduleType.Blockout)+@")) 
 				ORDER BY SchedDate";//Order the entire result set by SchedDate.
 			log?.WriteLine("command: "+command,LogLevel.Verbose);
