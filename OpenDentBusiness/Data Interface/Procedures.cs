@@ -906,7 +906,7 @@ namespace OpenDentBusiness {
 			return Crud.ProcedureCrud.SelectMany(command);
 		}
 
-		public static List<Procedure> GetProcsByStatusForPat(long patNum,ProcStat[] procStatuses) {
+		public static List<Procedure> GetProcsByStatusForPat(long patNum,params ProcStat[] procStatuses) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
 				return Meth.GetObject<List<Procedure>>(MethodBase.GetCurrentMethod(),patNum,procStatuses);
 			}
@@ -3185,7 +3185,7 @@ namespace OpenDentBusiness {
 
 		///<summary>Gets the placement date for ortho patients.
 		///Takes the patient's patientNote.DateOrthoPlacementOverride and preference.OrthoPlacementProcsList into account.
-		///Uses the first D8* procedure if neither of the above are found.</summary>
+		///Uses the first D8* procedure if neither of the above are found.  Returns DateTime.MinValue if no proc found.</summary>
 		public static DateTime GetFirstOrthoProcDate(PatientNote patNoteCur) {
 			//No need to check RemotingRole; no call to db.
 			if(patNoteCur.DateOrthoPlacementOverride != DateTime.MinValue) {
@@ -3195,15 +3195,20 @@ namespace OpenDentBusiness {
 			DateTime firstOrthoProcDate = DateTime.MinValue;
 			List<long> listOrthoProcNums = ProcedureCodes.GetOrthoBandingCodeNums();
 			//otherwise, use the proc of one of the codes specified in the pref.
-			List<Procedure> listOrthoProcsForPat = Procedures.GetCompleteForPats(new List<long> { patNoteCur.PatNum }).Where(x => listOrthoProcNums.Contains(x.CodeNum)).ToList();
-			if(listOrthoProcsForPat.Count>0) {
-				firstOrthoProcDate=listOrthoProcsForPat.Min(x => x.ProcDate);
+			Procedure proc=Procedures.GetProcsByStatusForPat(patNoteCur.PatNum,ProcStat.C)
+				.Where(x => listOrthoProcNums.Contains(x.CodeNum))
+				.OrderBy(x => x.ProcDate)//Earliest ortho placement first.
+				.FirstOrDefault();
+			if(proc!=null) {
+				firstOrthoProcDate=proc.ProcDate;
 			}
 			return firstOrthoProcDate;
 		}
 
-		///<summary>Does nothing if not an ortho proc. PatPlan table needs to be updated when an ortho placement procedure is set complete.
-		///Only updates the date if no OrthoAutoNextClaimDate is set on the corresponding PatPlan.</summary>
+		///<summary>Does nothing if not an ortho proc (dictated by the pref OrthoPlacementProcsList or a code starting with D8 if pref not set).
+		///PatPlan table needs to be updated when an ortho placement procedure is set complete.
+		///Only updates the date if no OrthoAutoNextClaimDate is set on the corresponding PatPlan. Updates PatientNote.OrthoMonthsTreatOverride
+		///if this is the first Ortho placement proc set complete.</summary>
 		public static void SetOrthoProcComplete(Procedure procCur,ProcedureCode procCode) {
 			if(procCode == null || procCur == null) { //this should never happen unless they have some corruption
 				return;
@@ -3214,10 +3219,8 @@ namespace OpenDentBusiness {
 					return;
 				}
 			}
-			else {
-				if(!procCode.ProcCode.StartsWith("D8080") && !procCode.ProcCode.StartsWith("D8090")) {
-					return;
-				}
+			else if(!procCode.ProcCode.StartsWith("D8080") && !procCode.ProcCode.StartsWith("D8090")) {
+				return;
 			}
 			List<PatPlan> listPatPlans = PatPlans.GetPatPlansForPat(procCur.PatNum);
 			foreach(PatPlan patPlanCur in listPatPlans) {
@@ -3234,6 +3237,19 @@ namespace OpenDentBusiness {
 				procWaitDays=procWaitDays.AddMonths(1);//Always push the next claim date out a month, even after the "wait days" preference.
 				patPlanCur.OrthoAutoNextClaimDate = new DateTime(procWaitDays.Year,procWaitDays.Month,1);
 				PatPlans.Update(patPlanCur);
+			}
+			if(procCur.ProcStatus==ProcStat.C) {//Only make this change if Complete procedure.(Currently, will always be true, but for safety).
+				Patient patCur=Patients.GetLim(procCur.PatNum);//GetLim because we just need pat.Guarantor.
+				PatientNote patNoteCur=PatientNotes.Refresh(patCur.PatNum,patCur.Guarantor);//Inserts PatientNote rows if one does not exists for PatNum AND Guarantor.
+				//First time completing an Ortho placement procedure, so we don't have an override in place yet. Any subsequent Ortho procs will use the same
+				//override as the first Ortho proc.
+				Byte defaultMonths=PrefC.GetByte(PrefName.OrthoDefaultMonthsTreat);
+				//Only set the override if one has not already been set.
+				if(patNoteCur.OrthoMonthsTreatOverride==-1) {
+					//Set OrthoMonthsTreatOverride to PrefName.OrthoDefaultMonthsTreat, so we don't overwrite it if the practice default changes later.
+					patNoteCur.OrthoMonthsTreatOverride=defaultMonths;//Use current practice default.
+					PatientNotes.Update(patNoteCur,patCur.Guarantor);
+				}
 			}
 		}
 

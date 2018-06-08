@@ -3453,7 +3453,8 @@ namespace OpenDental {
 		}
 
 		private void butOrthoDefaultMonthsTreat_Click(object sender,EventArgs e) {
-			PatientNoteCur.OrthoMonthsTreatOverride=-1;
+			//Setting OrthoMonthsTreatOverride locks this value into place just in case it the pref changes down the road.
+			PatientNoteCur.OrthoMonthsTreatOverride=PrefC.GetByte(PrefName.OrthoDefaultMonthsTreat);
 			PatientNotes.Update(PatientNoteCur,PatCur.Guarantor);
 			FillOrtho();
 		}

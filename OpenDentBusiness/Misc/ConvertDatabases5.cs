@@ -7072,6 +7072,39 @@ No Action Required in many cases, check your new patient Web Sched on your web s
 			Db.NonQ(command);
 		}
 
+		private static void To17_4_78() {
+			string command;
+			ODEvent.Fire(new ODEventArgs("ConvertDatabases",
+				"Upgrading database to version: 17.4.78 - Preserving ortho treatment month defaults"));//No translation in convert script.
+			//The below code is intended to preserve the value from PrefName.OrthoDefaultMonthsTreat for patients that have completed ortho placement procs.
+			//Previously if someone were to change PrefName.OrthoDefaultMonthsTreat the patients that did not have overrides 
+			//would then use the new pref value and lose their original Tx Months Total.
+			command="SELECT preference.ValueString FROM preference WHERE preference.PrefName='OrthoDefaultMonthsTreat'";
+			string orthoDefaultMonths=Db.GetScalar(command);
+			//Mimics ProcedureCodes.GetOrthoBandingCodeNums()
+			command="SELECT preference.ValueString FROM preference WHERE preference.PrefName='OrthoPlacementProcsList'";
+			string orthoPlacementProcsPref=Db.GetScalar(command);
+			List<long> listOrthoPlacementProcCodeNums=orthoPlacementProcsPref.Split(new char[] { ',' }).Select(x => PIn.Long(x)).ToList();
+			//Get all procedure codes that start with D8 if the preference is not currently set (preserves old behavior).
+			if(string.IsNullOrEmpty(orthoPlacementProcsPref)) {
+				command="SELECT procedurecode.CodeNum FROM procedurecode WHERE procedurecode.ProcCode LIKE 'D8%'";
+				listOrthoPlacementProcCodeNums=Db.GetListLong(command);
+			}
+			//Get all PatNums for patients that have at least one completed ortho placement procedure.
+			command="SELECT DISTINCT procedurelog.PatNum "
+				+"FROM procedurelog "
+				+"WHERE ProcStatus=2 "/*2=Complete*/
+				+"AND procedurelog.CodeNum IN ("+string.Join(",",listOrthoPlacementProcCodeNums)+") ";
+			List<long> listPatNumsWithOrthoTreatments=Db.GetListLong(command);
+			if(listPatNumsWithOrthoTreatments.Count > 0) {
+				command="UPDATE patientnote SET patientnote.OrthoMonthsTreatOverride="+orthoDefaultMonths+" "
+					+"WHERE patientnote.PatNum IN ("+string.Join(",",listPatNumsWithOrthoTreatments)+") "
+					+"AND patientnote.OrthoMonthsTreatOverride=-1 ";
+				Db.NonQ(command);
+			}
+			ODEvent.Fire(new ODEventArgs("ConvertDatabases","Upgrading database to version: 17.4.78"));//No translation in convert script.
+		}
+
 		private static void To18_1_1() {
 			string command;
 			DataTable table;
@@ -8455,11 +8488,40 @@ No Action Required in many cases, check your new patient Web Sched on your web s
 			}//End iRYS
 		}
 
-		private static void To18_1_20() {
+		private static void To18_1_21() {
 			string command;
 			//turn off single patient statements
 			command="UPDATE preference SET ValueString = 0 WHERE PrefName LIKE 'BillingDefaultsSinglePatient'";
 			Db.NonQ(command);
+			ODEvent.Fire(new ODEventArgs("ConvertDatabases",
+				"Upgrading database to version: 18.1.21 - Preserving ortho treatment month defaults"));//No translation in convert script.
+			//The below code is intended to preserve the value from PrefName.OrthoDefaultMonthsTreat for patients that have completed ortho placement procs.
+			//Previously if someone were to change PrefName.OrthoDefaultMonthsTreat the patients that did not have overrides 
+			//would then use the new pref value and lose their original Tx Months Total.
+			command="SELECT preference.ValueString FROM preference WHERE preference.PrefName='OrthoDefaultMonthsTreat'";
+			string orthoDefaultMonths=Db.GetScalar(command);
+			//Mimics ProcedureCodes.GetOrthoBandingCodeNums()
+			command="SELECT preference.ValueString FROM preference WHERE preference.PrefName='OrthoPlacementProcsList'";
+			string orthoPlacementProcsPref=Db.GetScalar(command);
+			List<long> listOrthoPlacementProcCodeNums=orthoPlacementProcsPref.Split(new char[] { ',' }).Select(x => PIn.Long(x)).ToList();
+			//Get all procedure codes that start with D8 if the preference is not currently set (preserves old behavior).
+			if(string.IsNullOrEmpty(orthoPlacementProcsPref)) {
+				command="SELECT procedurecode.CodeNum FROM procedurecode WHERE procedurecode.ProcCode LIKE 'D8%'";
+				listOrthoPlacementProcCodeNums=Db.GetListLong(command);
+			}
+			//Get all PatNums for patients that have at least one completed ortho placement procedure.
+			command="SELECT DISTINCT procedurelog.PatNum "
+				+"FROM procedurelog "
+				+"WHERE ProcStatus=2 "/*2=Complete*/
+				+"AND procedurelog.CodeNum IN ("+string.Join(",",listOrthoPlacementProcCodeNums)+") ";
+			List<long> listPatNumsWithOrthoTreatments=Db.GetListLong(command);
+			if(listPatNumsWithOrthoTreatments.Count > 0) {
+				command="UPDATE patientnote SET patientnote.OrthoMonthsTreatOverride="+orthoDefaultMonths+" "
+					+"WHERE patientnote.PatNum IN ("+string.Join(",",listPatNumsWithOrthoTreatments)+") "
+					+"AND patientnote.OrthoMonthsTreatOverride=-1 ";
+				Db.NonQ(command);
+			}
+			ODEvent.Fire(new ODEventArgs("ConvertDatabases","Upgrading database to version: 18.1.21"));//No translation in convert script.
 		}
 
 	}

@@ -741,6 +741,8 @@ namespace OpenDentBusiness {
 		OrthoEnabled,
 		///<summary>When turned on, prompts the user to move any completed ortho procedures' fees' to be moved to the D8080 procedurecode.</summary>
 		OrthoInsPayConsolidated,
+		///<summary>Comma delimited list of procedure code CodeNum's.  These procedures are used as flags in order to determine the Patients' DatePlacement.
+		///DatePlacement is the ProcDate of the first completed procedure that is associated to any of the procedure codes in this list.</summary>
 		OrthoPlacementProcsList,
 		///<summary>Enum:RpOutstandingIns.DateFilterTab. Defaults to DaysOld. Determines which date filter tab to default load in Outstanding Insurance 
 		///Report.</summary>

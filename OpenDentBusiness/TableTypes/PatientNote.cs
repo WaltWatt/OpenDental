@@ -31,6 +31,7 @@ namespace OpenDentBusiness{
 		///<summary>In Case of Emergency Phone.</summary>
 		public string ICEPhone;
 		///<summary>-1 by default. Overrides the default number of months for an ortho treatment for this patient.
+		///Gets automatically set to the current value found in the pref OrthoClaimMonthsTreatment when the first placement procedure has been completed and this value is -1.
 		///This column is an integer instead of a byte because it needs to store -1 so that users can override with the value of 0.
 		///When set to -1 the default practice value for the pref OrthoClaimMonthsTreatment is used.</summary>
 		public int OrthoMonthsTreatOverride=-1;

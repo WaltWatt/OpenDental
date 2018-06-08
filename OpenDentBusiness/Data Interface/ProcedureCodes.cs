@@ -724,7 +724,7 @@ namespace OpenDentBusiness{
 				return strListOrthoNums.Split(new char[] { ',' }).ToList().Select(x => PIn.Long(x)).ToList();
 			}
 			else {
-				return GetWhereFromList(x => x.ProcCode.StartsWith("D8")).Select(x => x.CodeNum).ToList();
+				return GetWhereFromList(x => x.ProcCode.ToUpper().StartsWith("D8")).Select(x => x.CodeNum).ToList();
 			}
 		}
 
