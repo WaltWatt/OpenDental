@@ -4597,7 +4597,7 @@ namespace OpenDental {
 			_paymentCur.BankBranch=textBankBranch.Text;
 			_paymentCur.PayNote=textNote.Text;
 			_paymentCur.IsRecurringCC=checkRecurring.Checked;
-			if(checkPayTypeNone.Checked) {
+			if(checkPayTypeNone.Checked || _paymentCur.PayAmt==0) {
 				_paymentCur.PayType=0;
 			}
 			else {
