@@ -362,31 +362,37 @@ namespace OpenDental{
 					}
 					Image thisImage;
 					string extension;
-					if(ClaimFormCur.Items[i].ImageFileName=="ADA2006.gif"){
-						thisImage=CDT.Class1.GetADA2006();
-						extension=".gif";
-					}
-					else if(ClaimFormCur.Items[i].ImageFileName=="ADA2012.gif") {
-						thisImage=CDT.Class1.GetADA2012();
-						extension=".gif";
-					}
-					else if(ClaimFormCur.Items[i].ImageFileName=="1500_02_12.gif") {
-						thisImage=Properties.Resources._1500_02_12;
-						extension=".gif";
-					}
-					else{
-						//In the case when the A to Z folders are not being used, an invalid form image path is returned
-						//and we simply print without the background image (just as if the background image were removed
-						//from the A to Z folders where it was expected.
-						string fileName=FileAtoZ.CombinePaths(ImageStore.GetPreferredAtoZpath(),ClaimFormCur.Items[i].ImageFileName);
-						if(!FileAtoZ.Exists(fileName)) {
-							continue;
-						}
-						thisImage=FileAtoZ.GetImage(fileName);
-						if(thisImage==null) {
-							continue;
-						}
-						extension=Path.GetExtension(ClaimFormCur.Items[i].ImageFileName);
+					switch(ClaimFormCur.Items[i].ImageFileName) {
+						case "ADA2006.gif":
+							thisImage=CDT.Class1.GetADA2006();
+							extension=".gif";
+							break;
+						case "ADA2012.gif":
+							thisImage=CDT.Class1.GetADA2012();
+							extension=".gif";
+							break;
+						case "ADA2012_J430D.gif":
+							thisImage=CDT.Class1.GetADA2012_J430D();
+							extension=".gif";
+							break;
+						case "1500_02_12.gif":
+							thisImage=Properties.Resources._1500_02_12;
+							extension=".gif";
+							break;
+						default:
+							//In the case when the A to Z folders are not being used, an invalid form image path is returned
+							//and we simply print without the background image (just as if the background image were removed
+							//from the A to Z folders where it was expected.
+							string fileName=FileAtoZ.CombinePaths(ImageStore.GetPreferredAtoZpath(),ClaimFormCur.Items[i].ImageFileName);
+							if(!FileAtoZ.Exists(fileName)) {
+								continue;
+							}
+							thisImage=FileAtoZ.GetImage(fileName);
+							if(thisImage==null) {
+								continue;
+							}
+							extension=Path.GetExtension(ClaimFormCur.Items[i].ImageFileName);
+							break;
 					}
 					if(extension==".jpg"){
 						grfx.DrawImage(thisImage,

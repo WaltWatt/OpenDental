@@ -1251,24 +1251,29 @@ namespace OpenDental{
 					}
 					string fileName=FileAtoZ.CombinePaths(ImageStore.GetPreferredAtoZpath(),_claimFormCur.Items[i].ImageFileName);
 					Image thisImage=null;
-					if(_claimFormCur.Items[i].ImageFileName=="ADA2006.gif") {
-						thisImage=CDT.Class1.GetADA2006();
-					}
-					else if(_claimFormCur.Items[i].ImageFileName=="ADA2012.gif") {
-						thisImage=CDT.Class1.GetADA2012();
-					}
-					else if(_claimFormCur.Items[i].ImageFileName=="1500_02_12.gif") {
-						thisImage=Properties.Resources._1500_02_12;
-					}
-					else {
-						if(!FileAtoZ.Exists(fileName)) {
-							MsgBox.Show(this,"File not found.");
-							continue;
-						}
-						thisImage=FileAtoZ.GetImage(fileName);
-						if(thisImage==null) {
-							continue;
-						}
+					switch(_claimFormCur.Items[i].ImageFileName) {
+						case "ADA2006.gif":
+							thisImage=CDT.Class1.GetADA2006();
+							break;
+						case "ADA2012.gif":
+							thisImage=CDT.Class1.GetADA2012();
+							break;
+						case "ADA2012_J430D.gif":
+							thisImage=CDT.Class1.GetADA2012_J430D();
+							break;
+						case "1500_02_12.gif":
+							thisImage=Properties.Resources._1500_02_12;
+							break;
+						default:
+							if(!FileAtoZ.Exists(fileName)) {
+								MsgBox.Show(this,"File not found.");
+								continue;
+							}
+							thisImage=FileAtoZ.GetImage(fileName);
+							if(thisImage==null) {
+								continue;
+							}
+							break;
 					}
 					if(fileName.Substring(fileName.Length-3)=="jpg"){
 						grfx.DrawImage(thisImage
