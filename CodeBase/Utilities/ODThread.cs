@@ -374,7 +374,9 @@ namespace CodeBase {
 			int actionsPerThread=(int)Math.Ceiling((double)listActions.Count/threadCount);
 			object locker=new object();
 			//No one outside of this method cares about this group name. They have no authority over this group.
-			string threadGroupName="ODThread.ThreadPool()"+Guid.NewGuid().ToString();
+			int threadID=1;
+			string threadGroupGUID=Guid.NewGuid().ToString();
+			string threadGroupName="ODThread.ThreadPool()"+threadGroupGUID;
 			for(int i = 0;i<listActions.Count;i++) {
 				//Add to the current thread pool.
 				listActionsCur.Add(listActions[i]);
@@ -384,6 +386,7 @@ namespace CodeBase {
 						((List<Action>)o.Tag).ForEach(x => x());
 					}));
 					odThread.Tag=new List<Action>(listActionsCur);
+					odThread.Name=threadGroupName+"-"+threadID;
 					odThread.GroupName=threadGroupName;
 					odThread.AddExceptionHandler(new ExceptionDelegate((Exception e) => {
 						lock (locker) {
@@ -395,6 +398,7 @@ namespace CodeBase {
 					//We just started a new thread pool so start a new one.
 					listActionsCur.Clear();
 					odThread.Start(true);
+					threadID++;
 				}
 			}
 			//Wait for all appointment drawing threads to finish.

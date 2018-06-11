@@ -10,7 +10,9 @@ using System.Threading;
 using CodeBase;
 
 namespace OpenDentBusiness {
-	///<summary>This class contains methods used to handle large tables - 
+	///<summary>Used in convert script and thus cannot change functionality without affecting conversion history.
+	///If a function needs to be changed drastically, then create necessary polymorphisms of the function to handle the new scenario.
+	///This class contains methods used to handle large tables - 
 	///The public variables ARE NOT thread safe - The functions within run things in thread, do not call functions in this class in threads. 
 	///USE SETTERS FOR THIS CLASS PRIOR TO RUNNING ANY LARGE TABLE COMMANDS!!!!!
 	///TableName and TablePriKeyField are REQUIRED.  
@@ -37,7 +39,7 @@ namespace OpenDentBusiness {
 		///The queue is filled by QUEUE_BATCHES_THREAD_COUNT threads to a maximum capacity of MAX_QUEUE_COUNT.
 		///The maximum of INSERT_THREAD_MIN_COUNT or the number of cores on the current computer will process the batches dequeued.  Make sure to use
 		///_lockObjQueueBatchData when manipulating this queue for thread safety.</summary>
-		private static Queue<Tuple<string,string>> _queueBatchQueries;
+		private static Queue<BatchQueries> _queueBatchQueries;
 		///<summary>Lock object to keep the queue thread safe.</summary>
 		private static object _lockObjQueueBatchQueries=new object();
 		///<summary>False until the filling threads have added the last batch of data to the queue.  Once true AND the queue is empty, the main thread is
@@ -195,7 +197,8 @@ namespace OpenDentBusiness {
 		}
 
 		///<summary>Using the smaller of max_allowed_packet or INSERT_MAX_BYTES and the max row length for the table with _tableName, returns the max
-		///number of rows per insert statement.  Number returned is rounded down to the nearest thousand, i.e. 15,324.2341 rounds down to 15,000.</summary>
+		///number of rows per insert statement.  Number returned is rounded down to the nearest thousand, i.e. 15,324.2341 rounds down to 15,000.
+		///Maximum of 25000 is returned in order to prevent excessive memory usage.</summary>
 		public static void SetRowsPerBatch() {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
 				Meth.GetVoid(MethodBase.GetCurrentMethod());
@@ -233,7 +236,10 @@ namespace OpenDentBusiness {
 				+"FROM information_schema.Columns c "
 				+"WHERE c.TABLE_SCHEMA='"+POut.String(GetCurrentDatabase())+"' "
 				+"AND c.TABLE_NAME='"+POut.String(_tableName)+"'";
-			_rowsPerBatch=Db.GetInt(command);
+			//Some extremely large tables get chopped up into huge batches (e.g. 645,000 items) and Open Dental starts to run out of memory when creating
+			//each individual insert statement.  The easiest solution is to arbitrarily limit the batches to a maximum number of items.  This does not
+			//affect the time it takes to execute all of these insert statements because we are going to run them all in parallel regardless.
+			_rowsPerBatch=Math.Min(Db.GetInt(command),25000);
 		}
 
 		///<summary>Creates actions that load batches of data into the queue for inserting by the insert threads and runs them with
@@ -298,14 +304,14 @@ namespace OpenDentBusiness {
 						if(listRowVals==null || listRowVals.Count==0) {
 							return;
 						}
-						string insertCommand="INSERT INTO `"+_tableName+"` ("+colNames+") VALUES "+string.Join(",",listRowVals);
-						string insertCommand2="INSERT INTO `"+_tableName+"` ("+colNames+") SELECT "+colNames+" FROM `"+_tempTableName+"` "+whereStr+" "
+						string commandValuesInsert="INSERT INTO `"+_tableName+"` ("+colNames+") VALUES "+string.Join(",",listRowVals);
+						string commandBulkInsert="INSERT INTO `"+_tableName+"` ("+colNames+") SELECT "+colNames+" FROM `"+_tempTableName+"` "+whereStr+" "
 							+"AND "+POut.String(_tablePriKeyField)+" NOT IN (SELECT "+POut.String(_tablePriKeyField)+" FROM `"+_tableName+"` "+whereStr+")";
 						bool isDataQueued=false;
 						while(!isDataQueued) {
 							lock(_lockObjQueueBatchQueries) {
 								if(_queueBatchQueries.Count<MAX_QUEUE_COUNT) {//Wait until queue is a reasonable size before queueing more.
-									_queueBatchQueries.Enqueue(Tuple.Create(insertCommand,insertCommand2));
+									_queueBatchQueries.Enqueue(new BatchQueries(commandValuesInsert,commandBulkInsert));
 									isDataQueued=true;
 									queueCount++;
 								}
@@ -361,31 +367,29 @@ namespace OpenDentBusiness {
 						bool isBatchQueued=false;
 						bool insertFailed=true;
 						while(!_areQueueBatchThreadsDone || isBatchQueued) {//if queue batch thread is done and queue is empty, loop is finished
-							string command="";
-							string command2="";
+							BatchQueries batch=null;
 							try {
-								Tuple<string,string> insertCmds=null;
 								lock(_lockObjQueueBatchQueries) {
 									if(_queueBatchQueries.Count==0) {
 										//queueBatchThread must not be finished gathering batches but the queue is empty, give the batch thread time to catch up
 										continue;
 									}
-									insertCmds=_queueBatchQueries.Dequeue();
+									batch=_queueBatchQueries.Dequeue();
 								}
-								if(insertCmds==null || string.IsNullOrEmpty(insertCmds.Item1)) {
+								if(batch==null || (string.IsNullOrEmpty(batch.CommandValuesInsert) && string.IsNullOrEmpty(batch.CommandBulkInsert))) {
 									continue;
 								}
-								command=insertCmds.Item1;
-								command2=insertCmds.Item2;
-								Db.NonQ(command);
+								Db.NonQ(batch.CommandValuesInsert);
 								insertFailed=false;
 							}
 							catch(Exception ex) {//just loop again and wait if necessary
 								ex.DoNothing();
 								insertFailed=true;
-								if(!string.IsNullOrEmpty(command2)) {
+								if(!string.IsNullOrEmpty(batch.CommandBulkInsert)) {
 									try {
-										Db.NonQ(command2);
+										//If multiple bulk insert commands get here at the same time they will fail 100% of the time for any InnoDB table due to 
+										//a MySQL deadlock issue caused by the sub-select that makes sure it is not trying to insert duplicate rows.
+										Db.NonQ(batch.CommandBulkInsert);
 										insertFailed=false;
 									}
 									catch(Exception ex2) {
@@ -438,7 +442,7 @@ namespace OpenDentBusiness {
 			ODThread odThreadQueueData=new ODThread(QueueBatches);
 			try {
 				lock(_lockObjQueueBatchQueries) {
-					_queueBatchQueries=new Queue<Tuple<string,string>>();
+					_queueBatchQueries=new Queue<BatchQueries>();
 				}
 				_areQueueBatchThreadsDone=false;
 				odThreadQueueData.Name="QueueDataThread";
@@ -521,7 +525,7 @@ namespace OpenDentBusiness {
 			ODThread odThreadQueueData=new ODThread(QueueBatches);
 			try {
 				lock(_lockObjQueueBatchQueries) {
-					_queueBatchQueries=new Queue<Tuple<string,string>>();
+					_queueBatchQueries=new Queue<BatchQueries>();
 				}
 				_areQueueBatchThreadsDone=false;
 				odThreadQueueData.Name="QueueDataThread";
@@ -638,6 +642,16 @@ namespace OpenDentBusiness {
 			return "";
 		}
 		#endregion Specific Table Methods
+
+		private class BatchQueries:Tuple<string,string> {
+			///<summary>One insert statement with a plethora of individual value groupings that explicitly specify each value to be inserted.</summary>
+			public string CommandValuesInsert { get { return Item1; } }
+			///<summary>An insert statement that utilizes a single query to select from one table and insert that data into another table.</summary>
+			public string CommandBulkInsert { get { return Item2; } }
+
+			public BatchQueries(string commandValuesInsert,string commandBulkInsert) : base(commandValuesInsert,commandBulkInsert) {
+			}
+		}
 
 	}
 }

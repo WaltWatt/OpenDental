@@ -659,37 +659,26 @@ namespace OpenDentBusiness{
 			if(provNums.Count==0 && empNums.Count==0 && !includeCNotes && !includePNotes) {
 				return table;
 			}
-			List<string> listOrClauses=new List<string>();
-			//Only notes with clinicNum==0
-			if(includePNotes) {
-				listOrClauses.Add("(SchedType="+POut.Int((int)ScheduleType.Practice)+" AND schedule.ClinicNum=0)");
-			}
-			//Only notes with clinicNum!=0; Treats HQ/ClinicNum==0 as show all non-practice notes.
-			if(includeCNotes) {
-				listOrClauses.Add("(SchedType="+POut.Int((int)ScheduleType.Practice)+" AND schedule.ClinicNum"+(clinicNum==0?">0":("="+POut.Long(clinicNum)))+")");
-			}
-			if(provNums.Count>0) {
-				listOrClauses.Add("schedule.ProvNum IN("+string.Join(",",provNums.Select(x => POut.Long(x)))+")");
-			}
-			if(empNums.Count>0) {
-				listOrClauses.Add("schedule.EmployeeNum IN("+string.Join(",",empNums.Select(x => POut.Long(x)))+")");
-			}
-			string command="SELECT Abbr,employee.FName,Note,SchedDate,SchedType,Status,StartTime,StopTime,schedule.ClinicNum,provider.ItemOrder "
+			//The following queries used to be one big query which ended up being very slow for larger customers (due to having AND (blah OR blah) AND...)
+			//Therefore, we added a multi-column index and broke up the "OR clauses" which took the large query from ~17 seconds down to ~0.476 seconds.
+			//This section of code will look ugly but is quite efficient with a schedule table of ~4.8 million rows (provider ~2,600 and employee ~1,800).
+			#region Schedule Query Core
+			string commandScheduleCore="SELECT Abbr,employee.FName,Note,SchedDate,SchedType,Status,StartTime,StopTime,schedule.ClinicNum,provider.ItemOrder "
 				+"FROM schedule ";
-				if(showClinicSchedule && clinicNum!=0) {
-					command+="INNER JOIN scheduleop ON schedule.ScheduleNum=scheduleop.ScheduleNum "
-						+"INNER JOIN operatory ON scheduleop.OperatoryNum=operatory.OperatoryNum ";
-				}
-				command+="LEFT JOIN provider ON schedule.ProvNum=provider.ProvNum "
+			if(showClinicSchedule && clinicNum!=0) {
+				commandScheduleCore+="INNER JOIN scheduleop ON schedule.ScheduleNum=scheduleop.ScheduleNum "
+					+"INNER JOIN operatory ON scheduleop.OperatoryNum=operatory.OperatoryNum ";
+			}
+			commandScheduleCore+="LEFT JOIN provider ON schedule.ProvNum=provider.ProvNum "
 				+"LEFT JOIN employee ON schedule.EmployeeNum=employee.EmployeeNum "
-				+"WHERE SchedDate BETWEEN "+POut.Date(dateStart)+" AND "+POut.Date(dateEnd)+" "
-				+"AND ("+string.Join(" OR ",listOrClauses)+") ";
-				if(showClinicSchedule && clinicNum!=0) {
-					command+="AND operatory.ClinicNum="+POut.Long(clinicNum)+" ";
-				}
-				//Now we need to find all the dynamic schedules based on the filters.
-				command+="UNION ";//Purposefully use a UNION instead of UNION ALL because we want to remove all duplicate rows.
-				command+="SELECT Abbr,employee.FName,Note,SchedDate,SchedType,Status,StartTime,StopTime,schedule.ClinicNum,provider.ItemOrder "
+				+"WHERE SchedDate BETWEEN "+POut.Date(dateStart)+" AND "+POut.Date(dateEnd)+" ";
+			if(showClinicSchedule && clinicNum!=0) {
+				commandScheduleCore+="AND operatory.ClinicNum="+POut.Long(clinicNum)+" ";
+			}
+			#endregion
+			#region Dynamic Schedule Core
+			string commandDynamicScheduleCore=
+				"SELECT Abbr,employee.FName,Note,SchedDate,SchedType,Status,StartTime,StopTime,schedule.ClinicNum,provider.ItemOrder "
 				+"FROM schedule "
 				+"LEFT JOIN provider ON schedule.ProvNum=provider.ProvNum "
 				+"LEFT JOIN operatory ON operatory.ProvDentist=provider.ProvNum OR operatory.ProvHygienist=provider.ProvNum "
@@ -698,11 +687,37 @@ namespace OpenDentBusiness{
 				+"WHERE SchedDate BETWEEN "+POut.Date(dateStart)+" AND "+POut.Date(dateEnd)+" "
 				+"AND scheduleop.ScheduleNum IS NULL ";
 			if(showClinicSchedule && clinicNum!=0) {
-					command+="AND operatory.ClinicNum="+POut.Long(clinicNum)+" ";
+				commandDynamicScheduleCore+="AND operatory.ClinicNum="+POut.Long(clinicNum)+" ";
+			}
+			#endregion
+			#region Schedule Filters
+			List<string> listFilters=new List<string>();
+			if(includePNotes) {//Only notes with clinicNum==0
+				//Add a specific query for practice notes for both regular and dynamic schedule queries that will get UNIONed together later down.
+				listFilters.Add("AND (SchedType="+POut.Int((int)ScheduleType.Practice)+" AND schedule.ClinicNum=0)");
+			}
+			if(includeCNotes) {//Only notes with clinicNum!=0; Treats HQ/ClinicNum==0 as show all non-practice notes.
+				listFilters.Add("AND (SchedType="+POut.Int((int)ScheduleType.Practice)
+					+" AND schedule.ClinicNum"+(clinicNum==0 ? ">0" : ("="+POut.Long(clinicNum)))+")");
+			}
+			if(provNums.Count>0) {
+				listFilters.Add("AND schedule.ProvNum IN("+string.Join(",",provNums.Select(x => POut.Long(x)))+")");
+			}
+			if(empNums.Count>0) {
+				listFilters.Add("AND schedule.EmployeeNum IN("+string.Join(",",empNums.Select(x => POut.Long(x)))+")");
+			}
+			#endregion
+			string command="";
+			//Make a standard and dynamic schedule query that is UNIONed together for each filter in the list.
+			foreach(string filter in listFilters) {
+				//Purposefully use a UNION instead of UNION ALL because we want to remove all duplicate rows.
+				if(!string.IsNullOrEmpty(command)) {
+					command+=" UNION ";
 				}
-				command+="AND ("+string.Join(" OR ",listOrClauses)+") ";
-				//if the for loop below changes to compare values in a row and the previous row, this query must be ordered by the additional comparison column
-				command+="ORDER BY SchedDate,FName,ItemOrder,StartTime,ClinicNum,Status";
+				command+=commandScheduleCore+filter+" UNION "+commandDynamicScheduleCore+filter;
+			}
+			//If the for loop below changes to compare values in a row and the previous row, this query must be ordered by the additional comparison column
+			command+=" ORDER BY SchedDate,FName,ItemOrder,StartTime,ClinicNum,Status";
 			DataTable raw=Db.GetTable(command);
 			DateTime startTime;
 			DateTime stopTime;

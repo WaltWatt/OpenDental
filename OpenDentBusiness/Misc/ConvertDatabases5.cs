@@ -8528,5 +8528,38 @@ No Action Required in many cases, check your new patient Web Sched on your web s
 			ODEvent.Fire(new ODEventArgs("ConvertDatabases","Upgrading database to version: 18.1.21"));//No translation in convert script.
 		}
 
+		private static void To18_1_22() {
+			string command;
+			ODEvent.Fire(new ODEventArgs("ConvertDatabases","Upgrading database to version: 18.1.22 - add index ClinicNumSchedType"));
+			try {
+				if(DataConnection.DBtype==DatabaseType.MySql) {
+					//Add a composite index of the ClinicNum and SchedType columns and call the new index ClinicNumSchedType.
+					if(!LargeTableHelper.IndexExists("schedule","ClinicNumSchedType")) {
+						LargeTableHelper.AlterLargeTable("schedule","ScheduleNum",null
+							,new List<Tuple<string,string>> { Tuple.Create("ClinicNum,SchedType","ClinicNumSchedType") });
+					}
+					//Drop the redundant index once composite index is successfully added
+					ODEvent.Fire(new ODEventArgs("ConvertDatabases","Upgrading database to version: 18.1.22 - drop index ClinicNum"));
+					if(LargeTableHelper.IndexExists("schedule","ClinicNum")) {
+						command="ALTER TABLE schedule DROP INDEX ClinicNum";
+						Db.NonQ(command);
+					}
+				}
+				else {//oracle
+					//Add a composite index of the ClinicNum and SchedType columns and call the new index schedule_ClinicNumSchedType.
+					command=@"CREATE INDEX schedule_ClinicNumSchedType ON schedule (ClinicNum,SchedType)";
+					Db.NonQ(command);
+					//Drop the redundant index once composite index is successfully added
+					ODEvent.Fire(new ODEventArgs("ConvertDatabases","Upgrading database to version: 18.1.22 - drop index ClinicNum"));
+					command="DROP INDEX schedule_ClinicNum";
+					Db.NonQ(command);
+				}
+			}
+			catch(Exception ex) {
+				ex.DoNothing();//just an index, do nothing
+			}
+			ODEvent.Fire(new ODEventArgs("ConvertDatabases","Upgrading database to version: 18.1.22"));//No translation in convert script.
+		}
+
 	}
 }

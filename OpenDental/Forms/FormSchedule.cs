@@ -1095,6 +1095,7 @@ namespace OpenDental{
 				MsgBox.Show(this,"Not allowed to paste back onto the same date as is on the clipboard.");
 				return;
 			}
+			Action actionCloseScheduleProgress=ODProgressOld.ShowProgressStatus(nameof(ScheduleEvent),typeof(ScheduleEvent),this);
 			List<long> provNums=new List<long>();
 			if(!listProv.SelectedIndices.Contains(0)) {//if 'none' is selected, don't populate provNums; not allowed to select 'none' and another prov validated above
 				provNums=listProv.SelectedIndices.OfType<int>().Select(x => _listProviders[x].ProvNum).ToList();
@@ -1141,6 +1142,7 @@ namespace OpenDental{
 				textClipboard.Text=DateCopyStart.ToShortDateString();
 			}
 			changed=true;
+			actionCloseScheduleProgress?.Invoke();
 		}
 
 		private void butRepeat_Click(object sender,EventArgs e) {
@@ -1179,6 +1181,7 @@ namespace OpenDental{
 				MsgBox.Show(this,"Provider or Employee selection has been changed.  Please refresh first.");
 				return;
 			}
+			Action actionCloseScheduleProgress=ODProgressOld.ShowProgressStatus(nameof(ScheduleEvent),typeof(ScheduleEvent),this);
 			Logger.LogToPath("",LogPath.Signals,LogPhase.Start);		
 			//calculate which day or week is currently selected.
 			DateTime dateSelectedStart;
@@ -1283,6 +1286,7 @@ namespace OpenDental{
 				textClipboard.Text=DateCopyStart.ToShortDateString();
 			}
 			changed=true;
+			actionCloseScheduleProgress?.Invoke();
 			Logger.LogToPath("",LogPath.Signals,LogPhase.End);
 		}
 
