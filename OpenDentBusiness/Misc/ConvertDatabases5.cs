@@ -7090,17 +7090,19 @@ No Action Required in many cases, check your new patient Web Sched on your web s
 				command="SELECT procedurecode.CodeNum FROM procedurecode WHERE procedurecode.ProcCode LIKE 'D8%'";
 				listOrthoPlacementProcCodeNums=Db.GetListLong(command);
 			}
-			//Get all PatNums for patients that have at least one completed ortho placement procedure.
-			command="SELECT DISTINCT procedurelog.PatNum "
-				+"FROM procedurelog "
-				+"WHERE ProcStatus=2 "/*2=Complete*/
-				+"AND procedurelog.CodeNum IN ("+string.Join(",",listOrthoPlacementProcCodeNums)+") ";
-			List<long> listPatNumsWithOrthoTreatments=Db.GetListLong(command);
-			if(listPatNumsWithOrthoTreatments.Count > 0) {
-				command="UPDATE patientnote SET patientnote.OrthoMonthsTreatOverride="+orthoDefaultMonths+" "
-					+"WHERE patientnote.PatNum IN ("+string.Join(",",listPatNumsWithOrthoTreatments)+") "
-					+"AND patientnote.OrthoMonthsTreatOverride=-1 ";
-				Db.NonQ(command);
+			if(listOrthoPlacementProcCodeNums.Count > 0) {
+				//Get all PatNums for patients that have at least one completed ortho placement procedure.
+				command="SELECT DISTINCT procedurelog.PatNum "
+					+"FROM procedurelog "
+					+"WHERE ProcStatus=2 "/*2=Complete*/
+					+"AND procedurelog.CodeNum IN ("+string.Join(",",listOrthoPlacementProcCodeNums)+") ";
+				List<long> listPatNumsWithOrthoTreatments=Db.GetListLong(command);
+				if(listPatNumsWithOrthoTreatments.Count > 0) {
+					command="UPDATE patientnote SET patientnote.OrthoMonthsTreatOverride="+orthoDefaultMonths+" "
+						+"WHERE patientnote.PatNum IN ("+string.Join(",",listPatNumsWithOrthoTreatments)+") "
+						+"AND patientnote.OrthoMonthsTreatOverride=-1 ";
+					Db.NonQ(command);
+				}
 			}
 			ODEvent.Fire(new ODEventArgs("ConvertDatabases","Upgrading database to version: 17.4.78"));//No translation in convert script.
 		}
@@ -8509,17 +8511,19 @@ No Action Required in many cases, check your new patient Web Sched on your web s
 				command="SELECT procedurecode.CodeNum FROM procedurecode WHERE procedurecode.ProcCode LIKE 'D8%'";
 				listOrthoPlacementProcCodeNums=Db.GetListLong(command);
 			}
-			//Get all PatNums for patients that have at least one completed ortho placement procedure.
-			command="SELECT DISTINCT procedurelog.PatNum "
-				+"FROM procedurelog "
-				+"WHERE ProcStatus=2 "/*2=Complete*/
-				+"AND procedurelog.CodeNum IN ("+string.Join(",",listOrthoPlacementProcCodeNums)+") ";
-			List<long> listPatNumsWithOrthoTreatments=Db.GetListLong(command);
-			if(listPatNumsWithOrthoTreatments.Count > 0) {
-				command="UPDATE patientnote SET patientnote.OrthoMonthsTreatOverride="+orthoDefaultMonths+" "
-					+"WHERE patientnote.PatNum IN ("+string.Join(",",listPatNumsWithOrthoTreatments)+") "
-					+"AND patientnote.OrthoMonthsTreatOverride=-1 ";
-				Db.NonQ(command);
+			if(listOrthoPlacementProcCodeNums.Count > 0) {
+				//Get all PatNums for patients that have at least one completed ortho placement procedure.
+				command="SELECT DISTINCT procedurelog.PatNum "
+					+"FROM procedurelog "
+					+"WHERE ProcStatus=2 "/*2=Complete*/
+					+"AND procedurelog.CodeNum IN ("+string.Join(",",listOrthoPlacementProcCodeNums)+") ";
+				List<long> listPatNumsWithOrthoTreatments=Db.GetListLong(command);
+				if(listPatNumsWithOrthoTreatments.Count > 0) {
+					command="UPDATE patientnote SET patientnote.OrthoMonthsTreatOverride="+orthoDefaultMonths+" "
+						+"WHERE patientnote.PatNum IN ("+string.Join(",",listPatNumsWithOrthoTreatments)+") "
+						+"AND patientnote.OrthoMonthsTreatOverride=-1 ";
+					Db.NonQ(command);
+				}
 			}
 			ODEvent.Fire(new ODEventArgs("ConvertDatabases","Upgrading database to version: 18.1.21"));//No translation in convert script.
 		}
