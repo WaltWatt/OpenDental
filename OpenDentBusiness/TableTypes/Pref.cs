@@ -1199,6 +1199,16 @@ namespace OpenDentBusiness {
 		TreatPlanSortByTooth,
 		///<summary>Deprecated.  All new TPs use sheets as of 17.1.  Old Printing for classic sheets is handled by ContrTreat.cs bool DoPrintUsingSheets.</summary>
 		TreatPlanUseSheets,
+		///<summary>Used by OD HQ. Not added to db convert script. Number of calls in triage.///</summary>
+		TriageCalls,
+		///<summary>Used by OD HQ. Not added to db convert script. Number of red calls in triage.///</summary>
+		TriageRedCalls,
+		///<summary>Used by OD HQ. Not added to db convert script. Minutes behind on red calls.///</summary>
+		TriageRedTime,
+		///<summary>Used by OD HQ. Not added to db convert script. Minutes behind on calls for red alert.///</summary>
+		TriageTime,
+		///<summary>Used by OD HQ. Not added to db convert script. Minutes behind on calls for yellow alert.///</summary>
+		TriageTimeWarning,
 		TrojanExpressCollectBillingType,
 		TrojanExpressCollectPassword,
 		TrojanExpressCollectPath,
@@ -1231,6 +1241,8 @@ namespace OpenDentBusiness {
 		UseProviderColorsInChart,
 		///<summary>Used by OD HQ. Not added to db convert script. The path where voice mails will be archived.</summary>
 		VoiceMailArchivePath,
+		///<summary>Used by OD HQ. Not added to db convert script. Number of voicemails that will make the alert color change.///</summary>
+		VoicemailCalls,
 		///<summary>Used by OD HQ. Not added to db convert script. The path where voice mails will be saved when they are entered in the database.
 		///</summary>
 		VoiceMailCreatePath,
@@ -1248,6 +1260,8 @@ namespace OpenDentBusiness {
 		VoiceMailSMB2Password,
 		///<summary>Used by OD HQ.  Not added to db convert script.  The user name in plain text that our required to access files via SMB2.</summary>
 		VoiceMailSMB2UserName,
+		///<summary>Used by OD HQ. Not added to db convert script. How many minutes we can be behind on voicemails before alert color changes.///</summary>
+		VoicemailTime,
 		WaitingRoomAlertColor,
 		///<summary>0 to disable.  When enabled, sets rows to alert color based on wait time.</summary>
 		WaitingRoomAlertTime,

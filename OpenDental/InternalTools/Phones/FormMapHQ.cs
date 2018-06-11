@@ -26,6 +26,8 @@ namespace OpenDental {
 		private MapAreaContainer _mapCur;
 		///<summary>The site that is associated to the first three octets of the computer that has launched this map.</summary>
 		private Site _siteCur;
+		//preferences for setting triage alert colors
+		private int _triageRedCalls,_triageRedTime,_voicemailCalls,_voicemailTime,_triageCalls,_triageTime,_triageTimeWarning;
 
 		private PhoneEmpSubGroupType _curSubGroupType {
 			get {
@@ -67,6 +69,7 @@ namespace OpenDental {
 			FillTabs();
 			FillCombo();
 			FillMapAreaPanel();
+			FillTriagePreferences();
 			FillTriageLabelColors();
 		}
 
@@ -129,6 +132,17 @@ namespace OpenDental {
 					mapAreaPanelHQ.AddDisplayLabel(clinicMapItems[i]);
 				}
 			}
+		}
+
+		/// <summary>Gets the preferences from the database that determine when the map alert colors change.</summary>
+		private void FillTriagePreferences() {
+			_triageRedCalls=PrefC.GetInt(PrefName.TriageRedCalls);
+			_triageCalls=PrefC.GetInt(PrefName.TriageCalls);
+			_triageRedTime=PrefC.GetInt(PrefName.TriageRedTime);
+			_triageTime=PrefC.GetInt(PrefName.TriageTime);
+			_triageTimeWarning=PrefC.GetInt(PrefName.TriageTimeWarning);
+			_voicemailCalls=PrefC.GetInt(PrefName.VoicemailCalls);
+			_voicemailTime=PrefC.GetInt(PrefName.VoicemailTime);
 		}
 
 		#endregion
@@ -437,13 +451,13 @@ namespace OpenDental {
 			else {
 				this.labelTriageRedTimeSpan.Text=timeBehind.ToStringmmss();
 			}
-			if(calls>1) { //we are behind
+			if(calls>_triageRedCalls) { //we are behind
 				labelTriageRedCalls.SetAlertColors();
 			}
 			else { //we are ok
 				labelTriageRedCalls.SetNormalColors();
 			}
-			if(timeBehind>TimeSpan.FromMinutes(1)) { //we are behind
+			if(timeBehind>TimeSpan.FromMinutes(_triageRedTime)) { //we are behind
 				labelTriageRedTimeSpan.SetAlertColors();
 			}
 			else { //we are ok
@@ -459,13 +473,13 @@ namespace OpenDental {
 			else {
 				this.labelVoicemailTimeSpan.Text=timeBehind.ToStringmmss();
 			}
-			if(calls>5) { //we are behind
+			if(calls>_voicemailCalls) { //we are behind
 				labelVoicemailCalls.SetAlertColors();
 			}
 			else { //we are ok
 				labelVoicemailCalls.SetNormalColors();
 			}
-			if(timeBehind>TimeSpan.FromMinutes(5)) { //we are behind
+			if(timeBehind>TimeSpan.FromMinutes(_voicemailTime)) { //we are behind
 				labelVoicemailTimeSpan.SetAlertColors();
 			}
 			else { //we are ok
@@ -487,16 +501,16 @@ namespace OpenDental {
 			else { //we don't have any calls with no notes nor any red triage tasks so display count of total tasks
 				this.labelTriageCalls.Text="("+callsWithNotes.ToString()+")";
 			}
-			if(callsWithNoNotes+triageRed>10) { //we are behind
+			if(callsWithNoNotes+triageRed>_triageCalls) { //we are behind
 				labelTriageCalls.SetAlertColors();
 			}
 			else { //we are ok
 				labelTriageCalls.SetNormalColors();
 			}
-			if(timeBehind>TimeSpan.FromMinutes(19)) { //we are behind
+			if(timeBehind>TimeSpan.FromMinutes(_triageTime)) { //we are behind
 				labelTriageTimeSpan.SetAlertColors();
 			}
-			else if(timeBehind>TimeSpan.FromMinutes(9)) { //we are approaching being behind
+			else if(timeBehind>TimeSpan.FromMinutes(_triageTimeWarning)) { //we are approaching being behind
 				labelTriageTimeSpan.SetWarnColors();
 			}
 			else { //we are ok
