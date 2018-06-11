@@ -124,7 +124,7 @@ namespace OpenDentBusiness.WebTypes.WebSched.TimeSlot {
 			List<Schedule> listBlockoutSchedules=listSchedules.FindAll(x => x.BlockoutType > 0);
 			//Get every single appointment for all operatories within our start and end dates for double booking and overlapping consideration.
 			List<Appointment> listApptsForOps=Appointments.GetAppointmentsForOpsByPeriod(Operatories.GetDeepCopy(true).Select(x => x.OperatoryNum).ToList()
-				,dateStart,dateEnd,log);
+				,dateStart,dateEnd,log,listSchedules.GroupBy(x => x.ProvNum).Select(x => x.Key).ToList());
 			log?.WriteLine("listProviderSchedules:\r\n\t"+string.Join(",\r\n\t",
 				listProviderSchedules.Select(x => x.ScheduleNum+" - "+x.SchedDate.ToShortDateString()+" "+x.StartTime)),LogLevel.Verbose);
 			log?.WriteLine("listBlockoutSchedules:\r\n\t"+string.Join(",\r\n\t",
