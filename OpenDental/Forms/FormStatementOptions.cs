@@ -413,7 +413,6 @@ namespace OpenDental{
 			this.checkSinglePatient.TabIndex = 4;
 			this.checkSinglePatient.Text = "Single patient only";
 			this.checkSinglePatient.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-			this.checkSinglePatient.Visible = false;
 			this.checkSinglePatient.Click += new System.EventHandler(this.checkSinglePatient_Click);
 			// 
 			// groupDateRange
@@ -758,6 +757,8 @@ namespace OpenDental{
 				}
 				if(StmtCur.Mode_==StatementMode.Electronic) {
 					//Automatically select intermingling family and remove that as a selection option.
+					checkSinglePatient.Checked=false;
+					checkSinglePatient.Enabled=false;
 					checkIntermingled.Checked=true;
 					checkIntermingled.Enabled=false;
 				}
@@ -873,6 +874,8 @@ namespace OpenDental{
 				}
 				if(StmtList[0].Mode_==StatementMode.Electronic) {
 					//Automatically select intermingling family and remove that as a selection option.
+					checkSinglePatient.Checked=false;
+					checkSinglePatient.Enabled=false;
 					checkIntermingled.Checked=true;
 					checkIntermingled.Enabled=false;
 				}
@@ -1055,6 +1058,8 @@ namespace OpenDental{
 				}
 				SetEnabled(true);
 				if(StmtCur.Mode_==StatementMode.Electronic) {
+					checkSinglePatient.Checked=false;
+					checkSinglePatient.Enabled=false;
 					checkIntermingled.Checked=true;
 					checkIntermingled.Enabled=false;
 				}
@@ -1984,6 +1989,8 @@ namespace OpenDental{
 		private void listMode_Click(object sender,EventArgs e) {
 			if(listMode.SelectedIndex==electIndex) {
 				//Selected electronic mode. Automatically select intermingling family and remove that as a selection option.
+				checkSinglePatient.Checked=false;
+				checkSinglePatient.Enabled=false;
 				checkIntermingled.Checked=true;
 				checkIntermingled.Enabled=false;
 			}
