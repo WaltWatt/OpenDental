@@ -46,7 +46,7 @@ namespace OpenDental {
 			byte[] ecryptBytes=Encoding.UTF8.GetBytes(encrypt);
 			MemoryStream ms=new MemoryStream();
 			CryptoStream cs=null;
-			Aes aes=new AesManaged();
+			Aes aes=new AesCryptoServiceProvider();
 			aes.Key=key;
 			aes.IV=new byte[16];
 			ICryptoTransform encryptor=aes.CreateEncryptor(aes.Key,aes.IV);
@@ -70,7 +70,7 @@ namespace OpenDental {
 				MemoryStream ms=null;
 				CryptoStream cs=null;
 				StreamReader sr=null;
-				Aes aes=new AesManaged();
+				Aes aes=new AesCryptoServiceProvider();
 				aes.Key=key;
 				aes.IV=new byte[16];
 				ICryptoTransform decryptor=aes.CreateDecryptor(aes.Key,aes.IV);
