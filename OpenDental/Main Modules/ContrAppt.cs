@@ -3357,6 +3357,7 @@ namespace OpenDental {
 						ODTuple<Appointment,bool> aptTuple=Appointments.SchedulePlannedApt(aptCur,PatCur,listApptFields,aptCur.AptDateTime,aptCur.Op);//Appointments S-Class handles Signalods
 						aptCur=aptTuple.Item1;
 						procAlreadyAttached=aptTuple.Item2;
+						isCreate=true;
 					}
 					catch(ApplicationException ex) {
 						MessageBox.Show(ex.Message);
@@ -3459,7 +3460,7 @@ namespace OpenDental {
 				RefreshModuleScreenPatient();
 				RefreshPeriod(isRefreshSchedules:true);//date moving to for this computer; This line may not be needed
 				AppointmentL.DateSelected=aptCur.AptDateTime;			
-				if(isCreate) {//new appointment (not planned) is being added to the schedule from the pinboard, trigger ScheduleProcedure automation
+				if(isCreate) {//new appointment is being added to the schedule from the pinboard, trigger ScheduleProcedure automation
 					List<string> procCodes=procsForSingleApt.Select(x => ProcedureCodes.GetProcCode(x.CodeNum).ProcCode).ToList();					
 					AutomationL.Trigger(AutomationTrigger.ScheduleProcedure,procCodes,aptCur.PatNum);
 				}
