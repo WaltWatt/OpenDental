@@ -293,7 +293,7 @@ namespace OpenDental {
 				get {
 					return "Providers will show up in almost every part of OpenDental. "
 						+"It is important that all provider information is up-to-date so that "
-						+"claims, reports, and procedures, fee schedules, and estimates will function correctly.";
+						+"claims, reports, procedures, fee schedules, and estimates will function correctly.";
 				}
 			}
 
