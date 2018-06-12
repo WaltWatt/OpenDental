@@ -161,6 +161,15 @@ namespace OpenDental {
 			}
 		}
 
+		public Phone PhoneCur {
+			get {
+				return _phoneCur;
+			}
+			set {
+				_phoneCur=value;
+			}
+		}
+
 		#endregion
 
 		#region Events
@@ -606,8 +615,5 @@ namespace OpenDental {
 			GoToChanged?.Invoke(this,new EventArgs());
 		}
 
-		public Phone getPhoneCur() {
-			return _phoneCur;
-		}
 	}
 }

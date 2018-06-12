@@ -225,6 +225,7 @@ namespace OpenDental {
 							room.Empty=true;
 							continue;
 						}
+						room.PhoneCur=phone;//Refresh PhoneCur so that it has up to date customer information.
 						ChatUser chatuser=listChatUsers.Where(x => x.Extension == phone.Extension).FirstOrDefault();
 						PhoneEmpDefault phoneEmpDefault=PhoneEmpDefaults.GetEmpDefaultFromList(phone.EmployeeNum,peds);
 						if(phoneEmpDefault==null) {//We have a cubicle with no corresponding phone emp default entry.

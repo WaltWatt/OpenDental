@@ -6427,7 +6427,7 @@ namespace OpenDental{
 
 		private void MapAreaRoomControl_GoToChanged(object sender,EventArgs e) {
 			MapAreaRoomControl room=(MapAreaRoomControl)sender;
-			CurPatNum=room.getPhoneCur().PatNum;
+			CurPatNum=room.PhoneCur.PatNum;
 			Patient pat=Patients.GetPat(CurPatNum);
 			RefreshCurrentModule();
 			FillPatientButton(pat);
