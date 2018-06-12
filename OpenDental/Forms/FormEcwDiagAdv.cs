@@ -162,7 +162,7 @@ namespace OpenDental {
 				MemoryStream ms=null;
 				CryptoStream cs=null;
 				StreamReader sr=null;
-				Aes aes=new AesManaged();
+				Aes aes=new AesCryptoServiceProvider();
 				UTF8Encoding enc=new UTF8Encoding();
 				aes.Key=enc.GetBytes("AKQjlLUjlcABVbqp");//Random string will be key
 				aes.IV=new byte[16];
