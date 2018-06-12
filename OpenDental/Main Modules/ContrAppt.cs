@@ -4681,16 +4681,7 @@ namespace OpenDental {
 				case OtherResult.GoTo:
 					ContrApptSingle.SelectedAptNum=FormAO.AptNumsSelected[0];
 					AppointmentL.DateSelected=PIn.Date(FormAO.DateJumpToString);
-					RefreshModuleDataPatient(FormAO.SelectedPatNum);
-					FormOpenDental.S_Contr_PatientSelected(PatCur,true,false);
-					if((int)AppointmentL.DateSelected.DayOfWeek==0) {//if sunday
-						WeekStartDate=AppointmentL.DateSelected.AddDays(-6).Date;//go back to the previous monday
-					}
-					else {
-						WeekStartDate=AppointmentL.DateSelected.AddDays(1-(int)AppointmentL.DateSelected.DayOfWeek).Date;//go back to current monday
-					}
-					WeekEndDate=WeekStartDate.AddDays(ApptDrawing.NumOfWeekDaysToDisplay-1).Date;
-					RefreshPeriod();
+					ModuleSelected(PatCur.PatNum);
 					break;
 			}
 		}
