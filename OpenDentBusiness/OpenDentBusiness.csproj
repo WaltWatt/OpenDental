@@ -279,6 +279,7 @@
     <Compile Include="Data Interface\Etrans835Attaches.cs" />
     <Compile Include="Data Interface\ProviderClinics.cs" />
     <Compile Include="Data Interface\TaskTakens.cs" />
+    <Compile Include="ODEvents\ScheduleEvent.cs" />
     <Compile Include="Remoting\DtoProcessor.cs" />
     <Compile Include="Remoting\NullObject.cs" />
     <Compile Include="TableTypes\ProviderClinic.cs" />
