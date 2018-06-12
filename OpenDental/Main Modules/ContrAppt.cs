@@ -5461,7 +5461,7 @@ namespace OpenDental {
 			MessageBox.Show(Lan.g(this,"Automatic dialing of patient phone numbers requires an additional service")+".\r\n"
 							+Lan.g(this,"Contact Open Dental for more information")+".");
 			try {
-				Process.Start("http://www.opendental.com/manual/dentaltekinfo.html");
+				Process.Start("http://www.opendental.com/resources/redirects/redirectdentaltekinfo.html");
 			}
 			catch(Exception) {
 				MessageBox.Show(Lan.g(this,"Could not find")+" http://www.opendental.com/contact.html" + "\r\n"
