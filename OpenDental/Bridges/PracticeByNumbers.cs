@@ -17,7 +17,7 @@ namespace OpenDental.Bridges{
 					Process.Start("http://www.opendental.com/manual/portalpracticebynumbers.html");
 				}
 				else {
-					Process.Start("http://www.opendental.com/manual/practicebynumbers.html");
+					Process.Start("http://www.opendental.com/resources/redirects/redirectpracticebynumbers.html");
 				}
 			}
 			catch(Exception ex) {

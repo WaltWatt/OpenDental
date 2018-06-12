@@ -23,7 +23,7 @@ namespace OpenDental.Bridges{
 					Process.Start("http://www.opendental.com/manual/portaldentalintel.html");
 				}
 				else {
-					Process.Start("http://www.opendental.com/manual/dentalintel.html");
+					Process.Start("http://www.opendental.com/resources/redirects/redirectdentalintel.html");
 				}
 			}
 			catch {

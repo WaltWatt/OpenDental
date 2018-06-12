@@ -19,7 +19,7 @@ namespace OpenDental.Bridges{
 		///<summary></summary>
 		public static void ShowPage() {
 			try {
-				Process.Start("http://opendental.com/manual/cds.html");
+				Process.Start("http://www.opendental.com/resources/redirects/redirectcds.html");
 			}
 			catch {
 				MsgBox.Show("CDS","Failed to open web browser.  Please make sure you have a default browser set and are connected to the internet then try again.");

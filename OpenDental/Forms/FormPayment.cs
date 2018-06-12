@@ -3098,7 +3098,7 @@ namespace OpenDental {
 			}
 			else {//Program link not enabled.  Launch a promo site.
 				ODException.SwallowAnyException(() =>
-					Process.Start("www.opendental.com/site/redirectopenedge.html")
+					Process.Start("http://www.opendental.com/resources/redirects/redirectopenedge.html")
 				);
 				return false;
 			}
@@ -3446,7 +3446,7 @@ namespace OpenDental {
 			}
 			else {//Program link not enabled.  Launch a promo site.
 				ODException.SwallowAnyException(() =>
-					Process.Start("www.opendental.com/site/redirectpayconnect.html")
+					Process.Start("http://www.opendental.com/resources/redirects/redirectpayconnect.html")
 				);
 				return false;
 			}
@@ -3633,7 +3633,7 @@ namespace OpenDental {
 			}
 			else {//Program link not enabled.  Launch a promo website.
 				ODException.SwallowAnyException(() =>
-					Process.Start("www.opendental.com/site/redirectpaysimple.html")
+					Process.Start("http://www.opendental.com/resources/redirects/redirectpaysimple.html")
 				);
 				return false;
 			}

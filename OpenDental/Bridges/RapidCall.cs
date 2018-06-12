@@ -29,7 +29,7 @@ namespace OpenDental.Bridges{
 					SendData(Programs.GetCur(ProgramName.RapidCall));
 				}
 				else {
-					Process.Start("http://www.opendental.com/manual/dentaltekrapidcall.html");
+					Process.Start("http://www.opendental.com/resources/redirects/redirectdentaltekrapidcall.html");
 				}
 			}
 			catch {

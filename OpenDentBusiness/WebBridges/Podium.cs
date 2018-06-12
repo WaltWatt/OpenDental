@@ -91,10 +91,10 @@ namespace OpenDentBusiness {
 		public static void ShowPage() {
 			try {
 				if(Programs.IsEnabled(ProgramName.Podium)) {
-					Process.Start("http://www.opendental.com/manual/podiumdashboard.html");
+					Process.Start("http://www.opendental.com/resources/redirects/redirectpodiumdashboard.html");
 				}
 				else {
-					Process.Start("http://www.opendental.com/manual/podiumod.html");
+					Process.Start("http://www.opendental.com/resources/redirects/redirectpodiumod.html");
 				}
 			}
 			catch {
