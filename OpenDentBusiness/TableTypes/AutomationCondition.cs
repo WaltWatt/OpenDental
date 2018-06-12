@@ -44,7 +44,11 @@ namespace OpenDentBusiness{
 		///<summary></summary>
 		InsuranceNotEffective,
 		///<summary></summary>
-		BillingType
+		BillingType,
+		///<summary></summary>
+		IsProcRequired,
+		///<summary></summary>
+		IsControlled,
 	}
 
 	///<summary></summary>

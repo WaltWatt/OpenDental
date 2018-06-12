@@ -34,7 +34,10 @@ namespace OpenDental {
 			if(!IsNew) {
 				textCompareString.Text=ConditionCur.CompareString;
 				listCompareField.SelectedIndex=(int)ConditionCur.CompareField;
-				if(ConditionCur.CompareField!=AutoCondField.InsuranceNotEffective) {
+				if(ConditionCur.CompareField!=AutoCondField.InsuranceNotEffective
+					&& ConditionCur.CompareField!=AutoCondField.IsControlled
+					&& ConditionCur.CompareField!=AutoCondField.IsProcRequired) 
+				{
 					listComparison.SelectedIndex=(int)ConditionCur.Comparison;
 				}
 				ShowOrHideFields((AutoCondField)listCompareField.SelectedIndex);
@@ -51,9 +54,19 @@ namespace OpenDental {
 				butBillingType.Visible=false;
 				labelCompareString.Text=Lan.g(this,"Text");
 			}
-			if(autoCondField==AutoCondField.InsuranceNotEffective) {//Hide fields
-				//labelWarning.Text=""; //Currently, this is the only condition that shows the warning label.  No need to dynamically set the text.
+			if(autoCondField==AutoCondField.InsuranceNotEffective
+				|| autoCondField==AutoCondField.IsControlled
+				|| autoCondField==AutoCondField.IsProcRequired) 
+			{//Hide fields
 				labelWarning.Visible=true;
+				if(autoCondField==AutoCondField.InsuranceNotEffective) {
+					labelWarning.Text="At any point in time this rule is triggered, the current date and time will be compared to the "
+						+"effective date range of the current patient's primary insurance.  If it does not fall within the range then the "
+						+"action for this automation will be triggered.";
+				}
+				else {
+					labelWarning.Text="This automation field will only work when using the RxCreate trigger.";
+				}
 				labelComparison.Visible=false;
 				labelCompareString.Visible=false;
 				listComparison.Visible=false;
@@ -120,9 +133,11 @@ namespace OpenDental {
 		}
 
 		private void butOK_Click(object sender,EventArgs e) {
-			if((AutoCondField)listCompareField.SelectedIndex==AutoCondField.InsuranceNotEffective) {
+			if((AutoCondField)listCompareField.SelectedIndex==AutoCondField.InsuranceNotEffective
+				|| (AutoCondField)listCompareField.SelectedIndex==AutoCondField.IsProcRequired
+				|| (AutoCondField)listCompareField.SelectedIndex==AutoCondField.IsControlled) 
+			{
 				ConditionCur.CompareString=""; 
-				ConditionCur.CompareField=AutoCondField.InsuranceNotEffective;
 				ConditionCur.Comparison=AutoCondComparison.None;
 			}
 			else {
@@ -141,9 +156,9 @@ namespace OpenDental {
 					return;
 				}
 				ConditionCur.CompareString=textCompareString.Text;
-				ConditionCur.CompareField=(AutoCondField)listCompareField.SelectedIndex;
 				ConditionCur.Comparison=(AutoCondComparison)listComparison.SelectedIndex;
 			}
+			ConditionCur.CompareField=(AutoCondField)listCompareField.SelectedIndex;
 			if(IsNew) {
 				AutomationConditions.Insert(ConditionCur);
 			}

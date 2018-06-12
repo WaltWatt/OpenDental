@@ -590,6 +590,7 @@ namespace OpenDental{
 		#endregion
 
 		private void FormRxEdit_Load(object sender, System.EventArgs e) {
+			RxPatCur.IsNew=IsNew;
 			_rxPatOld=RxPatCur.Copy();
 			if(IsNew){
 				butAudit.Visible=false;
@@ -841,6 +842,9 @@ namespace OpenDental{
 			if(!SheetPrinting.PrintRx(sheet,RxPatCur)) {
 				return;
 			}
+			if(RxPatCur.IsNew) {
+				AutomationL.Trigger(AutomationTrigger.RxCreate,new List<string>(),PatCur.PatNum,0,new List<RxPat>() { RxPatCur });
+			}
 			DialogResult=DialogResult.OK;
 		}
 
@@ -863,6 +867,9 @@ namespace OpenDental{
 		private void butOK_Click(object sender, System.EventArgs e) {
 			if(!SaveRx()){
 				return;
+			}
+			if(RxPatCur.IsNew) {
+				AutomationL.Trigger(AutomationTrigger.RxCreate,new List<string>(),PatCur.PatNum,0,new List<RxPat>() { RxPatCur });
 			}
 			DialogResult=DialogResult.OK;
 		}

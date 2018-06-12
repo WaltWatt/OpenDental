@@ -4233,6 +4233,7 @@ namespace OpenDental {
 			DateTime rxStartDateT=PrefC.GetDateT(PrefName.ElectronicRxDateStartedUsing131);
 			XmlNode nodeNewDataSet=xml.FirstChild;
 			List <long> listActiveMedicationPatNums=new List<long>();
+			List<RxPat> listNewRx=new List<RxPat>();
 			foreach(XmlNode nodeTable in nodeNewDataSet.ChildNodes) {
 				RxPat rxOld=null;
 				MedicationPat medOrderOld=null;
@@ -4420,6 +4421,9 @@ namespace OpenDental {
 				}
 				long medicationPatNum=Erx.UpdateErxMedication(rxOld,rx,rxCui,strDrugName,strGenericName,isProv);
 				listActiveMedicationPatNums.Add(medicationPatNum);
+				if(rxOld==null) {//Only add the rx if it is new.  We don't want to trigger automation for existing prescriptions.
+					listNewRx.Add(rx);
+				}
 			}//end foreach
 			List <MedicationPat> listAllMedicationsForPatient=MedicationPats.Refresh(PatCur.PatNum,false);
 			foreach(MedicationPat medication in listAllMedicationsForPatient) {
@@ -4433,6 +4437,9 @@ namespace OpenDental {
 				medication.DateStop=DateTime.Today.AddDays(-1);//Discontinue the medication as of yesterday so that it will immediately show as discontinued.
 				MedicationPats.Update(medication,false);//Discontinue the medication inside OD to match what shows in the eRx interface.
 			}//end foreach
+			if(listNewRx.Count>0) {
+				AutomationL.Trigger(AutomationTrigger.RxCreate,new List<string>(),PatCur.PatNum,0,listNewRx);
+			}
 			return true;
 		}
 		
@@ -4746,7 +4753,10 @@ namespace OpenDental {
 					DoseSpot.GetClinicIdAndKey(clinicNum,doseSpotUserID,null,null,out doseSpotClinicID,out doseSpotClinicKey);
 					DoseSpot.GetPrescriberNotificationCounts(doseSpotClinicID,doseSpotClinicKey,doseSpotUserID,out countRefillRequests,out countErrors,out countPendingPrescriptions);
 					SetErxButtonNotification(countRefillRequests,countErrors,countPendingPrescriptions,false);
-					if(DoseSpot.SyncPrescriptionsFromDoseSpot(doseSpotClinicID,doseSpotClinicKey,doseSpotUserID,PatCur.PatNum)) {
+					Action<List<RxPat>> onRxAdd=new Action<List<RxPat>>((listRx) => {
+						AutomationL.Trigger(AutomationTrigger.RxCreate,new List<string>(),PatCur.PatNum,0,listRx);
+					});
+					if(DoseSpot.SyncPrescriptionsFromDoseSpot(doseSpotClinicID,doseSpotClinicKey,doseSpotUserID,PatCur.PatNum,onRxAdd)) {
 						ModuleSelectedDoseSpot();
 					}
 				}

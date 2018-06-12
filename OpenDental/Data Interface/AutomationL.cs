@@ -5,12 +5,18 @@ using System.Linq;
 using System.Text;
 using OpenDentBusiness;
 using System.Windows.Forms;
+using CodeBase;
 
 namespace OpenDental {
 	public class AutomationL {
 		///<summary>ProcCodes will be null unless trigger is CompleteProcedure or ScheduledProcedure.
 		///This routine will generally fail silently.  Will return true if a trigger happened.</summary>
+
 		public static bool Trigger(AutomationTrigger trigger,List<string> procCodes,long patNum,long aptNum=0) {
+			return Trigger<object>(trigger,procCodes,patNum,aptNum);
+		}
+
+		public static bool Trigger<T>(AutomationTrigger trigger,List<string> procCodes,long patNum,long aptNum=0,T triggerObj=default(T)) {
 			if(patNum==0) {//Could happen for OpenPatient trigger
 				return false;
 			}
@@ -32,7 +38,7 @@ namespace OpenDental {
 				//matching automation item has been found
 				//Get possible list of conditions that exist for this automation item
 				List<AutomationCondition> autoConditionsList=AutomationConditions.GetListByAutomationNum(listAutomations[i].AutomationNum);
-				if(autoConditionsList.Count>0 && !CheckAutomationConditions(autoConditionsList,patNum)) {
+				if(autoConditionsList.Count>0 && !CheckAutomationConditions(autoConditionsList,patNum,triggerObj)) {
 					continue;
 				}
 				SheetDef sheetDef;
@@ -180,7 +186,7 @@ namespace OpenDental {
 			return automationHappened;
 		}
 
-		private static bool CheckAutomationConditions(List<AutomationCondition> autoConditionsList,long patNum) {
+		private static bool CheckAutomationConditions<T>(List<AutomationCondition> autoConditionsList,long patNum,T triggerObj = default(T)) {
 			//Make sure every condition returns true
 			for(int i=0;i<autoConditionsList.Count;i++) {
 				switch(autoConditionsList[i].CompareField) {
@@ -226,6 +232,18 @@ namespace OpenDental {
 						break;
 					case AutoCondField.BillingType:
 						if(!BillingTypeComparison(autoConditionsList[i],patNum)) {
+							return false;
+						}
+						break;
+					case AutoCondField.IsProcRequired:
+						//ONLY TO BE USED FOR RxCreate AUTOMATION TRIGGER
+						if(!IsProcRequiredComparison(autoConditionsList[i],patNum,triggerObj)) {
+							return false;
+						}
+						break;
+					case AutoCondField.IsControlled:
+						//ONLY TO BE USED FOR RxCreate AUTOMATION TRIGGER
+						if(!IsControlledComparison(autoConditionsList[i],patNum,triggerObj)) {
 							return false;
 						}
 						break;
@@ -403,6 +421,32 @@ namespace OpenDental {
 					return patBillType.ItemName.ToLower().Contains(autoCond.CompareString.ToLower());
 				default:
 					return false;
+			}
+		}
+
+		///<summary>Returns true if the patient is a RxPat and if IsProcRequired is true</summary>
+		///ONLY TO BE USED FOR RxCreate AUTOMATION TRIGGER
+		private static bool IsProcRequiredComparison<T>(AutomationCondition autoCond,long patNum,T triggerObj) {
+			try {
+				List<RxPat> listRx = (List<RxPat>)(object)triggerObj;
+				return listRx.Any(x => x.IsProcRequired);
+			}
+			catch(Exception e) {
+				e.DoNothing();
+				return false;
+			}
+		}
+
+		///<summary>Returns true if the patient is a RxPat and if IsControlled is true</summary>
+		///ONLY TO BE USED FOR RxCreate AUTOMATION TRIGGER
+		private static bool IsControlledComparison<T>(AutomationCondition autoCond,long patNum,T triggerObj) {
+			try {
+				List<RxPat> listRx = (List<RxPat>)(object)triggerObj;
+				return listRx.Any(x => x.IsControlled);
+			}
+			catch(Exception e) {
+				e.DoNothing();
+				return false;
 			}
 		}
 		#endregion

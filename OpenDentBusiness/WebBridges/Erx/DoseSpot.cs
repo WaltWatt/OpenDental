@@ -178,13 +178,16 @@ namespace OpenDentBusiness {
 		}
 
 		///<summary>Can throw exceptions.  Returns true if changes were made to medications.</summary>
-		public static bool SyncPrescriptionsFromDoseSpot(string clinicID,string clinicKey,string userID,long patNum) {
+		public static bool SyncPrescriptionsFromDoseSpot(string clinicID,string clinicKey,string userID,long patNum,Action<List<RxPat>> onRxAdd=null) {
 			//No need to check RemotingRole; no call to db.
 			OIDExternal oidPatID=DoseSpot.GetDoseSpotPatID(patNum);
 			if(oidPatID==null) {
 				return false;//We don't have a PatID from DoseSpot for this patient.  Therefore there is nothing to sync with.
 			}
 			DoseSpotService.API api=new DoseSpotService.API();
+#if DEBUG
+			api.Url="https://my.staging.dosespot.com/api/12/api.asmx?wsdl";
+#endif
 			DoseSpotService.GetMedicationListRequest req=new DoseSpotService.GetMedicationListRequest();
 			req.SingleSignOn=GetSingleSignOn(clinicID,clinicKey,userID,false);
 			req.PatientId=int.Parse(oidPatID.IDExternal);//If this fails (and throws an exception), we got the wrong oid
@@ -204,6 +207,7 @@ namespace OpenDentBusiness {
 			Patient patCur=Patients.GetPat(patNum);
 			List<long> listActiveMedicationPatNums=new List<long>();
 			Dictionary<int,string> dictPharmacyNames=new Dictionary<int,string>();
+			List<RxPat> listNewRx=new List<RxPat>();
 			foreach(DoseSpotService.MedicationListItem medication in res.Medications) {
 				RxPat rxOld=null;
 				if(medication.Source==DoseSpotService.MedicationSourceType.SelfReported) {
@@ -307,6 +311,9 @@ namespace OpenDentBusiness {
 					rx.ProvNum=prov.ProvNum;
 				}
 				long medicationPatNum=Erx.UpdateErxMedication(rxOld,rx,rxCui,medication.DisplayName,medication.GenericDrugName,isProv);
+				if(rxOld==null) {//Only add the rx if it is new.  We don't want to trigger automation for existing prescriptions.
+					listNewRx.Add(rx);
+				}
 				listActiveMedicationPatNums.Add(medicationPatNum);
 			}
 			List<MedicationPat> listAllMedicationsForPatient=MedicationPats.Refresh(patNum,false);
@@ -321,6 +328,9 @@ namespace OpenDentBusiness {
 				medication.DateStop=DateTime.Today.AddDays(-1);//Discontinue the medication as of yesterday so that it will immediately show as discontinued.
 				MedicationPats.Update(medication,false);//Discontinue the medication inside OD to match what shows in the eRx interface.
 			}//end foreach
+			if(onRxAdd!=null && listNewRx.Count!=0) {
+				onRxAdd(listNewRx);
+			}
 			return true;
 		}
 
@@ -332,6 +342,9 @@ namespace OpenDentBusiness {
 				return;//We don't have a PatID from DoseSpot for this patient.  Therefore there is nothing to sync with.
 			}
 			DoseSpotService.API api=new DoseSpotService.API();
+#if DEBUG
+			api.Url="https://my.staging.dosespot.com/api/12/api.asmx?wsdl";
+#endif
 			DoseSpotService.AddSelfReportedMedicationsRequest req=new DoseSpotService.AddSelfReportedMedicationsRequest();
 			req.SingleSignOn=GetSingleSignOn(clinicID,clinicKey,userID,false);
 			req.PatientId=PIn.Int(oidPatID.IDExternal);
@@ -398,6 +411,9 @@ namespace OpenDentBusiness {
 			countRefillReqs=0;
 			countTransmissionErrors=0;
 			DoseSpotService.API api=new DoseSpotService.API();
+#if DEBUG
+			api.Url="https://my.staging.dosespot.com/api/12/api.asmx?wsdl";
+#endif
 			DoseSpotService.RefillRequestsTransmissionErrorsMessageRequest req=new DoseSpotService.RefillRequestsTransmissionErrorsMessageRequest();
 			req.SingleSignOn=GetSingleSignOn(clinicID,clinicKey,userID,false);
 			req.ClinicianId=PIn.Int(userID);
@@ -421,6 +437,9 @@ namespace OpenDentBusiness {
 			countRefillReqs=0;
 			countTransactionErrors=0;
 			DoseSpotService.API api=new DoseSpotService.API();
+#if DEBUG
+			api.Url="https://my.staging.dosespot.com/api/12/api.asmx?wsdl";
+#endif
 			DoseSpotService.GetPrescriberNotificationCountsRequest req=new DoseSpotService.GetPrescriberNotificationCountsRequest();
 			req.SingleSignOn=GetSingleSignOn(clinicID,clinicKey,userID,false);
 			DoseSpotService.GetPrescriberNotificationCountsResponse res=api.GetPrescriberNotificationCounts(req);

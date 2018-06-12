@@ -54,9 +54,11 @@ namespace OpenDentBusiness{
 		///<summary>Attaching a procedure to a scheduled appointment.</summary>
 		ScheduleProcedure,
 		///<summary></summary>
-		SetBillingType
+		SetBillingType,
 		//<summary>Either a single statement or as part of the billing process.  Either print or </summary>
 		//CreateStatement
+		///<summary>Creating a new Rx</summary>
+		RxCreate,
 	}
 
 	///<summary></summary>
