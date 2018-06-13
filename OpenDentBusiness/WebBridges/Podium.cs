@@ -119,7 +119,7 @@ namespace OpenDentBusiness {
 				if(phoneNumber=="") {
 					continue;
 				}
-				string apiUrl="https://podium.co/api/v2/review_invitations";
+				string apiUrl="https://api.podium.com/api/v2/switchboard_invitations";
 				string apiToken=ProgramProperties.GetPropVal(Programs.GetProgramNum(ProgramName.Podium),PropertyDescs.APIToken);//I might be able to use _programNum here if static is per class like I think it is
 				if(string.IsNullOrEmpty(locationId)) {
 					return false;
