@@ -858,7 +858,11 @@ namespace OpenDental{
 				MsgBox.Show(this,"Invalid NPI.  Must be 10 digits.");
 				return;
 			}
-			if(_isErx && textErxAccountId.Text!="" && !Regex.IsMatch(textErxAccountId.Text,"^[0-9]+\\-[a-zA-Z0-9]{5}$")) {
+			string accountId=textErxAccountId.Text;
+			if(textErxAccountId.Text.Length>2 && textErxAccountId.Text.Substring(0,3).ToLower()=="ds;") {//support for DoseSpot account Ids
+				accountId=textErxAccountId.Text.Substring(3);
+			}
+			if(_isErx && textErxAccountId.Text!="" && !Regex.IsMatch(accountId,"^[0-9]+\\-[a-zA-Z0-9]{5}$")) {
 				MsgBox.Show(this,"Invalid ErxAccountId.");
 				return;
 			}
