@@ -191,7 +191,7 @@ namespace OpenDentBusiness{
 			command+="AND AptStatus!="+POut.Int((int)ApptStatus.UnschedList)+" "
 				+"AND AptDateTime>="+POut.DateT(dateStart.Date)+" ";
 			if(dateEnd.Year > 1880) {
-				command+="AND AptDateTime<="+POut.DateT(dateEnd.Date)+" ";
+				command+="AND AptDateTime<="+POut.DateT(dateEnd.Date.AddDays(1))+" ";
 			}
 			if(listProvNums!=null) {
 				List<long> listProvNumsFinal=listProvNums.FindAll(x => x>0);
