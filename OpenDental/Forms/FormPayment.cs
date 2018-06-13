@@ -4184,8 +4184,13 @@ namespace OpenDental {
 				if(FormPSE.SplitAssociated!=null && FormPSE.SplitAssociated.PaySplitOrig!=null && FormPSE.SplitAssociated.PaySplitLinked!=null) {
 					if(paySplit.SplitAmt<0) {
 						//if prepayment, check the charge grid for the original prepayment so we can update the charge grid amounts.
-						List<AccountEntry> listAccountEntries=gridCharges.Rows.Select(x => x.Tag as List<AccountEntry>)
-							.SelectMany(x => x).ToList();
+						List<AccountEntry> listAccountEntries=new List<AccountEntry>();
+						if(comboGroupBy.SelectedIndex!=0) {//Either 'Provider' or 'Clinic and Provider' selected
+							listAccountEntries=gridCharges.Rows.SelectMany(x => x.Tag as List<AccountEntry>).ToList();
+						}
+						else {//'None' selected
+							listAccountEntries=gridCharges.Rows.Select(x => x.Tag as AccountEntry).ToList();
+						}
 						AccountEntry charge=listAccountEntries.FirstOrDefault(x => x.PriKey==FormPSE.SplitAssociated.PaySplitOrig.SplitNum);
 						if(charge!=null) {
 							prePaymentOrigNum=charge.PriKey;
