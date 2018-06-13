@@ -434,7 +434,7 @@ namespace CodeBase {
 				return true;
 			}
 			//Check the new path against all installed service paths. Typically installed service paths are encapsulated by \"  \" so use Contains().
-			if(serviceFileInfo!=null&&asWmi.Any(x => x.PathName.ToLower().Contains(serviceFileInfo.FullName.ToLower()))) { //Path match. Already exists.
+			if(serviceFileInfo!=null && asWmi.Any(x => x.PathName.ToLower().Contains(serviceFileInfo.FullName.ToLower()))) { //Path match. Already exists.
 				return true;
 			}
 			//Service does not exist.
@@ -459,14 +459,14 @@ namespace CodeBase {
 				return collection
 					.Cast<ManagementObject>()
 					.Select(x => new ODWmiService() {
-						Description=(string)x.Properties["Description"].Value,
-						DisplayName=(string)x.Properties["DisplayName"].Value,
-						Name=(string)x.Properties["Name"].Value,
-						PathName=(string)x.Properties["PathName"].Value,
+						Description=(string)x.Properties["Description"].Value??"",
+						DisplayName=(string)x.Properties["DisplayName"].Value??"",
+						Name=(string)x.Properties["Name"].Value??"",
+						PathName=(string)x.Properties["PathName"].Value??"",
 						Started=(bool)x.Properties["Started"].Value,
-						StartMode=(string)x.Properties["StartMode"].Value,
-						StartName=(string)x.Properties["StartName"].Value,
-						State=(string)x.Properties["State"].Value,
+						StartMode=(string)x.Properties["StartMode"].Value??"",
+						StartName=(string)x.Properties["StartName"].Value??"",
+						State=(string)x.Properties["State"].Value??"",
 					}).ToList();
 			}
 		}
