@@ -904,8 +904,8 @@ namespace OpenDentBusiness {
 				sbErrors.AppendLine(Lans.g("DoseSpot","Last name missing"));
 			}
 			string deaNum=ProviderClinics.GetDEANum(prov.ProvNum,clinicNum);
-			if(!Regex.IsMatch(deaNum,"^[A-Za-z]{2}[0-9]{7}$")) {
-				sbErrors.AppendLine(Lans.g("DoseSpot","DEA Number must be 2 letters followed by 7 digits."));
+			if(deaNum.ToLower()!="none" && !Regex.IsMatch(deaNum,"^[A-Za-z]{2}[0-9]{7}$")) {
+				sbErrors.AppendLine(Lans.g("DoseSpot","Provider DEA Number must be 2 letters followed by 7 digits.  If no DEA Number, enter NONE."));
 			}
 			string npi=Regex.Replace(prov.NationalProvID,"[^0-9]*","");//NPI with all non-numeric characters removed.
 			if(npi.Length!=10) {
