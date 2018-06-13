@@ -2727,7 +2727,7 @@ namespace OpenDental.InternalTools.Job_Manager {
 			FormRequestEdit FormFR=new FormRequestEdit();
 			FormFR.RequestId=(long)gridFeatureReq.Rows[e.Row].Tag;
 			FormFR.IsAdminMode=PrefC.IsODHQ;
-			FormFR.ShowDialog();
+			FormFR.Show();
 		}
 
 		private void gridHistory_CellDoubleClick(object sender,ODGridClickEventArgs e) {
