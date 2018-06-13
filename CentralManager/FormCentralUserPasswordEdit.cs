@@ -40,8 +40,12 @@ namespace CentralManager {
 		}
 
 		private void butOK_Click(object sender,EventArgs e) {
+			Userod user=Userods.GetUserByName(textUserName.Text,false);
 			if(!_isCreate && !IsInSecurityWindow) {
-				string userPassCur=Userods.GetUserByName(textUserName.Text,false).Password;
+				string userPassCur="";
+				if(user!=null) {
+					userPassCur=user.Password;
+				}
 				//If user's current password is blank we dont care what they put for the old one.
 				if(userPassCur!="" && Userods.HashPassword(textCurrent.Text)!=userPassCur)	{
 					MessageBox.Show(this,"Current password incorrect.");
@@ -54,7 +58,7 @@ namespace CentralManager {
 			}
 			else{
 				HashedResult=Userods.HashPassword(textPassword.Text);
-				if(Userods.GetUserByName(textUserName.Text,false).UserName==Security.CurUser.UserName || IsInSecurityWindow) {
+				if(user?.UserName==Security.CurUser.UserName || IsInSecurityWindow) {
 					Security.PasswordTyped=textPassword.Text;
 					//They're updating the password for the logged in user.  Update CurUser for when they sync then attempt to log into remote DB.
 				}
