@@ -2989,7 +2989,7 @@ namespace OpenDentBusiness {
 			return ssn; //other cultures
 		}
 
-		///<summary>Updated 10/29/2015 v15.4.  To prevent orphaned patients, if patFrom is a guarantor then all family members of patFrom are moved into the family patTo belongs to, and then the merge of the two specified accounts is performed.  Returns false if the merge was canceled by the user.</summary>
+		///<summary>Updated 06/12/2018 v18.2.0(Check this convert method when updating merge methods).  To prevent orphaned patients, if patFrom is a guarantor then all family members of patFrom are moved into the family patTo belongs to, and then the merge of the two specified accounts is performed.  Returns false if the merge was canceled by the user.</summary>
 		public static bool MergeTwoPatients(long patTo,long patFrom) {
 			//No need to check RemotingRole; no call to db.
 			if(patTo==patFrom) {
@@ -3044,9 +3044,12 @@ namespace OpenDentBusiness {
 				"anestheticrecord.PatNum",
 				"anesthvsdata.PatNum",
 				"appointment.PatNum",
+				"asapcomm.PatNum",
 				"claim.PatNum",
 				"claimproc.PatNum",
+				"clinicerx.PatNum",
 				"commlog.PatNum",
+				"confirmationrequest.PatNum",
 				"creditcard.PatNum",
 				"custrefentry.PatNumCust",
 				"custrefentry.PatNumRef",
@@ -3067,11 +3070,13 @@ namespace OpenDentBusiness {
 				"encounter.PatNum",
 				"erxlog.PatNum",
 				"etrans.PatNum",
+				//"famaging.PatNum", //Taken care of down below as this should be the guarantor of the patient being merged into
 				"familyhealth.PatNum",
 				//formpat.FormPatNum IS NOT a PatNum so it is should not be merged.  It is the primary key.
 				"formpat.PatNum",
 				"guardian.PatNumChild",  //This may create duplicate entries for a single patient and guardian
 				"guardian.PatNumGuardian",  //This may create duplicate entries for a single patient and guardian
+				"histappointment.PatNum",
 				"hl7msg.PatNum",
 				"inssub.Subscriber",
 				"installmentplan.PatNum",
@@ -3093,6 +3098,7 @@ namespace OpenDentBusiness {
 				//"patientlink.PatNumFrom",//We want to leave the link history unchanged so that audit entries display correctly. If we start using this table for other types of linkage besides merges, then we might need to include this column.
 				//"patientlink.PatNumTo",//^^Ditto
 				//"patientnote.PatNum"	//The patientnote table is ignored because only one record can exist for each patient.  The record in 'patFrom' remains so it can be accessed again if needed.
+				"patientportalinvite.PatNum",
 				//"patientrace.PatNum", //The patientrace table is ignored because we don't want duplicate races.  We could merge them but we would have to add specific code to stop duplicate races being inserted.
 				"patplan.PatNum",
 				"payment.PatNum",
@@ -3136,11 +3142,14 @@ namespace OpenDentBusiness {
 				"toothinitial.PatNum",
 				"treatplan.PatNum",
 				"treatplan.ResponsParty",
+				//"tsitranslog.PatNum", //Taken care of down below as this should be the guarantor of the patient being merged into
 				//vaccineobs.VaccinePatNum IS NOT a PatNum so it is should not be merged. It is the FK to the vaccinepat.VaccinePatNum.
 				"vaccinepat.PatNum",
 				//vaccinepat.VaccinePatNum IS NOT a PatNum so it is should not be merged. It is the primary key.
 				"vitalsign.PatNum",
-				"xchargetransaction.PatNum"
+				"webschedrecall.PatNum",
+				"xchargetransaction.PatNum",
+				"xwebresponse.PatNum",
 			};
 			string command="";
 			//Update and remove all patfields that were added to the list above.
@@ -3209,6 +3218,15 @@ namespace OpenDentBusiness {
 				+"SET Guarantor="+POut.Long(patientTo.Guarantor)+" "
 				+"WHERE Guarantor="+POut.Long(patFrom);
 			Db.NonQ(command);
+			//Update tables where the PatNum should be changed to the guarantor of the patient being merged into.
+			//Only accomplishes anything if the patFrom is a guarantor. Otherwise, no effect.
+			string[] listGuarantorToGuarantor={ "famaging","tsitranslog" };
+			for(int i=0;i<listGuarantorToGuarantor.Length;i++) {
+				command="UPDATE "+POut.String(listGuarantorToGuarantor[i])+" "
+					+"SET PatNum="+POut.Long(patientTo.Guarantor)+" "
+					+"WHERE PatNum="+POut.Long(patFrom);
+				Db.NonQ(command);
+			}
 			//At this point, the 'patFrom' is a regular patient and is absoloutely not a guarantor.
 			//Now modify all PatNum foreign keys from 'patFrom' to 'patTo' to complete the majority of the
 			//merge of the records between the two accounts.			
