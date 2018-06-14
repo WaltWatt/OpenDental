@@ -258,6 +258,13 @@ namespace OpenDentBusiness {
 			return null;
 		}
 
+		public static List<Schedule> SendObjectParams(params Schedule[] arraySchedules) {
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				return Meth.GetObject<List<Schedule>>(MethodBase.GetCurrentMethod(),arraySchedules);
+			}
+			return arraySchedules.ToList();
+		}
+
 		public static Color SendColorParam(Color color) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
 				return Meth.GetObject<Color>(MethodBase.GetCurrentMethod(),color);

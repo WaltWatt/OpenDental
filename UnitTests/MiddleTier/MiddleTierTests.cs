@@ -273,6 +273,15 @@ namespace UnitTests.MiddleTier {
 			Assert.IsTrue(pat2==null);
 		}
 
+		///<summary>The purpose of this test is to make sure middle tier can invoke methods that utilize the params keyword.</summary>
+		[TestMethod]
+		public void MiddleTier_SendObjectParams() {
+			List<Schedule> listRetVals=WebServiceTests.SendObjectParams(new Schedule() { ScheduleNum=5 },new Schedule() { ScheduleNum=23 });
+			Assert.AreEqual(listRetVals.Count,2);
+			Assert.AreEqual(listRetVals[0].ScheduleNum,5);
+			Assert.AreEqual(listRetVals[1].ScheduleNum,23);
+		}
+
 		[TestMethod]
 		public void MiddleTier_SendColorParam() {
 			Color colorResult=WebServiceTests.SendColorParam(Color.Green);
