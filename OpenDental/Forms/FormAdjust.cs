@@ -908,7 +908,8 @@ namespace OpenDental{
 			double procInsEst=-ClaimProcs.ProcEstNotReceived(listClaimProcs,procCur.ProcNum);
 			double procAdj=Adjustments.Refresh(procCur.PatNum).Where(x => x.ProcNum==procCur.ProcNum && x.AdjNum!=_adjustmentCur.AdjNum).Select(x => x.AdjAmt).Sum();
 			double procPatPaid=-PaySplits.GetTotForProc(procCur);
-			textProcFee.Text=procCur.ProcFee.ToString("F");
+			double procFee=Procedures.CalculateProcCharge(procCur);
+			textProcFee.Text=procFee.ToString("F");
 			textProcWriteoff.Text=procWO==0?"":procWO.ToString("F");
 			textProcInsPaid.Text=procInsPaid==0?"":procInsPaid.ToString("F");
 			textProcInsEst.Text=procInsEst==0?"":procInsEst.ToString("F");
@@ -925,7 +926,7 @@ namespace OpenDental{
 			}
 			textProcAdjCur.Text=procAdjCur==0?"":procAdjCur.ToString("F");
 			//most of these are negative values, so add
-			_adjRemAmt = new[] { procCur.ProcFee,procWO,procInsPaid,procInsEst,procAdj,procPatPaid,procAdjCur }.Sum(x => (decimal)x);
+			_adjRemAmt = new[] { procFee,procWO,procInsPaid,procInsEst,procAdj,procPatPaid,procAdjCur }.Sum(x => (decimal)x);
 			labelProcRemain.Text=_adjRemAmt.ToString("c");
 		}
 
