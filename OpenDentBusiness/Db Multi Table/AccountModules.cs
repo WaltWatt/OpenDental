@@ -32,6 +32,7 @@ namespace OpenDentBusiness {
 			public SerializableDictionary<long,DateTime> DictDateLastOrthoClaims;
 			public DateTime FirstOrthoProcDate;
 			public List<FieldDefLink> ListFieldDefLinksAcct;
+			public List<PatientLink> ListMergeLinks;
 
 			[XmlElement(nameof(DataSetMain))]
 			public string DataSetMainXml {
@@ -109,6 +110,8 @@ namespace OpenDentBusiness {
 				,retVal.ListInsPlans,DateTime.Today,retVal.ListInsSubs));
 			Logger.LogAction("PaySplits.GetPrepayForFam",LogPath.AccountModule,() => retVal.ListPrePayments=PaySplits.GetPrepayForFam(fam));
 			Logger.LogAction("RepeatCharges.Refresh",LogPath.AccountModule,() => retVal.ArrRepeatCharges=RepeatCharges.Refresh(pat.PatNum));
+			Logger.LogAction("PatientLinks.GetLinks",LogPath.AccountModule,() => 
+				retVal.ListMergeLinks=PatientLinks.GetLinks(fam.ListPats.Select(x => x.PatNum).ToList(),PatientLinkType.Merge));
 			if(doGetOrtho) {
 				retVal.DictDateLastOrthoClaims=new SerializableDictionary<long,DateTime>();
 				foreach(PatPlan patPlan in retVal.ListPatPlans) {

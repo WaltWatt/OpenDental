@@ -220,7 +220,7 @@ namespace OpenDental {
 				if(DataSetMain==null) {
 					return false;
 				}
-				return gridAcctPat.GetSelectedIndex()==DataSetMain.Tables["patient"].Rows.Count-1;
+				return gridAcctPat.GetSelectedIndex()==gridAcctPat.Rows.Count-1;
 			}
 		}
 		#endregion UserVariables
@@ -2515,6 +2515,13 @@ namespace OpenDental {
 			DataTable table=DataSetMain.Tables["patient"];
 			decimal bal=0;
 			for(int i=0;i<table.Rows.Count;i++) {
+				if(i!=table.Rows.Count-1 && PatientLinks.WasPatientMerged(PIn.Long(table.Rows[i]["PatNum"].ToString()),_loadData.ListMergeLinks)
+					&& FamCur.ListPats[i].PatNum!=PatCur.PatNum && ((decimal)table.Rows[i]["balanceDouble"])==0) 
+				{
+					//Hide merged patients so that new things don't get added to them. If the user really wants to find this patient, they will have to use 
+					//the Select Patient window.
+					continue;
+				}
 				bal+=(decimal)table.Rows[i]["balanceDouble"];
 				row = new ODGridRow();
 				row.Cells.Add(table.Rows[i]["name"].ToString());
@@ -2526,7 +2533,7 @@ namespace OpenDental {
 			}
 			gridAcctPat.EndUpdate();
 			if(isSelectingFamily){
-				gridAcctPat.SetSelected(FamCur.ListPats.Length,true);
+				gridAcctPat.SetSelected(gridAcctPat.Rows.Count-1,true);
 			}
 			else{
 				for(int i=0;i<FamCur.ListPats.Length;i++) {
@@ -2902,7 +2909,6 @@ namespace OpenDental {
 				gridComm.EndUpdate();
 				return;
 			}
-			bool isSelectingFamily=gridAcctPat.GetSelectedIndex()==this.DataSetMain.Tables["patient"].Rows.Count-1;
 			gridComm.BeginUpdate();
 			gridComm.Columns.Clear();
 			ODGridColumn col = new ODGridColumn(Lan.g("TableCommLogAccount", "Date"), 70);
@@ -2925,7 +2931,7 @@ namespace OpenDental {
 			for(int i=0;i<table.Rows.Count;i++) {
 				//Skip commlog entries which belong to other family members per user option.
 				if(!this.checkShowFamilyComm.Checked										//show family not checked
-					&& !isSelectingFamily																	//family not selected
+					&& !_isSelectingFamily																	//family not selected
 					&& table.Rows[i]["PatNum"].ToString()!=PatCur.PatNum.ToString()	//not this patient
 					&& table.Rows[i]["FormPatNum"].ToString()=="0")				//not a questionnaire (FormPat)
 				{
@@ -2939,7 +2945,7 @@ namespace OpenDental {
 				row = new ODGridRow();
 				row.Cells.Add(table.Rows[i]["commDate"].ToString());
 				row.Cells.Add(table.Rows[i]["commTime"].ToString());
-				if(isSelectingFamily) {
+				if(_isSelectingFamily) {
 					row.Cells.Add(table.Rows[i]["patName"].ToString());
 				}
 				else {//one patient
@@ -3653,8 +3659,7 @@ namespace OpenDental {
 					return;
 				}
 			}
-			bool isSelectingFamily=gridAcctPat.GetSelectedIndex()==this.DataSetMain.Tables["patient"].Rows.Count-1;
-			ModuleSelected(PatCur.PatNum,isSelectingFamily);
+			ModuleSelected(PatCur.PatNum,_isSelectingFamily);
 		}
 
 		private void gridPayPlan_CellDoubleClick(object sender,ODGridClickEventArgs e) {
@@ -3668,8 +3673,7 @@ namespace OpenDental {
 					ModuleSelected(FormPayPlan2.GotoPatNum,false);
 					return;
 				}
-				bool isSelectingFamily=gridAcctPat.GetSelectedIndex()==this.DataSetMain.Tables["patient"].Rows.Count-1;
-				ModuleSelected(PatCur.PatNum,isSelectingFamily);
+				ModuleSelected(PatCur.PatNum,_isSelectingFamily);
 			}
 			else {//Installment Plan
 				FormInstallmentPlanEdit FormIPE= new FormInstallmentPlanEdit();
@@ -3684,7 +3688,7 @@ namespace OpenDental {
 			if(ViewingInRecall){
 				return;
 			}
-			if(e.Row==FamCur.ListPats.Length){//last row
+			if(e.Row==gridAcctPat.Rows.Count-1) {//last row
 				FormOpenDental.S_Contr_PatientSelected(FamCur.ListPats[0],false);
 				ModuleSelected(FamCur.ListPats[0].PatNum,true);
 			}
