@@ -8307,11 +8307,18 @@ namespace OpenDental{
 					case FormType.FormDoseSpotAssignUserId:
 						if(!Security.IsAuthorized(Permissions.SecurityAdmin)) {
 							break;
-				}
+				    }
 						FormDoseSpotAssignUserId FormAU=new FormDoseSpotAssignUserId(alertItem.FKey);
 						FormAU.ShowDialog();
 						break;
-			}
+          case FormType.FormDoseSpotAssignClinicId:
+            if(!Security.IsAuthorized(Permissions.SecurityAdmin)) {
+              break;
+            }
+            FormDoseSpotAssignClinicId FormACI=new FormDoseSpotAssignClinicId(alertItem.FKey);
+            FormACI.ShowDialog();
+            break;
+        }
 			}
 			if(menuItem.Name==ActionType.ShowItemValue.ToString()) {
 				MsgBoxCopyPaste msgBCP=new MsgBoxCopyPaste(alertItem.ItemValue);

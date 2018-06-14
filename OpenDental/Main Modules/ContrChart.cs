@@ -4573,10 +4573,25 @@ namespace OpenDental {
 						string provNpi=Regex.Replace(prov.NationalProvID,"[^0-9]*","");//NPI with all non-numeric characters removed.
 						UpdateErxAccess(provNpi,doseSpotUserID,clinicNum,doseSpotClinicID,doseSpotClinicKey,erxOption);
 						ProviderErx provErxDoseSpot=ProviderErxs.GetOneForNpiAndOption(provNpi,erxOption);
+						ClinicErx clinicErxCur=ClinicErxs.GetByClinicIdAndKey(doseSpotClinicID,doseSpotClinicKey);
 						if(provErxDoseSpot.IsEnabled!=ErxStatus.Enabled) {
 							MessageBox.Show(Lan.g(this,"Contact support to enable eRx for provider")+" "+prov.Abbr);
 							isDoseSpotAccessAllowed=false;
-						}
+            }
+            if(clinicErxCur.EnabledStatus!=ErxStatus.Enabled) {
+              string clinicAbbr="";
+              if(clinicErxCur.ClinicNum==-1) {//ClinicErx was inserted from ODHQ, use the ClinicDesc given by an ODHQ staff
+                clinicAbbr=clinicErxCur.ClinicDesc;
+              }
+              else if(clinicErxCur.ClinicNum==0) {//Office Headquarters
+                clinicAbbr="Headquarters";
+              }
+              else {
+                clinicAbbr=Clinics.GetAbbr(clinicErxCur.ClinicNum);
+              }
+              MessageBox.Show(Lan.g(this,"Contact support to enable eRx for clinic")+" "+clinicAbbr);
+              isDoseSpotAccessAllowed=false;
+            }
 					}
 					//Try to add any self reported medications to DoseSpot before the user gets views their list.
 					DoseSpot.SyncPrescriptionsToDoseSpot(doseSpotClinicID,doseSpotClinicKey,doseSpotUserID,PatCur.PatNum);

@@ -62,21 +62,41 @@ namespace OpenDentBusiness {
 
 		#endregion
 
-		public static void MakeClinicErxAlert(ClinicErx clinicErx) {
+		public static void MakeClinicErxAlert(ClinicErx clinicErx,bool clinicAutomaticallyAttached) {
 			AlertItem alert=AlertItems.RefreshForType(AlertType.DoseSpotClinicRegistered)
 				.FirstOrDefault(x => x.FKey==clinicErx.ClinicErxNum);
 			if(alert!=null) {
 				return;//alert already exists
 			}
-			alert=new AlertItem {
-				Actions=ActionType.MarkAsRead | ActionType.Delete,
-				Description=(clinicErx.ClinicDesc=="" ? "Headquarters" : clinicErx.ClinicDesc)+" "+Lans.g("DoseSpot","has been registered"),
-				Severity=SeverityType.Low,
-				Type=AlertType.DoseSpotClinicRegistered,
-				FKey=clinicErx.ClinicErxNum,
-				ClinicNum=clinicErx.ClinicNum,
-			};
-			AlertItems.Insert(alert);
+      Clinic clinic=Clinics.GetClinic(clinicErx.ClinicNum);
+      List<ProgramProperty> listDoseSpotClinicProperties=ProgramProperties.GetForProgram(Programs.GetProgramNum(ProgramName.eRx))
+          .FindAll(x => x.ClinicNum==0
+            && (x.PropertyDesc==Erx.PropertyDescs.ClinicID || x.PropertyDesc==Erx.PropertyDescs.ClinicKey)
+            && !string.IsNullOrWhiteSpace(x.PropertyValue));
+      if(clinic!=null || clinicAutomaticallyAttached) {
+        //A clinic was associated with the clinicerx successfully, no user action needed.
+        alert=new AlertItem {
+          Actions=ActionType.MarkAsRead | ActionType.Delete,
+          Description=(clinicErx.ClinicDesc=="" ? "Headquarters" : clinicErx.ClinicDesc)+" "+Lans.g("DoseSpot","has been registered"),
+          Severity=SeverityType.Low,
+          Type=AlertType.DoseSpotClinicRegistered,
+          FKey=clinicErx.ClinicErxNum,
+          ClinicNum=clinicErx.ClinicNum,
+        };
+      }
+      else {
+        //User action needed to make a link to an existing clinic that was registered.
+        alert=new AlertItem {
+          Actions=ActionType.MarkAsRead | ActionType.Delete | ActionType.OpenForm,
+          Description=Lans.g("DoseSpot","Select clinic to assign ID"),
+          Severity=SeverityType.Low,
+          Type=AlertType.DoseSpotClinicRegistered,
+          ClinicNum=-1,//Show in all clinics.  We only want 1 alert, but that alert can be processed from any clinic because we don't know which clinic to display in.
+          FKey=clinicErx.ClinicErxNum,
+          FormToOpen=FormType.FormDoseSpotAssignClinicId,
+        };
+      }
+      AlertItems.Insert(alert);
 		}
 
 		///<summary>Handles assigning Dose Spot ID to a user with matching NPI.

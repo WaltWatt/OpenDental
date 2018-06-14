@@ -436,6 +436,12 @@
     <Compile Include="Forms\FormDefEditWSNPApptTypes.designer.cs">
       <DependentUpon>FormDefEditWSNPApptTypes.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\FormDoseSpotAssignClinicId.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FormDoseSpotAssignClinicId.designer.cs">
+      <DependentUpon>FormDoseSpotAssignClinicId.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\FormPaySimpleSetup.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -4907,6 +4913,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\FormDefEditWSNPApptTypes.resx">
       <DependentUpon>FormDefEditWSNPApptTypes.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\FormDoseSpotAssignClinicId.resx">
+      <DependentUpon>FormDoseSpotAssignClinicId.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\FormPaySimpleSetup.resx">
       <DependentUpon>FormPaySimpleSetup.cs</DependentUpon>

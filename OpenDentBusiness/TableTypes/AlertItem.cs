@@ -187,7 +187,10 @@ namespace OpenDentBusiness {
 		///<summary>10 - FormDoseSpotAssignUserId.</summary>
 		[Description("DoseSpot Assign User ID")]
 		FormDoseSpotAssignUserId,
-	}
+    ///<summary>11 - FormDoseSpotAssignClinicId.</summary>
+    [Description("DoseSpot Assign Clinic ID")]
+    FormDoseSpotAssignClinicId,
+  }
 
 	///<summary>Alert-related attributes.</summary>
 	public class AlertAttribute:Attribute {
