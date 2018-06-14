@@ -107,7 +107,13 @@ namespace OpenDental {
 				else if(result==DialogResult.Yes) {
 					Prefs.UpdateString(PrefName.WebServiceServerName,Dns.GetHostName());
 				}
-				WebServiceMainHQProxy.SetEConnectorOn();
+				try {
+					WebServiceMainHQProxy.SetEConnectorOn();
+				}
+				catch {
+					MsgBox.Show(this,"The eConnector was disabled.  Please contact support.");
+					return;
+				}
 			}
 			//At this point the user wants to install the eConnector service (or upgrade the old cust listener to the eConnector).
 			bool isListening;
