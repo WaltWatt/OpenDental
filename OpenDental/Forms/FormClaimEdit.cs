@@ -6080,7 +6080,7 @@ namespace OpenDental{
 			string exportPath=PrefC.GetString(PrefName.ClaimAttachExportPath);
 			if(!Directory.Exists(exportPath)){
 				if(MessageBox.Show(Lan.g(this,"The claim export path no longer exists at:")+" "+exportPath+"\r\n"
-					+Lan.g(this,"Would you like to create it?"),"", MessageBoxButtons.YesNo)==DialogResult.OK) 
+					+Lan.g(this,"Would you like to create it?"),"", MessageBoxButtons.YesNo)==DialogResult.Yes) 
 				{
 					try {
 						Directory.CreateDirectory(exportPath);
