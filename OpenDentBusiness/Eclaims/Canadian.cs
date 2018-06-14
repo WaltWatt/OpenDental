@@ -66,8 +66,10 @@ namespace OpenDentBusiness.Eclaims {
 			StringBuilder strb;
 			string primaryEOBResponse="";
 			string primaryClaimRequestMessage="";
-			claim=Claims.GetClaim(queueItem.ClaimNum);
-			claimProcList=ClaimProcs.Refresh(claim.PatNum);
+			claimProcList=ClaimProcs.Refresh(queueItem.PatNum);
+			List<Claim> listClaims=Claims.GetClaimsFromClaimNums(claimProcList.Select(x => x.ClaimNum)
+				.Union(new List<long> { queueItem.ClaimNum }).Distinct().ToList());
+			claim=listClaims.FirstOrDefault(x => x.ClaimNum==queueItem.ClaimNum);
 			claimProcsClaim=ClaimProcs.GetForSendClaim(claimProcList,claim.ClaimNum);
 			long planNum=claim.PlanNum;
 			long insSubNum=claim.InsSubNum;
@@ -86,7 +88,13 @@ namespace OpenDentBusiness.Eclaims {
 					List<ClaimProc> claimProcsForProc=ClaimProcs.GetForProc(claimProcList,claimProcsClaim[i].ProcNum);
 					bool matchingPrimaryProc=false;
 					for(int j=0;j<claimProcsForProc.Count;j++) {
-						if(claimProcsForProc[j].ClaimNum!=0 && claimProcsForProc[j].ClaimNum!=claim.ClaimNum && (claimNumPrimary==0 || claimNumPrimary==claimProcsForProc[j].ClaimNum)) {
+						if(claimProcsForProc[j].ClaimNum!=0 && claimProcsForProc[j].ClaimNum!=claim.ClaimNum 
+							&& (claimNumPrimary==0 || claimNumPrimary==claimProcsForProc[j].ClaimNum)) 
+						{
+							Claim claimPri=listClaims.FirstOrDefault(x => x.ClaimNum==claimProcsForProc[j].ClaimNum);
+							if(claimPri!=null && claimPri.ClaimType!="P") {//Make sure this claimproc isn't for a PreAuth or tertiary claim
+								continue;
+							}
 							claimNumPrimary=claimProcsForProc[j].ClaimNum;
 							matchingPrimaryProc=true;
 							break;
