@@ -8561,5 +8561,27 @@ No Action Required in many cases, check your new patient Web Sched on your web s
 			ODEvent.Fire(new ODEventArgs("ConvertDatabases","Upgrading database to version: 18.1.22"));//No translation in convert script.
 		}
 
+		private static void To18_1_24() {
+			string command;
+			ODEvent.Fire(new ODEventArgs("ConvertDatabases",
+				"Upgrading database to version: 18.1.24 - Moving AuditTrailDeleteDuplicateApptCreate to Old Tab"));//No translation in convert script.
+			//check databasemaintenance for AuditTrailDeleteDuplicateApptCreate, insert if not there and set IsOld to True or update to set IsOld to true
+			command="SELECT MethodName FROM databasemaintenance WHERE MethodName='AuditTrailDeleteDuplicateApptCreate'";
+			string methodName=Db.GetScalar(command);
+			if(methodName=="") {//didn't find row in table, insert
+				if(DataConnection.DBtype==DatabaseType.MySql) {
+					command="INSERT INTO databasemaintenance (MethodName, IsOld) VALUES ('AuditTrailDeleteDuplicateApptCreate',1)";//true by default
+				}
+				else {//oracle
+					command="INSERT INTO databasemaintenance (DatabaseMaintenanceNum, MethodName, IsOld) VALUES ((SELECT COALESCE(MAX(DatabaseMaintenanceNum),0)+1 DatabaseMaintenanceNum FROM databasemaintenance),'AuditTrailDeleteDuplicateApptCreate',1)";
+				}
+			}
+			else {//found row, update IsOld
+				command="UPDATE databasemaintenance SET IsOld = 1 WHERE MethodName = 'AuditTrailDeleteDuplicateApptCreate'";//true by default
+			}
+			Db.NonQ(command);
+			ODEvent.Fire(new ODEventArgs("ConvertDatabases","Upgrading database to version: 18.1.24"));//No translation in convert script
+		}
+
 	}
 }
