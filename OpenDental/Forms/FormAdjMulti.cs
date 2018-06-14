@@ -665,7 +665,7 @@ namespace OpenDental {
 					cell=new ODGridCell(ProcedureCodes.GetStringProcCode(Proc.CodeNum));
 					row.Cells.Add(cell);
 					//Fee;
-					cell=new ODGridCell(Proc.ProcFee.ToString("c"));
+					cell=new ODGridCell(Procedures.CalculateProcCharge(Proc).ToString("c"));
 					cell.CellColor=Color.LightYellow;
 					row.Cells.Add(cell);
 					//Rem Before
