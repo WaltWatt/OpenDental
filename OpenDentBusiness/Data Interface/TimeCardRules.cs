@@ -911,13 +911,13 @@ namespace OpenDentBusiness{
 								continue;
 							}
 							if(listOTEntries[j].Item2>negTime) {
-								listOTEntries[j].Item2.Subtract(negTime);
+								listOTEntries[j]=new Tuple<long,TimeSpan>(listOTEntries[j].Item1,listOTEntries[j].Item2.Subtract(negTime));
 								negTime=TimeSpan.Zero;
 								break;//we zeroed out the adjustment using only overtime from this clinic.
 							}
 							else {
-								negTime.Subtract(listOTEntries[j].Item2);
-								listOTEntries[j].Item2.Subtract(listOTEntries[j].Item2);//zero it out.
+								negTime=negTime.Subtract(listOTEntries[j].Item2);
+								listOTEntries[j]=new Tuple<long,TimeSpan>(listOTEntries[j].Item1,listOTEntries[j].Item2.Subtract(listOTEntries[j].Item2));//zero it out.
 							}
 						}
 						//houskeeping
@@ -928,13 +928,13 @@ namespace OpenDentBusiness{
 								break;
 							}
 							if(listOTEntries[j].Item2>negTime) {
-								listOTEntries[j].Item2.Subtract(negTime);
+								listOTEntries[j]=new Tuple<long,TimeSpan>(listOTEntries[j].Item1,listOTEntries[j].Item2.Subtract(negTime));
 								negTime=TimeSpan.Zero;
 								break;//we zeroed out the adjustment using only overtime from this clinic.
 							}
 							else {
-								negTime.Subtract(listOTEntries[j].Item2);
-								listOTEntries[j].Item2.Subtract(listOTEntries[j].Item2);//zero it out.
+								negTime=negTime.Subtract(listOTEntries[j].Item2);
+								listOTEntries[j]=new Tuple<long,TimeSpan>(listOTEntries[j].Item1,listOTEntries[j].Item2.Subtract(listOTEntries[j].Item2));//zero it out.
 							}
 						}
 						//houskeeping
