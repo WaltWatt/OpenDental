@@ -3021,6 +3021,11 @@ namespace OpenDentBusiness {
 			return PIn.Long(Db.GetScalar(command));
 		}
 
+		///<summary>Returns the given procs proc fee but considers BaseUnits and UnitQty</summary>
+		public static double CalculateProcCharge(Procedure proc) {
+			return proc.ProcFee*Math.Max(1,proc.BaseUnits+proc.UnitQty);
+		}
+
 		//public static bool IsUsingCode(long codeNum) {
 		//	if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
 		//		return Meth.GetBool(MethodBase.GetCurrentMethod(),codeNum);

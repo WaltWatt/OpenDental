@@ -1252,7 +1252,7 @@ namespace OpenDental
 			textProcProv.Text=Providers.GetAbbr(ProcCur.ProvNum);
 			textProcTooth.Text=Tooth.ToInternat(ProcCur.ToothNum);
 			textProcDescription.Text=ProcedureCodes.GetProcCode(ProcCur.CodeNum).Descript;
-			ProcFee=ProcCur.ProcFee;
+			ProcFee=Procedures.CalculateProcCharge(ProcCur);
 			ProcWriteoff=-ClaimProcs.ProcWriteoff(ClaimProcList,ProcCur.ProcNum);
 			ProcInsPaid=-ClaimProcs.ProcInsPay(ClaimProcList,ProcCur.ProcNum);
 			ProcInsEst=-ClaimProcs.ProcEstNotReceived(ClaimProcList,ProcCur.ProcNum);
