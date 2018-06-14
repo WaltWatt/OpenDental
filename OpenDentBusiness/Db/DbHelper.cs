@@ -171,6 +171,13 @@ namespace OpenDentBusiness {
 			return "ADDDATE("+date+",INTERVAL "+minutes+" MINUTE)";
 		}
 
+		public static string DateAddSecond(string date,string seconds) {
+			if(DataConnection.DBtype==DatabaseType.Oracle) {
+				return date+" +"+seconds+"/86400";//1 second is 1/86400 of a day
+			}
+			return "ADDDATE("+date+",INTERVAL "+seconds+" SECOND)";
+		}
+
 		///<summary>Use the overload taking three arguments in order to take advantage of indexes on the column.
 		///TO_DATE() for datetime columns where we only want the date.</summary>
 		public static string DtimeToDate(string colName) {

@@ -37,16 +37,19 @@ namespace OpenDentBusiness{
 				Meth.GetVoid(MethodBase.GetCurrentMethod(),employeeNum);
 				return;
 			}
-			//Get the last clockevent for the employee. 
+			//Get the last clockevent for the employee. Will include clockevent with "in" before NOW, and "out" anytime before 23:59:59 of TODAY.
 			string command = @"SELECT * FROM clockevent 
-				WHERE TimeDisplayed2<="+DbHelper.Now()+" AND TimeDisplayed1<="+DbHelper.Now()+@"
+				WHERE TimeDisplayed2<="+DbHelper.DateAddSecond(DbHelper.DateAddDay(DbHelper.Curdate(),"1"),"-1")+" AND TimeDisplayed1<="+DbHelper.Now()+@"
 				AND EmployeeNum="+POut.Long(employeeNum)+@"
 				ORDER BY IF(YEAR(TimeDisplayed2) < 1880,TimeDisplayed1,TimeDisplayed2) DESC";
 			command=DbHelper.LimitOrderBy(command,1);
 			ClockEvent clockEvent=Crud.ClockEventCrud.SelectOne(command);
 			Employee employee=GetEmp(employeeNum);
 			Employee employeeOld=employee.Copy();
-			if(clockEvent==null //Employee has never clocked in
+			if(clockEvent!=null && clockEvent.TimeDisplayed2>DateTime.Now) {//Future time manual clock out.
+				employee.ClockStatus=Lans.g("ContrStaff","Manual Entry");
+			}
+			else if(clockEvent==null //Employee has never clocked in
 				|| (clockEvent.TimeDisplayed2.Year > 1880 && clockEvent.ClockStatus==TimeClockStatus.Home))//Clocked out for home
 			{
 				employee.ClockStatus=Lans.g("enumTimeClockStatus",TimeClockStatus.Home.ToString());
