@@ -96,7 +96,7 @@ namespace OpenDental {
 					PatStr=_patCur.FName,
 					StatStr=procCur.ProcStatus.ToString(),
 					ProcStr=ProcedureCodes.GetStringProcCode(procCur.CodeNum),
-					FeeStr=procCur.ProcFee.ToString("f"),
+					FeeStr=(Procedures.CalculateProcCharge(procCur)).ToString("f"),
 					RemBefStr=entryCharge.AmountStart.ToString("f"),
 					Proc=procCur,
 					//everything else blank
