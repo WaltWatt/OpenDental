@@ -261,6 +261,27 @@ namespace UnitTests.MiddleTier {
 			Assert.IsTrue(strErrors.Count==0);
 		}
 
+		///<summary>Reflection treats methods that have an array as their only argument differently than methods with multiple arguments.
+		///When an array is the only argument, the functionality somehow mimics what happens when a method utilizes the params keyword.
+		///Meaning, an array of three objects will act like three separate objects instead of acting like an array of three objects.
+		///This functionality goes away as soon as another argument is added to the method signature (why we haven't noticed this problem yet).</summary>
+		[TestMethod]
+		public void MiddleTier_SendArrayPatient() {
+			Patient[] arrayPatients=new Patient[3];
+			arrayPatients[0]=new Patient { LName="Jones",AddrNote=WebServiceTests.DirtyString };
+			arrayPatients[1]=null;
+			arrayPatients[2]=new Patient { SchedAfterTime=new TimeSpan(5,30,22) };
+			Patient[] arrayPatientsReturned=WebServiceTests.SendArrayPatient(arrayPatients);
+			Assert.AreNotEqual(arrayPatientsReturned,null);
+			Assert.AreEqual(arrayPatientsReturned.Length,3);
+			Assert.AreEqual(arrayPatientsReturned[0].LName,"Jones");
+			Assert.AreEqual(arrayPatientsReturned[0].AddrNote,WebServiceTests.DirtyString);
+			Assert.AreEqual(arrayPatientsReturned[1],null);
+			Assert.AreEqual(arrayPatientsReturned[2].SchedAfterTime.Hours,5);
+			Assert.AreEqual(arrayPatientsReturned[2].SchedAfterTime.Minutes,30);
+			Assert.AreEqual(arrayPatientsReturned[2].SchedAfterTime.Seconds,22);
+		}
+
 		[TestMethod]
 		public void MiddleTier_SendNullParam() {
 			string stringNull=WebServiceTests.SendNullParam(null);

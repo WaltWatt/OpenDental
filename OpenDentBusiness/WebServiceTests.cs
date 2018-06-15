@@ -244,6 +244,13 @@ namespace OpenDentBusiness {
 			return retVal;
 		}
 
+		public static Patient[] SendArrayPatient(Patient[] arrayPatients) {
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				return Meth.GetObject<Patient[]>(MethodBase.GetCurrentMethod(),arrayPatients);
+			}
+			return arrayPatients;
+		}
+
 		public static string SendNullParam(string str) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
 				return Meth.GetString(MethodBase.GetCurrentMethod(),str);

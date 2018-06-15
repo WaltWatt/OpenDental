@@ -4,6 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenDentBusiness;
 using System.Collections.Generic;
 using UnitTestsCore;
+using System.Reflection;
 
 namespace UnitTests {
 	[TestClass]
@@ -20,6 +21,13 @@ namespace UnitTests {
 		protected Logger.WriteLineDelegate _log;
 		///<summary>Put this in the watch window to see the logger results.</summary>
 		protected string _logStr="";
+
+		public static string UnitTestDbName {
+			get {
+				Version versionBusiness=Assembly.GetAssembly(typeof(PatientStatus)).GetName().Version;
+				return "unittest"+versionBusiness.Major+versionBusiness.Minor;
+			}
+		}
 
 		public TestBase() {
 			_log=new Logger.WriteLineDelegate((log,ll) => {
@@ -38,7 +46,7 @@ namespace UnitTests {
 		/// Do this first so that the time the Initialize and ClassInitialize methods take doesn't get counted in the test times. </summary>
 		[AssemblyInitialize]
 		public static void Initialize(TestContext context) {
-			if(!UnitTestsCore.DatabaseTools.SetDbConnection("unittest","localhost","3306","root","",false)) {//Put this in a config file in the future.
+			if(!UnitTestsCore.DatabaseTools.SetDbConnection(UnitTestDbName,"localhost","3306","root","",false)) {//Put this in a config file in the future.
 				UnitTestsCore.DatabaseTools.SetDbConnection("","localhost","3306","root","",false);
 				DatabaseTools.FreshFromDump("localhost","3306","root","",false);//this also sets database to be unittest.
 			}

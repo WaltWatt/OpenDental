@@ -13,16 +13,16 @@ namespace UnitTests {
 		public static string FreshFromDump(string serverAddr,string port,string userName,string password,bool isOracle) {
 			Security.CurUser=Security.CurUser??new Userod();
 			if(!isOracle) {
-				string command="DROP DATABASE IF EXISTS unittest";
+				string command="DROP DATABASE IF EXISTS "+TestBase.UnitTestDbName;
 				try {
 					DataCore.NonQ(command);
 				}
 				catch {
 					throw new Exception("Database could not be dropped.  Please remove any remaining text files and try again.");
 				}
-				command="CREATE DATABASE unittest";
+				command="CREATE DATABASE "+TestBase.UnitTestDbName;
 				DataCore.NonQ(command);
-				UnitTestsCore.DatabaseTools.SetDbConnection("unittest",serverAddr,port,userName,password,false);
+				UnitTestsCore.DatabaseTools.SetDbConnection(TestBase.UnitTestDbName,serverAddr,port,userName,password,false);
 				command=Properties.Resources.dump;
 				DataCore.NonQ(command);
 				string toVersion=Assembly.GetAssembly(typeof(OpenDental.PrefL)).GetName().Version.ToString();

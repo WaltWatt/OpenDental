@@ -12,7 +12,7 @@ namespace UnitTests {
 		/// <summary></summary>
 		public static string CreateTempTable(string serverAddr, string port, string userName, string password, bool isOracle) {
 			string retVal="";
-			UnitTestsCore.DatabaseTools.SetDbConnection("unittest",serverAddr,port,userName,password,isOracle);
+			UnitTestsCore.DatabaseTools.SetDbConnection(TestBase.UnitTestDbName,serverAddr,port,userName,password,isOracle);
 			string command;
 			if(DataConnection.DBtype==DatabaseType.MySql) {
 				command="DROP TABLE IF EXISTS tempcore";
