@@ -240,7 +240,7 @@ namespace OpenDental {
 			// 
 			this.contextMenu.Popup += new System.EventHandler(this.contextMenu_Popup);
 			// 
-			// timer1
+			// timerSpellCheck
 			// 
 			this.timerSpellCheck.Interval = 500;
 			this.timerSpellCheck.Tick += new System.EventHandler(this.timerSpellCheck_Tick);
@@ -764,17 +764,20 @@ namespace OpenDental {
 					}
 				}
 			}
+			List<int> listLineHeights=GetLineHeights();
 			for(int i=ind;i<mc.Count;i++) {
-				Point start=this.GetPositionFromCharIndex(mc[i].Index);//get pos of character at index of match
-				Point end=this.GetPositionFromCharIndex(mc[i].Index+mc[i].Value.Length-1);//get pos of the char at the end of this word, to see if the 'word' spans more than one line
-				start.Y=start.Y+this.FontHeight;
-				end.Y=end.Y+this.FontHeight;
-				if(start.Y>=this.Height) {//y pos is below the visible area, with scroll bar active
-					break;
-				}
+				int startIndex=mc[i].Index;
+				int endIndex=mc[i].Index+mc[i].Value.Length-1;
+				int startLineIndex=GetLineFromCharIndex(startIndex);
+				int endLineIndex=GetLineFromCharIndex(endIndex);
+				Point start=this.GetPositionFromCharIndex(startIndex);//get pos of character at index of match
 				//word may span more than one line, so white out all lines between the starting char line and the ending char line
-				for(int j=start.Y;j<=end.Y;j+=this.FontHeight) {
-					Rectangle wavyLineArea=new Rectangle(1,j,this.Width,2);
+				for(int j=startLineIndex,y=start.Y;j<=endLineIndex;j++) {
+					y+=listLineHeights[j];
+					if(y>=this.Height) {//y pos of the bottom of the line is below the visible area, with scroll bar active.
+						break;
+					}
+					Rectangle wavyLineArea=new Rectangle(1,y,this.Width,2);
 					BufferGraphics.FillRectangle(new SolidBrush(this.BackColor),wavyLineArea);
 				}
 			}
@@ -931,19 +934,45 @@ namespace OpenDental {
 			return wordList;
 		}
 
+		///<summary>Returns a list of line heights in order of line index.</summary>
+		private List<int> GetLineHeights() {
+			using(RichTextBox rtf=new RichTextBox()) {
+				rtf.Rtf=this.Rtf;
+				rtf.Size=this.Size;
+				if(!rtf.Text.EndsWith("\r\n\t")) {
+					rtf.AppendText("\r\n\t");//This will allow us to get the Top of the fake line, which is the bottom of the last line of real text.
+				}
+				List<RichTextLineInfo> listLines=GraphicsHelper.GetTextSheetDisplayLines(rtf,-1,-1);
+				List<int> listLineHeights=new List<int>();
+				for(int i=0;i<listLines.Count-1;i++) {
+					//Top of next line minus top of current line will give us the height of the current line.
+					listLineHeights.Add(listLines[i+1].Top-listLines[i].Top);
+				}
+				return listLineHeights;
+			}
+		}
+
+		///<summary>Requires endIndex >= startIndex.</summary>
 		private void DrawWave(int startIndex,int endIndex) {
+			List<int> listLineHeights=GetLineHeights();
+			int startLineIndex=GetLineFromCharIndex(startIndex);
+			int startLineHeight=listLineHeights[startLineIndex];
 			Point start=this.GetPositionFromCharIndex(startIndex);//accounts for scroll position
 			Point end=this.GetPositionFromCharIndex(endIndex);//accounts for scroll position
-			start.Y=start.Y+this.FontHeight;//move from top of line to bottom of line
-			end.Y=end.Y+this.FontHeight;//move from top of line to bottom of line
+			start.Y=start.Y+startLineHeight;//move from top of line to bottom of line
+			end.Y=end.Y+startLineHeight;//move from top of line to bottom of line
 			if(start.Y<=4 || start.Y>=this.Height) {//Don't draw lines for text which is currently not visible.
 				return;
 			}
 			Pen pen=Pens.Red;
-			if(end.Y>start.Y) {//Mispelled word spans multiple lines
+			//Misspelled word spans multiple lines.  This should never actually happen as word wrapping
+			//does not allow this scenario to happen and ODTextBox defaults word wrapping to 'true'.
+			//The only exception is words which are longer than the line, but we are ignoring this case for now (per Nathan).
+			if(end.Y>start.Y) {
+				int lineIndex=startLineIndex;
 				Point tempEnd=start;
 				tempEnd.X=this.Width;
-				while(tempEnd.Y<=end.Y) {
+				while(tempEnd.Y<=end.Y) {//One line at a time.
 					if((tempEnd.X-start.X)>4) {//Only draw wavy line if mispelled word is at least 4 pixels wide, otherwise draw straight line
 						ArrayList pl=new ArrayList();
 						for(int i=start.X;i<=(tempEnd.X-2);i=i+4) {
@@ -957,7 +986,11 @@ namespace OpenDental {
 						BufferGraphics.DrawLine(pen,start,end);
 					}
 					start.X=1;
-					start.Y=start.Y+this.FontHeight;
+					//There is a known issue where if a word spans more than 1 line, the fontheight will only calculate correctly for
+					//the first line. The second line's fontheight will not recalculate correctly and will use the first line's static value.
+					//Per Nathan we are ignoring this case. If we do want to fix it in the future, this is the spot.
+					//lineIndex needs to be updated to use the index of the current line the word is on.
+					start.Y=start.Y+listLineHeights[lineIndex];
 					tempEnd.Y=start.Y;
 					if(tempEnd.Y==end.Y) {//We incremented to the next line and this is the last line of the mispelled word
 						tempEnd.X=end.X;
@@ -966,11 +999,12 @@ namespace OpenDental {
 						tempEnd.X=this.Width;
 					}
 				}
+				startLineIndex++;
 			}
-			else {
+			else {//end.Y==start.Y
 				if((end.X-start.X)>4) {
 					ArrayList pl=new ArrayList();
-					for(int i=start.X;i<=(end.X-2);i=i+4) {
+					for(int i=start.X;i<=(end.X-2);i=i+4) {//Only draw wavy line if misspelled word is at least 4 pixels wide, otherwise draw straight line.
 						pl.Add(new Point(i,start.Y));
 						pl.Add(new Point(i+2,start.Y+1));
 					}

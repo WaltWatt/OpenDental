@@ -115,17 +115,41 @@ namespace OpenDental {
 
 		///<summary>Returns a list of strings representing the lines of sheet text which will display on screen when viewing the specified text.</summary>
 		public static List<RichTextLineInfo> GetTextSheetDisplayLines(RichTextBox textbox) {
+			return GetTextSheetDisplayLines(textbox,-1,-1);
+		}
+
+		///<summary>Set start index or end index to -1 to return information for all lines.
+		///Returns a list of strings representing the lines of sheet text which will display on screen when viewing the specified text.</summary>
+		public static List<RichTextLineInfo> GetTextSheetDisplayLines(RichTextBox textbox,int startCharIndex,int endCharIndex) {
 			List <RichTextLineInfo> listLines=new List<RichTextLineInfo>();
-			int lineCount=GetTextLineCount(textbox);
-			for(int i=0;i<lineCount;i++) {
-				RichTextLineInfo line=new RichTextLineInfo();
-				line.FirstCharIndex=textbox.GetFirstCharIndexFromLine(i);
-				Point pos=textbox.GetPositionFromCharIndex(line.FirstCharIndex);
-				line.Left=pos.X;
-				line.Top=pos.Y;
-				listLines.Add(line);
+			int startLineIndex=0;
+			int endLineIndex=0;
+			if(startCharIndex==-1 || endCharIndex==-1) {//All lines.
+				startLineIndex=0;
+				endLineIndex=GetTextLineCount(textbox)-1;
+			}
+			else {
+				startLineIndex=textbox.GetLineFromCharIndex(startCharIndex);
+				endLineIndex=textbox.GetLineFromCharIndex(endCharIndex);
+			}
+			for(int i=startLineIndex;i<=endLineIndex;i++) {
+				listLines.Add(GetOneTextLine(textbox,i));
 			}
 			return listLines;
+		}
+
+		///<summary>If lineIndex is past the last line, then the information of the last line will be returned. </summary>
+		public static RichTextLineInfo GetOneTextLine(RichTextBox textbox,int lineIndex) {
+			RichTextLineInfo lineInfo=new RichTextLineInfo();
+			//GetFirstCharIndexFromLine() returns -1 if lineIndex is past the last line.
+			lineInfo.FirstCharIndex=textbox.GetFirstCharIndexFromLine(lineIndex);
+			if(lineInfo.FirstCharIndex==-1) {//Return the last line's information.
+				lineInfo.FirstCharIndex=textbox.GetFirstCharIndexFromLine(GetTextLineCount(textbox)-1);//First character of last line.
+			}
+			Point pos=textbox.GetPositionFromCharIndex(lineInfo.FirstCharIndex);
+			lineInfo.Left=pos.X;
+			lineInfo.Top=pos.Y;
+			return lineInfo;
 		}
 
 		public static int GetTextLineCount(RichTextBox textbox) {
