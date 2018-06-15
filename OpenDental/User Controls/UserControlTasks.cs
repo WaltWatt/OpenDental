@@ -1449,6 +1449,65 @@ namespace OpenDental {
 			FormOpenDental.S_TaskGoTo(GotoType,GotoKeyNum);
 		}
 
+		///<summary>Marks the selected task as read and updates the grid.</summary>
+		private void MarkRead(Task markedTask) {
+			if(PrefC.GetBool(PrefName.TasksNewTrackedByUser)) {
+				if(tabContr.SelectedTab==tabNew){
+					//these are never in someone else's inbox, so don't block.
+				}
+				else if(tabContr.SelectedTab==tabPatientTickets 
+					&& TaskUnreads.IsUnread(Security.CurUser.UserNum,markedTask.TaskNum)) 
+				{
+					//Task clicked is new for the user, don't block.
+				}
+				else{
+					long userNumInbox=0;
+					if(tabContr.SelectedTab.In(tabOpenTickets,tabPatientTickets)) {
+						userNumInbox=TaskLists.GetMailboxUserNumByAncestor(markedTask.TaskNum);
+					}
+					else {
+						if(_listTaskListTreeHistory.Count!=0) {
+							userNumInbox=TaskLists.GetMailboxUserNum(_listTaskListTreeHistory[0].TaskListNum);
+						}
+						else {
+							MsgBox.Show(this,"Please setup task lists before marking tasks as read.");
+							return;
+						}
+					}
+					if(userNumInbox != 0 && userNumInbox != Security.CurUser.UserNum) {
+						MsgBox.Show(this,"Not allowed to mark off tasks in someone else's inbox.");
+						return;
+					}
+				}
+				//might not need to go to db to get this info 
+				//might be able to check this:
+				//if(task.IsUnread) {
+				//But seems safer to go to db.
+				if(TaskUnreads.IsUnread(Security.CurUser.UserNum,markedTask.TaskNum)) {
+					TaskUnreads.SetRead(Security.CurUser.UserNum,markedTask.TaskNum);
+				}
+				DataValid.SetInvalidTask(markedTask.TaskNum,false);
+				//if already read, nothing else to do.  If done, nothing to do
+			}
+			else {
+				if(markedTask.TaskStatus==TaskStatusEnum.New) {
+					Task task=markedTask.Copy();
+					Task taskOld=task.Copy();
+					task.TaskStatus=TaskStatusEnum.Viewed;
+					try {
+						Tasks.Update(task,taskOld);
+						DataValid.SetInvalidTask(task.TaskNum,false);
+					}
+					catch(Exception ex) {
+						MessageBox.Show(ex.Message);
+						return;
+					}
+				}
+				//no longer allowed to mark done from here
+			}
+			//FillGrid();
+		}
+
 		private void MoveListIntoAncestor(TaskList newList,long oldListParent) {
 			if(_wasCut) {//If the TaskList was cut, move direct children of the list "up" one in the hierarchy and then update
 				List<TaskList> childLists=TaskLists.RefreshChildren(newList.TaskListNum,Security.CurUser.UserNum,0,TaskType.All);
@@ -1729,61 +1788,7 @@ namespace OpenDental {
 				return;//but ignore column 0 for now.  We would need to add that as a new feature.
 			}
 			if(clickedCol==0){//check tasks off
-				if(PrefC.GetBool(PrefName.TasksNewTrackedByUser)) {
-					if(tabContr.SelectedTab==tabNew){
-						//these are never in someone else's inbox, so don't block.
-					}
-					else if(tabContr.SelectedTab==tabPatientTickets 
-						&& TaskUnreads.IsUnread(Security.CurUser.UserNum,_listTasks[_clickedI-_listTaskLists.Count].TaskNum)) 
-					{
-						//Task clicked is new for the user, don't block.
-					}
-					else{
-						long userNumInbox=0;
-						if(tabContr.SelectedTab.In(tabOpenTickets,tabPatientTickets)) {
-							userNumInbox=TaskLists.GetMailboxUserNumByAncestor(_listTasks[_clickedI-_listTaskLists.Count].TaskNum);
-						}
-						else {
-							if(_listTaskListTreeHistory.Count!=0) {
-								userNumInbox=TaskLists.GetMailboxUserNum(_listTaskListTreeHistory[0].TaskListNum);
-							}
-							else {
-								MsgBox.Show(this,"Please setup task lists before marking tasks as read.");
-								return;
-							}
-						}
-						if(userNumInbox != 0 && userNumInbox != Security.CurUser.UserNum) {
-							MsgBox.Show(this,"Not allowed to mark off tasks in someone else's inbox.");
-							return;
-						}
-					}
-					//might not need to go to db to get this info 
-					//might be able to check this:
-					//if(task.IsUnread) {
-					//But seems safer to go to db.
-					if(TaskUnreads.IsUnread(Security.CurUser.UserNum,_listTasks[_clickedI-_listTaskLists.Count].TaskNum)) {
-						TaskUnreads.SetRead(Security.CurUser.UserNum,_listTasks[_clickedI-_listTaskLists.Count].TaskNum);
-					}
-					DataValid.SetInvalidTask(_listTasks[_clickedI-_listTaskLists.Count].TaskNum,false);
-					//if already read, nothing else to do.  If done, nothing to do
-				}
-				else {
-					if(_listTasks[_clickedI-_listTaskLists.Count].TaskStatus==TaskStatusEnum.New) {
-						Task task=_listTasks[_clickedI-_listTaskLists.Count].Copy();
-						Task taskOld=task.Copy();
-						task.TaskStatus=TaskStatusEnum.Viewed;
-						try {
-							Tasks.Update(task,taskOld);
-							DataValid.SetInvalidTask(task.TaskNum,false);
-						}
-						catch(Exception ex) {
-							MessageBox.Show(ex.Message);
-							return;
-						}
-					}
-					//no longer allowed to mark done from here
-				}
-				//FillGrid();
+				MarkRead(_listTasks[_clickedI-_listTaskLists.Count]);
 			}
 			if((tabContr.SelectedTab.In(tabNew,tabPatientTickets,tabOpenTickets) && clickedCol==2) 
 				|| (tabContr.SelectedTab!=tabNew && clickedCol==1)) 
@@ -2061,6 +2066,10 @@ namespace OpenDental {
 
 		private void menuItemGoto_Click(object sender,System.EventArgs e) {
 			Goto_Clicked();
+		}
+
+		private void menuItemMarkRead_Click(object sender,EventArgs e) {
+			MarkRead(_clickedTask);
 		}
 
 		private void menuNavJob_Click(object sender,EventArgs e,Job selectedJob) {

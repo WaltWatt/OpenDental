@@ -58,6 +58,7 @@ namespace OpenDental {
 			this.menuItemAddCommlog = new System.Windows.Forms.MenuItem();
 			this.menuItemGoto = new System.Windows.Forms.MenuItem();
 			this.menuNavJob = new System.Windows.Forms.MenuItem();
+			this.menuDeleteTaken = new System.Windows.Forms.MenuItem();
 			this.timerDoneTaskListRefresh = new System.Windows.Forms.Timer(this.components);
 			this.menuTask = new System.Windows.Forms.ContextMenu();
 			this.menuItemTaskReminder = new System.Windows.Forms.MenuItem();
@@ -65,7 +66,7 @@ namespace OpenDental {
 			this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
 			this.gridMain = new OpenDental.UI.ODGrid();
 			this.ToolBarMain = new OpenDental.UI.ODToolBar();
-			this.menuDeleteTaken = new System.Windows.Forms.MenuItem();
+			this.menuItemMarkRead = new System.Windows.Forms.MenuItem();
 			this.tabContr.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -242,6 +243,7 @@ namespace OpenDental {
             this.menuItemSendToMe,
             this.menuItemAddCommlog,
             this.menuItemGoto,
+            this.menuItemMarkRead,
             this.menuNavJob,
             this.menuDeleteTaken});
 			this.menuEdit.Popup += new System.EventHandler(this.menuEdit_Popup);
@@ -340,9 +342,16 @@ namespace OpenDental {
 			// 
 			// menuNavJob
 			// 
-			this.menuNavJob.Index = 16;
+			this.menuNavJob.Index = 17;
 			this.menuNavJob.Text = "Navigate to Job";
 			this.menuNavJob.Visible = false;
+			// 
+			// menuDeleteTaken
+			// 
+			this.menuDeleteTaken.Index = 18;
+			this.menuDeleteTaken.Text = "Delete Task Taken";
+			this.menuDeleteTaken.Visible = false;
+			this.menuDeleteTaken.Click += new System.EventHandler(this.menuDeleteTaken_Click);
 			// 
 			// timerDoneTaskListRefresh
 			// 
@@ -404,12 +413,11 @@ namespace OpenDental {
 			this.ToolBarMain.TabIndex = 2;
 			this.ToolBarMain.ButtonClick += new OpenDental.UI.ODToolBarButtonClickEventHandler(this.ToolBarMain_ButtonClick);
 			// 
-			// menuDeleteTaken
+			// menuItemMarkRead
 			// 
-			this.menuDeleteTaken.Index = 17;
-			this.menuDeleteTaken.Text = "Delete Task Taken";
-			this.menuDeleteTaken.Visible = false;
-			this.menuDeleteTaken.Click += new System.EventHandler(this.menuDeleteTaken_Click);
+			this.menuItemMarkRead.Index = 16;
+			this.menuItemMarkRead.Text = "Mark as Read";
+			this.menuItemMarkRead.Click += new System.EventHandler(this.menuItemMarkRead_Click);
 			// 
 			// UserControlTasks
 			// 
@@ -471,5 +479,6 @@ namespace OpenDental {
 		private System.Windows.Forms.MenuItem menuNavJob;
 		private System.Windows.Forms.MenuItem menuItemPriority;
 		private System.Windows.Forms.MenuItem menuDeleteTaken;
+		private System.Windows.Forms.MenuItem menuItemMarkRead;
 	}
 }
