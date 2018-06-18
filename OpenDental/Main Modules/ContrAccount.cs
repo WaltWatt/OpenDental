@@ -3968,10 +3968,7 @@ namespace OpenDental {
 		}
 		
 		private void menuItemAddMultAdj_Click(object sender,EventArgs e) {
-			FormAdjMulti FormMA=new FormAdjMulti(PatCur);
-			if(FormMA.ShowDialog() == DialogResult.OK) {
-				ModuleSelected(PatCur.PatNum);
-			}
+			AddAdjustmentToSelectedProcsHelper();
 		}
 
 		public static bool CheckClearinghouseDefaults() {
