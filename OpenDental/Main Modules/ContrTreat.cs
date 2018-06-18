@@ -2670,7 +2670,7 @@ namespace OpenDental{
 							procFee=Fees.GetFee(procCodeCur.CodeNum,patProv.FeeSched,listProcForTP[i].ClinicNum,patProv.ProvNum);
 						}
 					}
-					decimal procFeeAmt=(procFee == null) ? 0 : (decimal)procFee.Amount;
+					decimal procFeeAmt=(procFee == null) ? fee : (decimal)procFee.Amount;
 					if(checkShowIns.Checked) {
 						priIns=fee-procFeeAmt > 0 ? fee-procFeeAmt : 0;
 					}
