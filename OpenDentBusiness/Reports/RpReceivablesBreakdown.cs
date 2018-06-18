@@ -20,6 +20,7 @@ namespace OpenDentBusiness {
 											//each whereProv needs to be set up separately for each query
 			switch(tableName) {
 				case "TableCharge":
+					whereProv="";
 					if(listProvNums.Count != 0) {
 						whereProv+=" AND ProvNum IN("+string.Join(",",listProvNums)+") ";
 					}
@@ -50,6 +51,10 @@ namespace OpenDentBusiness {
 					break;
 				case "TablePayPlanCharge":
 					if(isPayPlan2) {
+						whereProv="";
+						if(listProvNums.Count != 0) {
+						  whereProv+=" AND ProvNum IN("+string.Join(",",listProvNums)+") ";
+						}
 						query="SELECT payplancharge.ChargeDate, SUM(payplancharge.Principal + payplancharge.Interest) Amt "
 						+ "FROM payplancharge "
 						+ "WHERE payplancharge.ChargeType = " +POut.Int((int)PayPlanChargeType.Debit) +" "
