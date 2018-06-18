@@ -582,8 +582,15 @@ namespace OpenDentBusiness {
 				}
 			}
 			else if(clearinghouseClin.CommBridge==EclaimsCommBridge.EDS) {
-				if(!EDS.Retrieve(clearinghouseClin,progress)) {
-					return Lans.g("FormClaimReports","Error retrieving.")+"\r\n"+EDS.ErrorMessage;
+				List<string> listEdsErrors=new List<string>();
+				if(!EDS.Retrieve277s(clearinghouseClin,progress)) {
+					listEdsErrors.Add(Lans.g("FormClaimReports","Error retrieving.")+"\r\n"+EDS.ErrorMessage);
+				}
+				if(!EDS.Retrieve835s(clearinghouseClin,progress)) {
+					listEdsErrors.Add(Lans.g("FormClaimReports","Error retrieving.")+"\r\n"+EDS.ErrorMessage);
+				}
+				if(listEdsErrors.Count>0) {
+					return string.Join("\r\n",listEdsErrors);
 				}
 			}
 			return "";

@@ -125,37 +125,50 @@ namespace OpenDentBusiness.Eclaims {
 		}
 
 		///<summary>Attempts to retrieve an End of Day report from EDS.
-		///No need to pass in a date as this web call will retrieve a 277 containing all data since last called.
-		///When clearinghouseClin.IsEraDownloadAllowed is enabled, we also attempt to retrieve a 835 since last called.</summary>
-		public static bool Retrieve(Clearinghouse clearinghouseClin,IODProgressExtended progress=null) {
+		///No need to pass in a date as this web call will retrieve a 277 containing all data since last called.</summary>
+		public static bool Retrieve277s(Clearinghouse clearinghouseClin,IODProgressExtended progress) {
 			progress=progress??new ODProgressExtendedNull();
 			progress.UpdateProgress(Lans.g(progress.LanThis,"Contacting web server and downloading reports"),"reports","17%",17);
+			bool retVal=false;
 			if(progress.IsPauseOrCancel()) {
 				progress.UpdateProgress(Lans.g(progress.LanThis,"Canceled by user."));
 				return false;
 			}
 			progress.UpdateProgress(Lans.g(progress.LanThis,"Downloading 277s"),"reports","33%",33);
-			bool retVal=Retrieve277s(clearinghouseClin);
+			retVal=Retrieve277s(clearinghouseClin);
 			if(retVal) {
 				progress.UpdateProgress(Lans.g(progress.LanThis,"Retrieved 277s successfully."));
 			}
 			else {
 				progress.UpdateProgress(Lans.g(progress.LanThis,"Retrieving 277s was unsuccessful."));
 			}
+			return retVal;
+		}
+
+		///<summary>Attempts to retrieve an End of Day report from EDS.
+		///No need to pass in a date as this web call, when clearinghouseClin.IsEraDownloadAllowed is enabled,
+		///will retrieve an 835 containing all data since last called.</summary>
+		public static bool Retrieve835s(Clearinghouse clearinghouseClin,IODProgressExtended progress) {
+			if(clearinghouseClin.IsEraDownloadAllowed==EraBehaviors.None) {
+					return true;
+			}
+			progress=progress??new ODProgressExtendedNull();
+			progress.UpdateProgress(Lans.g(progress.LanThis,"Contacting web server and downloading reports"),"reports","40%",40);
 			if(progress.IsPauseOrCancel()) {
 				progress.UpdateProgress(Lans.g(progress.LanThis,"Canceled by user."));
 				return false;
 			}
-			if(clearinghouseClin.IsEraDownloadAllowed!=EraBehaviors.None) {
-				progress.UpdateProgress(Lans.g(progress.LanThis,"Downloading ERAs"),"reports","50%",50);
-				if(progress.IsPauseOrCancel()) {
-					progress.UpdateProgress(Lans.g(progress.LanThis,"Canceled by user."));
-					return false;
-				}
-				if(retVal) {//We successfully retrieved 277s
-					retVal=Retrieve835s(clearinghouseClin);
-					progress.UpdateProgress(Lans.g(progress.LanThis,"Retrieved 835s successfully."));
-				}
+			progress.UpdateProgress(Lans.g(progress.LanThis,"Downloading ERAs"),"reports","50%",50);
+			if(progress.IsPauseOrCancel()) {
+				progress.UpdateProgress(Lans.g(progress.LanThis,"Canceled by user."));
+				return false;
+			}
+			bool retVal=Retrieve835s(clearinghouseClin);
+			if(retVal) {
+				progress.UpdateProgress(Lans.g(progress.LanThis,"Retrieved 835s successfully."));
+			}
+			else {
+				progress.UpdateProgress(Lans.g(progress.LanThis,"Retrieving 835s was unsuccessful."));
 			}
 			return retVal;
 		}
