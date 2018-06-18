@@ -541,7 +541,7 @@ namespace OpenDental {
 				return;
 			}
 			Clinic clinic=(Clinic)gridMain.Rows[e.Row].Tag;
-			DefLinkClinic defLinkClinic=_listDefLinkClinicSpecialties.Find(x=>x.Clinic.Equals(clinic));
+			DefLinkClinic defLinkClinic=_listDefLinkClinicSpecialties.Find(x=>x.Clinic.ClinicNum==clinic.ClinicNum);
 			FormClinicEdit FormCE=new FormClinicEdit(((Clinic)gridMain.Rows[e.Row].Tag).Copy(),defLinkClinic);
 			if(FormCE.ShowDialog()==DialogResult.OK) {
 				if(FormCE.ClinicCur==null) {//Clinic was deleted
@@ -556,7 +556,7 @@ namespace OpenDental {
 				}
 				else { 
 					ListClinics[ListClinics.IndexOf(clinic)]=FormCE.ClinicCur;
-					defLinkClinic=_listDefLinkClinicSpecialties.Find(x=>x.Clinic.Equals(clinic));
+					defLinkClinic=_listDefLinkClinicSpecialties.Find(x=>x.Clinic.ClinicNum==clinic.ClinicNum);
 					if(defLinkClinic!=null) {
 						defLinkClinic=FormCE.DefLinkClinicSpecialties;
 					}
