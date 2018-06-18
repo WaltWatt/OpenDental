@@ -30,7 +30,7 @@ namespace OpenDentBusiness {
 			DtoGetTable dto=new DtoGetTable();
 			dto.MethodName=methodBase.DeclaringType.Namespace+"."
 				+methodBase.DeclaringType.Name+"."+methodBase.Name;
-			dto.Params=DtoObject.ConstructArray(parameters,GetParamTypes(methodBase));
+			dto.Params=DtoObject.ConstructArray(methodBase,parameters);
 			dto.Credentials=new Credentials();
 			dto.Credentials.Username=Security.CurUser.UserName;
 			dto.Credentials.Password=Security.PasswordTyped;//.CurUser.Password;
@@ -99,7 +99,7 @@ namespace OpenDentBusiness {
 			DtoGetDS dto=new DtoGetDS();
 			dto.MethodName=methodBase.DeclaringType.Namespace+"."
 				+methodBase.DeclaringType.Name+"."+methodBase.Name;
-			dto.Params=DtoObject.ConstructArray(parameters,GetParamTypes(methodBase));
+			dto.Params=DtoObject.ConstructArray(methodBase,parameters);
 			dto.Credentials=new Credentials();
 			dto.Credentials.Username=Security.CurUser.UserName;
 			dto.Credentials.Password=Security.PasswordTyped;//.CurUser.Password;
@@ -140,7 +140,7 @@ namespace OpenDentBusiness {
 			DtoGetSerializableDictionary dto=new DtoGetSerializableDictionary();
 			dto.MethodName=methodBase.DeclaringType.Namespace+"."
 				+methodBase.DeclaringType.Name+"."+methodBase.Name;
-			dto.Params=DtoObject.ConstructArray(parameters,GetParamTypes(methodBase));
+			dto.Params=DtoObject.ConstructArray(methodBase,parameters);
 			dto.Credentials=new Credentials();
 			dto.Credentials.Username=Security.CurUser.UserName;
 			dto.Credentials.Password=Security.PasswordTyped;//.CurUser.Password;
@@ -181,7 +181,7 @@ namespace OpenDentBusiness {
 			DtoGetLong dto=new DtoGetLong();
 			dto.MethodName=methodBase.DeclaringType.Namespace+"."
 				+methodBase.DeclaringType.Name+"."+methodBase.Name;
-			dto.Params=DtoObject.ConstructArray(parameters,GetParamTypes(methodBase));
+			dto.Params=DtoObject.ConstructArray(methodBase,parameters);
 			dto.Credentials=new Credentials();
 			dto.Credentials.Username=Security.CurUser.UserName;
 			dto.Credentials.Password=Security.PasswordTyped;//.CurUser.Password;
@@ -222,7 +222,7 @@ namespace OpenDentBusiness {
 			DtoGetInt dto=new DtoGetInt();
 			dto.MethodName=methodBase.DeclaringType.Namespace+"."
 				+methodBase.DeclaringType.Name+"."+methodBase.Name;
-			dto.Params=DtoObject.ConstructArray(parameters,GetParamTypes(methodBase));
+			dto.Params=DtoObject.ConstructArray(methodBase,parameters);
 			dto.Credentials=new Credentials();
 			dto.Credentials.Username=Security.CurUser.UserName;
 			dto.Credentials.Password=Security.PasswordTyped;//.CurUser.Password;
@@ -263,7 +263,7 @@ namespace OpenDentBusiness {
 			DtoGetDouble dto=new DtoGetDouble();
 			dto.MethodName=methodBase.DeclaringType.Namespace+"."
 				+methodBase.DeclaringType.Name+"."+methodBase.Name;
-			dto.Params=DtoObject.ConstructArray(parameters,GetParamTypes(methodBase));
+			dto.Params=DtoObject.ConstructArray(methodBase,parameters);
 			dto.Credentials=new Credentials();
 			dto.Credentials.Username=Security.CurUser.UserName;
 			dto.Credentials.Password=Security.PasswordTyped;//.CurUser.Password;
@@ -304,7 +304,7 @@ namespace OpenDentBusiness {
 			DtoGetVoid dto=new DtoGetVoid();
 			dto.MethodName=methodBase.DeclaringType.Namespace+"."
 				+methodBase.DeclaringType.Name+"."+methodBase.Name;
-			dto.Params=DtoObject.ConstructArray(parameters,GetParamTypes(methodBase));
+			dto.Params=DtoObject.ConstructArray(methodBase,parameters);
 			dto.Credentials=new Credentials();
 			dto.Credentials.Username=Security.CurUser.UserName;
 			dto.Credentials.Password=Security.PasswordTyped;//.CurUser.Password;
@@ -338,7 +338,7 @@ namespace OpenDentBusiness {
 			}
 			dto.MethodName=methodBase.DeclaringType.Namespace+"."
 				+methodBase.DeclaringType.Name+"."+methodBase.Name;
-			dto.Params=DtoObject.ConstructArray(parameters,GetParamTypes(methodBase));
+			dto.Params=DtoObject.ConstructArray(methodBase,parameters);
 			dto.Credentials=new Credentials();
 			dto.Credentials.Username=Security.CurUser.UserName;
 			dto.Credentials.Password=Security.PasswordTyped;//.CurUser.Password;
@@ -382,7 +382,7 @@ namespace OpenDentBusiness {
 			DtoGetString dto=new DtoGetString();
 			dto.MethodName=methodBase.DeclaringType.Namespace+"."
 				+methodBase.DeclaringType.Name+"."+methodBase.Name;
-			dto.Params=DtoObject.ConstructArray(parameters,GetParamTypes(methodBase));
+			dto.Params=DtoObject.ConstructArray(methodBase,parameters);
 			dto.Credentials=new Credentials();
 			dto.Credentials.Username=Security.CurUser.UserName;
 			dto.Credentials.Password=Security.PasswordTyped;//.CurUser.Password;
@@ -410,7 +410,7 @@ namespace OpenDentBusiness {
 			DtoGetBool dto=new DtoGetBool();
 			dto.MethodName=methodBase.DeclaringType.Namespace+"."
 				+methodBase.DeclaringType.Name+"."+methodBase.Name;
-			dto.Params=DtoObject.ConstructArray(parameters,GetParamTypes(methodBase));
+			dto.Params=DtoObject.ConstructArray(methodBase,parameters);
 			dto.Credentials=new Credentials();
 			dto.Credentials.Username=Security.CurUser.UserName;
 			dto.Credentials.Password=Security.PasswordTyped;//.CurUser.Password;
@@ -428,15 +428,6 @@ namespace OpenDentBusiness {
 				}
 			}
 			return retval;
-		}
-
-		private static Type[] GetParamTypes(MethodBase methodBase) {
-			ParameterInfo[] paramInfo=methodBase.GetParameters();
-			Type[] retVal=new Type[paramInfo.Length];
-			for(int i=0;i<paramInfo.Length;i++) {
-				retVal[i]=paramInfo[i].ParameterType;
-			}
-			return retVal;
 		}
 
 		///<summary>Fires a CredentialsFailedAfterLoginEvent to notify the main thread that the user needs to log in again.

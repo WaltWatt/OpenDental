@@ -155,17 +155,45 @@ namespace OpenDentBusiness {
 			return (null);
 		}
 
-		///<summary>We must pass in a matching array of types for situations where nulls are used in parameters.
-		///Otherwise, we won't know the parameter type.
+		///<summary>We must pass in the MethodBase for the method that is being invoked for situations where nulls are used in parameters.
+		///Otherwise, we won't know the parameter types of the arguments that the method takes.
+		///MethodBase is also required for identifying unique parameters (e.g. detecting if the only parameter is an array).
 		///This method needs to create a "deep copy" of all objects passed in because we will be escaping characters within string variables.
 		///Since we do not know what objects are being passed in, we decided to use JSON to generically serialize each object.
-		///JSON seems to handle invalid characters better than XML even though it has its own quirks.</summary>
-		public static DtoObject[] ConstructArray(object[] objArray,Type[] objTypes) {
-			DtoObject[] retVal=new DtoObject[objArray.Length];
+		///JSON seems to handle invalid characters better than XML even though it has its own quirks.
+		///Throws exceptions if an invalid amount of objects was passed in for the desired method.</summary>
+		public static DtoObject[] ConstructArray(MethodBase methodBase,object[] objArray) {
+			ParameterInfo[] arrayParameterInfos=methodBase.GetParameters();
+			DtoObject[] retVal=new DtoObject[arrayParameterInfos.Length];
 			JsonSerializerSettings jsonSettings=new JsonSerializerSettings() { TypeNameHandling=TypeNameHandling.Auto };
-			for(int i=0;i<objArray.Length;i++) {
+			bool isSingleArray=false;
+			//Methods that only have one parameter that is an array get treated differently for some reason.
+			//Their objArray will contain an entry for every entity within the array instead of a single object that is the array itself.
+			//E.g. invoking a method signature like "Method(object[])" with several objects will translate to X objects (object1,object2,object3...) 
+			//instead of a single object (object[]) but a method like "Method(object[],bool)" or even "Method(bool,object[])" 
+			//will translate correctly into two objects (object[],bool) or (bool,object[]).
+			//Therefore, when we have exactly one parameter, check to see if it is an array and if it is, artifically group together all objects
+			//that were passed into objArray so that we end up with one and only one DtoObject that represents an array of objects.
+			if(arrayParameterInfos.Length==1 && arrayParameterInfos[0].ParameterType.IsArray) {
+				isSingleArray=true;
+			}
+			//Methods that utilize the params keyword will allow a variable number of arguments in its invocation.
+			//Therefore, the number of objects passed in objArray is not guaranteed to be the same length as arrayParameterInfos.
+			//Only validate that the length of both arrays are equal when an array is the only argument passed in OR the params keyword is not used.
+			if(!isSingleArray && arrayParameterInfos.All(x => x.GetCustomAttributes(typeof(ParamArrayAttribute)).Count()==0)) {
+				//Verify that the correct number of objects were passed in.
+				if(objArray.Length!=arrayParameterInfos.Length) {
+					throw new ApplicationException("Middle Tier, incorrect number of parameters passed to method "+methodBase.Name+".\r\n"
+						+"Expected parameter count: "+arrayParameterInfos.Length+"\r\n"
+						+"Actual parameter count: "+objArray.Length);
+				}
+			}
+			for(int i=0;i<arrayParameterInfos.Length;i++) {
 				object objCur=objArray[i];
-				Type typeCur=objTypes[i];
+				if(isSingleArray) {
+					objCur=objArray;//We need to treat this object as the entire array of objects that was passed in.
+				}
+				Type typeCur=arrayParameterInfos[i].ParameterType;
 				DtoObject dtoCur=new DtoObject(objCur,typeCur);
 				Type typeElement=typeCur;
 				if(typeCur!=typeof(string) && typeCur.IsGenericType) {//get the type of the items in the List

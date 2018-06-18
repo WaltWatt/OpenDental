@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using OpenDentBusiness;
 using System.Data;
 using System.Drawing;
+using CodeBase;
 
 namespace UnitTests.MiddleTier {
 	[TestClass]
@@ -303,6 +304,17 @@ namespace UnitTests.MiddleTier {
 			Assert.AreEqual(listRetVals[1].ScheduleNum,23);
 		}
 
+		///<summary>The purpose of this test is to make sure middle tier can invoke methods that utilize the params keyword with other args.</summary>
+		[TestMethod]
+		public void MiddleTier_SendObjectParamsWithArgs() {
+			List<Schedule> listRetVals=WebServiceTests.SendObjectParamsWithArgs(true,WebServiceTests.DirtyString
+				,new Schedule() { ScheduleNum=5 }
+				,new Schedule() { ScheduleNum=23 });
+			Assert.AreEqual(listRetVals.Count,2);
+			Assert.AreEqual(listRetVals[0].ScheduleNum,5);
+			Assert.AreEqual(listRetVals[1].ScheduleNum,23);
+		}
+
 		[TestMethod]
 		public void MiddleTier_SendColorParam() {
 			Color colorResult=WebServiceTests.SendColorParam(Color.Green);
@@ -572,6 +584,34 @@ namespace UnitTests.MiddleTier {
 				strErrors.Add("The dirty string was altered from the simulated update call.");
 			}
 			Assert.IsTrue(strErrors.Count==0);
+		}
+
+		///<summary>This test explicitly tests that Middle Tier does not invoke polymorphisms when passed an incorrect number of parameters.</summary>
+		[TestMethod]
+		public void MiddleTier_InvalidWebMethod_TooFew() {
+			bool hasFailed=false;
+			try {
+				WebServiceTests.InvalidWebMethod(true);
+			}
+			catch(Exception ex) {
+				ex.DoNothing();
+				hasFailed=true;
+			}
+			Assert.IsTrue(hasFailed);
+		}
+
+		///<summary>This test explicitly tests that Middle Tier does not invoke polymorphisms when passed an incorrect number of parameters.</summary>
+		[TestMethod]
+		public void MiddleTier_InvalidWebMethod_TooMany() {
+			bool hasFailed=false;
+			try {
+				WebServiceTests.InvalidWebMethod();
+			}
+			catch(Exception ex) {
+				ex.DoNothing();
+				hasFailed=true;
+			}
+			Assert.IsTrue(hasFailed);
 		}
 
 	}

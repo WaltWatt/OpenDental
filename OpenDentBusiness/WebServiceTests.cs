@@ -272,6 +272,19 @@ namespace OpenDentBusiness {
 			return arraySchedules.ToList();
 		}
 
+		public static List<Schedule> SendObjectParamsWithArgs(bool argBool,string argString,params Schedule[] arraySchedules) {
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				return Meth.GetObject<List<Schedule>>(MethodBase.GetCurrentMethod(),argBool,argString,arraySchedules);
+			}
+			if(!argBool) {
+				throw new ArgumentException("Invalid boolean value.  Required to be set to true.","argBool");
+			}
+			if(argString!=DirtyString) {
+				throw new ArgumentException("Invalid string value.  Required to be equal to DirtyString.","argString");
+			}
+			return arraySchedules.ToList();
+		}
+
 		public static Color SendColorParam(Color color) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
 				return Meth.GetObject<Color>(MethodBase.GetCurrentMethod(),color);
@@ -458,5 +471,22 @@ namespace OpenDentBusiness {
 			}
 			return true;
 		}
+
+		///<summary>This invalid web method should NOT invoke the polymorphism below.</summary>
+		public static void InvalidWebMethod(bool argBool) {
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				Meth.GetVoid(MethodBase.GetCurrentMethod());//Purposefully invalid middle tier call.
+				return;
+			}
+		}
+
+		///<summary>This invalid web method should NOT invoke the polymorphism above.</summary>
+		public static void InvalidWebMethod() {
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				Meth.GetVoid(MethodBase.GetCurrentMethod(),true);//Purposefully invalid middle tier call.
+				return;
+			}
+		}
+
 	}
 }
