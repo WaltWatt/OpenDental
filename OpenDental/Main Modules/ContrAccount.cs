@@ -3601,12 +3601,12 @@ namespace OpenDental {
 			else if(table.Rows[e.Row]["AdjNum"].ToString()!="0"){
 				Adjustment adj=Adjustments.GetOne(PIn.Long(table.Rows[e.Row]["AdjNum"].ToString()));
 				if(adj==null) {
-					MsgBox.Show(this,"The adjustment has been deleted.");
-					ModuleSelected(PatCur.PatNum);//refresh the screen so user can see adjustment doesn't exist. 
-					return;
+					MsgBox.Show(this,"The adjustment has been deleted.");//Don't return. Fall through to the refresh. 
 				}
-				FormAdjust FormAdj=new FormAdjust(PatCur,adj);
-				FormAdj.ShowDialog();
+				else {
+					FormAdjust FormAdj=new FormAdjust(PatCur,adj);
+					FormAdj.ShowDialog();
+				}
 			}
 			else if(table.Rows[e.Row]["PayNum"].ToString()!="0"){
 				Payment PaymentCur=Payments.GetPayment(PIn.Long(table.Rows[e.Row]["PayNum"].ToString()));
@@ -3645,9 +3645,14 @@ namespace OpenDental {
 			}
 			else if(table.Rows[e.Row]["StatementNum"].ToString()!="0"){
 				Statement stmt=Statements.GetStatement(PIn.Long(table.Rows[e.Row]["StatementNum"].ToString()));
-				FormStatementOptions FormS=new FormStatementOptions();
-				FormS.StmtCur=stmt;
-				FormS.ShowDialog();
+				if(stmt==null) {
+					MsgBox.Show(this,"The statement has been deleted");//Don't return. Fall through to the refresh. 
+				}
+				else {
+					FormStatementOptions FormS=new FormStatementOptions();
+					FormS.StmtCur=stmt;
+					FormS.ShowDialog();
+				}
 			}
 			else if(table.Rows[e.Row]["PayPlanNum"].ToString()!="0"){
 				PayPlan payplan=PayPlans.GetOne(PIn.Long(table.Rows[e.Row]["PayPlanNum"].ToString()));
