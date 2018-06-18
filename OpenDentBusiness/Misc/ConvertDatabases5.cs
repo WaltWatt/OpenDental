@@ -8534,7 +8534,7 @@ No Action Required in many cases, check your new patient Web Sched on your web s
 			try {
 				if(DataConnection.DBtype==DatabaseType.MySql) {
 					//Add a composite index of the ClinicNum and SchedType columns and call the new index ClinicNumSchedType.
-					if(!LargeTableHelper.IndexExists("schedule","ClinicNumSchedType")) {
+					if(!LargeTableHelper.IndexExists("schedule","ClinicNum,SchedType")) {
 						LargeTableHelper.AlterLargeTable("schedule","ScheduleNum",null
 							,new List<Tuple<string,string>> { Tuple.Create("ClinicNum,SchedType","ClinicNumSchedType") });
 					}
