@@ -572,53 +572,59 @@ namespace OpenDentBusiness {
 			UserOdPref userPrefDoseSpotID=GetDoseSpotUserIdFromPref(userCur.UserNum,clinicNum);
 			//If the current user doesn't have a valid User ID, go retreive one from DoseSpot.
 			if(userPrefDoseSpotID==null || string.IsNullOrWhiteSpace(userPrefDoseSpotID.ValueString)) {
-				UserOdPref otherRegisteredClinician=UserOdPrefs.GetAllByFkeyAndFkeyType(programErx.ProgramNum,UserOdFkeyType.Program)
-					.FirstOrDefault(x => !string.IsNullOrWhiteSpace(x.ValueString) && Userods.GetUser(x.UserNum).ProvNum!=0);
-				//userCur.ProvNum==0 means that this is a real clinician.  
-				//We can add proxy clinicians for no charge, but actual clinicians will incur a fee.
-				if(!Erx.IsUserAnEmployee(userCur) || otherRegisteredClinician==null) {
-					//Either the prov isn't registered, or there are no credentials to create the proxy clinician.
-					//Either way, we want the user to know they need to register the provider.
-					throw new ODException("Missing DoseSpot User ID for provider.  Call support to register provider, then enter User ID into security window.");
-				}
-				//Get the provider from the doseSpotUserID we are using.  This ensures that DoseSpot knows the provider is valid,
-				//instead of passing in the patient's primary provider, which may not be registered in DoseSpot.
-				Provider provOther=Providers.GetProv(Userods.GetUser(otherRegisteredClinician.UserNum).ProvNum);
-				ValidateProvider(provOther,clinicNum);
-				string defaultDoseSpotUserID=otherRegisteredClinician.ValueString;
-				string clinicID="";
-				string clinicKey="";
-				GetClinicIdAndKey(clinicNum,defaultDoseSpotUserID,programErx,null,out clinicID,out clinicKey);
-				DoseSpotService.API api=new DoseSpotService.API();
-				DoseSpotService.ClinicianAddMessage req=new DoseSpotService.ClinicianAddMessage();
-				req.SingleSignOn=GetSingleSignOn(clinicID,clinicKey,defaultDoseSpotUserID,false);
-				EmailAddress email=EmailAddresses.GetForUser(userCur.UserNum);
-				if(email==null || string.IsNullOrWhiteSpace(email.EmailUsername)) {
-					throw new ODException("Invalid email address for the current user.");
-				}
-				req.Clinician=MakeDoseSpotClinician(provOther,clinicCur,email.EmailUsername,true);//If the user isn't a provider, they are a proxy clinician.
-#if DEBUG
-				//This code will output the XML into the console.  This may be needed for DoseSpot when troubleshooting issues.
-				//This XML will be the soap body and exclude the header and envelope.
-				System.Xml.Serialization.XmlSerializer xml=new System.Xml.Serialization.XmlSerializer(req.GetType());
-				xml.Serialize(Console.Out,req);
-#endif
-				DoseSpotService.ClinicianAddResultsMessage res=api.ClinicianAdd(req);
-				if(res.Result!=null && (res.Result.ResultCode.ToLower().Contains("error") || res.Clinician==null)) {
-					throw new Exception(res.Result.ResultDescription);
-				}
-				retVal=res.Clinician.ClinicianId.ToString();
-				//Since userPrefDoseSpotID can't be null, we just overwrite all of the fields to be sure that they are correct.
-				userPrefDoseSpotID.UserNum=userCur.UserNum;
-				userPrefDoseSpotID.Fkey=programErx.ProgramNum;
-				userPrefDoseSpotID.FkeyType=UserOdFkeyType.Program;
-				userPrefDoseSpotID.ValueString=retVal;
-				if(userPrefDoseSpotID.IsNew) {
-					UserOdPrefs.Insert(userPrefDoseSpotID);
-				}
-				else {
-					UserOdPrefs.Update(userPrefDoseSpotID);
-				}
+				//If there is no UserId for this user, throw an exception.  The below code was when we thought the Podio database matched the DoseSpot database.
+				//The below code would add a proxy clinician via the API and give back the DoseSpot User ID.
+				//This was causing issues with Podio and making sure the proxy clinician has access to the appropriate clinics.
+				throw new ODException("Missing DoseSpot User ID for user.  Call support to register provider or proxy user, then enter User ID into security window.");
+				#region Old Proxy User Registration
+				//        UserOdPref otherRegisteredClinician=UserOdPrefs.GetAllByFkeyAndFkeyType(programErx.ProgramNum,UserOdFkeyType.Program)
+				//          .FirstOrDefault(x => !string.IsNullOrWhiteSpace(x.ValueString) && Userods.GetUser(x.UserNum).ProvNum!=0);
+				//        //userCur.ProvNum==0 means that this is a real clinician.  
+				//        //We can add proxy clinicians for no charge, but actual clinicians will incur a fee.
+				//        if(!Erx.IsUserAnEmployee(userCur) || otherRegisteredClinician==null) {
+				//          //Either the prov isn't registered, or there are no credentials to create the proxy clinician.
+				//          //Either way, we want the user to know they need to register the provider.
+				//          throw new ODException("Missing DoseSpot User ID for provider.  Call support to register provider, then enter User ID into security window.");
+				//        }
+				//        //Get the provider from the doseSpotUserID we are using.  This ensures that DoseSpot knows the provider is valid,
+				//        //instead of passing in the patient's primary provider, which may not be registered in DoseSpot.
+				//        Provider provOther=Providers.GetProv(Userods.GetUser(otherRegisteredClinician.UserNum).ProvNum);
+				//				ValidateProvider(provOther,clinicNum);
+				//				string defaultDoseSpotUserID=otherRegisteredClinician.ValueString;
+				//				string clinicID="";
+				//				string clinicKey="";
+				//				GetClinicIdAndKey(clinicNum,defaultDoseSpotUserID,programErx,null,out clinicID,out clinicKey);
+				//				DoseSpotService.API api=new DoseSpotService.API();
+				//				DoseSpotService.ClinicianAddMessage req=new DoseSpotService.ClinicianAddMessage();
+				//				req.SingleSignOn=GetSingleSignOn(clinicID,clinicKey,defaultDoseSpotUserID,false);
+				//				EmailAddress email=EmailAddresses.GetForUser(userCur.UserNum);
+				//				if(email==null || string.IsNullOrWhiteSpace(email.EmailUsername)) {
+				//					throw new ODException("Invalid email address for the current user.");
+				//				}
+				//				req.Clinician=MakeDoseSpotClinician(provOther,clinicCur,email.EmailUsername,true);//If the user isn't a provider, they are a proxy clinician.
+				//#if DEBUG
+				//				//This code will output the XML into the console.  This may be needed for DoseSpot when troubleshooting issues.
+				//				//This XML will be the soap body and exclude the header and envelope.
+				//				System.Xml.Serialization.XmlSerializer xml=new System.Xml.Serialization.XmlSerializer(req.GetType());
+				//				xml.Serialize(Console.Out,req);
+				//#endif
+				//				DoseSpotService.ClinicianAddResultsMessage res=api.ClinicianAdd(req);
+				//				if(res.Result!=null && (res.Result.ResultCode.ToLower().Contains("error") || res.Clinician==null)) {
+				//					throw new Exception(res.Result.ResultDescription);
+				//				}
+				//				retVal=res.Clinician.ClinicianId.ToString();
+				//				//Since userPrefDoseSpotID can't be null, we just overwrite all of the fields to be sure that they are correct.
+				//				userPrefDoseSpotID.UserNum=userCur.UserNum;
+				//				userPrefDoseSpotID.Fkey=programErx.ProgramNum;
+				//				userPrefDoseSpotID.FkeyType=UserOdFkeyType.Program;
+				//				userPrefDoseSpotID.ValueString=retVal;
+				//				if(userPrefDoseSpotID.IsNew) {
+				//					UserOdPrefs.Insert(userPrefDoseSpotID);
+				//				}
+				//				else {
+				//					UserOdPrefs.Update(userPrefDoseSpotID);
+				//				}
+				#endregion
 			}
 			else {
 				retVal=userPrefDoseSpotID.ValueString;
