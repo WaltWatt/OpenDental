@@ -186,7 +186,7 @@ namespace OpenDental {
 					report.AddSubTitle("Clinics",Lan.g(this,"All Clinics"));
 				}
 				else {
-					string clinNames = string.Join(", ",listUnearnedAllocationTypes.SelectedItems.OfType<ODBoxItem<Clinic>>().Select(x => x.Tag.Abbr));
+					string clinNames = string.Join(", ",listUnearnedAllocationClins.SelectedItems.OfType<ODBoxItem<Clinic>>().Select(x => x.Tag.Abbr));
 					report.AddSubTitle("Clinics",clinNames);
 				}
 			}
@@ -287,7 +287,7 @@ namespace OpenDental {
 					report.AddSubTitle("Clinics",Lan.g(this,"All Clinics"));
 				}
 				else {
-					string clinNames = string.Join(", ",listNetUnearnedTypes.SelectedItems.OfType<ODBoxItem<Clinic>>().Select(x => x.Tag.Abbr));
+					string clinNames = string.Join(", ",listNetUnearnedClins.SelectedItems.OfType<ODBoxItem<Clinic>>().Select(x => x.Tag.Abbr));
 					report.AddSubTitle("Clinics",clinNames);
 				}
 			}
@@ -341,7 +341,7 @@ namespace OpenDental {
 					report.AddSubTitle("Clinics",Lan.g(this,"All Clinics"));
 				}
 				else {
-					string clinNames = string.Join(",",listLineItemClins.SelectedItems.OfType<Clinic>().Select(x => x.Abbr));
+					string clinNames = string.Join(",",listLineItemClins.SelectedItems.OfType<ODBoxItem<Clinic>>().Select(x => x.Tag.Abbr));
 					report.AddSubTitle("Clinics",clinNames);
 				}
 			}
@@ -405,7 +405,7 @@ namespace OpenDental {
 					report.AddSubTitle("Clinics",Lan.g(this,"All Clinics"));
 				}
 				else {
-					string clinNames = string.Join(",",listUnearnedAcctClins.SelectedItems.OfType<Clinic>().Select(x => x.Abbr));
+					string clinNames = string.Join(",",listUnearnedAcctClins.SelectedItems.OfType<ODBoxItem<Clinic>>().Select(x => x.Tag.Abbr));
 					report.AddSubTitle("Clinics",clinNames);
 				}
 			}
