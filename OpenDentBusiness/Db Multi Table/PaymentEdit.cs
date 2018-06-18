@@ -126,6 +126,9 @@ namespace OpenDentBusiness {
 					data.ListProcsCompleted[i].ProcFee=patPortion;
 				}
 			}
+			else {
+				data.ListProcsCompleted.ForEach(x => x.ProcFee*=Math.Max(1,x.BaseUnits+x.UnitQty));
+			}
 			return data;
 		}
 
