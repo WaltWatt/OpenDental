@@ -2793,8 +2793,8 @@ namespace OpenDentBusiness {
 			//Look at the comments for claimProc.DateEntry, if not set then the claimProc has no financial meaning yet.
 			string command=@"SELECT claimproc.*
 				FROM claimproc 
-				INNER JOIN claim ON claim.ClaimNum=claimProc.ClaimNum
-				WHERE (claimProc.PatNum!=claim.PatNum)";
+				INNER JOIN claim ON claim.ClaimNum=claimproc.ClaimNum
+				WHERE (claimproc.PatNum!=claim.PatNum)";
 			List<ClaimProc> listClaimProcs=Crud.ClaimProcCrud.SelectMany(command);
 			if(listClaimProcs.Count==0 && !verbose) {
 				return "";
