@@ -272,19 +272,37 @@ namespace OpenDentBusiness{
 
 		///<summary>Set validate to true to throw an exception if start and stop times need to be validated.  If validate is set to false, then the calling code is responsible for the validation.  Also inserts necessary scheduleop enteries.  Insert an invalid schedule signalod when hasSignal=true.</summary>
 		public static long Insert(Schedule sched,bool validate,bool hasSignal=true){
+			//No need to check RemotingRole; no call to db.
+			Insert(validate,hasSignal,sched);
+			return sched.ScheduleNum;
+		}
+
+		///<summary>Set validate to true to throw an exception if start and stop times need to be validated.
+		///If validate is set to false, then the calling code is responsible for the validation.  Also inserts necessary scheduleop enteries.
+		///Inserts an invalid schedule signalod for each schedule passed in when hasSignal=true.</summary>
+		public static void Insert(bool validate,bool hasSignal,params Schedule[] arraySchedules) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				sched.ScheduleNum=Meth.GetLong(MethodBase.GetCurrentMethod(),sched,validate,hasSignal);
-				return sched.ScheduleNum;
+				Meth.GetVoid(MethodBase.GetCurrentMethod(),validate,hasSignal,arraySchedules);
+				return;
 			}
 			if(validate) {
-				Validate(sched);
+				foreach(Schedule schedule in arraySchedules) {
+					Validate(schedule);
+				}
 			}
-			Crud.ScheduleCrud.Insert(sched);
+			//For now we have to insert each schedule one at a time in order to correctly set the PK for any subsequent FK relationships (e.g. scheduleops).
+			//Crud.ScheduleCrud.InsertMany(listSchedules);
+			foreach(Schedule schedule in arraySchedules) {
+				Crud.ScheduleCrud.Insert(schedule);
+			}
 			if(hasSignal) {
-				Signalods.SetInvalidSched(sched);
+				Signalods.SetInvalidSched(arraySchedules);
 			}
-			sched.Ops.ForEach(x => ScheduleOps.Insert(new ScheduleOp { ScheduleNum=sched.ScheduleNum,OperatoryNum=x }));
-			return sched.ScheduleNum;
+			//Create a new ScheduleOp object for every single OperatoryNum within each schedule's Ops variable.
+			List<ScheduleOp> listScheduleOps=arraySchedules.SelectMany(
+					x => x.Ops.Select(y => new ScheduleOp { ScheduleNum=x.ScheduleNum,OperatoryNum=y })).ToList();
+			//Bulk insert all of the schedule ops we just created.
+			Crud.ScheduleOpCrud.InsertMany(listScheduleOps);
 		}
 
 		///<summary></summary>

@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Text;
 
 namespace OpenDentBusiness.Crud{
 	public class ScheduleCrud {
@@ -162,6 +163,57 @@ namespace OpenDentBusiness.Crud{
 				schedule.ScheduleNum=Db.NonQ(command,true,"ScheduleNum","schedule",paramNote);
 			}
 			return schedule.ScheduleNum;
+		}
+
+		///<summary>Inserts many Schedules into the database.  Provides option to use the existing priKey.</summary>
+		public static void InsertMany(List <Schedule> listSchedules){
+			if(DataConnection.DBtype==DatabaseType.Oracle || PrefC.RandomKeys) {
+				foreach(Schedule schedule in listSchedules) {
+					Insert(schedule);
+				}
+			}
+			else {
+				StringBuilder sbCommands=null;
+				int index=0;
+				while(index < listSchedules.Count) {
+					Schedule schedule=listSchedules[index];
+					StringBuilder sbRow=new StringBuilder("(");
+					bool hasComma=false;
+					if(sbCommands==null) {
+						sbCommands=new StringBuilder();
+						sbCommands.Append("INSERT INTO schedule (");
+						sbCommands.Append("SchedDate,StartTime,StopTime,SchedType,ProvNum,BlockoutType,Note,Status,EmployeeNum,ClinicNum) VALUES ");
+					}
+					else {
+						hasComma=true;
+					}
+					sbRow.Append(POut.Date(schedule.SchedDate)); sbRow.Append(",");
+					sbRow.Append(POut.Time(schedule.StartTime)); sbRow.Append(",");
+					sbRow.Append(POut.Time(schedule.StopTime)); sbRow.Append(",");
+					sbRow.Append(POut.Int((int)schedule.SchedType)); sbRow.Append(",");
+					sbRow.Append(POut.Long(schedule.ProvNum)); sbRow.Append(",");
+					sbRow.Append(POut.Long(schedule.BlockoutType)); sbRow.Append(",");
+					sbRow.Append("'"+POut.String(schedule.Note)+"'"); sbRow.Append(",");
+					sbRow.Append(POut.Int((int)schedule.Status)); sbRow.Append(",");
+					sbRow.Append(POut.Long(schedule.EmployeeNum)); sbRow.Append(",");
+					//DateTStamp can only be set by MySQL
+					sbRow.Append(POut.Long(schedule.ClinicNum)); sbRow.Append(")");
+					if(sbCommands.Length+sbRow.Length+1 > TableBase.MaxAllowedPacketCount) {
+						Db.NonQ(sbCommands.ToString());
+						sbCommands=null;
+					}
+					else {
+						if(hasComma) {
+							sbCommands.Append(",");
+						}
+						sbCommands.Append(sbRow.ToString());
+						if(index==listSchedules.Count-1) {
+							Db.NonQ(sbCommands.ToString());
+						}
+						index++;
+					}
+				}
+			}
 		}
 
 		///<summary>Inserts one Schedule into the database.  Returns the new priKey.  Doesn't use the cache.</summary>

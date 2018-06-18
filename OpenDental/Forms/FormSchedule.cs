@@ -1119,6 +1119,7 @@ namespace OpenDental{
 				TimeSpan span=dateSelectedStart-DateCopyStart;
 				weekDelta=span.Days/7;//usually a positive # representing a future paste, but can be negative
 			}
+			List<Schedule> listSchedulesToInsert=new List<Schedule>();
 			for(int i=0;i<SchedList.Count;i++){
 				sched=SchedList[i];
 				if(isWeek){
@@ -1127,8 +1128,9 @@ namespace OpenDental{
 				else{
 					sched.SchedDate=dateSelectedStart;
 				}
-				Schedules.Insert(sched,false);
+				listSchedulesToInsert.Add(sched);
 			}
+			Schedules.Insert(false,true,listSchedulesToInsert.ToArray());
 			DateTime rememberDateStart=DateCopyStart;
 			DateTime rememberDateEnd=DateCopyEnd;
 			_clickedCell=gridMain.SelectedCell;
@@ -1236,6 +1238,7 @@ namespace OpenDental{
 				weekDelta=span.Days/7;//usually a positive # representing a future paste, but can be negative
 			}
 			Logger.LogToPath("ScheduleUpsert",LogPath.Signals,LogPhase.Start,"repeatCount: "+repeatCount.ToString());
+			List<Schedule> listSchedulesToInsert=new List<Schedule>();
 			int dayDelta=0;//this is needed when repeat pasting days in order to calculate skipping weekends.
 			//dayDelta will start out zero and increment separately from r.
 			for(int r=0;r<repeatCount;r++){//for example, user wants to repeat 3 times.
@@ -1262,7 +1265,7 @@ namespace OpenDental{
 					else {
 						sched.SchedDate=dateSelectedStart.AddDays(dayDelta);
 					}
-					Schedules.Insert(sched,false);//if there is one provider in 4 ops, then this does 5 inserts per loop.
+					listSchedulesToInsert.Add(sched);
 				}
 				Logger.LogToPath("SchedList.Insert",LogPath.Signals,LogPhase.End);		
 				if(!checkWeekend.Checked && dateSelectedStart.AddDays(dayDelta).DayOfWeek==DayOfWeek.Friday){
@@ -1272,6 +1275,7 @@ namespace OpenDental{
 					dayDelta++;
 				}
 			}
+			Schedules.Insert(false,true,listSchedulesToInsert.ToArray());
 			Logger.LogToPath("ScheduleUpsert",LogPath.Signals,LogPhase.End);
 			DateTime rememberDateStart=DateCopyStart;
 			DateTime rememberDateEnd=DateCopyEnd;

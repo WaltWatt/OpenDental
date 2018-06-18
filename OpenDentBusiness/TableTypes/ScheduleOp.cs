@@ -5,6 +5,7 @@ namespace OpenDentBusiness{
 
 	///<summary>Links one schedule block to one operatory.  So for a schedule block to show, it must be linked to one or more operatories.</summary>
 	[Serializable]
+	[CrudTable(HasBatchWriteMethods=true)]
 	public class ScheduleOp:TableBase {
 		///<summary>Primary key.</summary>
 		[CrudColumn(IsPriKey=true)]

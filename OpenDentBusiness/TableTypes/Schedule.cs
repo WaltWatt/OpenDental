@@ -7,6 +7,7 @@ namespace OpenDentBusiness{
 
 	///<summary>One block of time.  Either for practice, provider, employee, or blockout.</summary>
 	[Serializable]
+	[CrudTable(HasBatchWriteMethods=true)]
 	public class Schedule:TableBase {
 		///<summary>Primary key.</summary>
 		[CrudColumn(IsPriKey=true)]

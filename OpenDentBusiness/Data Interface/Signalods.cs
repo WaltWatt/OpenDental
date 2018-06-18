@@ -180,26 +180,41 @@ namespace OpenDentBusiness {
 			return arrayInvalidTypes.ToList();
 		}
 
-		///<summary></summary>
-		public static long Insert(Signalod sig) {
+		///<summary>Returns the PK of the signal inserted if only one signal was passed in; Otherwise, returns 0.</summary>
+		public static long Insert(params Signalod[] arraySignals) {
+			if(arraySignals==null || arraySignals.Length < 1) {
+				return 0;
+			}
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				sig.SignalNum=Meth.GetLong(MethodBase.GetCurrentMethod(),sig);
-				return sig.SignalNum;
+				long signalNum=Meth.GetLong(MethodBase.GetCurrentMethod(),arraySignals);
+				if(arraySignals.Length==1) {
+					arraySignals[0].SignalNum=signalNum;
+				}
+				return signalNum;
 			}
 			if(RemotingClient.RemotingRole==RemotingRole.ServerWeb) {
+				//Make an in-memory list out of the array so that we can manipulate it without actually removing any entries passed in (for our insert below).
+				List<Signalod> listSignals=arraySignals.ToList();
 				//Refresh the cache now so that we don't have to refresh the cache when the clients update their cache.
-				if(sig.IType==InvalidType.Fees && sig.FKeyType==KeyType.FeeSched && sig.FKey > 0) {
-					//We don't want to refresh the entire feecache if we don't have to.
-					Fees.InvalidateFeeSchedule(sig.FKey);					
+				List<Signalod> listFeeSchedSignals=listSignals.Where(x => x.IType==InvalidType.Fees && x.FKeyType==KeyType.FeeSched && x.FKey > 0).ToList();
+				foreach(Signalod signal in listFeeSchedSignals) {
+					Fees.InvalidateFeeSchedule(signal.FKey);
 				}
-				else {
-					Cache.Refresh(sig.IType);
-				}
+				//Remove any signals from our list that we've already taken care of.
+				listSignals.RemoveAll(x => x.IType==InvalidType.Fees && x.FKeyType==KeyType.FeeSched && x.FKey > 0);
+				Cache.Refresh(listSignals.Select(x => x.IType).Distinct().ToArray());
 			}
 			//We need to explicitly get the server time in advance rather than using NOW(), because we need to update the signal object soon after creation.
-			sig.SigDateTime=MiscData.GetNowDateTime();
-			sig.RemoteRole=RemotingClient.RemotingRole;
-			return Crud.SignalodCrud.Insert(sig);
+			DateTime dateTimeNow=MiscData.GetNowDateTime();
+			foreach(Signalod signal in arraySignals) {
+				signal.SigDateTime=dateTimeNow;
+				signal.RemoteRole=RemotingClient.RemotingRole;
+			}
+			if(arraySignals.Length==1) {
+				return Crud.SignalodCrud.Insert(arraySignals[0]);
+			}
+			Crud.SignalodCrud.InsertMany(arraySignals.ToList());
+			return 0;
 		}
 
 		///<summary>Simplest way to use the new fKey and FKeyType. Set isBroadcast=true to process signals immediately on workstation.</summary>
@@ -303,31 +318,31 @@ namespace OpenDentBusiness {
 			//BroadcastSignals(listSignals);//for immediate update. Signals will be processed again at next tick interval.
 		}
 
-		/// <summary>Inserts a signal for each operatory in the schedule that has been changed, and for the provider the schedule is for.
-		/// Generally should not be called outside of Schedules.cs</summary>
-		public static void SetInvalidSched(Schedule sched) {
+		///<summary>Inserts a signal for each operatory in the schedule that has been changed, and for the provider the schedule is for.
+		///Generally should not be called outside of Schedules.cs</summary>
+		public static void SetInvalidSched(params Schedule[] arraySchedules) {
 			//No need to check RemotingRole; no call to db.
-			foreach(long opNum in sched.Ops) {
-				Signalod sig=new Signalod()
-				{
+			//Make an array of signals for every operatory involved.
+			Signalod[] arrayOpSignals=arraySchedules
+				.SelectMany(x => x.Ops.Select(y => new Signalod() {
 					IType=InvalidType.Schedules,
-					DateViewing=sched.SchedDate,
-					FKey=opNum,
-					FKeyType=KeyType.Operatory
-				};
-				Insert(sig);
-			}
-			//Set the signalod for the provider
-			if(sched.ProvNum!=0) {
-				Signalod provSig=new Signalod()
-				{
+					DateViewing=x.SchedDate,
+					FKey=y,
+					FKeyType=KeyType.Operatory,
+				}))
+				.ToArray();
+			Insert(arrayOpSignals);
+			//Make a list of signals for every provider involved.
+			Schedule[] arrayProviderSchedules=arraySchedules.Where(x => x.ProvNum > 0).ToArray();
+			Signalod[] arrayProviderSignals=arrayProviderSchedules
+				.Select(x => new Signalod() {
 					IType=InvalidType.Schedules,
-					DateViewing=sched.SchedDate,
-					FKey=sched.ProvNum,
-					FKeyType=KeyType.Provider
-				};
-				Insert(provSig);
-			}
+					DateViewing=x.SchedDate,
+					FKey=x.ProvNum,
+					FKeyType=KeyType.Provider,
+				})
+				.ToArray();
+			Insert(arrayProviderSignals);
 		}
 
 		/// <summary>Schedules, when we don't have a specific FKey and want to set an invalid for the entire type. 

@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Text;
 
 namespace OpenDentBusiness.Crud{
 	public class SignalodCrud {
@@ -155,6 +156,53 @@ namespace OpenDentBusiness.Crud{
 				signalod.SignalNum=Db.NonQ(command,true,"SignalNum","signalod",paramMsgValue);
 			}
 			return signalod.SignalNum;
+		}
+
+		///<summary>Inserts many Signalods into the database.  Provides option to use the existing priKey.</summary>
+		public static void InsertMany(List <Signalod> listSignalods){
+			if(DataConnection.DBtype==DatabaseType.Oracle || PrefC.RandomKeys) {
+				foreach(Signalod signalod in listSignalods) {
+					Insert(signalod);
+				}
+			}
+			else {
+				StringBuilder sbCommands=null;
+				int index=0;
+				while(index < listSignalods.Count) {
+					Signalod signalod=listSignalods[index];
+					StringBuilder sbRow=new StringBuilder("(");
+					bool hasComma=false;
+					if(sbCommands==null) {
+						sbCommands=new StringBuilder();
+						sbCommands.Append("INSERT INTO signalod (");
+						sbCommands.Append("DateViewing,SigDateTime,FKey,FKeyType,IType,RemoteRole,MsgValue) VALUES ");
+					}
+					else {
+						hasComma=true;
+					}
+					sbRow.Append(POut.Date(signalod.DateViewing)); sbRow.Append(",");
+					sbRow.Append(POut.DateT(signalod.SigDateTime)); sbRow.Append(",");
+					sbRow.Append(POut.Long(signalod.FKey)); sbRow.Append(",");
+					sbRow.Append("'"+POut.String(signalod.FKeyType.ToString())+"'"); sbRow.Append(",");
+					sbRow.Append(POut.Int((int)signalod.IType)); sbRow.Append(",");
+					sbRow.Append(POut.Int((int)signalod.RemoteRole)); sbRow.Append(",");
+					sbRow.Append("'"+POut.String(signalod.MsgValue)+"'"); sbRow.Append(")");
+					if(sbCommands.Length+sbRow.Length+1 > TableBase.MaxAllowedPacketCount) {
+						Db.NonQ(sbCommands.ToString());
+						sbCommands=null;
+					}
+					else {
+						if(hasComma) {
+							sbCommands.Append(",");
+						}
+						sbCommands.Append(sbRow.ToString());
+						if(index==listSignalods.Count-1) {
+							Db.NonQ(sbCommands.ToString());
+						}
+						index++;
+					}
+				}
+			}
 		}
 
 		///<summary>Inserts one Signalod into the database.  Returns the new priKey.  Doesn't use the cache.</summary>

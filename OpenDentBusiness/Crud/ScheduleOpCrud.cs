@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Text;
 
 namespace OpenDentBusiness.Crud{
 	public class ScheduleOpCrud {
@@ -122,6 +123,48 @@ namespace OpenDentBusiness.Crud{
 				scheduleOp.ScheduleOpNum=Db.NonQ(command,true,"ScheduleOpNum","scheduleOp");
 			}
 			return scheduleOp.ScheduleOpNum;
+		}
+
+		///<summary>Inserts many ScheduleOps into the database.  Provides option to use the existing priKey.</summary>
+		public static void InsertMany(List <ScheduleOp> listScheduleOps){
+			if(DataConnection.DBtype==DatabaseType.Oracle || PrefC.RandomKeys) {
+				foreach(ScheduleOp scheduleOp in listScheduleOps) {
+					Insert(scheduleOp);
+				}
+			}
+			else {
+				StringBuilder sbCommands=null;
+				int index=0;
+				while(index < listScheduleOps.Count) {
+					ScheduleOp scheduleOp=listScheduleOps[index];
+					StringBuilder sbRow=new StringBuilder("(");
+					bool hasComma=false;
+					if(sbCommands==null) {
+						sbCommands=new StringBuilder();
+						sbCommands.Append("INSERT INTO scheduleop (");
+						sbCommands.Append("ScheduleNum,OperatoryNum) VALUES ");
+					}
+					else {
+						hasComma=true;
+					}
+					sbRow.Append(POut.Long(scheduleOp.ScheduleNum)); sbRow.Append(",");
+					sbRow.Append(POut.Long(scheduleOp.OperatoryNum)); sbRow.Append(")");
+					if(sbCommands.Length+sbRow.Length+1 > TableBase.MaxAllowedPacketCount) {
+						Db.NonQ(sbCommands.ToString());
+						sbCommands=null;
+					}
+					else {
+						if(hasComma) {
+							sbCommands.Append(",");
+						}
+						sbCommands.Append(sbRow.ToString());
+						if(index==listScheduleOps.Count-1) {
+							Db.NonQ(sbCommands.ToString());
+						}
+						index++;
+					}
+				}
+			}
 		}
 
 		///<summary>Inserts one ScheduleOp into the database.  Returns the new priKey.  Doesn't use the cache.</summary>

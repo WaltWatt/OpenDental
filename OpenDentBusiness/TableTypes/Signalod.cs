@@ -5,6 +5,7 @@ namespace OpenDentBusiness {
 
 	///<summary>An actual signal that gets sent out as part of the messaging functionality.</summary>
 	[Serializable]
+	[CrudTable(HasBatchWriteMethods=true)]
 	public class Signalod:TableBase {
 		///<summary>Primary key.</summary>
 		[CrudColumn(IsPriKey=true)]
