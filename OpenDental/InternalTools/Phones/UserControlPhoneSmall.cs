@@ -339,6 +339,9 @@ namespace OpenDental {
 					+"A site must first be set within the Edit Employee Setting window.");
 				return;
 			}
+			if(ped.IsTriageOperator) {
+				SetTeamAssist();
+			}
 			timerConfRoom.Stop();
 			labelConfRoom.Text="Reserving Conf Room...";
 			labelConfRoom.Visible=true;
