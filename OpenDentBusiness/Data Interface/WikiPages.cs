@@ -204,7 +204,7 @@ namespace OpenDentBusiness{
 			string command="";
 			//Match keywords first-----------------------------------------------------------------------------------
 			command=
-				"SELECT PageTitle FROM wikiPage "
+				"SELECT PageTitle FROM wikipage "
 				// \_ represents a literal _ because _ has a special meaning in LIKE clauses.
 				//The second \ is just to escape the first \.  The other option would be to pass the \ through POut.String.
 				+"WHERE PageTitle NOT LIKE '\\_%' AND IsDraft=0 "
@@ -223,7 +223,7 @@ namespace OpenDentBusiness{
 			}
 			//Match PageTitle Second-----------------------------------------------------------------------------------
 			command=
-				"SELECT PageTitle FROM wikiPage "
+				"SELECT PageTitle FROM wikipage "
 				+"WHERE PageTitle NOT LIKE '\\_%' AND IsDraft=0 "
 				+"AND IsDeleted="+POut.Bool(isDeleted)+" ";
 			for(int i=0;i<searchTokens.Length;i++) {
@@ -241,7 +241,7 @@ namespace OpenDentBusiness{
 			//Match Content third-----------------------------------------------------------------------------------
 			if(!ignoreContent) {
 				command=
-					"SELECT PageTitle FROM wikiPage "
+					"SELECT PageTitle FROM wikipage "
 					+"WHERE PageTitle NOT LIKE '\\_%' AND IsDraft=0 "
 					+"AND IsDeleted="+POut.Bool(isDeleted)+" ";
 				for(int i=0;i<searchTokens.Length;i++) {
