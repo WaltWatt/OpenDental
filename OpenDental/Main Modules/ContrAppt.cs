@@ -2738,7 +2738,7 @@ namespace OpenDental {
 
 		///<summary>Fills the production summary for the day. ContrApptSheet2.Controls should be current with ContrApptSingle(s) for the select Op and date.</summary>
 		private void FillProduction() {
-			if(!ApptViewItemL.ApptRows.Exists(x => x.ElementDesc=="Production")) {
+			if(!ApptViewItemL.ApptRows.Exists(x => x.ElementDesc=="Production") && !ApptViewItemL.ApptRows.Exists(x => x.ElementDesc=="NetProduction")){
 				textProduction.Text="";
 				return;
 			}
