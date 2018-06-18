@@ -8583,5 +8583,11 @@ No Action Required in many cases, check your new patient Web Sched on your web s
 			ODEvent.Fire(new ODEventArgs("ConvertDatabases","Upgrading database to version: 18.1.24"));//No translation in convert script
 		}
 
+		private static void To18_1_25() {
+			string command=@"ALTER TABLE autonotecontrol 
+					MODIFY ControlLabel VARCHAR(255)";
+			Db.NonQ(command);
+		}
+
 	}
 }

@@ -165,29 +165,32 @@ namespace OpenDental {
 			// 
 			this.comboType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.comboType.FormattingEnabled = true;
-			this.comboType.Location = new System.Drawing.Point(186,68);
+			this.comboType.Location = new System.Drawing.Point(186,42);
 			this.comboType.Name = "comboType";
-			this.comboType.Size = new System.Drawing.Size(177,21);
+			this.comboType.Size = new System.Drawing.Size(215,21);
 			this.comboType.TabIndex = 0;
 			this.comboType.SelectedIndexChanged += new System.EventHandler(this.comboType_SelectedIndexChanged);
 			// 
 			// textBoxControlLabel
 			// 
-			this.textBoxControlLabel.Location = new System.Drawing.Point(186,42);
+			this.textBoxControlLabel.Location = new System.Drawing.Point(186,71);
+			this.textBoxControlLabel.MaxLength = 255;
+			this.textBoxControlLabel.Multiline = true;
 			this.textBoxControlLabel.Name = "textBoxControlLabel";
-			this.textBoxControlLabel.Size = new System.Drawing.Size(177,20);
+			this.textBoxControlLabel.Size = new System.Drawing.Size(364,76);
 			this.textBoxControlLabel.TabIndex = 2;
+			this.textBoxControlLabel.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBoxControlLabel_KeyDown);
 			// 
 			// textBoxControlDescript
 			// 
 			this.textBoxControlDescript.Location = new System.Drawing.Point(186,14);
 			this.textBoxControlDescript.Name = "textBoxControlDescript";
-			this.textBoxControlDescript.Size = new System.Drawing.Size(177,20);
+			this.textBoxControlDescript.Size = new System.Drawing.Size(215,20);
 			this.textBoxControlDescript.TabIndex = 1;
 			// 
 			// labelControlType
 			// 
-			this.labelControlType.Location = new System.Drawing.Point(123,68);
+			this.labelControlType.Location = new System.Drawing.Point(123,42);
 			this.labelControlType.Name = "labelControlType";
 			this.labelControlType.Size = new System.Drawing.Size(61,18);
 			this.labelControlType.TabIndex = 115;
@@ -196,7 +199,7 @@ namespace OpenDental {
 			// 
 			// labelControlLabel
 			// 
-			this.labelControlLabel.Location = new System.Drawing.Point(73,42);
+			this.labelControlLabel.Location = new System.Drawing.Point(73,71);
 			this.labelControlLabel.Name = "labelControlLabel";
 			this.labelControlLabel.Size = new System.Drawing.Size(111,18);
 			this.labelControlLabel.TabIndex = 114;
@@ -216,16 +219,16 @@ namespace OpenDental {
 			// 
 			this.textOptions.AcceptsReturn = true;
 			this.textOptions.HideSelection = false;
-			this.textOptions.Location = new System.Drawing.Point(186,95);
+			this.textOptions.Location = new System.Drawing.Point(186,154);
 			this.textOptions.Multiline = true;
 			this.textOptions.Name = "textOptions";
 			this.textOptions.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-			this.textOptions.Size = new System.Drawing.Size(364,352);
+			this.textOptions.Size = new System.Drawing.Size(364,293);
 			this.textOptions.TabIndex = 4;
 			// 
 			// labelResponses
 			// 
-			this.labelResponses.Location = new System.Drawing.Point(3,95);
+			this.labelResponses.Location = new System.Drawing.Point(2,154);
 			this.labelResponses.Name = "labelResponses";
 			this.labelResponses.Size = new System.Drawing.Size(182,105);
 			this.labelResponses.TabIndex = 123;
@@ -314,7 +317,7 @@ namespace OpenDental {
 			this.butDown.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
 			this.butDown.CornerRadius = 4F;
 			this.butDown.Image = global::OpenDental.Properties.Resources.down;
-			this.butDown.Location = new System.Drawing.Point(582,95);
+			this.butDown.Location = new System.Drawing.Point(582,154);
 			this.butDown.Name = "butDown";
 			this.butDown.Size = new System.Drawing.Size(25,24);
 			this.butDown.TabIndex = 126;
@@ -328,7 +331,7 @@ namespace OpenDental {
 			this.butUp.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
 			this.butUp.CornerRadius = 4F;
 			this.butUp.Image = global::OpenDental.Properties.Resources.up;
-			this.butUp.Location = new System.Drawing.Point(556,95);
+			this.butUp.Location = new System.Drawing.Point(556,154);
 			this.butUp.Name = "butUp";
 			this.butUp.Size = new System.Drawing.Size(25,24);
 			this.butUp.TabIndex = 125;

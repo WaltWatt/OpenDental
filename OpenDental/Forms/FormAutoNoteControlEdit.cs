@@ -170,6 +170,12 @@ namespace OpenDental {
 			AutoNoteControls.Delete(ControlCur.AutoNoteControlNum);
 			DialogResult=DialogResult.OK;
 		}
+		
+		private void textBoxControlLabel_KeyDown(object sender,KeyEventArgs e) {
+			if(e.KeyCode==Keys.Enter) {
+				e.SuppressKeyPress=true;
+			}
+		}
 
 		private void butOK_Click(object sender,EventArgs e) {
 			if(textBoxControlDescript.Text.ToString()=="" 
