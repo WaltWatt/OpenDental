@@ -2526,6 +2526,7 @@ namespace OpenDental {
 				row = new ODGridRow();
 				row.Cells.Add(table.Rows[i]["name"].ToString());
 				row.Cells.Add(table.Rows[i]["balance"].ToString());
+				row.Tag=PIn.Long(table.Rows[i]["PatNum"].ToString());
 				if(i==0 || i==table.Rows.Count-1) {
 					row.Bold=true;
 				}
@@ -3692,14 +3693,19 @@ namespace OpenDental {
 		private void gridAcctPat_CellClick(object sender,ODGridClickEventArgs e) {
 			if(ViewingInRecall){
 				return;
-			}
+			}			
 			if(e.Row==gridAcctPat.Rows.Count-1) {//last row
 				FormOpenDental.S_Contr_PatientSelected(FamCur.ListPats[0],false);
 				ModuleSelected(FamCur.ListPats[0].PatNum,true);
 			}
 			else{
-				FormOpenDental.S_Contr_PatientSelected(FamCur.ListPats[e.Row],false);
-				ModuleSelected(FamCur.ListPats[e.Row].PatNum);
+				long patNum=(long)gridAcctPat.Rows[e.Row].Tag;
+				Patient pat=FamCur.ListPats.First(x => x.PatNum==patNum);
+				if(pat==null) {
+					return;
+				}
+				FormOpenDental.S_Contr_PatientSelected(pat,false);
+				ModuleSelected(patNum);
 			}
 		}
 
