@@ -5363,6 +5363,7 @@ namespace OpenDental{
 			string value="";
 			switch(alertItem.Type) {
 				case AlertType.Generic:
+				case AlertType.ClinicsChangedInternal:
 					break;
 				case AlertType.OnlinePaymentsPending:
 					value+=Lan.g(this,"Pending Online Payments")+": ";
@@ -5400,6 +5401,7 @@ namespace OpenDental{
 				case AlertType.EConnectorError:
 				case AlertType.DoseSpotProviderRegistered:
 				case AlertType.DoseSpotClinicRegistered:
+				case AlertType.ClinicsChanged:
 				default:
 					value+=Lan.g(this,alertItem.Type.GetDescription())+": ";
 					break;

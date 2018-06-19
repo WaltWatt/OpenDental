@@ -124,6 +124,13 @@ namespace OpenDentBusiness {
 		///<summary>16 - An appointment has been created via Web Sched Recall.</summary>
 		[Description("Web Sched Recall Appointment Created")]
 		WebSchedRecallApptCreated,
+		///<summary>17 - Alerts related to turning clinics on or off for eServices.</summary>
+		[Description("Clinic Feature Changed")]
+		ClinicsChanged,
+		///<summary>18 - Alerts related to turning clinics on or off for eServices. Internal, not displayed to the customer.
+		///Will be processed by the eConnector and then deleted.</summary>
+		[Description("Clinic Feature Changed (internal)")]
+		ClinicsChangedInternal,
 	}
 
 	///<summary>Represents the urgency of the alert.  Also determines the color for the menu item in the main menu.</summary>

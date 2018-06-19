@@ -7105,6 +7105,30 @@ No Action Required in many cases, check your new patient Web Sched on your web s
 				}
 			}
 			ODEvent.Fire(new ODEventArgs("ConvertDatabases","Upgrading database to version: 17.4.78"));//No translation in convert script.
+			//Clinics turned on or off alert
+			command="SELECT AlertCategoryNum FROM alertcategory WHERE InternalName='eServices' AND IsHQCategory=1";
+			string alertCategoryNum=Db.GetScalar(command);
+			if(DataConnection.DBtype==DatabaseType.MySql) {
+				command="INSERT INTO alertcategorylink (AlertCategoryNum,AlertType) VALUES ("+alertCategoryNum+",17)";//ClinicsChanged
+				Db.NonQ(command);
+			}
+			else {//oracle
+				command="INSERT INTO alertcategorylink (AlertCategoryLinkNum,AlertCategoryNum,AlertType) "+
+					"VALUES ((SELECT MAX(AlertCategoryLinkNum)+1 FROM alertcategorylink),"+alertCategoryNum+",17)";//ClinicsChanged
+				Db.NonQ(command);
+			}
+			//Internal clinics turned on or off alert
+			command="SELECT AlertCategoryNum FROM alertcategory WHERE InternalName='eServices' AND IsHQCategory=1";
+			alertCategoryNum=Db.GetScalar(command);
+			if(DataConnection.DBtype==DatabaseType.MySql) {
+				command="INSERT INTO alertcategorylink (AlertCategoryNum,AlertType) VALUES ("+alertCategoryNum+",18)";//ClinicsChangedInternal
+				Db.NonQ(command);
+			}
+			else {//oracle
+				command="INSERT INTO alertcategorylink (AlertCategoryLinkNum,AlertCategoryNum,AlertType) "+
+					"VALUES ((SELECT MAX(AlertCategoryLinkNum)+1 FROM alertcategorylink),"+alertCategoryNum+",18)";//ClinicsChangedInternal
+				Db.NonQ(command);
+			}
 		}
 
 		private static void To18_1_1() {

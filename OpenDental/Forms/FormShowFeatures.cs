@@ -34,12 +34,6 @@ namespace OpenDental{
 		private CheckBox checkPatClone;
 		private CheckBox checkQuestionnaire;
 		private CheckBox checkTrojanCollect;
-		///<summary>Output from HQ initialized in FillForm().</summary>
-		WebServiceMainHQProxy.EServiceSetup.SignupOut _signupOut=null;
-		///<summary>Non-null indicates that signup portal info is still loading.</summary>
-		private ODThread _threadSignupPortal=null;
-		///<summary>If non null then checkNoClinics_Click will not be allowed to continue.</summary>
-		private Exception _signupException=null;
 		private bool _isClinicsEnabledInDb=false;
 
 		private bool _hasClinicsEnabledChanged {
@@ -394,21 +388,6 @@ namespace OpenDental{
 			checkPatClone.Checked=PrefC.GetBool(PrefName.ShowFeaturePatientClone);
 			checkQuestionnaire.Checked=PrefC.GetBool(PrefName.AccountShowQuestionnaire);
 			checkTrojanCollect.Checked=PrefC.GetBool(PrefName.AccountShowTrojanExpressCollect);
-			if(Security.IsAuthorized(Permissions.SecurityAdmin,true)) {
-				//Default error until this thread finishes.
-				_signupException=new Exception(Lan.g(this,"Signup info is still loading"));
-				_threadSignupPortal=new ODThread(new ODThread.WorkerDelegate((th) => {
-					_signupOut=WebServiceMainHQProxy.GetEServiceSetupFull(SignupPortalPermission.FullPermission);
-					//We go this far so allow checkNoClinics_Click().
-					_signupException=null;
-				}));
-				_threadSignupPortal.AddExceptionHandler(new ODThread.ExceptionDelegate((ex) => { _signupException=ex; }));
-				_threadSignupPortal.AddExitHandler(new ODThread.WorkerDelegate((th) => { _threadSignupPortal=null; }));
-				_threadSignupPortal.Start();
-			}
-			else {
-				_signupException=new Exception(Lan.g("Security","Not authorized for")+"\r\n"+GroupPermissions.GetDesc(Permissions.SecurityAdmin));
-			}
 		}
 
 		private void checkDentalSchools_Click(object sender,EventArgs e) {
@@ -418,12 +397,8 @@ namespace OpenDental{
 		}
 
 		private void checkEnableClinics_Click(object sender,EventArgs e) {
-			try {
-				ValidateHqValidationComplete();
-			}
-			catch(Exception ex) { //Change it back to what the db has.
+			if(MessageBox.Show(Lan.g(this,"If you are subscribed to eServices, you may need to restart the eConnector when you turn clinics on or off. Continue?"),"",MessageBoxButtons.YesNo)!=DialogResult.Yes) {
 				RestoreClinicCheckBox();
-				MessageBox.Show(ex.Message);
 			}
 		}
 
@@ -459,71 +434,35 @@ namespace OpenDental{
 			checkEnableClinics.Checked=_isClinicsEnabledInDb;
 		}
 
-		///<summary>Thread was started on form load and must exit with no errors in order to continue modifying clinics pref. 
-		///Call this method to assure that this method has returned ok. Throws exceptions if failed or returns if ok.</summary>
-		private void ValidateHqValidationComplete() {
-			if(_threadSignupPortal!=null||_signupException!=null||_signupOut==null) {
-				throw ODMethodsT.Coalesce(_signupException,new Exception(Lan.g(this,"Unknown error while trying to evaluate eService signups. Please try again later.")));
-			}
-		}
-
-		///<summary>Validates that PrefName.EasyNoClinics is ok to be changed and changes it when necessary. Tells HQ about changes and re-syncs with new HQ clinic preference for this practice.
+		///<summary>Validates that PrefName.EasyNoClinics is ok to be changed and changes it when necessary. Sends an alert to eConnector to perform the conversion.
 		///If fails then restores checkEnableClinics to original value when form was opened.</summary>
 		private bool IsClinicCheckBoxOk() {
 			try {
 				if(!_hasClinicsEnabledChanged) { //No change.
 					return true;
 				}
-				//Make sure signup info was retrieved from HQ.
-				ValidateHqValidationComplete();
-				//Find any eServices that HQ says are enabled.
-				var clinicsEnabled=_signupOut.EServices
-					.FindAll(x => x.IsEnabled)
-					.GroupBy(x => x.ClinicNum)
-					.ToList();
-				//Build the prompt.
-				string prompt="";
-				foreach(var clinicEnabled in clinicsEnabled) {
-					if(clinicEnabled.Key!=0) {
-						prompt+=ODMethodsT.Coalesce(Clinics.GetFirstOrDefault(x => x.ClinicNum==clinicEnabled.Key)
-							,new Clinic() { Abbr="Undefined Clinic" }).Abbr+"\r\n";
-					}
-					else {
-						prompt+=Lan.g(this,"Practice")+"\r\n";
-					}
-					//If bundle then don't show others.
-					if(clinicEnabled.Any(x => x.EService==eServiceCode.Bundle)) {
-						prompt+="  - "+eServiceCode.Bundle.GetDescription()+"\r\n";
-					}
-					else { //Show all enabled eServices.
-						foreach(var eService in clinicEnabled.ToList()) {
-							prompt+="  - "+eService.EService.GetDescription()+"\r\n";
-						}
-					}
-				}
-				//Prompt and take action when necessary.
-				if(!string.IsNullOrEmpty(prompt)) {
-					if(checkEnableClinics.Checked) { //Will be switching clinics on.
-						prompt=
-							Lan.g(this,"Your eServices will need to be reassigned to your clinics once you have created at least one clinic.")+"\r\n\r\n"+
-							Lan.g(this,"Once have created at least one clinic, please visit the Signup Portal using eServices | Signup in order to make the appropriate changes to your service agreement.")+"\r\n\r\n"+
-							Lan.g(this,"You are currently subscribed to the following eServices. Click OK to continue.")+"\r\n\r\n"+prompt;
-					}
-					else { //Will be switching clinics off.
-						prompt=
-							Lan.g(this,"Your eServices will all be transferred from individual clinics to your practice.")+"\r\n\r\n"+
-							Lan.g(this,"Once you approve this change, please visit the Signup Portal using eServices | Signup in order to verify the changes to your service agreement are correct.")+"\r\n\r\n"+
-							Lan.g(this,"You are currently subscribed to the following eServices. Click OK to approve this change.")+"\r\n\r\n"+prompt;
-					}
-					if(MessageBox.Show(prompt,"",MessageBoxButtons.OKCancel)!=DialogResult.OK) {
-						throw new Exception(Lan.g(this,"Clinic feature modification canceled"));
-					}
-				}
 				//Turn clinics on/off locally and send the signal to other workstations. This must happen before we call HQ so we tell HQ the new value.
 				Prefs.UpdateBool(PrefName.EasyNoClinics,!checkEnableClinics.Checked);
 				DataValid.SetInvalid(InvalidType.Prefs);
-				//This call will perform the changes to the local clinic pref at HQ. It will also re-sync local prefs and table infor HQ's info.
-				WebServiceMainHQProxy.GetEServiceSetupFull(SignupPortalPermission.FullPermission,true);
+				//Create an alert for the user to know they may need to restart the eConnector if they are subscribed to eServices
+				AlertItems.Insert(new AlertItem()
+				{
+					Description=Lan.g(this,"Clinic Feature Changed, you may need to restart the eConnector if you are subscribed to eServices"),
+					Type=AlertType.ClinicsChanged,
+					Severity=SeverityType.Low,
+					Actions=ActionType.OpenForm | ActionType.MarkAsRead | ActionType.Delete,
+					FormToOpen=FormType.FormEServicesEConnector,
+					ItemValue="Clinics turned "+(checkEnableClinics.Checked ? "On":"Off")
+				});
+				//Create an alert for the eConnector to perform the clinic conversion as needed.
+				AlertItems.Insert(new AlertItem()
+				{
+					Description="Clinics Changed",
+					Type=AlertType.ClinicsChangedInternal,
+					Severity=SeverityType.Normal,
+					Actions=ActionType.None,
+					ItemValue=checkEnableClinics.Checked ? "On":"Off"
+				});
 				return true;
 			}
 			catch(Exception ex) {
