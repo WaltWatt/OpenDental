@@ -149,6 +149,7 @@ namespace OpenDental {
 				//textConnectionMessage.Text=node.InnerText;
 				MessageBox.Show(node.InnerText,"Error");
 				DialogResult=DialogResult.Cancel;
+				Close();
 				return;
 			}
 			//Process a valid return value------------------------------------------------------------------------------------------------
@@ -456,6 +457,7 @@ namespace OpenDental {
 				return;
 			}
 			DialogResult=DialogResult.OK;
+			Close();
 		}
 
 		///<summary>Only called when user clicks Delete or OK.  Not called repeatedly when adding discussions.</summary>
@@ -688,10 +690,12 @@ namespace OpenDental {
 				return;
 			}
 			DialogResult=DialogResult.OK;
+			Close();
 		}
 
 		private void butCancel_Click(object sender,EventArgs e) {
 			DialogResult=DialogResult.Cancel;
+			Close();
 		}
 
 		
