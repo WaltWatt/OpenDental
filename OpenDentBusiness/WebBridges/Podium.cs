@@ -104,63 +104,91 @@ namespace OpenDentBusiness {
 
 		///<summary>Tries each of the phone numbers provided in the list one at a time until it succeeds.</summary>
 		public static bool SendData(Patient pat,long clinicNum) {
-			List<string> listPhoneNumbers=new List<string>() { pat.WirelessPhone,pat.HmPhone };
-			string firstName=pat.FName;
-			string lastName=pat.LName;
-			string emailIn=pat.Email;
-			string isTestString="false";
 			string locationId=ProgramProperties.GetPropValForClinicOrDefault(Programs.GetProgramNum(ProgramName.Podium),PropertyDescs.LocationID,clinicNum);
+			if(string.IsNullOrEmpty(locationId)) {
+				return false;
+			}
+			List<string> listPhoneNumbers=new List<string>() { pat.WirelessPhone,pat.HmPhone };
 			int statusCode=-100;	//Set default to a failure, negative because http status codes are 1xx-5xx
-#if DEBUG
-			isTestString="true";
-#endif
+			string apiUrl="https://api.podium.com/api/v2/switchboard_invitations";
+			string apiToken=ProgramProperties.GetPropVal(Programs.GetProgramNum(ProgramName.Podium),PropertyDescs.APIToken);
+			if(pat.TxtMsgOk==YN.No || (pat.TxtMsgOk==YN.Unknown && PrefC.GetBool(PrefName.TextMsgOkStatusTreatAsNo))) {//Don't text
+				//Try to use email
+				statusCode=MakeWebCall(apiToken,apiUrl,locationId,"",pat);
+				MakeCommlog(pat,"",statusCode);
+				return statusCode.Between(200,299);
+			}
+			//Try all phone numbers for this patient since they allow texting
 			for(int i=0;i<listPhoneNumbers.Count;i++) {
 				string phoneNumber=new string(listPhoneNumbers[i].Where(x => char.IsDigit(x)).ToArray());
 				if(phoneNumber=="") {
 					continue;
 				}
-				string apiUrl="https://api.podium.com/api/v2/switchboard_invitations";
-				string apiToken=ProgramProperties.GetPropVal(Programs.GetProgramNum(ProgramName.Podium),PropertyDescs.APIToken);//I might be able to use _programNum here if static is per class like I think it is
-				if(string.IsNullOrEmpty(locationId)) {
-					return false;
+				statusCode=MakeWebCall(apiToken,apiUrl,locationId,phoneNumber,pat);
+				if(statusCode.Between(200,299)) {
+					MakeCommlog(pat,phoneNumber,statusCode);
+					return true;
 				}
-				try {
-					using(WebClientEx client=new WebClientEx()) {
-						client.Headers[HttpRequestHeader.Accept]="application/json";
-						client.Headers[HttpRequestHeader.ContentType]="application/json";
-						client.Headers[HttpRequestHeader.Authorization]="Token token=\""+apiToken+"\"";
-						client.Encoding=UnicodeEncoding.UTF8;
-						string bodyJson=string.Format(@"
-						{{
-							""locationId"": ""{0}"",
-							""lastName"": ""{3}"",
-							""firstName"": ""{2}"",
-							""email"": ""{4}"",
-							""phoneNumber"": ""{1}"",
-							""integrationName"": ""opendental"",
-							""test"": {5}
-						}}",locationId,phoneNumber,firstName,lastName,emailIn,isTestString);
-						//Post with Authorization headers and a body comprised of a JSON serialized anonymous type.
-						client.UploadString(apiUrl,"POST",bodyJson);
-						statusCode=(int)(client.StatusCode);
-						if(statusCode.Between(200,299)) {
-							MakeCommlog(pat,phoneNumber,statusCode);
-							return true;
-						}
-					}
-				}
-				catch(WebException we) {
-					if(we.Response.GetType()==typeof(HttpWebResponse)) {
-						statusCode=(int)((HttpWebResponse)we.Response).StatusCode;
-					}
-				}
-				catch(Exception) {
-					//Do nothing because a verbose commlog will be made below if all phone numbers fail.
+				else {
+					//If the status code was an error for the current number, we will attempt to use other numbers the patient may have entered.
+					//We will only make an error commlog and return false if all numbers tried returned an error.
 				}
 			}
 			MakeCommlog(pat,"",statusCode);
 			//explicitly failed or did not succeed.
 			return false;
+		}
+
+		///<summary>Returns the status code of the web call made to Podium.  
+		///200-299 indicates a successful response, >=300 indicates a Podium error response, negative status codes indicate an Open Dental error.</summary>
+		private static int MakeWebCall(string apiToken,string apiUrl,string locationId,string phoneNumber,Patient pat) 
+		{
+			int retVal=-100;
+			if(pat.TxtMsgOk==YN.No || (pat.TxtMsgOk==YN.Unknown && PrefC.GetBool(PrefName.TextMsgOkStatusTreatAsNo))) {//Use email.
+				retVal=-200;//Our code for 'no email address'
+				phoneNumber="";//Ensure that there is no way we send a phone number to Podium if the patient doesn't approve text messages.
+				if(string.IsNullOrEmpty(pat.Email)) {
+					return retVal;//Will be -200, meaning no email and can't text.
+				}
+			}
+			if(string.IsNullOrWhiteSpace(phoneNumber) && string.IsNullOrWhiteSpace(pat.Email)) {
+				return retVal;
+			}
+			//We either have a phoneNumber or email (or both), so send it to Podium.
+			string isTestString="false";
+#if DEBUG
+			isTestString="true";
+#endif
+			try {
+				using(WebClientEx client=new WebClientEx()) {
+					client.Headers[HttpRequestHeader.Accept]="application/json";
+					client.Headers[HttpRequestHeader.ContentType]="application/json";
+					client.Headers[HttpRequestHeader.Authorization]="Token token=\""+apiToken+"\"";
+					client.Encoding=UnicodeEncoding.UTF8;
+					string bodyJson=string.Format(@"
+							{{
+								""locationId"": ""{0}"",
+								""lastName"": ""{3}"",
+								""firstName"": ""{2}"",
+								""email"": ""{4}"",
+								""phoneNumber"": ""{1}"",
+								""integrationName"": ""opendental"",
+								""test"": {5}
+							}}",locationId,phoneNumber,pat.FName,pat.LName,pat.Email,isTestString);
+					//Post with Authorization headers and a body comprised of a JSON serialized anonymous type.
+					client.UploadString(apiUrl,"POST",bodyJson);
+					retVal=(int)(client.StatusCode);
+				}
+			}
+			catch(WebException we) {
+				if(we.Response.GetType()==typeof(HttpWebResponse)) {
+					retVal=(int)((HttpWebResponse)we.Response).StatusCode;
+				}
+			}
+			catch(Exception) {
+				//Do nothing because a verbose commlog will be made below if all phone numbers fail.
+			}
+			return retVal;
 			//Sample Request:
 
 			//Accept: 'application/json's
@@ -184,12 +212,17 @@ namespace OpenDentBusiness {
 			string commText="";
 			//Status code meanings:
 			//		-100: Patient had no phone number
+			//		-200: Patient can't text and had no email
 			//		2XX: Successfully sent message
 			//		422: Message has already been sent for patient
 			//		Anything else: Failure of some sort.
 			switch(statusCode/100) {	//Get general http status codes e.g. -100=-1, 203=2
 				case -1:	//Failure, no phone number
 					commText=Lans.g("Podium","Podium review invitation request failed because there was no phone number.  Error code:")+" "+statusCode;
+					break;
+				case -2:	//Failure, no email
+					commText=Lans.g("Podium","Podium review invitation request failed because the patient doesn't accept texts "
+						+"and there was no email address.  Error code:")+" "+statusCode;
 					break;
 				case 2:	//Success https://httpstatusdogs.com/200-ok
 					commText=Lans.g("Podium","Podium review invitation request successfully sent.");
@@ -224,7 +257,10 @@ namespace OpenDentBusiness {
 				string homePhone=new string(pat.HmPhone.Where(x => char.IsDigit(x)).ToArray());
 				List<string> phonesTried=new List<string> { wirelessPhone,homePhone }.FindAll(x => x!="");
 				string phoneNumbersTried=", "+Lans.g("Podium","No valid phone number found.");
-				if(phonesTried.Count>0) {
+				if(pat.TxtMsgOk==YN.No || (pat.TxtMsgOk==YN.Unknown && PrefC.GetBool(PrefName.TextMsgOkStatusTreatAsNo))) {//Used email
+					phoneNumbersTried="";
+				}
+				else if(phonesTried.Count>0) {
 					phoneNumbersTried=", "+Lans.g("Podium","Phone numbers tried")+": "+string.Join(", ",phonesTried);
 				}
 				commText+=phoneNumbersTried;
