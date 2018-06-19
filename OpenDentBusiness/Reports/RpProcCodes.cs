@@ -9,7 +9,9 @@ namespace OpenDentBusiness {
 	public class RpProcCodes {
 
 		public static DataTable GetData(long feeSchedNum,long clinicNum,long provNum,bool isCategories,bool includeBlanks) {
-			//No remoting check, no call to db
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				return Meth.GetTable(MethodBase.GetCurrentMethod(),feeSchedNum,clinicNum,provNum,isCategories,includeBlanks);
+			}
 			DataTable data=GetDataSet(feeSchedNum,clinicNum,provNum);
 			DataTable retVal=new DataTable("ProcCodes");
 			if(isCategories) {
