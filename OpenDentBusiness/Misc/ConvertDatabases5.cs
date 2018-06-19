@@ -8613,9 +8613,14 @@ No Action Required in many cases, check your new patient Web Sched on your web s
 			string command=@"ALTER TABLE autonotecontrol 
 					MODIFY ControlLabel VARCHAR(255)";
 			Db.NonQ(command);
+		}
+
+		private static void To18_1_26() {
+			ODEvent.Fire(new ODEventArgs("ConvertDatabases",
+				"Upgrading database to version: 18.1.26"));//No translation in convert script.
 			//We are running this section of code for HQ only
 			//This is very uncommon and normally manual queries should be run instead of doing a convert script.
-			command="SELECT ValueString FROM preference WHERE PrefName='DockPhonePanelShow'";
+			string command="SELECT ValueString FROM preference WHERE PrefName='DockPhonePanelShow'";
 			DataTable table=Db.GetTable(command);
 			if(table.Rows.Count > 0 && PIn.Bool(table.Rows[0][0].ToString())) {
 				//Convert the following int columns to bigint so that they can handle TimeSpans stored as Ticks.
