@@ -61,7 +61,7 @@ namespace OpenDentBusiness.Crud{
 				catch{
 					jobReview.ReviewStatus=(JobReviewStatus)0;
 				}
-				jobReview.Hours       = PIn.String(row["Hours"].ToString());
+				jobReview.TimeReview  = TimeSpan.FromTicks(PIn.Long(row["TimeReview"].ToString()));
 				retVal.Add(jobReview);
 			}
 			return retVal;
@@ -79,7 +79,7 @@ namespace OpenDentBusiness.Crud{
 			table.Columns.Add("DateTStamp");
 			table.Columns.Add("Description");
 			table.Columns.Add("ReviewStatus");
-			table.Columns.Add("Hours");
+			table.Columns.Add("TimeReview");
 			foreach(JobReview jobReview in listJobReviews) {
 				table.Rows.Add(new object[] {
 					POut.Long  (jobReview.JobReviewNum),
@@ -88,7 +88,7 @@ namespace OpenDentBusiness.Crud{
 					POut.DateT (jobReview.DateTStamp,false),
 					            jobReview.Description,
 					POut.Int   ((int)jobReview.ReviewStatus),
-					            jobReview.Hours,
+					POut.Long (jobReview.TimeReview.Ticks),
 				});
 			}
 			return table;
@@ -129,7 +129,7 @@ namespace OpenDentBusiness.Crud{
 			if(useExistingPK || PrefC.RandomKeys) {
 				command+="JobReviewNum,";
 			}
-			command+="JobNum,ReviewerNum,Description,ReviewStatus,Hours) VALUES(";
+			command+="JobNum,ReviewerNum,Description,ReviewStatus,TimeReview) VALUES(";
 			if(useExistingPK || PrefC.RandomKeys) {
 				command+=POut.Long(jobReview.JobReviewNum)+",";
 			}
@@ -139,7 +139,7 @@ namespace OpenDentBusiness.Crud{
 				//DateTStamp can only be set by MySQL
 				+    DbHelper.ParamChar+"paramDescription,"
 				+"'"+POut.String(jobReview.ReviewStatus.ToString())+"',"
-				+"'"+POut.String(jobReview.Hours)+"')";
+				+"'"+POut.Long  (jobReview.TimeReview.Ticks)+"')";
 			if(jobReview.Description==null) {
 				jobReview.Description="";
 			}
@@ -176,7 +176,7 @@ namespace OpenDentBusiness.Crud{
 			if(isRandomKeys || useExistingPK) {
 				command+="JobReviewNum,";
 			}
-			command+="JobNum,ReviewerNum,Description,ReviewStatus,Hours) VALUES(";
+			command+="JobNum,ReviewerNum,Description,ReviewStatus,TimeReview) VALUES(";
 			if(isRandomKeys || useExistingPK) {
 				command+=POut.Long(jobReview.JobReviewNum)+",";
 			}
@@ -186,7 +186,7 @@ namespace OpenDentBusiness.Crud{
 				//DateTStamp can only be set by MySQL
 				+    DbHelper.ParamChar+"paramDescription,"
 				+"'"+POut.String(jobReview.ReviewStatus.ToString())+"',"
-				+"'"+POut.String(jobReview.Hours)+"')";
+				+"'"+POut.Long(jobReview.TimeReview.Ticks)+"')";
 			if(jobReview.Description==null) {
 				jobReview.Description="";
 			}
@@ -208,7 +208,7 @@ namespace OpenDentBusiness.Crud{
 				//DateTStamp can only be set by MySQL
 				+"Description =  "+DbHelper.ParamChar+"paramDescription, "
 				+"ReviewStatus= '"+POut.String(jobReview.ReviewStatus.ToString())+"', "
-				+"Hours       = '"+POut.String(jobReview.Hours)+"' "
+				+"TimeReview  =  "+POut.Long  (jobReview.TimeReview.Ticks)+" "
 				+"WHERE JobReviewNum = "+POut.Long(jobReview.JobReviewNum);
 			if(jobReview.Description==null) {
 				jobReview.Description="";
@@ -237,9 +237,9 @@ namespace OpenDentBusiness.Crud{
 				if(command!=""){ command+=",";}
 				command+="ReviewStatus = '"+POut.String(jobReview.ReviewStatus.ToString())+"'";
 			}
-			if(jobReview.Hours != oldJobReview.Hours) {
+			if(jobReview.TimeReview != oldJobReview.TimeReview) {
 				if(command!=""){ command+=",";}
-				command+="Hours = '"+POut.String(jobReview.Hours)+"'";
+				command+="TimeReview = '"+POut.Long  (jobReview.TimeReview.Ticks)+"'";
 			}
 			if(command==""){
 				return false;
@@ -270,7 +270,7 @@ namespace OpenDentBusiness.Crud{
 			if(jobReview.ReviewStatus != oldJobReview.ReviewStatus) {
 				return true;
 			}
-			if(jobReview.Hours != oldJobReview.Hours) {
+			if(jobReview.TimeReview != oldJobReview.TimeReview) {
 				return true;
 			}
 			return false;

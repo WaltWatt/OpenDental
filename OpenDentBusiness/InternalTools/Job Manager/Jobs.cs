@@ -52,7 +52,7 @@ namespace OpenDentBusiness {
 				Meth.GetVoid(MethodBase.GetCurrentMethod(),jobNum);
 				return;
 			}
-			if(JobReviews.GetForJob(jobNum).Count>0 || JobQuotes.GetForJob(jobNum).Count>0) {
+			if(JobReviews.GetReviewsForJobs(jobNum).Count>0 || JobQuotes.GetForJob(jobNum).Count>0) {
 				throw new Exception(Lans.g("Jobs","Not allowed to delete a job that has attached reviews or quotes.  Set the status to deleted instead."));//The exception is caught in FormJobEdit.
 			}
 			//JobReviews.DeleteForJob(jobNum);//do not delete, blocked above
@@ -110,7 +110,8 @@ namespace OpenDentBusiness {
 			List<long> jobNums=listJobsAll.Select(x=>x.JobNum).ToList();
 			Dictionary<long,List<JobLink>> listJobLinksAll=JobLinks.GetJobLinksForJobs(jobNums).GroupBy(x=>x.JobNum).ToDictionary(x=>x.Key,x=>x.ToList());
 			Dictionary<long,List<JobNote>> listJobNotesAll=JobNotes.GetJobNotesForJobs(jobNums).GroupBy(x => x.JobNum).ToDictionary(x => x.Key,x => x.ToList());
-			Dictionary<long,List<JobReview>> listJobReviewsAll=JobReviews.GetJobReviewsForJobs(jobNums).GroupBy(x => x.JobNum).ToDictionary(x => x.Key,x => x.ToList());
+			Dictionary<long,List<JobReview>> listJobReviewsAll=JobReviews.GetReviewsForJobs(jobNums.ToArray()).GroupBy(x => x.JobNum).ToDictionary(x => x.Key,x => x.ToList());
+			Dictionary<long,List<JobReview>> listJobTimeLogsAll=JobReviews.GetTimeLogsForJobs(jobNums.ToArray()).GroupBy(x => x.JobNum).ToDictionary(x => x.Key,x => x.ToList());
 			Dictionary<long,List<JobQuote>> listJobQuotesAll=JobQuotes.GetJobQuotesForJobs(jobNums).GroupBy(x => x.JobNum).ToDictionary(x => x.Key,x => x.ToList());
 			Dictionary<long,List<JobLog>> listJobLogsAll = JobLogs.GetJobLogsForJobs(jobNums).GroupBy(x => x.JobNum).ToDictionary(x => x.Key,x => x.ToList());
 			for(int i=0;i<listJobsAll.Count;i++) {
@@ -123,6 +124,9 @@ namespace OpenDentBusiness {
 				}
 				if(!listJobReviewsAll.TryGetValue(job.JobNum,out job.ListJobReviews)) {
 					job.ListJobReviews=new List<JobReview>();//empty list if not found
+				}
+				if(!listJobTimeLogsAll.TryGetValue(job.JobNum,out job.ListJobTimeLogs)) {
+					job.ListJobTimeLogs=new List<JobReview>();//empty list if not found
 				}
 				if(!listJobQuotesAll.TryGetValue(job.JobNum,out job.ListJobQuotes)) {
 					job.ListJobQuotes=new List<JobQuote>();//empty list if not found

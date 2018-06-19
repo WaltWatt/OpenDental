@@ -90,17 +90,17 @@ namespace OpenDental {
 					listUserNums.Remove(job.UserNumEngineer);
 				}
 				//If hrsEst is 0 then use the avgJobHours as a base.
-				double hrsEst=job.HoursEstimate==0?avgJobHours:job.HoursEstimate;
+				double hrsEst=job.TimeEstimate.TotalHours==0?avgJobHours:0;
 				//Remove the actual hours spent on the job currently
 				//If negative then just use 0 (We aren't in a dimension where negative time estimates can be used for other jobs)
-				double hrsCalculated=(hrsEst-job.HoursActual)<0?0:hrsEst-job.HoursActual;
+				double hrsCalculated=0;//(hrsEst-job.MinutesActual)<0?0:hrsEst-job.MinutesActual;
 				totalJobHours+=hrsCalculated;
 				if(job.PhaseCur==JobPhase.Development) {
 					_listTopJobs.Add(new Tuple<long,double>(job.JobNum,hrsCalculated));
 				}
 				gridCalculatedJobs.Rows.Add(
 					new ODGridRow(
-						new ODGridCell(job.HoursEstimate==0?"0("+_avgJobHours+")":job.HoursEstimate.ToString()),
+						new ODGridCell(job.TimeEstimate.TotalHours==0?"0("+_avgJobHours+")":job.TimeEstimate.TotalHours.ToString()),
 						new ODGridCell(job.HoursActual.ToString()),
 						new ODGridCell(job.Title)
 						) {

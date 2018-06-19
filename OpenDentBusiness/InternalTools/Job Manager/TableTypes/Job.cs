@@ -47,10 +47,12 @@ namespace OpenDentBusiness {
 		public JobCategory Category;
 		///<summary>The version the job is for. Example: 15.4.19, 16.1.1</summary>
 		public string JobVersion;
-		///<summary>The estimated hours a job will take.</summary>
-		public int HoursEstimate;
-		///<summary>The actual hours a job took.</summary>
-		public int HoursActual;
+		///<summary>The estimated time a job will take.</summary>
+		[CrudColumn(SpecialType=CrudSpecialColType.TimeSpanLong)]
+		public TimeSpan TimeEstimate;
+		///<summary>Deprecated: The actual time a job took.  Use HoursActual (or something similar to the logic within) instead.</summary>
+		[CrudColumn(SpecialType=CrudSpecialColType.TimeSpanLong)]
+		public TimeSpan TimeActual;
 		///<summary>The date/time that the job was created.  Not user editable.</summary>
 		[CrudColumn(SpecialType=CrudSpecialColType.DateTEntry)]
 		public DateTime DateTimeEntry;
@@ -93,6 +95,9 @@ namespace OpenDentBusiness {
 		public List<JobReview> ListJobReviews=new List<JobReview>();
 		///<summary>Not a data column.</summary>
 		[CrudColumn(IsNotDbColumn=true)]
+		public List<JobReview> ListJobTimeLogs=new List<JobReview>();
+		///<summary>Not a data column.</summary>
+		[CrudColumn(IsNotDbColumn=true)]
 		public List<JobQuote> ListJobQuotes=new List<JobQuote>();
 		///<summary>Not a data column.</summary>
 		[CrudColumn(IsNotDbColumn = true)]
@@ -111,9 +116,27 @@ namespace OpenDentBusiness {
 			job.ListJobLinks=this.ListJobLinks.Select(x => x.Copy()).ToList();
 			job.ListJobNotes=this.ListJobNotes.Select(x => x.Copy()).ToList();
 			job.ListJobReviews=this.ListJobReviews.Select(x => x.Copy()).ToList();
+			job.ListJobTimeLogs=this.ListJobTimeLogs.Select(x => x.Copy()).ToList();
 			job.ListJobQuotes=this.ListJobQuotes.Select(x => x.Copy()).ToList();
 			job.ListJobLogs=this.ListJobLogs.Select(x => x.Copy()).ToList();
 			return job;
+		}
+
+		///<summary>The actual hours a job has taken so far.</summary>
+		public double HoursActual {
+			get {
+				return ListJobTimeLogs.Sum(x => x.TimeReview.TotalHours);
+			}
+		}
+
+		///<summary>The estimated hours a job will take.</summary>
+		public double HoursEstimate {
+			get {
+				return TimeEstimate.TotalHours;
+			}
+			set {
+				TimeEstimate=TimeSpan.FromHours(value);
+			}
 		}
 
 		///<summary>Returns userNum of the person assigned to the next task for a job, 0 if unnassigned.</summary>

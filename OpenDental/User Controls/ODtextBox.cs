@@ -787,7 +787,7 @@ namespace OpenDental {
 		}
 
 		///<summary>Performs spell checking against indiviudal words against the English USA dictionary.</summary>
-		private void SpellCheck() {
+		public void SpellCheck() {
 			//Only spell check if enabled
 			if(!this._spellCheckIsEnabled 
 				|| !PrefC.GetBool(PrefName.SpellCheckIsEnabled)

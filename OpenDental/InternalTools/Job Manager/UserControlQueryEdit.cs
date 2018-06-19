@@ -304,16 +304,18 @@ namespace OpenDental.InternalTools.Job_Manager {
 		public void FillGridNote() {
 			gridNotes.BeginUpdate();
 			gridNotes.Columns.Clear();
+			gridNotes.Columns.Add(new ODGridColumn(Lan.g(this,"Note"),400));
 			gridNotes.Columns.Add(new ODGridColumn(Lan.g(this,"Date Time"),120));
 			gridNotes.Columns.Add(new ODGridColumn(Lan.g(this,"User"),80));
-			gridNotes.Columns.Add(new ODGridColumn(Lan.g(this,"Note"),400));
 			gridNotes.Rows.Clear();
 			ODGridRow row;
-			foreach(JobNote jobNote in _jobCur.ListJobNotes) {
+			List<JobNote> listJobNotes=_jobCur.ListJobNotes.ToList();
+			listJobNotes.Reverse();
+			foreach(JobNote jobNote in listJobNotes) {
 				row=new ODGridRow();
+				row.Cells.Add(jobNote.Note);
 				row.Cells.Add(jobNote.DateTimeNote.ToShortDateString()+" "+jobNote.DateTimeNote.ToShortTimeString());
 				row.Cells.Add(Userods.GetName(jobNote.UserNum));
-				row.Cells.Add(jobNote.Note);
 				row.Tag=jobNote;
 				gridNotes.Rows.Add(row);
 			}
@@ -681,7 +683,7 @@ namespace OpenDental.InternalTools.Job_Manager {
 			}
 			JobLinks.Sync(job.ListJobLinks,job.JobNum);
 			JobNotes.Sync(job.ListJobNotes,job.JobNum);
-			JobReviews.Sync(job.ListJobReviews,job.JobNum);
+			JobReviews.SyncReviews(job.ListJobReviews,job.JobNum);
 			JobQuotes.Sync(job.ListJobQuotes,job.JobNum);
 			MakeLogEntry(job,_jobOld);
 			Signalods.SetInvalid(InvalidType.Jobs,KeyType.Job,job.JobNum);

@@ -65,7 +65,7 @@ namespace WindowJobManagerDashboard {
 					jobTitles.Add(tb);
 				}
 				string needsWork="";
-				int devHours=listWriteCodeJobs.Where(x => x.UserNumEngineer==user.UserNum).Sum(x => x.HoursEstimate);
+				int devHours=0;//listWriteCodeJobs.Where(x => x.UserNumEngineer==user.UserNum).Sum(x => x.MinutesEstimate);
 				if(devHours<20) {
 					needsWork="Needs Work";
 				}

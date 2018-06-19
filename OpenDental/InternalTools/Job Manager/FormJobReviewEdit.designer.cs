@@ -36,7 +36,7 @@ namespace OpenDental{
 			this.butCancel = new OpenDental.UI.Button();
 			this.comboReviewer = new System.Windows.Forms.ComboBox();
 			this.butLogin = new OpenDental.UI.Button();
-			this.label2 = new System.Windows.Forms.Label();
+			this.labelReviewTime = new System.Windows.Forms.Label();
 			this.textReviewTime = new OpenDental.ValidNumber();
 			this.SuspendLayout();
 			// 
@@ -183,14 +183,14 @@ namespace OpenDental{
 			this.butLogin.Text = "Login as...";
 			this.butLogin.Click += new System.EventHandler(this.butLogin_Click);
 			// 
-			// label2
+			// labelReviewTime
 			// 
-			this.label2.Location = new System.Drawing.Point(6, 84);
-			this.label2.Name = "label2";
-			this.label2.Size = new System.Drawing.Size(134, 20);
-			this.label2.TabIndex = 20;
-			this.label2.Text = "Review Time (Minutes)";
-			this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.labelReviewTime.Location = new System.Drawing.Point(6, 84);
+			this.labelReviewTime.Name = "labelReviewTime";
+			this.labelReviewTime.Size = new System.Drawing.Size(134, 20);
+			this.labelReviewTime.TabIndex = 20;
+			this.labelReviewTime.Text = "Review Time (Minutes)";
+			this.labelReviewTime.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
 			// textReviewTime
 			// 
@@ -206,7 +206,7 @@ namespace OpenDental{
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
 			this.ClientSize = new System.Drawing.Size(413, 396);
 			this.Controls.Add(this.textReviewTime);
-			this.Controls.Add(this.label2);
+			this.Controls.Add(this.labelReviewTime);
 			this.Controls.Add(this.butLogin);
 			this.Controls.Add(this.comboReviewer);
 			this.Controls.Add(this.textDescription);
@@ -242,7 +242,7 @@ namespace OpenDental{
 		private ODtextBox textDescription;
 		private System.Windows.Forms.ComboBox comboReviewer;
 		private UI.Button butLogin;
-		private System.Windows.Forms.Label label2;
+		private System.Windows.Forms.Label labelReviewTime;
 		private ValidNumber textReviewTime;
 	}
 }

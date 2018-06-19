@@ -155,6 +155,7 @@ namespace OpenDental {
 			Enumerable.Range(7,14).ToList().ForEach(x => comboFontSize.Items.Add(x));//Sizes 7-20
 			comboFontSize.SelectedIndex=1;//Size 8;
 			butHighlight.BackColor=Color.Yellow;
+			butSpellCheck.BackColor=textImplementation.SpellCheckIsEnabled?Color.LightGreen:Color.LightCoral;
 			_highlightColor=butHighlight.BackColor;
 		}
 
@@ -400,17 +401,10 @@ namespace OpenDental {
 		}
 
 		private void butSpellCheck_Click(object sender,EventArgs e) {
-			if(_textFocused.ReadOnly) {
-				return;
-			}
-			FormSpellChecker FormSC = new FormSpellChecker();
-			FormSC.SetText(_textFocused.Rtf);
-			FormSC.ShowDialog();
-			if(FormSC.DialogResult!=DialogResult.OK) {
-				return;
-			}
-			_textFocused.Rtf=FormSC.TextRtf;
-			_textFocused.Focus();
+			textImplementation.SpellCheckIsEnabled=!textImplementation.SpellCheckIsEnabled;
+			textImplementation.Refresh();
+			textImplementation.SpellCheck();
+			butSpellCheck.BackColor=textImplementation.SpellCheckIsEnabled?Color.LightGreen:Color.LightCoral;
 		}
 
 		private void butClearFormatting_Click(object sender,EventArgs e) {

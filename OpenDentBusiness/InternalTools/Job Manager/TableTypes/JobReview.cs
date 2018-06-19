@@ -25,33 +25,32 @@ namespace OpenDentBusiness {
 		///<summary>The status of this review.</summary>
 		[CrudColumn(SpecialType=CrudSpecialColType.EnumAsString)]
 		public JobReviewStatus ReviewStatus;
-		///<summary>The hours spent on this review.</summary>
-		public string Hours;
+		///<summary>The time spent on this review.</summary>
+		[CrudColumn(SpecialType=CrudSpecialColType.TimeSpanLong)]
+		public TimeSpan TimeReview;
 
 		///<summary></summary>
 		public JobReview Copy() {
 			return (JobReview)this.MemberwiseClone();
 		}
 
-		public Double _Minutes {
+		///<summary>The total hours spent on this review.</summary>
+		public double Hours {
 			get {
-				double retVal=0;
-				Double.TryParse(Hours,out retVal);
-				return retVal*60;
+				return TimeReview.TotalHours;
 			}
 			set {
-				Hours=(value/60).ToString();
+				TimeReview=TimeSpan.FromHours(value);
 			}
 		}
 		
-		public Double _Hours {
+		///<summary>The total minutes spent on this review.</summary>
+		public double Minutes {
 			get {
-				double retVal=0;
-				Double.TryParse(Hours,out retVal);
-				return retVal;
+				return TimeReview.TotalMinutes;
 			}
 			set {
-				Hours=value.ToString();
+				TimeReview=TimeSpan.FromMinutes(value);
 			}
 		}
 	}
@@ -73,6 +72,8 @@ namespace OpenDentBusiness {
 		SaveCommit,
 		///<summary>7 -</summary>
 		SaveCommitted,
+		///<summary>8 -Only used for Time Logs. Not available for standard reviews</summary>
+		TimeLog,
 	}
 
 }

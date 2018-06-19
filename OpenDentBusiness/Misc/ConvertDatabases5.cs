@@ -8608,9 +8608,49 @@ No Action Required in many cases, check your new patient Web Sched on your web s
 		}
 
 		private static void To18_1_25() {
+			ODEvent.Fire(new ODEventArgs("ConvertDatabases",
+				"Upgrading database to version: 18.1.25"));//No translation in convert script.
 			string command=@"ALTER TABLE autonotecontrol 
 					MODIFY ControlLabel VARCHAR(255)";
 			Db.NonQ(command);
+			//We are running this section of code for HQ only
+			//This is very uncommon and normally manual queries should be run instead of doing a convert script.
+			command="SELECT ValueString FROM preference WHERE PrefName='DockPhonePanelShow'";
+			DataTable table=Db.GetTable(command);
+			if(table.Rows.Count > 0 && PIn.Bool(table.Rows[0][0].ToString())) {
+				//Convert the following int columns to bigint so that they can handle TimeSpans stored as Ticks.
+				command="ALTER TABLE job CHANGE COLUMN HoursEstimate TimeEstimate bigint(20) NOT NULL";
+				Db.NonQ(command);
+				command="ALTER TABLE job CHANGE COLUMN HoursActual TimeActual bigint(20) NOT NULL";//Convert this even though it is deprecated
+				Db.NonQ(command);
+				//The following columns were storing hours as ints and need to be converted to TimeSpan.Ticks (1/10 MS per tick).
+				command="UPDATE job SET job.TimeEstimate=ROUND(job.TimeEstimate*"+TimeSpan.TicksPerHour+",0)";
+				Db.NonQ(command);
+				command="UPDATE job SET job.TimeActual=ROUND(job.TimeActual*"+TimeSpan.TicksPerHour+",0)";
+				Db.NonQ(command);
+				DataTable tableReviews;
+				//Pull all of the job reviews into memory so that we can convert the old string column into a TimeSpanLong column (using ticks).
+				command="SELECT * FROM jobreview";
+				tableReviews=Db.GetTable(command);
+				command="ALTER TABLE jobreview CHANGE COLUMN Hours TimeReview bigint(20) NOT NULL";
+				Db.NonQ(command);
+				foreach(DataRow row in tableReviews.Rows) {
+					long reviewNum=PIn.Long(row["JobReviewNum"].ToString());
+					double hours=PIn.Double(row["Hours"].ToString());
+					command="UPDATE jobreview SET jobreview.TimeReview=ROUND("+hours*TimeSpan.TicksPerHour+",0) WHERE jobreview.JobReviewNum="+reviewNum;
+					Db.NonQ(command);
+				}
+				//Insert all the new TimeLog reviews for the deprecated TimeActual column
+				command="INSERT INTO jobreview (JobNum,ReviewerNum,DateTStamp,Description,ReviewStatus,TimeReview) "
+					+"SELECT job.JobNum"
+						+",IF(job.UserNumEngineer != 0,job.UserNumEngineer,IF(job.UserNumExpert != 0,job.UserNumExpert,job.UserNumConcept))"
+						+",NOW()"
+						+",'Auto-Inserted Via Convert Script'"
+						+",'TimeLog'"
+						+",job.TimeActual "
+					+"FROM job WHERE job.TimeActual != 0 ";
+				Db.NonQ(command);
+			}
 		}
 
 	}

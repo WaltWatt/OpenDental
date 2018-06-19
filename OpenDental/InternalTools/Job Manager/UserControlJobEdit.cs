@@ -102,13 +102,13 @@ namespace OpenDental.InternalTools.Job_Manager {
 				}
 			}
 			review.ReviewStatus=JobReviewStatus.Done;
-			InputBox inputBox = new InputBox("Please enter the number of minutes spent on this review.",review._Minutes.ToString());
+			InputBox inputBox = new InputBox("Please enter the number of minutes spent on this review.",review.Minutes.ToString());
 			if(inputBox.ShowDialog()==DialogResult.OK) {
 				double time = 0;
 				if(!Double.TryParse(inputBox.textResult.Text,out time)) {
 					return;
 				}
-				review._Minutes=time;
+				review.Minutes=time;
 				JobReviews.Update(review);
 				FillGridReviews();
 				Signalods.SetInvalid(InvalidType.Jobs,KeyType.Job,_jobCur.JobNum);
@@ -135,13 +135,13 @@ namespace OpenDental.InternalTools.Job_Manager {
 				}
 			}
 			review.ReviewStatus=JobReviewStatus.NeedsAdditionalReview;
-			InputBox inputBox = new InputBox("Please enter the number of minutes spent on this review.",review._Minutes.ToString());
+			InputBox inputBox = new InputBox("Please enter the number of minutes spent on this review.",review.Minutes.ToString());
 			if(inputBox.ShowDialog()==DialogResult.OK) {
 				double time = 0;
 				if(!Double.TryParse(inputBox.textResult.Text,out time)) {
 					return;
 				}
-				review._Minutes=time;
+				review.Minutes=time;
 				JobReviews.Update(review);
 				FillGridReviews();
 				Signalods.SetInvalid(InvalidType.Jobs,KeyType.Job,_jobCur.JobNum);
@@ -156,8 +156,7 @@ namespace OpenDental.InternalTools.Job_Manager {
 			Job job = _jobCur.Copy();
 			job.Requirements=textJobEditor.RequirementsRtf;
 			job.Implementation=textJobEditor.ImplementationRtf;
-			job.HoursActual=PIn.Int(textActualHours.Text);
-			job.HoursEstimate=PIn.Int(textEstHours.Text);
+			job.HoursEstimate=PIn.Double(textEstHours.Text);
 			if(comboPriority.SelectedIndex>-1) {
 				job.Priority=((ODBoxItem<Def>)comboPriority.SelectedItem).Tag.DefNum;
 			}
@@ -231,10 +230,10 @@ namespace OpenDental.InternalTools.Job_Manager {
 			catch {
 				textEditorDocumentation.MainText=_jobCur.Documentation;
 			}
-			UpdateLogColor();
 			FillAllGrids();
 			IsChanged=false;
 			CheckPermissions();
+			CreateViewLog();
 			if(job!=null) {//re-enable control after we have loaded the job.
 				this.Enabled=true;
 			}
@@ -601,7 +600,7 @@ namespace OpenDental.InternalTools.Job_Manager {
 				row.Cells.Add(jobReview.DateTStamp.ToShortDateString());
 				row.Cells.Add(Userods.GetName(jobReview.ReviewerNum));
 				row.Cells.Add(Enum.GetName(typeof(JobReviewStatus),(int)jobReview.ReviewStatus));
-				row.Cells.Add(Math.Round(jobReview._Hours,2).ToString());
+				row.Cells.Add(Math.Round(jobReview.Hours,2).ToString());
 				row.Cells.Add(jobReview.Description.Left(500,true));
 				row.Tag=jobReview;
 				gridReview.Rows.Add(row);
@@ -1254,8 +1253,8 @@ namespace OpenDental.InternalTools.Job_Manager {
 				if(inBox.DialogResult!=DialogResult.OK || string.IsNullOrEmpty(inBox.textResult.Text)) {
 					return;
 				}
-				textEstHours.Text=PIn.Int(inBox.textResult.Text).ToString();
-				_jobCur.HoursEstimate=PIn.Int(inBox.textResult.Text);
+				textEstHours.Text=PIn.String(inBox.textResult.Text).ToString();
+				_jobCur.HoursEstimate=PIn.Double(inBox.textResult.Text);
 			}
 			IsChanged=true;
 			_jobCur.UserNumConcept=Security.CurUser.UserNum;
@@ -1280,8 +1279,8 @@ namespace OpenDental.InternalTools.Job_Manager {
 				if(inBox.DialogResult!=DialogResult.OK || string.IsNullOrEmpty(inBox.textResult.Text)) {
 					return;
 				}
-				textEstHours.Text=PIn.Int(inBox.textResult.Text).ToString();
-				_jobCur.HoursEstimate=PIn.Int(inBox.textResult.Text);
+				textEstHours.Text=PIn.Double(inBox.textResult.Text).ToString();
+				_jobCur.HoursEstimate=PIn.Double(inBox.textResult.Text);
 			}
 			if(!ValidateJob(_jobCur)) {
 				return;
@@ -1301,8 +1300,8 @@ namespace OpenDental.InternalTools.Job_Manager {
 				if(inBox.DialogResult!=DialogResult.OK || string.IsNullOrEmpty(inBox.textResult.Text)) {
 					return;
 				}
-				textEstHours.Text=PIn.Int(inBox.textResult.Text).ToString();
-				_jobCur.HoursEstimate=PIn.Int(inBox.textResult.Text);
+				textEstHours.Text=PIn.Double(inBox.textResult.Text).ToString();
+				_jobCur.HoursEstimate=PIn.Double(inBox.textResult.Text);
 			}
 			IsChanged=true;
 			_jobOld.UserNumApproverChange=0;//in case it was previously set.
@@ -1404,8 +1403,8 @@ namespace OpenDental.InternalTools.Job_Manager {
 					if(inBox.DialogResult!=DialogResult.OK || string.IsNullOrEmpty(inBox.textResult.Text)) {
 						return;
 					}
-					textEstHours.Text=PIn.Int(inBox.textResult.Text).ToString();
-					_jobCur.HoursEstimate=PIn.Int(inBox.textResult.Text);
+					textEstHours.Text=PIn.Double(inBox.textResult.Text).ToString();
+					_jobCur.HoursEstimate=PIn.Double(inBox.textResult.Text);
 				}
 				_jobCur.UserNumApproverConcept=Security.CurUser.UserNum;
 			}
@@ -1566,13 +1565,9 @@ namespace OpenDental.InternalTools.Job_Manager {
 				return;
 			}
 			if(string.IsNullOrEmpty(textActualHours.Text) || textActualHours.Text=="0") {
-				InputBox inBox = new InputBox("Please add Hrs. Act. and include not only your time, but also write-up and review time.");
-				inBox.ShowDialog();
-				if(inBox.DialogResult!=DialogResult.OK || string.IsNullOrEmpty(inBox.textResult.Text)) {
+				if(!AddTime()) {
 					return;
 				}
-				textActualHours.Text=PIn.Int(inBox.textResult.Text).ToString();
-				_jobCur.HoursActual=PIn.Int(inBox.textResult.Text);
 			}
 			bool isHeadOnlyCommit=true;//True for conversions
 			if(_jobCur.Category==JobCategory.Conversion) {
@@ -1765,17 +1760,19 @@ namespace OpenDental.InternalTools.Job_Manager {
 			_isLoading=true;
 			Job jobMerge = newJob.Copy();//otherwise changes would be made to the tree view.
 			//Set _jobCur lists to the new lists made above.
-			_jobCur.ListJobLinks  =jobMerge.ListJobLinks;
-			_jobCur.ListJobNotes  =jobMerge.ListJobNotes;
-			_jobCur.ListJobQuotes =jobMerge.ListJobQuotes;
-			_jobCur.ListJobReviews=jobMerge.ListJobReviews;
-			_jobCur.ListJobLogs   =jobMerge.ListJobLogs;
+			_jobCur.ListJobLinks		=jobMerge.ListJobLinks;
+			_jobCur.ListJobNotes		=jobMerge.ListJobNotes;
+			_jobCur.ListJobQuotes		=jobMerge.ListJobQuotes;
+			_jobCur.ListJobReviews	=jobMerge.ListJobReviews;
+			_jobCur.ListJobTimeLogs	=jobMerge.ListJobTimeLogs;
+			_jobCur.ListJobLogs			=jobMerge.ListJobLogs;
 			//Update Old lists too
-			_jobOld.ListJobLinks  =jobMerge.ListJobLinks.Select(x=>x.Copy()).ToList();
-			_jobOld.ListJobNotes  =jobMerge.ListJobNotes.Select(x => x.Copy()).ToList();
-			_jobOld.ListJobQuotes =jobMerge.ListJobQuotes.Select(x => x.Copy()).ToList();
-			_jobOld.ListJobReviews=jobMerge.ListJobReviews.Select(x => x.Copy()).ToList();
-			_jobOld.ListJobLogs   =jobMerge.ListJobLogs.Select(x => x.Copy()).ToList();
+			_jobOld.ListJobLinks		=jobMerge.ListJobLinks.Select(x=>x.Copy()).ToList();
+			_jobOld.ListJobNotes		=jobMerge.ListJobNotes.Select(x => x.Copy()).ToList();
+			_jobOld.ListJobQuotes		=jobMerge.ListJobQuotes.Select(x => x.Copy()).ToList();
+			_jobOld.ListJobReviews	=jobMerge.ListJobReviews.Select(x => x.Copy()).ToList();
+			_jobOld.ListJobTimeLogs	=jobMerge.ListJobTimeLogs.Select(x => x.Copy()).ToList();
+			_jobOld.ListJobLogs			=jobMerge.ListJobLogs.Select(x => x.Copy()).ToList();
 			//JOB ROLE USER NUMS
 			_jobCur.UserNumApproverChange=jobMerge.UserNumApproverChange;
 			_jobCur.UserNumApproverConcept=jobMerge.UserNumApproverConcept;
@@ -1808,7 +1805,7 @@ namespace OpenDental.InternalTools.Job_Manager {
 					textTitle.Text=_jobCur.Title;
 				}
 				else {
-					MessageBox.Show("Job Title has been changed to:\r\n"+jobMerge.Title);
+					//MessageBox.Show("Job Title has been changed to:\r\n"+jobMerge.Title);
 				}
 			}
 			//REQUIREMENTS
@@ -1824,7 +1821,7 @@ namespace OpenDental.InternalTools.Job_Manager {
 					}
 				}
 				else {
-					MessageBox.Show("Job Concept has been changed.");
+					//MessageBox.Show("Job Concept has been changed.");
 				}
 			}
 			//IMPLEMENTATION
@@ -1840,7 +1837,7 @@ namespace OpenDental.InternalTools.Job_Manager {
 					}
 				}
 				else {
-					MessageBox.Show("Job Writeup has been changed.");
+					//MessageBox.Show("Job Writeup has been changed.");
 				}
 			}
 			//DOCUMENTATION
@@ -1856,7 +1853,7 @@ namespace OpenDental.InternalTools.Job_Manager {
 					}
 				}
 				else {
-					MessageBox.Show("Job Documentation has been changed.");//possibly implement locking the documentation pane.
+					//MessageBox.Show("Job Documentation has been changed.");//possibly implement locking the documentation pane.
 				}
 			}
 			//PRIORITY
@@ -1906,8 +1903,9 @@ namespace OpenDental.InternalTools.Job_Manager {
 			}
 			//HOURS ACT
 			if(_jobCur.HoursActual!=jobMerge.HoursActual && _jobCur.HoursActual==_jobOld.HoursActual) {//Was edited, AND user has not already edited it themselves.
-				_jobCur.HoursActual=jobMerge.HoursActual;
-				_jobOld.HoursActual=jobMerge.HoursActual;
+				//Stored in another table now, cannot set this value and no real need to.
+				//_jobCur.HoursActual=jobMerge.HoursActual;
+				//_jobOld.HoursActual=jobMerge.HoursActual;
 				textActualHours.Text=_jobCur.HoursActual.ToString();
 			}
 			//PARENT
@@ -1977,8 +1975,7 @@ namespace OpenDental.InternalTools.Job_Manager {
 			job.Requirements=textJobEditor.RequirementsRtf;
 			job.Implementation=textJobEditor.ImplementationRtf;
 			job.Documentation=textEditorDocumentation.MainRtf;
-			job.HoursActual=PIn.Int(textActualHours.Text);
-			job.HoursEstimate=PIn.Int(textEstHours.Text);
+			job.HoursEstimate=PIn.Double(textEstHours.Text);
 			if(comboPriority.SelectedIndex>-1) {
 				job.Priority=((ODBoxItem<Def>)comboPriority.SelectedItem).Tag.DefNum;
 			}
@@ -2004,6 +2001,7 @@ namespace OpenDental.InternalTools.Job_Manager {
 				job.ListJobLinks.ForEach(x=>x.JobNum=job.JobNum);
 				job.ListJobNotes.ForEach(x=>x.JobNum=job.JobNum);
 				job.ListJobReviews.ForEach(x=>x.JobNum=job.JobNum);
+				job.ListJobTimeLogs.ForEach(x=>x.JobNum=job.JobNum);
 				job.ListJobQuotes.ForEach(x=>x.JobNum=job.JobNum);
 				//job.ListJobEvents.ForEach(x=>x.JobNum=job.JobNum);//do not sync
 			}
@@ -2012,7 +2010,8 @@ namespace OpenDental.InternalTools.Job_Manager {
 			}
 			JobLinks.Sync(job.ListJobLinks,job.JobNum);
 			JobNotes.Sync(job.ListJobNotes,job.JobNum);
-			JobReviews.Sync(job.ListJobReviews,job.JobNum);
+			JobReviews.SyncReviews(job.ListJobReviews,job.JobNum);
+			JobReviews.SyncTimeLogs(job.ListJobTimeLogs,job.JobNum);
 			JobQuotes.Sync(job.ListJobQuotes,job.JobNum);
 			MakeLogEntry(job,_jobOld);
 			Signalods.SetInvalid(InvalidType.Jobs,KeyType.Job,job.JobNum);
@@ -2589,6 +2588,7 @@ namespace OpenDental.InternalTools.Job_Manager {
 				Jobs.Update(job);
 				Signalods.SetInvalid(InvalidType.Jobs,KeyType.Job,job.JobNum);
 			}
+			textTitle.SpellCheck();
 		}
 		
 		private void textVersion_TextChanged(object sender,EventArgs e) {
@@ -2670,8 +2670,8 @@ namespace OpenDental.InternalTools.Job_Manager {
 				return;
 			}
 			//Do not update the textbox or this could be put in an infinite loop
-			int hrsEst=0;
-			if(!int.TryParse(textEstHours.Text,out hrsEst)) {
+			double hrsEst=0;
+			if(!double.TryParse(textEstHours.Text,out hrsEst)) {
 				hrsEst=0;
 			}
 			_jobCur.HoursEstimate=hrsEst;
@@ -2681,29 +2681,7 @@ namespace OpenDental.InternalTools.Job_Manager {
 			}
 			else {
 				Job jobFromDB = Jobs.GetOne(_jobCur.JobNum);//Get from DB to ensure freshest copy (Lists not filled)
-				int.TryParse(textEstHours.Text,out jobFromDB.HoursEstimate);
-				Jobs.Update(jobFromDB);//update the checkout num.
-				Signalods.SetInvalid(InvalidType.Jobs,KeyType.Job,_jobCur.JobNum);//send signal that the job has been checked out.
-			}
-		}
-
-		private void textActualHours_TextChanged(object sender,EventArgs e) {
-			if(_isLoading) {
-				return;
-			}
-			//Do not update the textbox or this could be put in an infinite loop
-			int hrsAct=0;
-			if(!int.TryParse(textActualHours.Text,out hrsAct)) {
-				hrsAct=0;
-			}
-			_jobCur.HoursActual=hrsAct;
-			_jobOld.HoursActual=hrsAct;
-			if(IsNew) {
-				IsChanged=true;
-			}
-			else {
-				Job jobFromDB = Jobs.GetOne(_jobCur.JobNum);//Get from DB to ensure freshest copy (Lists not filled)
-				int.TryParse(textActualHours.Text,out jobFromDB.HoursActual);
+				jobFromDB.HoursEstimate=PIn.Double(textEstHours.Text);
 				Jobs.Update(jobFromDB);//update the checkout num.
 				Signalods.SetInvalid(InvalidType.Jobs,KeyType.Job,_jobCur.JobNum);//send signal that the job has been checked out.
 			}
@@ -3015,21 +2993,49 @@ namespace OpenDental.InternalTools.Job_Manager {
 			FillGridLog();
 		}
 
-		private void butUpdateLog_Click(object sender,EventArgs e) {
-			if(butUpdateLog.BackColor==Color.LightGreen) {
+		private void CreateViewLog() {
+			if(_jobCur.ListJobLogs.Exists(x => x.DateTimeEntry>=DateTime.Today && x.UserNumChanged==Security.CurUser.UserNum)) {
 				return;
 			}
-			SaveJob(_jobCur);
-			UpdateLogColor();
+			JobLog jobLog = JobLogs.MakeLogEntryForView(_jobCur);
+			if(jobLog==null) {
+				return;
+			}
+			_jobCur.ListJobLogs.Add(jobLog);
+			Signalods.SetInvalid(InvalidType.Jobs,KeyType.Job,_jobCur.JobNum);
+			FillGridLog();
 		}
 
-		private void UpdateLogColor() {
-			if(_jobCur.ListJobLogs.Exists(x => x.DateTimeEntry>=DateTime.Today)) {
-				butUpdateLog.BackColor=Color.LightGreen;
+		private void butAddTime_Click(object sender,EventArgs e) {
+			AddTime();
+		}
+
+		private bool AddTime() {
+			if(_isLoading) {
+				return false;
 			}
-			else {
-				butUpdateLog.BackColor=Color.LightCoral;
+			if(_jobCur==null) {
+				return false;//should never happen
 			}
+			if(!JobPermissions.IsAuthorized(JobPerm.Concept,true)
+				&& !JobPermissions.IsAuthorized(JobPerm.NotifyCustomer,true)
+				&& !JobPermissions.IsAuthorized(JobPerm.FeatureManager,true)
+				&& !JobPermissions.IsAuthorized(JobPerm.Documentation,true)) 
+			{
+				return false;
+			}
+			JobReview timeLog=new JobReview();
+			timeLog.JobNum=_jobCur.JobNum;
+			FormJobTimeAdd FormJTA=new FormJobTimeAdd(timeLog);
+			FormJTA.ShowDialog();
+			if(FormJTA.DialogResult!=DialogResult.OK || FormJTA.TimeLogCur==null) {
+				return false;
+			}
+			JobReviews.Insert(FormJTA.TimeLogCur);
+			Signalods.SetInvalid(InvalidType.Jobs,KeyType.Job,_jobCur.JobNum);
+			_jobCur.ListJobTimeLogs.Add(FormJTA.TimeLogCur);
+			textActualHours.Text=_jobCur.HoursActual.ToString();
+			return true;
 		}
 
 		private void textApprove_MouseDoubleClick(object sender,MouseEventArgs e) {

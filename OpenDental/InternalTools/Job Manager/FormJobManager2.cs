@@ -37,6 +37,7 @@ namespace OpenDental {
 			comboUser.Tag=Security.CurUser;
 			if(Security.IsAuthorized(Permissions.SecurityAdmin,true)) {
 				releaseCalculatorToolStripMenuItem.Visible=true;
+				jobOverviewToolStripMenuItem.Visible=true;
 			}
 			_listUsers=Userods.GetUsersForJobs();
 			FillPriorityList();
@@ -213,6 +214,10 @@ namespace OpenDental {
 			if(comboUser.SelectedIndex==1) {
 				userFilter=new Userod() { UserName="Unassigned",UserNum=0 };
 			}
+			//If all user set userFilter to null in order to get all jobs
+			if(comboUser.SelectedIndex==0) {
+				userFilter=null;
+			}
 			else if(comboUser.SelectedIndex>1) {
 				userFilter=_listUsers[comboUser.SelectedIndex-2];
 			}
@@ -227,7 +232,7 @@ namespace OpenDental {
 			gridAction.Columns.Clear();
 			gridAction.Columns.Add(new ODGridColumn("Priority",50) { TextAlign=HorizontalAlignment.Center });
 			gridAction.Columns.Add(new ODGridColumn("Flag",30) { TextAlign=HorizontalAlignment.Center });// X for yes, - for unassigned
-			gridAction.Columns.Add(new ODGridColumn("Owner",55) { TextAlign=HorizontalAlignment.Center });// X for yes, - for unassigned
+			gridAction.Columns.Add(new ODGridColumn("Owner",65) { TextAlign=HorizontalAlignment.Center });// X for yes, - for unassigned
 			gridAction.Columns.Add(new ODGridColumn("",245));
 			gridAction.Rows.Clear();
 			//Sort jobs into action dictionary
@@ -298,6 +303,11 @@ namespace OpenDental {
 				JobAction[] writeAdviseReview = new[] { JobAction.WriteCode,JobAction.ReviewCode,JobAction.WaitForReview,JobAction.Advise };
 				foreach(Job job in listJobsSorted) {
 					Def jobPriority = _listJobPriorities.FirstOrDefault(y => y.DefNum==job.Priority);
+					string ownerString = job.OwnerNum==0 ? "-" : Userods.GetName(job.OwnerNum);
+					//If in ReviewCode (you are the reviewer for the job), add a string for who sent it to you
+					if(kvp.Key==JobAction.ReviewCode) {
+						ownerString+="\r\n("+Userods.GetName(job.UserNumEngineer)+")";
+					}
 					gridAction.Rows.Add(
 					new ODGridRow(
 						new ODGridCell(jobPriority.ItemName) {
@@ -307,7 +317,7 @@ namespace OpenDental {
 						new ODGridCell(FlagHelper(job,gridAction.Rows.Count)) {
 							ColorText=job.TagOD!=null ? (Color)job.TagOD : Color.Black//Set in FlagCellHelper(...), tag is reset everytime FillGridActions() is called.
 							},
-						new ODGridCell(job.OwnerNum==0 ? "-" : Userods.GetName(job.OwnerNum)),
+						new ODGridCell(ownerString),
 						new ODGridCell(job.ToString()) { CellColor=(job.ToString().ToLower().Contains(textSearch.Text.ToLower())&&!string.IsNullOrWhiteSpace(textSearch.Text) ? Color.LightYellow : Color.Empty) }
 						) {
 						Tag=job
@@ -1932,6 +1942,24 @@ namespace OpenDental {
 			}
 			FormReleaseCalculator FormRC=new FormReleaseCalculator();
 			FormRC.Show();
+		}
+
+		private void jobTimeHelperToolStripMenuItem_Click(object sender,EventArgs e) {
+			if(Application.OpenForms.OfType<FormJobTime>().Count()>0) {
+				Application.OpenForms.OfType<FormJobTime>().ToList()[0].BringToFront();
+				return;
+			}
+			FormJobTime FormJT=new FormJobTime(_listJobsAll);
+			FormJT.Show();
+		}
+
+		private void jobOverviewToolStripMenuItem_Click(object sender,EventArgs e) {
+			if(Application.OpenForms.OfType<FormJobManagerOverview>().Count()>0) {
+				Application.OpenForms.OfType<FormJobManagerOverview>().ToList()[0].BringToFront();
+				return;
+			}
+			FormJobManagerOverview FormJMO=new FormJobManagerOverview(_listJobsAll);
+			FormJMO.Show();
 		}
 
 		private bool JobUnsavedChangesCheck() {

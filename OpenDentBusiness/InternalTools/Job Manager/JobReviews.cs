@@ -13,16 +13,7 @@ namespace OpenDentBusiness{
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
 				return Meth.GetObject<List<JobReview>>(MethodBase.GetCurrentMethod(),userNum);
 			}
-			string command="SELECT * FROM jobreview WHERE Reviewer = "+POut.Long(userNum);
-			return Crud.JobReviewCrud.SelectMany(command);
-		}
-
-		///<summary></summary>
-		public static List<JobReview> GetForJob(long jobNum) {
-			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				return Meth.GetObject<List<JobReview>>(MethodBase.GetCurrentMethod(),jobNum);
-			}
-			string command="SELECT * FROM jobreview WHERE JobNum = "+POut.Long(jobNum);
+			string command="SELECT * FROM jobreview WHERE Reviewer = "+POut.Long(userNum)+" AND ReviewStatus!='"+POut.String(JobReviewStatus.TimeLog.ToString())+"' ";
 			return Crud.JobReviewCrud.SelectMany(command);
 		}
 
@@ -34,6 +25,32 @@ namespace OpenDentBusiness{
 			return Crud.JobReviewCrud.SelectOne(jobReviewNum);
 		}
 
+		public static List<JobReview> GetReviewsForJobs(params long[] arrayJobNums) {
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				return Meth.GetObject<List<JobReview>>(MethodBase.GetCurrentMethod(),arrayJobNums);
+			}
+			if(arrayJobNums==null || arrayJobNums.Length==0) {
+				return new List<JobReview>();
+			}
+			string command="SELECT * FROM jobreview WHERE JobNum IN ("+string.Join(",",arrayJobNums)+") "
+				+"AND ReviewStatus!='"+POut.String(JobReviewStatus.TimeLog.ToString())+"' "
+				+"ORDER BY DateTStamp";
+			return Crud.JobReviewCrud.SelectMany(command);
+		}
+
+		public static List<JobReview> GetTimeLogsForJobs(params long[] arrayJobNums) {
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				return Meth.GetObject<List<JobReview>>(MethodBase.GetCurrentMethod(),arrayJobNums);
+			}
+			if(arrayJobNums==null || arrayJobNums.Length==0) {
+				return new List<JobReview>();
+			}
+			string command="SELECT * FROM jobreview WHERE JobNum IN ("+string.Join(",",arrayJobNums)+") "
+				+"AND ReviewStatus='"+POut.String(JobReviewStatus.TimeLog.ToString())+"' "
+				+"ORDER BY DateTStamp";
+			List<JobReview> listReviews=Crud.JobReviewCrud.SelectMany(command);
+			return listReviews;
+		}
 
 		public static DataTable GetOutstandingForUser(long userNum) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
@@ -94,25 +111,22 @@ namespace OpenDentBusiness{
 			Db.NonQ(command);
 		}
 
-		public static void Sync(List<JobReview> listNew,long jobNum) {
+		public static void SyncReviews(List<JobReview> listNew,long jobNum) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
 				Meth.GetVoid(MethodBase.GetCurrentMethod(),listNew,jobNum);
 				return;
 			}
-			List<JobReview> listDB=GetForJob(jobNum);
+			List<JobReview> listDB=GetReviewsForJobs(jobNum);
 			Crud.JobReviewCrud.Sync(listNew,listDB);
 		}
 
-		public static List<JobReview> GetJobReviewsForJobs(List<long> jobNums) {
+		public static void SyncTimeLogs(List<JobReview> listNew,long jobNum) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				return Meth.GetObject<List<JobReview>>(MethodBase.GetCurrentMethod(),jobNums);
+				Meth.GetVoid(MethodBase.GetCurrentMethod(),listNew,jobNum);
+				return;
 			}
-			if(jobNums==null || jobNums.Count==0) {
-				return new List<JobReview>();
-			}
-			string command="SELECT * FROM jobreview WHERE JobNum IN ("+string.Join(",",jobNums)+") "
-				+"ORDER BY DateTStamp";
-			return Crud.JobReviewCrud.SelectMany(command);
+			List<JobReview> listDB=GetTimeLogsForJobs(jobNum);
+			Crud.JobReviewCrud.Sync(listNew,listDB);
 		}
 
 

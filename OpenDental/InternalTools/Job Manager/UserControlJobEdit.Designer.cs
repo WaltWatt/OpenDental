@@ -42,7 +42,6 @@
 			this.comboCategory = new System.Windows.Forms.ComboBox();
 			this.label12 = new System.Windows.Forms.Label();
 			this.comboPriority = new System.Windows.Forms.ComboBox();
-			this.textTitle = new System.Windows.Forms.TextBox();
 			this.label4 = new System.Windows.Forms.Label();
 			this.label5 = new System.Windows.Forms.Label();
 			this.label3 = new System.Windows.Forms.Label();
@@ -54,14 +53,15 @@
 			this.timerVersion = new System.Windows.Forms.Timer(this.components);
 			this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
 			this.panel3 = new System.Windows.Forms.Panel();
+			this.textTitle = new OpenDental.ODtextBox();
 			this.butVersionPrompt = new OpenDental.UI.Button();
 			this.splitContainer2 = new System.Windows.Forms.SplitContainer();
 			this.splitContainerNoFlicker1 = new OpenDental.SplitContainerNoFlicker();
-			this.butUpdateLog = new System.Windows.Forms.Button();
 			this.gridRoles = new OpenDental.UI.ODGrid();
 			this.labelRelatedJobs = new System.Windows.Forms.Label();
 			this.treeRelatedJobs = new System.Windows.Forms.TreeView();
 			this.butActions = new OpenDental.UI.Button();
+			this.butAddTime = new OpenDental.UI.Button();
 			this.textJobEditor = new OpenDental.ODjobTextEditor();
 			this.butParentPick = new OpenDental.UI.Button();
 			this.textParent = new System.Windows.Forms.TextBox();
@@ -407,17 +407,6 @@
 			this.comboPriority.TabIndex = 286;
 			this.comboPriority.SelectionChangeCommitted += new System.EventHandler(this.comboPriority_SelectionChangeCommitted);
 			// 
-			// textTitle
-			// 
-			this.textTitle.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.textTitle.Location = new System.Drawing.Point(1, 21);
-			this.textTitle.MaxLength = 255;
-			this.textTitle.Name = "textTitle";
-			this.textTitle.Size = new System.Drawing.Size(183, 20);
-			this.textTitle.TabIndex = 288;
-			this.textTitle.TextChanged += new System.EventHandler(this.textTitle_TextChanged);
-			// 
 			// label4
 			// 
 			this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -520,6 +509,7 @@
 			// panel3
 			// 
 			this.tableLayoutPanel1.SetColumnSpan(this.panel3, 2);
+			this.panel3.Controls.Add(this.textTitle);
 			this.panel3.Controls.Add(this.textVersion);
 			this.panel3.Controls.Add(this.textJobNum);
 			this.panel3.Controls.Add(this.butVersionPrompt);
@@ -530,7 +520,6 @@
 			this.panel3.Controls.Add(this.textApprove);
 			this.panel3.Controls.Add(this.label5);
 			this.panel3.Controls.Add(this.label4);
-			this.panel3.Controls.Add(this.textTitle);
 			this.panel3.Controls.Add(this.comboPriority);
 			this.panel3.Controls.Add(this.label12);
 			this.panel3.Controls.Add(this.label6);
@@ -542,6 +531,24 @@
 			this.panel3.Name = "panel3";
 			this.panel3.Size = new System.Drawing.Size(1007, 54);
 			this.panel3.TabIndex = 308;
+			// 
+			// textTitle
+			// 
+			this.textTitle.AcceptsTab = true;
+			this.textTitle.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.textTitle.BackColor = System.Drawing.SystemColors.Window;
+			this.textTitle.DetectLinksEnabled = false;
+			this.textTitle.DetectUrls = false;
+			this.textTitle.Location = new System.Drawing.Point(7, 21);
+			this.textTitle.Multiline = false;
+			this.textTitle.Name = "textTitle";
+			this.textTitle.QuickPasteType = OpenDentBusiness.QuickPasteType.JobManager;
+			this.textTitle.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
+			this.textTitle.Size = new System.Drawing.Size(175, 21);
+			this.textTitle.TabIndex = 309;
+			this.textTitle.Text = "";
+			this.textTitle.TextChanged += new System.EventHandler(this.textTitle_TextChanged);
 			// 
 			// butVersionPrompt
 			// 
@@ -588,7 +595,6 @@
 			// 
 			// splitContainerNoFlicker1.Panel1
 			// 
-			this.splitContainerNoFlicker1.Panel1.Controls.Add(this.butUpdateLog);
 			this.splitContainerNoFlicker1.Panel1.Controls.Add(this.gridRoles);
 			this.splitContainerNoFlicker1.Panel1.Controls.Add(this.labelRelatedJobs);
 			this.splitContainerNoFlicker1.Panel1.Controls.Add(this.treeRelatedJobs);
@@ -596,6 +602,7 @@
 			// 
 			// splitContainerNoFlicker1.Panel2
 			// 
+			this.splitContainerNoFlicker1.Panel2.Controls.Add(this.butAddTime);
 			this.splitContainerNoFlicker1.Panel2.Controls.Add(this.textJobEditor);
 			this.splitContainerNoFlicker1.Panel2.Controls.Add(this.butParentPick);
 			this.splitContainerNoFlicker1.Panel2.Controls.Add(this.textParent);
@@ -608,20 +615,6 @@
 			this.splitContainerNoFlicker1.Size = new System.Drawing.Size(747, 373);
 			this.splitContainerNoFlicker1.SplitterDistance = 179;
 			this.splitContainerNoFlicker1.TabIndex = 310;
-			// 
-			// butUpdateLog
-			// 
-			this.butUpdateLog.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.butUpdateLog.BackColor = System.Drawing.Color.LightCoral;
-			this.butUpdateLog.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-			this.butUpdateLog.ForeColor = System.Drawing.SystemColors.ControlText;
-			this.butUpdateLog.Location = new System.Drawing.Point(101, 3);
-			this.butUpdateLog.Name = "butUpdateLog";
-			this.butUpdateLog.Size = new System.Drawing.Size(75, 23);
-			this.butUpdateLog.TabIndex = 308;
-			this.butUpdateLog.Text = "Update Log";
-			this.butUpdateLog.UseVisualStyleBackColor = false;
-			this.butUpdateLog.Click += new System.EventHandler(this.butUpdateLog_Click);
 			// 
 			// gridRoles
 			// 
@@ -685,6 +678,21 @@
 			this.butActions.Text = "Job Actions";
 			this.butActions.Click += new System.EventHandler(this.butActions_Click);
 			// 
+			// butAddTime
+			// 
+			this.butAddTime.AdjustImageLocation = new System.Drawing.Point(0, 0);
+			this.butAddTime.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.butAddTime.Autosize = true;
+			this.butAddTime.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
+			this.butAddTime.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
+			this.butAddTime.CornerRadius = 4F;
+			this.butAddTime.Location = new System.Drawing.Point(245, 348);
+			this.butAddTime.Name = "butAddTime";
+			this.butAddTime.Size = new System.Drawing.Size(58, 20);
+			this.butAddTime.TabIndex = 308;
+			this.butAddTime.Text = "Add Time";
+			this.butAddTime.Click += new System.EventHandler(this.butAddTime_Click);
+			// 
 			// textJobEditor
 			// 
 			this.textJobEditor.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -726,18 +734,18 @@
 			// 
 			this.textParent.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.textParent.Location = new System.Drawing.Point(314, 348);
+			this.textParent.Location = new System.Drawing.Point(373, 348);
 			this.textParent.MaxLength = 100;
 			this.textParent.Name = "textParent";
 			this.textParent.ReadOnly = true;
-			this.textParent.Size = new System.Drawing.Size(201, 20);
+			this.textParent.Size = new System.Drawing.Size(142, 20);
 			this.textParent.TabIndex = 304;
 			this.textParent.TabStop = false;
 			// 
 			// label1
 			// 
 			this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.label1.Location = new System.Drawing.Point(249, 348);
+			this.label1.Location = new System.Drawing.Point(309, 348);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(63, 20);
 			this.label1.TabIndex = 305;
@@ -747,18 +755,18 @@
 			// textActualHours
 			// 
 			this.textActualHours.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.textActualHours.Location = new System.Drawing.Point(197, 349);
+			this.textActualHours.Location = new System.Drawing.Point(193, 348);
 			this.textActualHours.MaxVal = 1000000;
 			this.textActualHours.MinVal = 0;
 			this.textActualHours.Name = "textActualHours";
+			this.textActualHours.ReadOnly = true;
 			this.textActualHours.Size = new System.Drawing.Size(46, 20);
 			this.textActualHours.TabIndex = 270;
-			this.textActualHours.TextChanged += new System.EventHandler(this.textActualHours_TextChanged);
 			// 
 			// label8
 			// 
 			this.label8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.label8.Location = new System.Drawing.Point(130, 348);
+			this.label8.Location = new System.Drawing.Point(128, 347);
 			this.label8.Name = "label8";
 			this.label8.Size = new System.Drawing.Size(65, 20);
 			this.label8.TabIndex = 265;
@@ -783,7 +791,7 @@
 			// label7
 			// 
 			this.label7.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.label7.Location = new System.Drawing.Point(7, 348);
+			this.label7.Location = new System.Drawing.Point(6, 347);
 			this.label7.Name = "label7";
 			this.label7.Size = new System.Drawing.Size(65, 20);
 			this.label7.TabIndex = 264;
@@ -793,7 +801,7 @@
 			// textEstHours
 			// 
 			this.textEstHours.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.textEstHours.Location = new System.Drawing.Point(74, 349);
+			this.textEstHours.Location = new System.Drawing.Point(73, 348);
 			this.textEstHours.MaxVal = 1000000;
 			this.textEstHours.MinVal = 0;
 			this.textEstHours.Name = "textEstHours";
@@ -1028,7 +1036,6 @@
 		private System.Windows.Forms.ComboBox comboCategory;
 		private System.Windows.Forms.Label label12;
 		private System.Windows.Forms.ComboBox comboPriority;
-		private System.Windows.Forms.TextBox textTitle;
 		private System.Windows.Forms.Label label4;
 		private System.Windows.Forms.Label label5;
 		private System.Windows.Forms.Label label3;
@@ -1072,6 +1079,7 @@
 		private UI.ODGrid gridLog;
 		private System.Windows.Forms.Panel panel1;
 		private System.Windows.Forms.CheckBox checkShowHistoryText;
-		private System.Windows.Forms.Button butUpdateLog;
+		private ODtextBox textTitle;
+		private UI.Button butAddTime;
 	}
 }

@@ -92,6 +92,19 @@ namespace OpenDentBusiness{
 			return JobLogs.GetOne(jobLog.JobLogNum);//to get new timestamp.
 		}
 
+		public static JobLog MakeLogEntryForView(Job job) {
+			JobLog jobLog = new JobLog() {
+				JobNum=job.JobNum,
+				UserNumChanged=Security.CurUser.UserNum,
+				UserNumExpert=job.UserNumExpert,
+				UserNumEngineer=job.UserNumEngineer,
+				Title=job.Title,
+				Description="Job Viewed"
+			};
+			JobLogs.Insert(jobLog);
+			return JobLogs.GetOne(jobLog.JobLogNum);//to get new timestamp.
+		}
+
 		public static void DeleteForJob(long jobNum) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
 				Meth.GetVoid(MethodBase.GetCurrentMethod(),jobNum);

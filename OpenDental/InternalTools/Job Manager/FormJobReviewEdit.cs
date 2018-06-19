@@ -6,11 +6,13 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using OpenDentBusiness;
+using CodeBase;
 
 namespace OpenDental {
 	public partial class FormJobReviewEdit:ODForm {
 		private JobReview _jobReviewCur;
 		private List<Userod> _listReviewers;
+		private List<string> _listReviewStatusNames;
 		private Userod secUser;
 
 		///<summary>Used for existing Reviews. Pass in the jobNum and the jobReviewNum.</summary>
@@ -32,14 +34,16 @@ namespace OpenDental {
 			_listReviewers=Userods.GetUsersByJobRole(JobPerm.Writeup,false);
 			_listReviewers.ForEach(x => comboReviewer.Items.Add(x.UserName));
 			comboReviewer.SelectedIndex=_listReviewers.FindIndex(x => x.UserNum==_jobReviewCur.ReviewerNum);
-			Enum.GetNames(typeof(JobReviewStatus)).ToList().ForEach(x=>comboStatus.Items.Add(x));
+			//TimeLogs are used for storing job time rather than reviews so we remove it as an option here.
+			_listReviewStatusNames=Enum.GetNames(typeof(JobReviewStatus)).Where(x => x!="TimeLog").ToList();
+			_listReviewStatusNames.ForEach(x=>comboStatus.Items.Add(x));
 			comboStatus.SelectedIndex=(int)_jobReviewCur.ReviewStatus;
 			CheckPermissions();
 			if(!_jobReviewCur.IsNew) {
 				textDateLastEdited.Text=_jobReviewCur.DateTStamp.ToShortDateString();
 			} 
 			textDescription.Text=_jobReviewCur.Description;
-			textReviewTime.Text=_jobReviewCur._Minutes.ToString();
+			textReviewTime.Text=_jobReviewCur.TimeReview.TotalMinutes.ToString();
 		}
 
 		private void CheckPermissions() {
@@ -111,8 +115,9 @@ namespace OpenDental {
 			if(comboReviewer.SelectedIndex>-1) {
 				_jobReviewCur.ReviewerNum=_listReviewers[comboReviewer.SelectedIndex].UserNum;
 			}
-			_jobReviewCur._Minutes=Double.Parse(textReviewTime.Text);
-			_jobReviewCur.ReviewStatus=(JobReviewStatus)comboStatus.SelectedIndex;
+			_jobReviewCur.TimeReview=new TimeSpan(0,int.Parse(textReviewTime.Text),0);
+			//Get from the JobReviewStatus enum since the list in this is missing the TimeLog enum value
+			_jobReviewCur.ReviewStatus=(JobReviewStatus)_listReviewStatusNames.IndexOf(comboStatus.SelectedItem.ToString());
 			_jobReviewCur.Description=textDescription.Text;
 			if(_jobReviewCur.IsNew) {
 				_jobReviewCur.DateTStamp=DateTime.Now;

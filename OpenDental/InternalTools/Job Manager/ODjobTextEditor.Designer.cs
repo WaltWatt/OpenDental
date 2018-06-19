@@ -435,7 +435,6 @@
 			this.textRequirements.QuickPasteType = OpenDentBusiness.QuickPasteType.JobManager;
 			this.textRequirements.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
 			this.textRequirements.Size = new System.Drawing.Size(855, 135);
-			this.textRequirements.SpellCheckIsEnabled = false;
 			this.textRequirements.TabIndex = 169;
 			this.textRequirements.Text = "";
 			this.textRequirements.TextChanged += new System.EventHandler(this.textDescription_TextChanged);

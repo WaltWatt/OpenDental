@@ -82,9 +82,9 @@ namespace OpenDental {
 				textQuotedTotal.Text="0";
 				return;
 			}
-			textDevHours.Text=listJobs.Sum(x => x.HoursEstimate).ToString();
-			textLongestHourEst.Text=listJobs.Max(x => x.HoursEstimate).ToString();
-			textJobsNoEst.Text=listJobs.Count(x => x.HoursEstimate==0).ToString();
+			//textDevHours.Text=listJobs.Sum(x => x.MinutesEstimate).ToString();
+			textLongestHourEst.Text=listJobs.Max(x => x.TimeEstimate).ToString();
+			//textJobsNoEst.Text=listJobs.Count(x => x.MinutesEstimate==0).ToString();
 			textReviewRequests.Text=listJobs.Sum(x => x.ListJobReviews.Count()).ToString();
 			textHighPrio.Text=listJobs.Count(x => x.Priority==Defs.GetDefsForCategory(DefCat.JobPriorities,true).FirstOrDefault(y => y.ItemValue.Contains("High")).DefNum).ToString();
 			textQuotedTotal.Text=listJobs.Sum(x => x.ListJobQuotes.Sum(y => PIn.Double(y.Amount))).ToString("C");

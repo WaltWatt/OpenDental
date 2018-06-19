@@ -71,8 +71,8 @@ namespace OpenDentBusiness.Crud{
 					job.Category            =(JobCategory)0;
 				}
 				job.JobVersion            = PIn.String(row["JobVersion"].ToString());
-				job.HoursEstimate         = PIn.Int   (row["HoursEstimate"].ToString());
-				job.HoursActual           = PIn.Int   (row["HoursActual"].ToString());
+				job.TimeEstimate          = TimeSpan.FromTicks(PIn.Long(row["TimeEstimate"].ToString()));
+				job.TimeActual            = TimeSpan.FromTicks(PIn.Long(row["TimeActual"].ToString()));
 				job.DateTimeEntry         = PIn.DateT (row["DateTimeEntry"].ToString());
 				job.Implementation        = PIn.String(row["Implementation"].ToString());
 				job.Documentation         = PIn.String(row["Documentation"].ToString());
@@ -120,8 +120,8 @@ namespace OpenDentBusiness.Crud{
 			table.Columns.Add("Priority");
 			table.Columns.Add("Category");
 			table.Columns.Add("JobVersion");
-			table.Columns.Add("HoursEstimate");
-			table.Columns.Add("HoursActual");
+			table.Columns.Add("TimeEstimate");
+			table.Columns.Add("TimeActual");
 			table.Columns.Add("DateTimeEntry");
 			table.Columns.Add("Implementation");
 			table.Columns.Add("Documentation");
@@ -151,8 +151,8 @@ namespace OpenDentBusiness.Crud{
 					POut.Long  (job.Priority),
 					POut.Int   ((int)job.Category),
 					            job.JobVersion,
-					POut.Int   (job.HoursEstimate),
-					POut.Int   (job.HoursActual),
+					POut.Long (job.TimeEstimate.Ticks),
+					POut.Long (job.TimeActual.Ticks),
 					POut.DateT (job.DateTimeEntry,false),
 					            job.Implementation,
 					            job.Documentation,
@@ -204,7 +204,7 @@ namespace OpenDentBusiness.Crud{
 			if(useExistingPK || PrefC.RandomKeys) {
 				command+="JobNum,";
 			}
-			command+="UserNumConcept,UserNumExpert,UserNumEngineer,UserNumApproverConcept,UserNumApproverJob,UserNumApproverChange,UserNumDocumenter,UserNumCustContact,UserNumCheckout,UserNumInfo,ParentNum,DateTimeCustContact,Priority,Category,JobVersion,HoursEstimate,HoursActual,DateTimeEntry,Implementation,Documentation,Title,PhaseCur,IsApprovalNeeded,AckDateTime,UserNumQuoter,UserNumApproverQuote,UserNumCustQuote,Requirements) VALUES(";
+			command+="UserNumConcept,UserNumExpert,UserNumEngineer,UserNumApproverConcept,UserNumApproverJob,UserNumApproverChange,UserNumDocumenter,UserNumCustContact,UserNumCheckout,UserNumInfo,ParentNum,DateTimeCustContact,Priority,Category,JobVersion,TimeEstimate,TimeActual,DateTimeEntry,Implementation,Documentation,Title,PhaseCur,IsApprovalNeeded,AckDateTime,UserNumQuoter,UserNumApproverQuote,UserNumCustQuote,Requirements) VALUES(";
 			if(useExistingPK || PrefC.RandomKeys) {
 				command+=POut.Long(job.JobNum)+",";
 			}
@@ -224,8 +224,8 @@ namespace OpenDentBusiness.Crud{
 				+    POut.Long  (job.Priority)+","
 				+"'"+POut.String(job.Category.ToString())+"',"
 				+"'"+POut.String(job.JobVersion)+"',"
-				+    POut.Int   (job.HoursEstimate)+","
-				+    POut.Int   (job.HoursActual)+","
+				+"'"+POut.Long  (job.TimeEstimate.Ticks)+"',"
+				+"'"+POut.Long  (job.TimeActual.Ticks)+"',"
 				+    DbHelper.Now()+","
 				+    DbHelper.ParamChar+"paramImplementation,"
 				+    DbHelper.ParamChar+"paramDocumentation,"
@@ -281,7 +281,7 @@ namespace OpenDentBusiness.Crud{
 			if(isRandomKeys || useExistingPK) {
 				command+="JobNum,";
 			}
-			command+="UserNumConcept,UserNumExpert,UserNumEngineer,UserNumApproverConcept,UserNumApproverJob,UserNumApproverChange,UserNumDocumenter,UserNumCustContact,UserNumCheckout,UserNumInfo,ParentNum,DateTimeCustContact,Priority,Category,JobVersion,HoursEstimate,HoursActual,DateTimeEntry,Implementation,Documentation,Title,PhaseCur,IsApprovalNeeded,AckDateTime,UserNumQuoter,UserNumApproverQuote,UserNumCustQuote,Requirements) VALUES(";
+			command+="UserNumConcept,UserNumExpert,UserNumEngineer,UserNumApproverConcept,UserNumApproverJob,UserNumApproverChange,UserNumDocumenter,UserNumCustContact,UserNumCheckout,UserNumInfo,ParentNum,DateTimeCustContact,Priority,Category,JobVersion,TimeEstimate,TimeActual,DateTimeEntry,Implementation,Documentation,Title,PhaseCur,IsApprovalNeeded,AckDateTime,UserNumQuoter,UserNumApproverQuote,UserNumCustQuote,Requirements) VALUES(";
 			if(isRandomKeys || useExistingPK) {
 				command+=POut.Long(job.JobNum)+",";
 			}
@@ -301,8 +301,8 @@ namespace OpenDentBusiness.Crud{
 				+    POut.Long  (job.Priority)+","
 				+"'"+POut.String(job.Category.ToString())+"',"
 				+"'"+POut.String(job.JobVersion)+"',"
-				+    POut.Int   (job.HoursEstimate)+","
-				+    POut.Int   (job.HoursActual)+","
+				+"'"+POut.Long(job.TimeEstimate.Ticks)+"',"
+				+"'"+POut.Long(job.TimeActual.Ticks)+"',"
 				+    DbHelper.Now()+","
 				+    DbHelper.ParamChar+"paramImplementation,"
 				+    DbHelper.ParamChar+"paramDocumentation,"
@@ -353,8 +353,8 @@ namespace OpenDentBusiness.Crud{
 				+"Priority              =  "+POut.Long  (job.Priority)+", "
 				+"Category              = '"+POut.String(job.Category.ToString())+"', "
 				+"JobVersion            = '"+POut.String(job.JobVersion)+"', "
-				+"HoursEstimate         =  "+POut.Int   (job.HoursEstimate)+", "
-				+"HoursActual           =  "+POut.Int   (job.HoursActual)+", "
+				+"TimeEstimate          =  "+POut.Long  (job.TimeEstimate.Ticks)+", "
+				+"TimeActual            =  "+POut.Long  (job.TimeActual.Ticks)+", "
 				//DateTimeEntry not allowed to change
 				+"Implementation        =  "+DbHelper.ParamChar+"paramImplementation, "
 				+"Documentation         =  "+DbHelper.ParamChar+"paramDocumentation, "
@@ -445,13 +445,13 @@ namespace OpenDentBusiness.Crud{
 				if(command!=""){ command+=",";}
 				command+="JobVersion = '"+POut.String(job.JobVersion)+"'";
 			}
-			if(job.HoursEstimate != oldJob.HoursEstimate) {
+			if(job.TimeEstimate != oldJob.TimeEstimate) {
 				if(command!=""){ command+=",";}
-				command+="HoursEstimate = "+POut.Int(job.HoursEstimate)+"";
+				command+="TimeEstimate = '"+POut.Long  (job.TimeEstimate.Ticks)+"'";
 			}
-			if(job.HoursActual != oldJob.HoursActual) {
+			if(job.TimeActual != oldJob.TimeActual) {
 				if(command!=""){ command+=",";}
-				command+="HoursActual = "+POut.Int(job.HoursActual)+"";
+				command+="TimeActual = '"+POut.Long  (job.TimeActual.Ticks)+"'";
 			}
 			//DateTimeEntry not allowed to change
 			if(job.Implementation != oldJob.Implementation) {
@@ -563,10 +563,10 @@ namespace OpenDentBusiness.Crud{
 			if(job.JobVersion != oldJob.JobVersion) {
 				return true;
 			}
-			if(job.HoursEstimate != oldJob.HoursEstimate) {
+			if(job.TimeEstimate != oldJob.TimeEstimate) {
 				return true;
 			}
-			if(job.HoursActual != oldJob.HoursActual) {
+			if(job.TimeActual != oldJob.TimeActual) {
 				return true;
 			}
 			//DateTimeEntry not allowed to change
