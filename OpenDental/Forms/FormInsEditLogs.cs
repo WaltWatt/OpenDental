@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms;
+using CodeBase;
 using OpenDental.UI;
 using OpenDentBusiness;
 
@@ -8,7 +10,7 @@ namespace OpenDental {
 	public partial class FormInsEditLogs:ODForm {
 		private InsPlan _insPlan;
 		private List<Benefit> _listBenefits;
-		private List<InsEditLog> _listLogs= new List<InsEditLog>();
+		private List<InsEditLog> _listLogs;
 
 		///<summary>Opens the window with the passed-in parameters set as the default.</summary>
 		public FormInsEditLogs(InsPlan insPlan, List<Benefit> listBenefits) {
@@ -20,12 +22,18 @@ namespace OpenDental {
 
 		private void FormInsEditLogs_Load(object sender,EventArgs e) {
 			textDateFrom.Text=DateTime.Now.AddMonths(-1).ToString();
-			textDateTo.Text=DateTime.Now.ToString();
+			textDateTo.Text=DateTime.Now.ToString();//Triggers the query via event handler, will cause FillGrid().
+			//Need to refill grid to get the vertical scroll bar to show up properly. It's annoying, but doesn't do a Db call, so not super terrible.
 			FillGrid();
 		}
 
-		///<summary>Set refreshFromDb to false to avoid running a query and use cached data.</summary>
-		private void FillGrid(bool refreshFromDb=true) {
+		private void FillGrid() {
+			if(_listLogs==null) {
+				Cursor=Cursors.WaitCursor;
+				_listLogs=InsEditLogs.GetLogsForPlan(_insPlan.PlanNum,_insPlan.CarrierNum,_insPlan.EmployerNum);
+				TranslateBeforeAndAfter();
+				Cursor=Cursors.Default;
+			}
 			gridMain.BeginUpdate();
 			gridMain.Columns.Clear();
 			gridMain.Columns.Add(new ODGridColumn("",25)); //for the drop down arrows.
@@ -38,20 +46,22 @@ namespace OpenDental {
 			gridMain.Columns.Add(new ODGridColumn("Before",150));
 			gridMain.Columns.Add(new ODGridColumn("After",150));
 			gridMain.Rows.Clear();
-			ConstructGridRows(refreshFromDb).ForEach(x => { gridMain.Rows.Add(x); });
+			ConstructGridRows().ForEach(x => { gridMain.Rows.Add(x); });
 			gridMain.EndUpdate();
 		}
-
+		
 		///<summary>Actually creates the GridRows and returns them in a list. Takes care of linking dropdown rows.</summary>
-		private List<ODGridRow> ConstructGridRows(bool refreshFromDb) {
-			if(_listLogs == null || refreshFromDb) {
-				_listLogs = InsEditLogs.GetLogsForPlan(_insPlan.PlanNum,_insPlan.CarrierNum,_insPlan.EmployerNum,PIn.Date(textDateFrom.Text),PIn.Date(textDateTo.Text));
-			}
+		private List<ODGridRow> ConstructGridRows() {
+			DateTime dateFrom=PIn.Date(textDateFrom.Text);
+			DateTime dateTo=PIn.Date(textDateTo.Text);
+			dateTo=(dateTo==DateTime.MinValue ? DateTime.Now : dateTo);
 			ODGridRow row;
 			List<ODGridRow> listRows=new List<ODGridRow>();
 			Dictionary<long,Userod> dictUsers=Userods.GetDeepCopy().ToDictionary(x => x.UserNum,x => x);
-			TranslateBeforeAndAfter();
 			foreach(InsEditLog logCur in _listLogs) {
+				if(!logCur.DateTStamp.Between(dateFrom,dateTo)) {
+					continue;
+				}
 				row = new ODGridRow();
 				row.Cells.Add("");
 				row.Cells.Add(logCur.DateTStamp.ToString());
@@ -123,8 +133,13 @@ namespace OpenDental {
 						if(logCur.LogType == InsEditLogType.Carrier) {
 							break;
 						}
-						logCur.OldValue = beforeKey == 0 ? logCur.OldValue : Carriers.GetCarrier(beforeKey).CarrierName;
-						logCur.NewValue = afterKey == 0 ? logCur.NewValue : Carriers.GetCarrier(afterKey).CarrierName;
+						string carrierNameBefore=Carriers.GetCarrier(beforeKey).CarrierName;
+						string carrierNameAfter=Carriers.GetCarrier(afterKey).CarrierName;
+						if(logCur.LogType==InsEditLogType.InsPlan && carrierNameBefore==carrierNameAfter) {//Edits to carrier.
+							break;//Don't translate CarrierNum to CarrierName when both carriers have the same name, loses too much useful detail.
+						}
+						logCur.OldValue = beforeKey == 0 ? logCur.OldValue : carrierNameBefore;
+						logCur.NewValue = afterKey == 0 ? logCur.NewValue : carrierNameAfter;
 						break;
 					case "EmployerNum":
 						if(logCur.LogType == InsEditLogType.Employer) {
