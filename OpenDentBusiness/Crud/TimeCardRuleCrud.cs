@@ -73,9 +73,9 @@ namespace OpenDentBusiness.Crud{
 				table.Rows.Add(new object[] {
 					POut.Long  (timeCardRule.TimeCardRuleNum),
 					POut.Long  (timeCardRule.EmployeeNum),
-					POut.Time  (timeCardRule.OverHoursPerDay),
-					POut.Time  (timeCardRule.AfterTimeOfDay),
-					POut.Time  (timeCardRule.BeforeTimeOfDay),
+					POut.Time  (timeCardRule.OverHoursPerDay,false),
+					POut.Time  (timeCardRule.AfterTimeOfDay,false),
+					POut.Time  (timeCardRule.BeforeTimeOfDay,false),
 					POut.Bool  (timeCardRule.IsOvertimeExempt),
 				});
 			}

@@ -271,7 +271,7 @@ namespace OpenDentBusiness.Crud{
 					            ehrLabResult.ObservationValueCodedElementCodeSystemNameAlt,
 					            ehrLabResult.ObservationValueCodedElementTextOriginal,
 					            ehrLabResult.ObservationValueDateTime,
-					POut.Time  (ehrLabResult.ObservationValueTime),
+					POut.Time  (ehrLabResult.ObservationValueTime,false),
 					            ehrLabResult.ObservationValueComparator,
 					POut.Double(ehrLabResult.ObservationValueNumber1),
 					            ehrLabResult.ObservationValueSeparatorOrSuffix,

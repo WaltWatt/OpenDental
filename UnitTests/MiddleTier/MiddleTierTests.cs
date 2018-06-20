@@ -7,6 +7,8 @@ using OpenDentBusiness;
 using System.Data;
 using System.Drawing;
 using CodeBase;
+using UnitTestsCore;
+using System.Reflection;
 
 namespace UnitTests.MiddleTier {
 	[TestClass]
@@ -612,6 +614,30 @@ namespace UnitTests.MiddleTier {
 				hasFailed=true;
 			}
 			Assert.IsTrue(hasFailed);
+		}
+
+		///<summary>Our CRUD method ListToTable is incorrectly setting TimeSpan columns by surrounding the time in single quotes.
+		///TimeSpans that are formatted like '08:00:00' cannot be parsed correctly which causes the program to do two things:
+		///1. It significantly slows down (due to trying its hardest to parse the string literal into a TimeSpan).
+		///2. Throws an exception which we catch within PIn.TimeSpan() which sadly turns the end result to System.TimeSpan.Zero.
+		///The scenario above describes how our cache classes work over the middle tier which ends up losing data and taking a long time.</summary>
+		[TestMethod]
+		public void MiddleTier_GetListToTable_TimeSpans() {
+			ApptViewT.ClearApptView();
+			long apptViewNum1=ApptViewT.CreateApptView(MethodBase.GetCurrentMethod().Name,new TimeSpan(5,20,13)).ApptViewNum;
+			long apptViewNum2=ApptViewT.CreateApptView(MethodBase.GetCurrentMethod().Name,new TimeSpan(9,0,45)).ApptViewNum;
+			long apptViewNum3=ApptViewT.CreateApptView(MethodBase.GetCurrentMethod().Name).ApptViewNum;
+			List<ApptView> listApptViews=ApptViews.GetDeepCopy();
+			Assert.AreEqual(listApptViews.Count,3);
+			Assert.AreEqual(5,listApptViews.First(x => x.ApptViewNum==apptViewNum1).ApptTimeScrollStart.Hours);
+			Assert.AreEqual(20,listApptViews.First(x => x.ApptViewNum==apptViewNum1).ApptTimeScrollStart.Minutes);
+			Assert.AreEqual(13,listApptViews.First(x => x.ApptViewNum==apptViewNum1).ApptTimeScrollStart.Seconds);
+			Assert.AreEqual(9,listApptViews.First(x => x.ApptViewNum==apptViewNum2).ApptTimeScrollStart.Hours);
+			Assert.AreEqual(0,listApptViews.First(x => x.ApptViewNum==apptViewNum2).ApptTimeScrollStart.Minutes);
+			Assert.AreEqual(45,listApptViews.First(x => x.ApptViewNum==apptViewNum2).ApptTimeScrollStart.Seconds);
+			Assert.AreEqual(TimeSpan.Zero.Hours,listApptViews.First(x => x.ApptViewNum==apptViewNum3).ApptTimeScrollStart.Hours);
+			Assert.AreEqual(TimeSpan.Zero.Minutes,listApptViews.First(x => x.ApptViewNum==apptViewNum3).ApptTimeScrollStart.Minutes);
+			Assert.AreEqual(TimeSpan.Zero.Seconds,listApptViews.First(x => x.ApptViewNum==apptViewNum3).ApptTimeScrollStart.Seconds);
 		}
 
 	}

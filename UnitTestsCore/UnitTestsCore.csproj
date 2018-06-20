@@ -67,6 +67,7 @@
     <Compile Include="TableTypes\AppointmentTypeT.cs" />
     <Compile Include="TableTypes\ApptReminderRuleT.cs" />
     <Compile Include="TableTypes\ApptReminderSentT.cs" />
+    <Compile Include="TableTypes\ApptViewT.cs" />
     <Compile Include="TableTypes\AsapCommT.cs" />
     <Compile Include="TableTypes\BenefitT.cs" />
     <Compile Include="TableTypes\CarrierT.cs" />

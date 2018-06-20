@@ -86,8 +86,8 @@ namespace OpenDentBusiness.Crud{
 				table.Rows.Add(new object[] {
 					POut.Long  (schedule.ScheduleNum),
 					POut.DateT (schedule.SchedDate,false),
-					POut.Time  (schedule.StartTime),
-					POut.Time  (schedule.StopTime),
+					POut.Time  (schedule.StartTime,false),
+					POut.Time  (schedule.StopTime,false),
 					POut.Int   ((int)schedule.SchedType),
 					POut.Long  (schedule.ProvNum),
 					POut.Long  (schedule.BlockoutType),

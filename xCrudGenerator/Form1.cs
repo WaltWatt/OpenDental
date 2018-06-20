@@ -397,6 +397,7 @@ using System.Drawing;"+rn);
 						+(field.FieldType.Name=="Color" ? ".ToArgb()" : "")
 						+(field.FieldType.Name=="Interval" ? ".ToInt()" : "")
 						+(field.FieldType.Name=="DateTime" ? ",false" : "")
+						+(field.FieldType.Name=="TimeSpan" ? ",false" : "")
 						+(field.FieldType.Name=="String" ? "" : ")")
 						+",");
 				}
