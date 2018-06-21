@@ -35,7 +35,13 @@
 			this.checkShowUnassigned = new System.Windows.Forms.CheckBox();
 			this.gridAction = new OpenDental.UI.ODGrid();
 			this.tabDocumentation = new System.Windows.Forms.TabPage();
+			this.label1 = new System.Windows.Forms.Label();
+			this.textDocumentationVersion = new System.Windows.Forms.TextBox();
 			this.gridDocumentation = new OpenDental.UI.ODGrid();
+			this.tabTesting = new System.Windows.Forms.TabPage();
+			this.label3 = new System.Windows.Forms.Label();
+			this.textVersionText = new System.Windows.Forms.TextBox();
+			this.gridTesting = new OpenDental.UI.ODGrid();
 			this.tabQuery = new System.Windows.Forms.TabPage();
 			this.checkShowQueryCancelled = new System.Windows.Forms.CheckBox();
 			this.checkShowQueryComplete = new System.Windows.Forms.CheckBox();
@@ -75,10 +81,12 @@
 			this.addChildJobToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.dashboardToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.releaseCalculatorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.jobTimeHelperToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.bugSubmissionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.releaseCalculatorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.jobOverviewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.bugSubmissionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.timerTestingVersion = new System.Windows.Forms.Timer(this.components);
+			this.timerDocumentationVersion = new System.Windows.Forms.Timer(this.components);
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
 			this.splitContainer1.Panel1.SuspendLayout();
 			this.splitContainer1.Panel2.SuspendLayout();
@@ -86,6 +94,7 @@
 			this.tabControlNav.SuspendLayout();
 			this.tabAction.SuspendLayout();
 			this.tabDocumentation.SuspendLayout();
+			this.tabTesting.SuspendLayout();
 			this.tabQuery.SuspendLayout();
 			this.tabNotify.SuspendLayout();
 			this.tabSubscribed.SuspendLayout();
@@ -109,7 +118,7 @@
 			// 
 			// timerSearch
 			// 
-			this.timerSearch.Interval = 200;
+			this.timerSearch.Interval = 500;
 			this.timerSearch.Tick += new System.EventHandler(this.timerSearch_Tick);
 			// 
 			// textSearch
@@ -148,6 +157,7 @@
 			// 
 			this.tabControlNav.Controls.Add(this.tabAction);
 			this.tabControlNav.Controls.Add(this.tabDocumentation);
+			this.tabControlNav.Controls.Add(this.tabTesting);
 			this.tabControlNav.Controls.Add(this.tabQuery);
 			this.tabControlNav.Controls.Add(this.tabNotify);
 			this.tabControlNav.Controls.Add(this.tabSubscribed);
@@ -212,6 +222,8 @@
 			// 
 			// tabDocumentation
 			// 
+			this.tabDocumentation.Controls.Add(this.label1);
+			this.tabDocumentation.Controls.Add(this.textDocumentationVersion);
 			this.tabDocumentation.Controls.Add(this.gridDocumentation);
 			this.tabDocumentation.Location = new System.Drawing.Point(4, 22);
 			this.tabDocumentation.Name = "tabDocumentation";
@@ -220,6 +232,23 @@
 			this.tabDocumentation.TabIndex = 6;
 			this.tabDocumentation.Text = "Documentation";
 			this.tabDocumentation.UseVisualStyleBackColor = true;
+			// 
+			// label1
+			// 
+			this.label1.Location = new System.Drawing.Point(3, 3);
+			this.label1.Name = "label1";
+			this.label1.Size = new System.Drawing.Size(42, 20);
+			this.label1.TabIndex = 244;
+			this.label1.Text = "Version";
+			this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			// 
+			// textDocumentationVersion
+			// 
+			this.textDocumentationVersion.Location = new System.Drawing.Point(51, 3);
+			this.textDocumentationVersion.Name = "textDocumentationVersion";
+			this.textDocumentationVersion.Size = new System.Drawing.Size(42, 20);
+			this.textDocumentationVersion.TabIndex = 243;
+			this.textDocumentationVersion.TextChanged += new System.EventHandler(this.textDocumentationVersion_TextChanged);
 			// 
 			// gridDocumentation
 			// 
@@ -233,16 +262,70 @@
 			this.gridDocumentation.HeaderFont = new System.Drawing.Font("Microsoft Sans Serif", 8.5F, System.Drawing.FontStyle.Bold);
 			this.gridDocumentation.HeaderHeight = 15;
 			this.gridDocumentation.HScrollVisible = false;
-			this.gridDocumentation.Location = new System.Drawing.Point(3, 3);
+			this.gridDocumentation.Location = new System.Drawing.Point(3, 26);
 			this.gridDocumentation.Name = "gridDocumentation";
 			this.gridDocumentation.ScrollValue = 0;
-			this.gridDocumentation.Size = new System.Drawing.Size(288, 621);
+			this.gridDocumentation.Size = new System.Drawing.Size(288, 598);
 			this.gridDocumentation.TabIndex = 239;
 			this.gridDocumentation.Title = "Action Items";
 			this.gridDocumentation.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
 			this.gridDocumentation.TitleHeight = 18;
 			this.gridDocumentation.TranslationName = "FormTaskEdit";
 			this.gridDocumentation.CellClick += new OpenDental.UI.ODGridClickEventHandler(this.gridDocumention_CellClick);
+			// 
+			// tabTesting
+			// 
+			this.tabTesting.Controls.Add(this.label3);
+			this.tabTesting.Controls.Add(this.textVersionText);
+			this.tabTesting.Controls.Add(this.gridTesting);
+			this.tabTesting.Location = new System.Drawing.Point(4, 22);
+			this.tabTesting.Name = "tabTesting";
+			this.tabTesting.Padding = new System.Windows.Forms.Padding(3);
+			this.tabTesting.Size = new System.Drawing.Size(294, 628);
+			this.tabTesting.TabIndex = 9;
+			this.tabTesting.Text = "Testing";
+			this.tabTesting.UseVisualStyleBackColor = true;
+			// 
+			// label3
+			// 
+			this.label3.Location = new System.Drawing.Point(3, 3);
+			this.label3.Name = "label3";
+			this.label3.Size = new System.Drawing.Size(42, 20);
+			this.label3.TabIndex = 242;
+			this.label3.Text = "Version";
+			this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			// 
+			// textVersionText
+			// 
+			this.textVersionText.Location = new System.Drawing.Point(51, 3);
+			this.textVersionText.Name = "textVersionText";
+			this.textVersionText.Size = new System.Drawing.Size(42, 20);
+			this.textVersionText.TabIndex = 241;
+			this.textVersionText.Text = "18.1";
+			this.textVersionText.TextChanged += new System.EventHandler(this.textVersionText_TextChanged);
+			// 
+			// gridTesting
+			// 
+			this.gridTesting.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.gridTesting.CellFont = new System.Drawing.Font("Microsoft Sans Serif", 8.5F);
+			this.gridTesting.HasAddButton = false;
+			this.gridTesting.HasDropDowns = false;
+			this.gridTesting.HasMultilineHeaders = true;
+			this.gridTesting.HeaderFont = new System.Drawing.Font("Microsoft Sans Serif", 8.5F, System.Drawing.FontStyle.Bold);
+			this.gridTesting.HeaderHeight = 15;
+			this.gridTesting.HScrollVisible = false;
+			this.gridTesting.Location = new System.Drawing.Point(3, 26);
+			this.gridTesting.Name = "gridTesting";
+			this.gridTesting.ScrollValue = 0;
+			this.gridTesting.Size = new System.Drawing.Size(288, 585);
+			this.gridTesting.TabIndex = 228;
+			this.gridTesting.Title = "Completed Jobs";
+			this.gridTesting.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
+			this.gridTesting.TitleHeight = 18;
+			this.gridTesting.TranslationName = "FormTaskEdit";
+			this.gridTesting.CellClick += new OpenDental.UI.ODGridClickEventHandler(this.gridTesting_CellClick);
 			// 
 			// tabQuery
 			// 
@@ -778,6 +861,13 @@
 			this.dashboardToolStripMenuItem.Text = "Dashboard";
 			this.dashboardToolStripMenuItem.Click += new System.EventHandler(this.butDashboard_Click);
 			// 
+			// jobTimeHelperToolStripMenuItem
+			// 
+			this.jobTimeHelperToolStripMenuItem.Name = "jobTimeHelperToolStripMenuItem";
+			this.jobTimeHelperToolStripMenuItem.Size = new System.Drawing.Size(170, 22);
+			this.jobTimeHelperToolStripMenuItem.Text = "Job Time Helper";
+			this.jobTimeHelperToolStripMenuItem.Click += new System.EventHandler(this.jobTimeHelperToolStripMenuItem_Click);
+			// 
 			// releaseCalculatorToolStripMenuItem
 			// 
 			this.releaseCalculatorToolStripMenuItem.Name = "releaseCalculatorToolStripMenuItem";
@@ -786,12 +876,13 @@
 			this.releaseCalculatorToolStripMenuItem.Visible = false;
 			this.releaseCalculatorToolStripMenuItem.Click += new System.EventHandler(this.butReleaseCalc_Click);
 			// 
-			// jobTimeHelperToolStripMenuItem
+			// jobOverviewToolStripMenuItem
 			// 
-			this.jobTimeHelperToolStripMenuItem.Name = "jobTimeHelperToolStripMenuItem";
-			this.jobTimeHelperToolStripMenuItem.Size = new System.Drawing.Size(170, 22);
-			this.jobTimeHelperToolStripMenuItem.Text = "Job Time Helper";
-			this.jobTimeHelperToolStripMenuItem.Click += new System.EventHandler(this.jobTimeHelperToolStripMenuItem_Click);
+			this.jobOverviewToolStripMenuItem.Name = "jobOverviewToolStripMenuItem";
+			this.jobOverviewToolStripMenuItem.Size = new System.Drawing.Size(170, 22);
+			this.jobOverviewToolStripMenuItem.Text = "Job Overview";
+			this.jobOverviewToolStripMenuItem.Visible = false;
+			this.jobOverviewToolStripMenuItem.Click += new System.EventHandler(this.jobOverviewToolStripMenuItem_Click);
 			// 
 			// bugSubmissionsToolStripMenuItem
 			// 
@@ -800,13 +891,15 @@
 			this.bugSubmissionsToolStripMenuItem.Text = "Bug Submissions";
 			this.bugSubmissionsToolStripMenuItem.Click += new System.EventHandler(this.butBugSubs_Click);
 			// 
-			// jobOverviewToolStripMenuItem
+			// timerTestingVersion
 			// 
-			this.jobOverviewToolStripMenuItem.Name = "jobOverviewToolStripMenuItem";
-			this.jobOverviewToolStripMenuItem.Size = new System.Drawing.Size(170, 22);
-			this.jobOverviewToolStripMenuItem.Text = "Job Overview";
-			this.jobOverviewToolStripMenuItem.Visible = false;
-			this.jobOverviewToolStripMenuItem.Click += new System.EventHandler(this.jobOverviewToolStripMenuItem_Click);
+			this.timerTestingVersion.Interval = 500;
+			this.timerTestingVersion.Tick += new System.EventHandler(this.timerTestingVersion_Tick);
+			// 
+			// timerDocumentationVersion
+			// 
+			this.timerDocumentationVersion.Interval = 500;
+			this.timerDocumentationVersion.Tick += new System.EventHandler(this.timerDocumentationVersion_Tick);
 			// 
 			// FormJobManager2
 			// 
@@ -836,6 +929,9 @@
 			this.tabControlNav.ResumeLayout(false);
 			this.tabAction.ResumeLayout(false);
 			this.tabDocumentation.ResumeLayout(false);
+			this.tabDocumentation.PerformLayout();
+			this.tabTesting.ResumeLayout(false);
+			this.tabTesting.PerformLayout();
 			this.tabQuery.ResumeLayout(false);
 			this.tabNotify.ResumeLayout(false);
 			this.tabSubscribed.ResumeLayout(false);
@@ -906,5 +1002,13 @@
 		private System.Windows.Forms.ToolStripMenuItem bugSubmissionsToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem jobTimeHelperToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem jobOverviewToolStripMenuItem;
+		private System.Windows.Forms.TabPage tabTesting;
+		private UI.ODGrid gridTesting;
+		private System.Windows.Forms.Label label3;
+		private System.Windows.Forms.TextBox textVersionText;
+		private System.Windows.Forms.Timer timerTestingVersion;
+		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.TextBox textDocumentationVersion;
+		private System.Windows.Forms.Timer timerDocumentationVersion;
 	}
 }

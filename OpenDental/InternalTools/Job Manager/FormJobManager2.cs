@@ -134,6 +134,19 @@ namespace OpenDental {
 					_listHiddenTabs.Remove(tabNotify);
 				}
 			}
+			if(!JobPermissions.IsAuthorized(JobPerm.TestingCoordinator,true)) 
+			{
+				if(tabControlNav.TabPages.Contains(tabTesting)) {
+					tabControlNav.TabPages.Remove(tabTesting);
+					_listHiddenTabs.Add(tabTesting);
+				}
+			}
+			else {
+				if(_listHiddenTabs.Contains(tabTesting)) {
+					tabControlNav.TabPages.Add(tabTesting);
+					_listHiddenTabs.Remove(tabTesting);
+				}
+			}
 		}
 
 		private void FillPriorityList() {
@@ -194,6 +207,7 @@ namespace OpenDental {
 					FilterAndFill();
 					FillGridActions();
 					FillGridDocumentation();
+					FillGridTesting();
 					FillGridSubscribed();
 					FillGridNotify();
 					FillExtraGrids();
@@ -384,6 +398,9 @@ namespace OpenDental {
 				if(job.Category==JobCategory.Query) {
 					continue;
 				}
+				if(!String.IsNullOrEmpty(textDocumentationVersion.Text) && !job.JobVersion.Contains(textDocumentationVersion.Text)) {
+					continue;
+				}
 				Userod user=new Userod() { UserName="Unassigned",UserNum=0 };
 				if(action==JobAction.Document) {
 					user=Userods.GetUser(job.UserNumDocumenter)??user;
@@ -436,6 +453,70 @@ namespace OpenDental {
 				}
 			}
 		}		
+
+		///<summary>Always fills from _ListJobsAll.</summary>
+		private void FillGridTesting() {
+			if(!tabControlNav.TabPages.Contains(tabTesting)) {
+				return;
+			}
+			long selectedJobNum = 0;
+			if(userControlJobEdit.GetJob()!=null) {
+				selectedJobNum=userControlJobEdit.GetJob().JobNum;
+			}
+			gridTesting.BeginUpdate();
+			gridTesting.Columns.Clear();
+			gridTesting.Columns.Add(new ODGridColumn("Priority",50) { TextAlign=HorizontalAlignment.Center });
+			gridTesting.Columns.Add(new ODGridColumn("Version",95) { TextAlign=HorizontalAlignment.Center });// X for yes, - for unassigned
+			gridTesting.Columns.Add(new ODGridColumn("",205));
+			gridTesting.Rows.Clear();
+			//Sort jobs into action dictionary
+			List<Job> listJobs=new List<Job>();
+			foreach(Job job in _listJobsAll) {
+				if(job.Category.In(JobCategory.Query,JobCategory.Research,JobCategory.Conversion)) {
+					continue;
+				}
+				if(!job.PhaseCur.In(JobPhase.Complete,JobPhase.Documentation)) {
+					continue;
+				}
+				if(!String.IsNullOrEmpty(textVersionText.Text) && !job.JobVersion.Contains(textVersionText.Text)) {
+					continue;
+				}
+				listJobs.Add(job);
+			}
+			listJobs.OrderBy(x => _listJobPriorities.FirstOrDefault(y => y.DefNum==x.Priority).ItemOrder).ToList();
+			//sort dictionary so actions will appear in same orderlistJobs
+			foreach(Job job in listJobs) {
+				Def jobPriority = _listJobPriorities.FirstOrDefault(y => y.DefNum==job.Priority);
+				gridTesting.Rows.Add(
+					new ODGridRow(
+						new ODGridCell(jobPriority.ItemName) {
+							CellColor=jobPriority.ItemColor
+						},
+						new ODGridCell(job.JobVersion),
+						new ODGridCell(job.ToString()) { CellColor=(job.ToString().ToLower().Contains(textSearch.Text.ToLower())&&!string.IsNullOrWhiteSpace(textSearch.Text) ? Color.LightYellow : Color.Empty) }) {
+						Tag=job
+					}
+				);
+			}
+			gridTesting.EndUpdate();
+			//RESELECT JOB
+			if(selectedJobNum>0) {
+				for(int i = 0;i<gridTesting.Rows.Count;i++) {
+					if((gridTesting.Rows[i].Tag is Job) && ((Job)gridTesting.Rows[i].Tag).JobNum==selectedJobNum) {
+						gridTesting.SetSelected(i,true);
+						break;
+					}
+				}
+			}
+		}		
+
+		private void datePickerFrom_ValueChanged(object sender,EventArgs e) {
+			FillGridTesting();
+		}
+
+		private void datePickerTo_ValueChanged(object sender,EventArgs e) {
+			FillGridTesting();
+		}
 		
 		///<summary></summary>
 		private void FillGridNotify() {
@@ -1407,6 +1488,7 @@ namespace OpenDental {
 			FillGridActions();
 			FillGridQueries();
 			FillGridDocumentation();
+			FillGridTesting();
 			FillGridSubscribed();
 			FillGridNotify();
 			FillExtraGrids();
@@ -1425,6 +1507,7 @@ namespace OpenDental {
 			FillGridActions();
 			FillGridQueries();
 			FillGridDocumentation();
+			FillGridTesting();
 			FillGridSubscribed();
 			FillGridNotify();
 			FillExtraGrids();
@@ -1547,6 +1630,7 @@ namespace OpenDental {
 			FillGridActions();
 			FillGridQueries();
 			FillGridDocumentation();
+			FillGridTesting();
 			FillGridSubscribed();
 			FillGridNotify();
 			FillExtraGrids();
@@ -1564,6 +1648,7 @@ namespace OpenDental {
 			FillGridActions();
 			FillGridQueries();
 			FillGridDocumentation();
+			FillGridTesting();
 			FillGridSubscribed();
 			FillGridNotify();
 			FillExtraGrids();
@@ -1639,6 +1724,7 @@ namespace OpenDental {
 					}
 					FillGridActions();
 					FillGridDocumentation();
+					FillGridTesting();
 					FillGridSubscribed();
 					FillGridNotify();
 					FillExtraGrids();
@@ -1919,6 +2005,7 @@ namespace OpenDental {
 			FillGridActions();
 			FillGridQueries();
 			FillGridDocumentation();
+			FillGridTesting();
 			FillGridSubscribed();
 			FillGridNotify();
 			FillExtraGrids();
@@ -1960,6 +2047,46 @@ namespace OpenDental {
 			}
 			FormJobManagerOverview FormJMO=new FormJobManagerOverview(_listJobsAll);
 			FormJMO.Show();
+		}
+
+		private void gridTesting_CellClick(object sender,ODGridClickEventArgs e) {
+			if(JobUnsavedChangesCheck()) {
+				return;
+			}
+			if(!(gridTesting.Rows[e.Row].Tag is Job)) {
+				return;
+			}
+			Job selectedjob = (Job)gridTesting.Rows[e.Row].Tag;
+			if(selectedjob.Category==JobCategory.Query) {
+				userControlQueryEdit.Visible=true;
+				userControlJobEdit.Visible=false;
+				userControlQueryEdit.LoadJob(selectedjob,GetJobTree(selectedjob));
+			}
+			else {
+				userControlQueryEdit.Visible=false;
+				userControlJobEdit.Visible=true;
+				userControlJobEdit.LoadJob(selectedjob,GetJobTree(selectedjob));
+			}
+		}
+
+		private void textVersionText_TextChanged(object sender,EventArgs e) {
+			timerTestingVersion.Stop();
+			timerTestingVersion.Start();
+		}
+
+		private void timerTestingVersion_Tick(object sender,EventArgs e) {
+			timerTestingVersion.Stop();
+			FillGridTesting();
+		}
+		
+		private void textDocumentationVersion_TextChanged(object sender,EventArgs e) {
+			timerDocumentationVersion.Stop();
+			timerDocumentationVersion.Start();
+		}
+
+		private void timerDocumentationVersion_Tick(object sender,EventArgs e) {
+			timerDocumentationVersion.Stop();
+			FillGridDocumentation();
 		}
 
 		private bool JobUnsavedChangesCheck() {

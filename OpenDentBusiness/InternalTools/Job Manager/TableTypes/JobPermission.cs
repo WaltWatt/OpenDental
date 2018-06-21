@@ -57,6 +57,8 @@ namespace OpenDentBusiness {
 		QueryTech,
 		///<summary>14 -</summary>
 		DocumentationManager,
+		///<summary>15 -</summary>
+		TestingCoordinator,
 	}
 
 }
