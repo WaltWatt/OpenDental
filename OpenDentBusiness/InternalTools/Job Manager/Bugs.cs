@@ -324,5 +324,23 @@ namespace OpenDentBusiness{
 			return bug;
 		}
 
+		///<summary>Attempts to get the ValueString from the bug's preference table for the given PrefName.  The ValueString retrieved from the db will be converted to T.
+		///Returns true if the preference was found and successfully converted to the type of T.  Otherwise retVal will be set to the default for T and false will be returned.</summary>
+		public static bool TryGetPrefValue<T>(string prefName,out T retVal) {
+			retVal=default(T);
+			try {
+				string val="";
+				DataAction.RunBugsHQ(() => {
+					val=Db.GetScalar("SELECT ValueString FROM preference WHERE PrefName='"+prefName+"'");
+				},false);
+				retVal=(T)Convert.ChangeType(val,typeof(T));
+			}
+			catch(Exception ex) {
+				ex.DoNothing();
+				return false;
+			}
+			return true;
+		}
+
 	}
 }

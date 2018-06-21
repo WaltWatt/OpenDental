@@ -50,26 +50,39 @@ namespace OpenDentBusiness {
 			return (List<VersionRelease>)odThread.Tag;
 		}
 
-		///<summary>Returns false if there are more modern builds since the given version for either stable or beta.
-		///Called from WebServiceMainHQ currently. 
-		///Does not check if on support.</summary>
-		public static bool IsMostRecentStableOrBeta(Version version,bool isForeign) {
-			//No need to check RemotingRole; no call to db.
+		///<summary>Returns false if given version was released prior to the last X versions.
+		///X is defined by bug.Preference 'BugSubmissionsCountPreviousVersions' value, defaults to 1 if there is an issue with retrieving the pref.
+		///Called from WebServiceMainHQ currently.  Does not check if on support.  Returns false if there are no stable or beta versions found.</summary>
+		public static bool IsVersionRecent(Version version,bool isForeign) {
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				return Meth.GetBool(MethodBase.GetCurrentMethod(),version,isForeign);
+			}
+			int maxVersions;
+			Bugs.TryGetPrefValue<int>("BugSubmissionsCountPreviousVersions",out maxVersions);
+			maxVersions=Math.Max(1,maxVersions);
 			List<VersionRelease> listVersionReleases=Refresh();//Ordered by most recent release and then IsForeign
-			Version betaCur=new Version(listVersionReleases
-				.First(x => x.IsBeta
+			List<VersionRelease> listBetaVersionReleases=listVersionReleases
+				.Where(x => x.IsBeta
 					&& x.IsForeign==isForeign 
 					&& x.DateRelease!=DateTime.MinValue)
-				.MajMinBuild0()
-			);
-			Version stableCur=new Version(listVersionReleases
-				.First(x => !x.IsBeta
+				.Take(maxVersions)//Safe even if list size is less than maxVersions.
+				.ToList();
+			if(listBetaVersionReleases.Count==0) {
+				return false;
+			}
+			Version versionBetaMin=new Version(listBetaVersionReleases.Last().MajMinBuild0());
+			List<VersionRelease> listStableVersionReleases=listVersionReleases
+				.Where(x => !x.IsBeta
 					&& x.IsForeign==isForeign
 					&& x.DateRelease!=DateTime.MinValue
-					&& ((x.MajorNum==betaCur.Major && x.MinorNum!=betaCur.Minor) || (x.MajorNum!=betaCur.Major)))
-				.MajMinBuild0()
-			);
-			return (version.CompareTo(stableCur)==0 || version.CompareTo(betaCur)==0);
+					&& ((x.MajorNum==versionBetaMin.Major && x.MinorNum!=versionBetaMin.Minor) || (x.MajorNum!=versionBetaMin.Major)))
+				.Take(maxVersions)//Safe even if list size is less than maxVersions.
+				.ToList();
+			if(listStableVersionReleases.Count==0) {
+				return false;
+			}
+			Version stablePre=new Version(listStableVersionReleases.Last().MajMinBuild0());
+			return (version.CompareTo(stablePre)>=0 || version.CompareTo(versionBetaMin)>=0);
 		}
 
 		private static List<VersionRelease> RefreshAndFill(string command) {
