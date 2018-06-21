@@ -93,7 +93,7 @@ namespace OpenDental {
 				double hrsEst=job.TimeEstimate.TotalHours==0?avgJobHours:0;
 				//Remove the actual hours spent on the job currently
 				//If negative then just use 0 (We aren't in a dimension where negative time estimates can be used for other jobs)
-				double hrsCalculated=0;//(hrsEst-job.MinutesActual)<0?0:hrsEst-job.MinutesActual;
+				double hrsCalculated=(hrsEst-job.HoursActual)<0?0:hrsEst-job.HoursActual;
 				totalJobHours+=hrsCalculated;
 				if(job.PhaseCur==JobPhase.Development) {
 					_listTopJobs.Add(new Tuple<long,double>(job.JobNum,hrsCalculated));
