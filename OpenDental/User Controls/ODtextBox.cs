@@ -677,7 +677,7 @@ namespace OpenDental {
 				return;
 			}
 			if(textEndPointCur.Y!=textEndPoint.Y) {//textEndPoint cannot be null, if not set it defaults to 0,0
-				ClearWavyLines();
+				ClearWavyLines(e.NewRectangle.Width);
 			}
 			textEndPoint=textEndPointCur;
 		}
@@ -704,7 +704,9 @@ namespace OpenDental {
 			}
 		}
 
-		public void ClearWavyLines() {
+		///<summary>The widthOverride parameter should only be explicitly set if the control is in 
+		///the middle of resizing. this.Size is stale when calculating line heights in the middle of a content resize event.</summary>
+		public void ClearWavyLines(int widthOverride=-1) {
 			if(this.Width <= 0 || this.Height <= 0) {//Width or Height can be 0 if the window or textbox is resized.  Causes a UE when creating a Bitmap. 
 				return;
 			}
@@ -764,7 +766,7 @@ namespace OpenDental {
 					}
 				}
 			}
-			List<int> listLineHeights=GetLineHeights();
+			List<int> listLineHeights=GetLineHeights(widthOverride);
 			for(int i=ind;i<mc.Count;i++) {
 				int startIndex=mc[i].Index;
 				int endIndex=mc[i].Index+mc[i].Value.Length-1;
@@ -934,15 +936,17 @@ namespace OpenDental {
 			return wordList;
 		}
 
-		///<summary>Returns a list of line heights in order of line index.</summary>
-		private List<int> GetLineHeights() {
-			using(RichTextBox rtf=new RichTextBox()) {
-				rtf.Rtf=this.Rtf;
-				rtf.Size=this.Size;
-				if(!rtf.Text.EndsWith("\r\n\t")) {
-					rtf.AppendText("\r\n\t");//This will allow us to get the Top of the fake line, which is the bottom of the last line of real text.
+		///<summary>Returns a list of line heights in order of line index. The widthOverride parameter should only
+		///be explicitly set if the control is in the middle of resizing. this.Size is stale when calculating
+		///line heights in the middle of a content resize event.</summary>
+		private List<int> GetLineHeights(int widthOverride=-1) {
+			using(RichTextBox rtb=new RichTextBox()) {
+				rtb.Rtf=this.Rtf;
+				rtb.Size=new Size((widthOverride==-1 ? this.Size.Width : widthOverride),this.Size.Height);
+				if(!rtb.Text.EndsWith("\r\n\t")) {
+					rtb.AppendText("\r\n\t");//This will allow us to get the Top of the fake line, which is the bottom of the last line of real text.
 				}
-				List<RichTextLineInfo> listLines=GraphicsHelper.GetTextSheetDisplayLines(rtf,-1,-1);
+				List<RichTextLineInfo> listLines=GraphicsHelper.GetTextSheetDisplayLines(rtb,-1,-1);
 				List<int> listLineHeights=new List<int>();
 				for(int i=0;i<listLines.Count-1;i++) {
 					//Top of next line minus top of current line will give us the height of the current line.
