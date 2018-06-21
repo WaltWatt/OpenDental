@@ -131,6 +131,9 @@ namespace OpenDentBusiness {
 		///Will be processed by the eConnector and then deleted.</summary>
 		[Description("Clinic Feature Changed (internal)")]
 		ClinicsChangedInternal,
+		///<summary>19 - Multiple computers are running OpenDentalServices. There should only ever be one.</summary>
+		[Description("Multiple OpenDentalServices")]
+		MultipleOpenDentalServices,
 	}
 
 	///<summary>Represents the urgency of the alert.  Also determines the color for the menu item in the main menu.</summary>
