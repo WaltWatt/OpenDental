@@ -216,6 +216,9 @@ namespace OpenDentBusiness {
 							if(string.IsNullOrEmpty(objCur.ToString())) {
 								continue;
 							}
+							if(IsPropertyDataTableXmlElement(type,pi)) {
+								continue;
+							}
 							objCur=XmlEscape(objCur.ToString());
 							pi.SetValue(obj,objCur,null);
 						}
@@ -319,6 +322,9 @@ namespace OpenDentBusiness {
 							if(string.IsNullOrEmpty(objCur.ToString())) {
 								continue;
 							}
+							if(IsPropertyDataTableXmlElement(type,pi)) {
+								continue;
+							}
 							objCur=XmlUnescape(objCur.ToString());
 							pi.SetValue(obj,objCur,null);
 						}
@@ -383,20 +389,6 @@ namespace OpenDentBusiness {
 			return retVal;
 		}
 
-		/*
-		public static string TableToXml(DataTable table){
-			StringBuilder strBuild=new StringBuilder();
-			XmlWriter xmlWriter=XmlWriter.Create(strBuild);
-			if(table.TableName==""){
-			//	throw new ApplicationException("OpenDentBusiness.WebServer.XmlConverter.TableToXml requires a tablename matching the type of the collection.");
-				table.TableName="Table";
-			}
-			table.WriteXml(xmlWriter,XmlWriteMode.WriteSchema);
-			xmlWriter.Close();
-			return strBuild.ToString();
-		}*/
-
-
 		///<summary>Serializes a DataTable by looping through the rows and columns.</summary>
 		public static string TableToXml(DataTable table) {
 			StringBuilder result=new StringBuilder();
@@ -437,14 +429,6 @@ namespace OpenDentBusiness {
 			return result.ToString();
 		}
 
-		/*public static string DsToXml(DataSet ds) {
-			StringBuilder strBuild=new StringBuilder();
-			XmlWriter xmlWriter=XmlWriter.Create(strBuild);
-			ds.WriteXml(xmlWriter,XmlWriteMode.WriteSchema);
-			xmlWriter.Close();
-			return strBuild.ToString();
-		}*/
-
 		public static string DsToXml(DataSet ds) {
 			StringBuilder strb=new StringBuilder();
 			strb.Append("<DataSet>");
@@ -456,7 +440,6 @@ namespace OpenDentBusiness {
 			strb.Append("</DataSet>");
 			return strb.ToString();
 		}
-
 
 		/// <summary></summary>
 		public static DataTable XmlToTable(string xmlData) {
@@ -496,26 +479,7 @@ namespace OpenDentBusiness {
 			}
 			return table;
 		}
-
-		/*
-		public static DataTable XmlToTable(string xmlData) {
-			DataTable table=new DataTable();
-			//XmlReader xmlReader=XmlReader.Create(new StringReader(xmlData));
-			XmlTextReader xmlReader=new XmlTextReader(new StringReader(xmlData));
-			table.ReadXml(xmlReader);
-			xmlReader.Close();
-			return table;
-		}*/
-
-		/*public static DataSet XmlToDs(string xmlData) {
-			DataSet ds=new DataSet();
-			//XmlReader xmlReader=XmlReader.Create(new StringReader(xmlData));
-			XmlTextReader xmlReader=new XmlTextReader(new StringReader(xmlData));
-			ds.ReadXml(xmlReader);
-			xmlReader.Close();
-			return ds;
-		}*/
-
+		
 		public static DataSet XmlToDs(string xmlData) {
 			DataSet ds=new DataSet();
 			XmlDocument doc=new XmlDocument();
@@ -526,6 +490,25 @@ namespace OpenDentBusiness {
 				ds.Tables.Add(XmlToTable(nodeTables.ChildNodes[t].OuterXml));//<DataTable>....</DataTable>
 			}
 			return ds;
+		}
+
+		///<summary>Pass in the object type of the class that contains a DataTable within it.
+		///Also, provide the property that will be checked to see if it is of type string and if it is meant to replace the DataTable.</summary>
+		private static bool IsPropertyDataTableXmlElement(Type type,PropertyInfo propertyInfo) {
+			if(propertyInfo.PropertyType!=typeof(string)) {
+				return false;
+			}
+			XmlElementAttribute attribute = propertyInfo.GetCustomAttribute<XmlElementAttribute>();
+			//We have already escaped the string inside of the TableToXML method for property that are helping serialize a datatable.
+			//If this property has an XML element name the same as a datatable field, we can skip it.
+			if(attribute!=null&&type.GetFields().Where(x => x!=null)
+				.Where(x => x.FieldType==typeof(DataTable))
+				.Where(x => x.GetCustomAttributes<XmlIgnoreAttribute>().Count()>0)
+				.Any(x => x.Name==attribute.ElementName)) 
+			{
+				return true;
+			}
+			return false;
 		}
 
 		///<summary>Escapes common characters used in XML from myString.  Also escapes any characters that are invalid for use in XML with an escape sequence of the pattern "&amp;#"+(int)char+";" (ampersand+hash+the unicode int (not hex) value of the char+semicolon)</summary>
