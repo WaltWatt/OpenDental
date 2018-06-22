@@ -594,7 +594,7 @@ namespace OpenDentBusiness {
 						listPaySplit.Add(splitNeg);
 						//Make a different paysplit attached to proc and prov they want to use it for.
 						PaySplit splitPos=new PaySplit();
-						splitPos.PatNum=prePaySplit.PatNum;
+						splitPos.PatNum=proc.PatNum;//Use procedure's pat to allocate to that patient's account even when viewing entire family.
 						splitPos.PayNum=payCur.PayNum;
 						splitPos.FSplitNum=0;//The association will be done on form closing.
 						splitPos.ProvNum=proc.ProvNum;
@@ -871,7 +871,7 @@ namespace OpenDentBusiness {
 						|| (payPlanVer==PayPlanVersions.AgeCreditsAndDebits && !PayPlans.GetOne(((PayPlanCharge)charge.Tag).PayPlanNum).IsClosed))
 					{ 
 						decimal payAmtCur;
-						autoSplitData.ListSplitsCur.AddRange(PaySplits.CreateSplitForPayPlan(payNum,payAmt,charge,
+						autoSplitData.ListAutoSplits.AddRange(PaySplits.CreateSplitForPayPlan(payNum,payAmt,charge,
 							listPayPlanCharges.Where(x => x.ChargeType==PayPlanChargeType.Credit).ToList(),autoSplitData.ListAccountCharges,0,true,out payAmtCur));
 						payAmt=(double)payAmtCur;
 					}
