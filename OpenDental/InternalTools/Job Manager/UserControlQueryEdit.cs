@@ -305,22 +305,17 @@ namespace OpenDental.InternalTools.Job_Manager {
 			gridNotes.BeginUpdate();
 			gridNotes.Columns.Clear();
 			gridNotes.Columns.Add(new ODGridColumn(Lan.g(this,"Note"),400));
-			gridNotes.Columns.Add(new ODGridColumn(Lan.g(this,"Date Time"),120));
-			gridNotes.Columns.Add(new ODGridColumn(Lan.g(this,"User"),80));
 			gridNotes.Rows.Clear();
 			ODGridRow row;
 			List<JobNote> listJobNotes=_jobCur.ListJobNotes.ToList();
 			listJobNotes.Reverse();
 			foreach(JobNote jobNote in listJobNotes) {
 				row=new ODGridRow();
-				row.Cells.Add(jobNote.Note);
-				row.Cells.Add(jobNote.DateTimeNote.ToShortDateString()+" "+jobNote.DateTimeNote.ToShortTimeString());
-				row.Cells.Add(Userods.GetName(jobNote.UserNum));
+				row.Cells.Add(jobNote.DateTimeNote.ToShortDateString()+" "+jobNote.DateTimeNote.ToShortTimeString()+"-"+Userods.GetName(jobNote.UserNum)+"-"+jobNote.Note);
 				row.Tag=jobNote;
 				gridNotes.Rows.Add(row);
 			}
 			gridNotes.EndUpdate();
-			gridNotes.ScrollToEnd();
 		}
 
 		private void FillGridHistory() {

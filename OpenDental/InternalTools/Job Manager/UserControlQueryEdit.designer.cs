@@ -53,9 +53,10 @@
 			this.textJobNum = new System.Windows.Forms.TextBox();
 			this.label1 = new System.Windows.Forms.Label();
 			this.panel4 = new System.Windows.Forms.Panel();
-			this.panel5 = new System.Windows.Forms.Panel();
 			this.label10 = new System.Windows.Forms.Label();
 			this.textSchedDate = new System.Windows.Forms.TextBox();
+			this.butActions = new OpenDental.UI.Button();
+			this.panel5 = new System.Windows.Forms.Panel();
 			this.splitContainerNoFlicker2 = new OpenDental.SplitContainerNoFlicker();
 			this.textEditorMain = new OpenDental.OdtextEditor();
 			this.tabControlMain = new System.Windows.Forms.TabControl();
@@ -67,7 +68,6 @@
 			this.panel1 = new System.Windows.Forms.Panel();
 			this.checkShowHistoryText = new System.Windows.Forms.CheckBox();
 			this.splitContainerNoFlicker1 = new OpenDental.SplitContainerNoFlicker();
-			this.butActions = new OpenDental.UI.Button();
 			this.groupLinks.SuspendLayout();
 			this.panel3.SuspendLayout();
 			this.panel4.SuspendLayout();
@@ -418,16 +418,6 @@
 			this.panel4.Size = new System.Drawing.Size(773, 100);
 			this.panel4.TabIndex = 329;
 			// 
-			// panel5
-			// 
-			this.panel5.Controls.Add(this.splitContainerNoFlicker2);
-			this.panel5.Controls.Add(this.splitContainerNoFlicker1);
-			this.panel5.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.panel5.Location = new System.Drawing.Point(0, 100);
-			this.panel5.Name = "panel5";
-			this.panel5.Size = new System.Drawing.Size(773, 626);
-			this.panel5.TabIndex = 330;
-			// 
 			// label10
 			// 
 			this.label10.Location = new System.Drawing.Point(351, 50);
@@ -443,6 +433,33 @@
 			this.textSchedDate.Size = new System.Drawing.Size(195, 20);
 			this.textSchedDate.TabIndex = 329;
 			this.textSchedDate.Leave += new System.EventHandler(this.textSchedDate_Leave);
+			// 
+			// butActions
+			// 
+			this.butActions.AdjustImageLocation = new System.Drawing.Point(0, 0);
+			this.butActions.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.butActions.Autosize = true;
+			this.butActions.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
+			this.butActions.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
+			this.butActions.CornerRadius = 4F;
+			this.butActions.Image = global::OpenDental.Properties.Resources.arrowDownTriangle;
+			this.butActions.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.butActions.Location = new System.Drawing.Point(676, 0);
+			this.butActions.Name = "butActions";
+			this.butActions.Size = new System.Drawing.Size(95, 23);
+			this.butActions.TabIndex = 303;
+			this.butActions.Text = "Job Actions";
+			this.butActions.Click += new System.EventHandler(this.butActions_Click);
+			// 
+			// panel5
+			// 
+			this.panel5.Controls.Add(this.splitContainerNoFlicker2);
+			this.panel5.Controls.Add(this.splitContainerNoFlicker1);
+			this.panel5.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.panel5.Location = new System.Drawing.Point(0, 100);
+			this.panel5.Name = "panel5";
+			this.panel5.Size = new System.Drawing.Size(773, 626);
+			this.panel5.TabIndex = 330;
 			// 
 			// splitContainerNoFlicker2
 			// 
@@ -508,7 +525,7 @@
 			this.gridNotes.HasMultilineHeaders = false;
 			this.gridNotes.HeaderFont = new System.Drawing.Font("Microsoft Sans Serif", 8.5F, System.Drawing.FontStyle.Bold);
 			this.gridNotes.HeaderHeight = 15;
-			this.gridNotes.HScrollVisible = true;
+			this.gridNotes.HScrollVisible = false;
 			this.gridNotes.Location = new System.Drawing.Point(3, 3);
 			this.gridNotes.Name = "gridNotes";
 			this.gridNotes.ScrollValue = 0;
@@ -595,23 +612,6 @@
 			this.splitContainerNoFlicker1.Size = new System.Drawing.Size(773, 626);
 			this.splitContainerNoFlicker1.SplitterDistance = 257;
 			this.splitContainerNoFlicker1.TabIndex = 307;
-			// 
-			// butActions
-			// 
-			this.butActions.AdjustImageLocation = new System.Drawing.Point(0, 0);
-			this.butActions.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.butActions.Autosize = true;
-			this.butActions.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
-			this.butActions.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
-			this.butActions.CornerRadius = 4F;
-			this.butActions.Image = global::OpenDental.Properties.Resources.arrowDownTriangle;
-			this.butActions.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
-			this.butActions.Location = new System.Drawing.Point(676, 0);
-			this.butActions.Name = "butActions";
-			this.butActions.Size = new System.Drawing.Size(95, 23);
-			this.butActions.TabIndex = 303;
-			this.butActions.Text = "Job Actions";
-			this.butActions.Click += new System.EventHandler(this.butActions_Click);
 			// 
 			// UserControlQueryEdit
 			// 
