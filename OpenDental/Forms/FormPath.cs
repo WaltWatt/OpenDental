@@ -1060,12 +1060,21 @@ namespace OpenDental{
 				DataValid.SetInvalid(InvalidType.Programs);
 			}
 			Cursor=Cursors.WaitCursor;
-			if(radioSftp.Checked && !OpenDentalCloud.Sftp.FileExists(textSftpHostname.Text,textSftpUsername.Text,textSftpPassword.Text,
-				ODFileUtils.CombinePaths(textSftpAtoZ.Text,"A",'/'))) 
-			{
-				Cursor=Cursors.Default;
-				MsgBox.Show(this,"The SFTP folder cannot be accessed or does not exist. The folder must contain all 26 A through Z folders.");
-				return;
+			if(radioSftp.Checked) { 
+				try {
+					if(!OpenDentalCloud.Sftp.FileExists(textSftpHostname.Text,textSftpUsername.Text,textSftpPassword.Text,
+						ODFileUtils.CombinePaths(textSftpAtoZ.Text,"A",'/'))) 
+					{
+						Cursor=Cursors.Default;
+						MsgBox.Show(this,"The SFTP folder cannot be accessed or does not exist. The folder must contain all 26 A through Z folders.");
+						return;
+					}
+				}
+				catch(Exception ex) {
+					Cursor=Cursors.Default;
+					MessageBox.Show(Lan.g(this,"Error connecting to SFTP host: ")+ex.Message);
+					return;
+				}
 			}
 			Cursor=Cursors.Default;
 			string sftpWarningMsg=Lan.g(this,"Warning: Updating workstations older than 16.3 while using SFTP may cause issues."
