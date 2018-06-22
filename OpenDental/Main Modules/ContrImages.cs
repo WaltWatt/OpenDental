@@ -955,8 +955,8 @@ namespace OpenDental {
 			//the current image has been erased. This will also avoid concurrent access to the the currently loaded images by
 			//the main and worker threads.
 			EraseCurrentImages();
-			if(PrefC.AtoZfolderUsed==DataStorageType.InDatabase && isNodeOldDoc) {
-				DeleteTempPdf(docNumOld);//Clean up the temp storage copy of PDF from DB.
+			if(isNodeOldDoc) {//We are no longer using the previously saved image, try to delete it if it is in the temp directory.
+				DeleteTempPdf(docNumOld);//Clean up the temp storage copy of PDF.
 			}
 			if(nodeId.NodeType==ImageNodeType.ApteryxImage) {
 				ShowApteryxImage(node); //Display image in our own special way. 
@@ -1127,12 +1127,9 @@ namespace OpenDental {
 								_webBrowserDocument.Navigate(pdfFilePath);//The return status of this function doesn't seem to be helpful.
 								pictureBoxMain.Visible=false;
 								isExportable=true;
-								if(PrefC.AtoZfolderUsed==DataStorageType.InDatabase) {
-									//Do nothing. Temp file will be deleted when leaving selected file.
-								}
-								else if(PrefC.AtoZfolderUsed!=DataStorageType.LocalAtoZ) {
-									File.Delete(pdfFilePath);//Delete temp file
-								}
+								//We used to delete the pdf as it was no longer needed.  
+								//The web browser can take time to load and requires the file to be present when it finishes loading, 
+								//so it will get deleted later (either when switching preview images or closing Open Dental
 							}
 						}
 						catch {
@@ -1262,9 +1259,9 @@ namespace OpenDental {
 			}
 		}
 
-		///<summary>When storing PDFs directly in DB, we download a temp file to display. This could cause local temp storage bloat if not cleaned up when tree 
-		///selection changes. Need to delete the temp file associated to NodeIdentifierOld, which persists even across module changes, so while 
-		///changing module will not cause the temp file to delete, returning to the image module or closing OpenDental cleans it up.</summary>
+		///<summary>When storing PDFs directly in DB/Cloud, we download a temp file to display. This could cause local temp storage bloat if not cleaned 
+		///up when tree selection changes. Need to delete the temp file associated to NodeIdentifierOld, which persists even across module changes, so 
+		///while changing module will not cause the temp file to delete, returning to the image module or closing OpenDental cleans it up.</summary>
 		private void DeleteTempPdf(long docNum) {
 			Document doc=Documents.GetByNum(docNum,doReturnNullIfNotFound:true);//Get old document.
 			if(doc!=null && Path.GetExtension(doc.FileName).ToLower()==".pdf") {//Adobe acrobat file.
