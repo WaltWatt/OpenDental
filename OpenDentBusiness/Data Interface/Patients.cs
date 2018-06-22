@@ -99,90 +99,76 @@ namespace OpenDentBusiness {
 			long collectionBillType=Defs.GetDefsForCategory(DefCat.BillingTypes,true).FirstOrDefault(x => x.ItemValue.ToLower()=="c")?.DefNum??0;
 			string whereCollBillType=(collectionBillType>0?(@"
 					OR guar.BillingType = "+POut.Long(collectionBillType)):"");
-			string command=@"SELECT guar.PatNum,guar.Guarantor,guar.Bal_0_30,guar.Bal_31_60,guar.Bal_61_90,guar.BalOver90,guar.BalTotal,guar.InsEst,
+			string command=@"SELECT guar.PatNum,guar.Bal_0_30,guar.Bal_31_60,guar.Bal_61_90,guar.BalOver90,guar.BalTotal,guar.InsEst,
 				guar.BalTotal-guar.InsEst AS $pat,guar.PayPlanDue,guar.LName,guar.FName,guar.Preferred,guar.MiddleI,guar.PriProv,guar.BillingType,
-				guar.ClinicNum,guar.Address,guar.City,guar.State,guar.Zip,guar.Birthdate,COALESCE(guarPay.DateLastPay,'0001-01-01') DateLastPay
+				guar.ClinicNum,guar.Address,guar.City,guar.State,guar.Zip,guar.Birthdate
 				FROM patient guar
-				LEFT JOIN (
-					SELECT p.Guarantor,MAX(ps.DatePay) DateLastPay
-					FROM paysplit ps
-					INNER JOIN patient p ON p.PatNum=ps.PatNum
-					WHERE ps.SplitAmt != 0
-					GROUP BY p.Guarantor
-				) guarPay ON guar.PatNum=guarPay.Guarantor
 				WHERE guar.PatNum=guar.Guarantor
 				AND guar.PatStatus != "+POut.Int((int)PatientStatus.Deleted)+@"
 				AND (
 					guar.PatStatus!="+POut.Int((int)PatientStatus.Archived)+@"
-					OR ROUND(guar.BalTotal,3)!=0"
+					OR ABS(guar.BalTotal)>0.005"
 					+whereCollBillType+@"
-				)
-				ORDER BY guar.Lname,guar.FName";
-			DataTable table=Db.GetTable(command);
-			List<PatAging> agingList=new List<PatAging>();
-			if(table.Rows.Count<1) {
-				return agingList;
+				)";
+			Dictionary<long,DataRow> dictAll=Db.GetTable(command).Select().ToDictionary(x => PIn.Long(x["PatNum"].ToString()),x => x);
+			if(dictAll.Count==0) {
+				return new List<PatAging>();
 			}
-			List<long> listAllPatNums=table.Select().Select(x => PIn.Long(x["PatNum"].ToString())).ToList();
-			List<TsiTransLog> listAllLogs=TsiTransLogs.SelectMany(listAllPatNums);
-			Dictionary<long,List<TsiTransLog>> dictPatNumListTrans=new Dictionary<long,List<TsiTransLog>>();
-			if(listAllLogs.Count>0) {
-				dictPatNumListTrans=listAllLogs.GroupBy(x => x.PatNum).ToDictionary(x => x.Key,x => x.OrderByDescending(y => y.TransDateTime).ToList());
-			}
-			string patNumString=string.Join(",",listAllPatNums.Select(x => POut.Long(x)));//guaranteed to not be empty
-			command="SELECT DISTINCT patient.Guarantor "
-				+"FROM patient "
-				+"INNER JOIN claim ON patient.PatNum=claim.PatNum "
-					+"AND claim.ClaimStatus IN ('U','H','W','S') "
-					+"AND claim.ClaimType IN ('P','S','Other') "
-				+"WHERE patient.Guarantor IN ("+patNumString+")";
-			List<long> listGuarNumsInsPending=Db.GetListLong(command);
-			command="SELECT DISTINCT patient.Guarantor "
-				+"FROM patient "
-				+"WHERE EXISTS ("
-					+"SELECT * FROM procedurelog "
-					+"INNER JOIN claimproc ON claimproc.ProcNum=procedurelog.ProcNum "
-						+"AND claimproc.NoBillIns=0 "
-						+"AND claimproc.Status="+POut.Int((int)ClaimProcStatus.Estimate)+" "
-					+"WHERE procedurelog.PatNum=patient.PatNum "
-					+"AND procedurelog.ProcFee>0 "
-					+"AND procedurelog.ProcStatus="+POut.Int((int)ProcStat.C)+" "
-					+"AND procedurelog.ProcDate>"+POut.Date(DateTime.Today.AddMonths(-6))
-				+") "
-				+"AND patient.Guarantor IN ("+patNumString+")";
-			List<long> listGuarNumsUnsentProcs=Db.GetListLong(command);
-			PatAging patage;
-			foreach(DataRow rowCur in table.Rows) {
-				patage=new PatAging();
-				patage.PatNum=PIn.Long(rowCur["PatNum"].ToString());
-				patage.Guarantor=PIn.Long(rowCur["Guarantor"].ToString());
-				patage.Bal_0_30=PIn.Double(rowCur["Bal_0_30"].ToString());
-				patage.Bal_31_60=PIn.Double(rowCur["Bal_31_60"].ToString());
-				patage.Bal_61_90=PIn.Double(rowCur["Bal_61_90"].ToString());
-				patage.BalOver90=PIn.Double(rowCur["BalOver90"].ToString());
-				patage.BalTotal=PIn.Double(rowCur["BalTotal"].ToString());
-				patage.InsEst=PIn.Double(rowCur["InsEst"].ToString());
-				patage.AmountDue=PIn.Double(rowCur["$pat"].ToString());
-				patage.PayPlanDue=PIn.Double(rowCur["PayPlanDue"].ToString());
-				patage.PatName=Patients.GetNameLF(PIn.String(rowCur["LName"].ToString()),PIn.String(rowCur["FName"].ToString()),
-					PIn.String(rowCur["Preferred"].ToString()),PIn.String(rowCur["MiddleI"].ToString()));
-				patage.PriProv=PIn.Long(rowCur["PriProv"].ToString());
-				patage.BillingType=PIn.Long(rowCur["BillingType"].ToString());
-				patage.ClinicNum=PIn.Long(rowCur["ClinicNum"].ToString());
-				patage.Address=PIn.String(rowCur["Address"].ToString());
-				patage.City=PIn.String(rowCur["City"].ToString());
-				patage.State=PIn.String(rowCur["State"].ToString());
-				patage.Zip=PIn.String(rowCur["Zip"].ToString());
-				patage.Birthdate=PIn.Date(rowCur["Birthdate"].ToString());
-				patage.DateLastPay=PIn.Date(rowCur["DateLastPay"].ToString());
-				patage.HasInsPending=listGuarNumsInsPending.Contains(patage.PatNum);
-				patage.HasUnsentProcs=listGuarNumsUnsentProcs.Contains(patage.PatNum);
-				if(!dictPatNumListTrans.TryGetValue(patage.PatNum,out patage.ListTsiLogs)) {
-					patage.ListTsiLogs=new List<TsiTransLog>();
-				}
-				agingList.Add(patage);
-			}
-			return agingList;
+			Dictionary<long,List<TsiTransLog>> dictPatListTrans=TsiTransLogs.SelectMany(dictAll.Keys.ToList())
+				.GroupBy(x => x.PatNum)
+				.ToDictionary(x => x.Key,x => x.OrderByDescending(y => y.TransDateTime).ToList());
+			command=@"SELECT patient.Guarantor,MAX(paysplit.DatePay) DateLastPay
+				FROM paysplit
+				INNER JOIN patient ON paysplit.PatNum=patient.PatNum
+				WHERE paysplit.SplitAmt != 0
+				GROUP BY patient.Guarantor
+				ORDER BY NULL";
+			Dictionary<long,DateTime> dictGuarDateLastPay=Db.GetTable(command).Select()
+				.ToDictionary(x => PIn.Long(x["Guarantor"].ToString()),x => PIn.Date(x["DateLastPay"].ToString()));
+			command=@"SELECT DISTINCT patient.Guarantor
+				FROM patient
+				INNER JOIN claim ON patient.PatNum=claim.PatNum
+					AND claim.ClaimStatus IN ('U','H','W','S')
+					AND claim.ClaimType IN ('P','S','Other')";
+			List<long> listGuarInsPending=Db.GetListLong(command).FindAll(x => dictAll.ContainsKey(x));
+			command=@"SELECT DISTINCT patient.Guarantor
+				FROM patient
+				INNER JOIN procedurelog ON procedurelog.PatNum=patient.PatNum
+				INNER JOIN claimproc ON claimproc.ProcNum=procedurelog.ProcNum
+				WHERE claimproc.NoBillIns=0
+				AND claimproc.Status="+POut.Int((int)ClaimProcStatus.Estimate)+@"
+				AND procedurelog.ProcFee>0
+				AND procedurelog.ProcStatus="+POut.Int((int)ProcStat.C)+@"
+				AND procedurelog.ProcDate>CURDATE()-INTERVAL 6 MONTH";
+			List<long> listGuarUnsentProcs=Db.GetListLong(command).FindAll(x => dictAll.ContainsKey(x));
+			DateTime dateLastPay;
+			List<TsiTransLog> listLogs;
+			return dictAll.Select(x => new PatAging() {
+					PatNum=x.Key,
+					Guarantor=x.Key,
+					Bal_0_30=PIn.Double(x.Value["Bal_0_30"].ToString()),
+					Bal_31_60=PIn.Double(x.Value["Bal_31_60"].ToString()),
+					Bal_61_90=PIn.Double(x.Value["Bal_61_90"].ToString()),
+					BalOver90=PIn.Double(x.Value["BalOver90"].ToString()),
+					BalTotal=PIn.Double(x.Value["BalTotal"].ToString()),
+					InsEst=PIn.Double(x.Value["InsEst"].ToString()),
+					AmountDue=PIn.Double(x.Value["$pat"].ToString()),
+					PayPlanDue=PIn.Double(x.Value["PayPlanDue"].ToString()),
+					PatName=Patients.GetNameLF(PIn.String(x.Value["LName"].ToString()),PIn.String(x.Value["FName"].ToString()),
+						PIn.String(x.Value["Preferred"].ToString()),PIn.String(x.Value["MiddleI"].ToString())),
+					PriProv=PIn.Long(x.Value["PriProv"].ToString()),
+					BillingType=PIn.Long(x.Value["BillingType"].ToString()),
+					ClinicNum=PIn.Long(x.Value["ClinicNum"].ToString()),
+					Address=PIn.String(x.Value["Address"].ToString()),
+					City=PIn.String(x.Value["City"].ToString()),
+					State=PIn.String(x.Value["State"].ToString()),
+					Zip=PIn.String(x.Value["Zip"].ToString()),
+					Birthdate=PIn.Date(x.Value["Birthdate"].ToString()),
+					DateLastPay=(dictGuarDateLastPay.TryGetValue(x.Key,out dateLastPay)?dateLastPay:DateTime.MinValue),
+					HasInsPending=listGuarInsPending.Contains(x.Key),
+					HasUnsentProcs=listGuarUnsentProcs.Contains(x.Key),
+					ListTsiLogs=(dictPatListTrans.TryGetValue(x.Key,out listLogs)?listLogs:new List<TsiTransLog>())
+				}).OrderBy(x => x.PatName).ToList();
 		}
 
 		///<summary>Used by the OpenDentalService Transworld thread to sync accounts sent to collection.</summary>
