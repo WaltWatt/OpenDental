@@ -180,7 +180,7 @@ namespace OpenDentBusiness{
 			Logger.IWriteLine log=null,List<long> listProvNums=null) 
 		{
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				return Meth.GetObject<List<Appointment>>(MethodBase.GetCurrentMethod(),opNums,dateStart,dateEnd,log);
+				return Meth.GetObject<List<Appointment>>(MethodBase.GetCurrentMethod(),opNums,dateStart,dateEnd,log,listProvNums);
 			}
 			string command="SELECT * FROM appointment WHERE Op > 0 ";
 			if(opNums!=null && opNums.Count > 0) {
