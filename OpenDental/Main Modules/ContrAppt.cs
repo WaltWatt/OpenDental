@@ -3697,11 +3697,7 @@ namespace OpenDental {
 				if(!SmsPhones.IsIntegratedTextingEnabled() && !Programs.IsEnabled(ProgramName.CallFire)) {
 					menuApt.MenuItems[menuApt.MenuItems.Count-1].Enabled=false;
 				}
-				//menuApt.MenuItems.Add(Lan.g(this,"Send Reminder Text"),menuApt_Click);
-				//if(!SmsPhones.IsIntegratedTextingEnabled() && !Programs.IsEnabled(ProgramName.CallFire)) {
-				//	menuApt.MenuItems[menuApt.MenuItems.Count-1].Enabled=false;
-				//}
-
+				Plugins.HookAddCode(this,"ContrAppt.MouseDownAppointment_menuApt_right_click");
 				menuApt.Show(ContrApptSheet2,new Point(e.X,e.Y));
 			}
 			else {
