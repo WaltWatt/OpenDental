@@ -8658,5 +8658,18 @@ No Action Required in many cases, check your new patient Web Sched on your web s
 			}
 		}
 
+		private static void To18_1_29() {
+			ODEvent.Fire(new ODEventArgs("ConvertDatabases","Upgrading database to version: 18.1.29"));//No translation in convert script.
+			//check databasemaintenance for CanadaCarriersCdaMissingInfo, insert if not there and set IsOld to True or update to set IsOld to true
+			string command="SELECT MethodName FROM databasemaintenance WHERE MethodName='CanadaCarriersCdaMissingInfo'";
+			string methodName=Db.GetScalar(command);
+			if(methodName=="") {//didn't find row in table, insert
+				command="INSERT INTO databasemaintenance (MethodName,IsOld) VALUES ('CanadaCarriersCdaMissingInfo',1)";
+			}
+			else {//found row, update IsOld
+				command="UPDATE databasemaintenance SET IsOld = 1 WHERE MethodName = 'CanadaCarriersCdaMissingInfo'";
+			}
+			Db.NonQ(command);
+		}
 	}
 }
