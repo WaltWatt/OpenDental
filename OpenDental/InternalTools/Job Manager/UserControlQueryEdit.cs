@@ -308,10 +308,10 @@ namespace OpenDental.InternalTools.Job_Manager {
 			gridNotes.Rows.Clear();
 			ODGridRow row;
 			List<JobNote> listJobNotes=_jobCur.ListJobNotes.ToList();
-			listJobNotes.Reverse();
+			listJobNotes=listJobNotes.OrderByDescending(x => x.DateTimeNote).ToList();
 			foreach(JobNote jobNote in listJobNotes) {
 				row=new ODGridRow();
-				row.Cells.Add(jobNote.DateTimeNote.ToShortDateString()+" "+jobNote.DateTimeNote.ToShortTimeString()+"-"+Userods.GetName(jobNote.UserNum)+"-"+jobNote.Note);
+				row.Cells.Add(jobNote.DateTimeNote.ToShortDateString()+" "+jobNote.DateTimeNote.ToShortTimeString()+" - "+Userods.GetName(jobNote.UserNum)+" - "+jobNote.Note);
 				row.Tag=jobNote;
 				gridNotes.Rows.Add(row);
 			}
@@ -1071,7 +1071,7 @@ namespace OpenDental.InternalTools.Job_Manager {
 					JobNotes.Update(FormJNE.JobNoteCur);
 				}
 			}
-			_jobCur.ListJobNotes.RemoveAt(e.Row);// (x => x.JobNoteNum==jobNote.JobNoteNum);//should remove only one
+			_jobCur.ListJobNotes.RemoveAll(x => x.JobNoteNum==jobNote.JobNoteNum);//should remove only one
 			if(FormJNE.JobNoteCur!=null) {
 				_jobCur.ListJobNotes.Add(FormJNE.JobNoteCur);
 			}

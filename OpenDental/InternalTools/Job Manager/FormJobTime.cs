@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using OpenDentBusiness;
 using System.Linq;
 using OpenDental.UI;
+using CodeBase;
 
 namespace OpenDental {
 	public partial class FormJobTime:ODForm {
@@ -24,7 +25,8 @@ namespace OpenDental {
 		}
 
 		private void FillGrid() {
-			List<Job> listJobsFiltered=_listJobs.Where(x => x.ListJobLogs.Exists(
+			List<Job> listJobsFiltered=_listJobs.Where(x => !x.PhaseCur.In(JobPhase.Complete,JobPhase.Documentation)
+				&& x.ListJobLogs.Exists(
 				y => y.DateTimeEntry>=DateTime.Today
 				&& y.UserNumChanged==Security.CurUser.UserNum)).ToList();//Give me all the joblogs for today.
 			//Order the list in this order
@@ -54,8 +56,8 @@ namespace OpenDental {
 			gridJobs.Rows.Clear();
 			foreach(Job job in listJobsSorted) {
 				ODGridRow row=new ODGridRow() { Tag=job };
-				if(job.UserNumEngineer==Security.CurUser.UserNum
-					|| job.UserNumExpert==Security.CurUser.UserNum) 
+				if((job.UserNumEngineer==Security.CurUser.UserNum || job.UserNumExpert==Security.CurUser.UserNum)
+					&& !job.PhaseCur.In(JobPhase.Complete,JobPhase.Documentation)) 
 				{
 					row.ColorBackG=job.ListJobTimeLogs.Exists(y => y.ReviewerNum==Security.CurUser.UserNum && y.DateTStamp.Day==DateTime.Today.Day)?Color.LightGreen:Color.LightCoral;
 				}

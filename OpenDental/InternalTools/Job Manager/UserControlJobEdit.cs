@@ -167,6 +167,10 @@ namespace OpenDental.InternalTools.Job_Manager {
 
 		///<summary>Should only be called once when new job should be loaded into control. If called again, changes will be lost.</summary>
 		public void LoadJob(Job job,TreeNode treeNode) {
+			Job jobPrev=null;
+			if(_jobCur!=null) {
+				jobPrev = _jobCur.Copy();
+			}
 			_isLoading=true;
 			if(comboPriority.Items.Count==0) {
 				_listPriorities=Defs.GetDefsForCategory(DefCat.JobPriorities,true).OrderBy(x => x.ItemOrder).ToList();
@@ -233,7 +237,7 @@ namespace OpenDental.InternalTools.Job_Manager {
 			FillAllGrids();
 			IsChanged=false;
 			CheckPermissions();
-			CreateViewLog();
+			CreateViewLog(jobPrev);
 			if(job!=null) {//re-enable control after we have loaded the job.
 				this.Enabled=true;
 			}
@@ -2993,7 +2997,10 @@ namespace OpenDental.InternalTools.Job_Manager {
 			FillGridLog();
 		}
 
-		private void CreateViewLog() {
+		private void CreateViewLog(Job jobPrevious) {
+			if(jobPrevious!=null && jobPrevious.JobNum==_jobCur.JobNum) {//Skip out if you click on the same job twice
+				return;
+			}
 			if(_jobCur.ListJobLogs.Exists(x => x.DateTimeEntry>=DateTime.Today && x.UserNumChanged==Security.CurUser.UserNum)) {
 				return;
 			}
