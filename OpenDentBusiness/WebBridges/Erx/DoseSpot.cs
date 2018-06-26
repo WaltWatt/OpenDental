@@ -232,6 +232,9 @@ namespace OpenDentBusiness {
 				RxPat rxOld=null;
 				if(medication.Source==DoseSpotService.MedicationSourceType.SelfReported) {
 					rxOld=RxPats.GetErxByIdForPat(Erx.OpenDentalErxPrefix+medication.MedicationId.ToString(),patNum);
+					if(rxOld==null) {
+						rxOld=RxPats.GetErxByIdForPat(Erx.DoseSpotPatReportedPrefix+medication.MedicationId.ToString(),patNum);
+					}
 				}
 				else {
 					rxOld=RxPats.GetErxByIdForPat(medication.MedicationId.ToString(),patNum);
@@ -310,7 +313,21 @@ namespace OpenDentBusiness {
 				rx.ErxGuid=doseSpotMedId.ToString();
 				bool isProv=false;
 				if(medication.Source==DoseSpotService.MedicationSourceType.SelfReported) {//Self Reported medications won't have a prescriber number
-					rx.ErxGuid=Erx.OpenDentalErxPrefix+medication.MedicationId;
+					if(rxOld==null) {//Rx doesn't exist in the database.  This probably originated from DoseSpot
+						MedicationPat medPat=MedicationPats.GetMedicationOrderByErxIdAndPat(Erx.OpenDentalErxPrefix+medication.MedicationId.ToString(),patNum);
+						if(medPat==null) {//If there isn't a record of the medication 
+							medPat=MedicationPats.GetMedicationOrderByErxIdAndPat(Erx.DoseSpotPatReportedPrefix+medication.MedicationId.ToString(),patNum);
+						}
+						if(medPat==null) {//If medPat is null at this point we don't have a record of this patient having the medication, so it probably was just made in DoseSpot.
+							rx.ErxGuid=Erx.DoseSpotPatReportedPrefix+medication.MedicationId;
+						}
+						else {
+							rx.ErxGuid=medPat.ErxGuid;//Maintain the ErxGuid that was assigned for the MedicationPat that already exists.
+						}
+					}
+					else {
+						rx.ErxGuid=rxOld.ErxGuid;//Maintain the ErxGuid that was already assigned for the Rx.
+					}
 				}
 				else {
 					//The prescriber ID for each medication is the doctor that approved the prescription.
@@ -330,7 +347,13 @@ namespace OpenDentBusiness {
 					}
 					rx.ProvNum=prov.ProvNum;
 				}
-				long medicationPatNum=Erx.UpdateErxMedication(rxOld,rx,rxCui,medication.DisplayName,medication.GenericDrugName,isProv);
+				long medicationPatNum=0;
+				if(Erx.IsDoseSpotPatReported(rx.ErxGuid)) {//For DoseSpot self reported, do not insert a prescription.
+					medicationPatNum=Erx.InsertOrUpdateErxMedication(rxOld,rx,rxCui,medication.DisplayName,medication.GenericDrugName,isProv,false);
+				}
+				else {
+					medicationPatNum=Erx.InsertOrUpdateErxMedication(rxOld,rx,rxCui,medication.DisplayName,medication.GenericDrugName,isProv);
+				}
 				if(rxOld==null) {//Only add the rx if it is new.  We don't want to trigger automation for existing prescriptions.
 					listNewRx.Add(rx);
 				}
@@ -375,7 +398,10 @@ namespace OpenDentBusiness {
 				return;//There are no medications to send to DoseSpot.
 			}
 			foreach(MedicationPat medPat in listAllMedicationsForPatient) {
-				if(Erx.IsFromDoseSpot(medPat.ErxGuid) || Erx.IsTwoWayIntegrated(medPat.ErxGuid)) {//Only send medications that DoseSpot doesn't already have
+				if(Erx.IsFromDoseSpot(medPat.ErxGuid) 
+					|| Erx.IsTwoWayIntegrated(medPat.ErxGuid)
+					|| Erx.IsDoseSpotPatReported(medPat.ErxGuid))
+				{//Only send medications that DoseSpot doesn't already have
 					continue;
 				}
 				DoseSpotService.SelfReportedMedication medCur=new DoseSpotService.SelfReportedMedication();

@@ -4419,7 +4419,7 @@ namespace OpenDental {
 						rx.ProvNum=rxOld.ProvNum;//Preserve the provnum if already in the database, because it may have already been corrected by the user after the previous download.
 					}
 				}
-				long medicationPatNum=Erx.UpdateErxMedication(rxOld,rx,rxCui,strDrugName,strGenericName,isProv);
+				long medicationPatNum=Erx.InsertOrUpdateErxMedication(rxOld,rx,rxCui,strDrugName,strGenericName,isProv);
 				listActiveMedicationPatNums.Add(medicationPatNum);
 				if(rxOld==null) {//Only add the rx if it is new.  We don't want to trigger automation for existing prescriptions.
 					listNewRx.Add(rx);

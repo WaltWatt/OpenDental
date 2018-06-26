@@ -30,12 +30,18 @@ namespace OpenDentBusiness {
 		///<summary>If this value is found in a MedicationPat or RxPat's ErxGuid column, it is a med/rx created in Open Dental, NOT imported from an eRx solution.</summary>
 		public static string OpenDentalErxPrefix="OD_SelfReported";
 
-		public static long UpdateErxMedication(RxPat rxOld,RxPat rx,long rxCui,string strDrugName,string strGenericName,bool isProv) {
+		///<summary>If this value is found in a MedicationPat or RxPat's ErxGuid column, it is a med/rx created in DoseSpot with the "Patient Reported" medication option.
+		///These should never be imported as prescriptions, per Brad.</summary>
+		public static string DoseSpotPatReportedPrefix="DS_PatientReported";
+
+		public static long InsertOrUpdateErxMedication(RxPat rxOld,RxPat rx,long rxCui,string strDrugName,string strGenericName,bool isProv,bool canInsertRx=true) {
 			if(rxOld==null) {
-				rx.IsNew=true;//Might not be necessary, but does not hurt.
-				rx.IsErxOld=false;
-				SecurityLogs.MakeLogEntry(Permissions.RxCreate,rx.PatNum,"eRx automatically created: "+rx.Drug);
-				RxPats.Insert(rx);
+				if(canInsertRx) {
+					rx.IsNew=true;//Might not be necessary, but does not hurt.
+					rx.IsErxOld=false;
+					SecurityLogs.MakeLogEntry(Permissions.RxCreate,rx.PatNum,"eRx automatically created: "+rx.Drug);
+					RxPats.Insert(rx);
+				}
 			}
 			else {//The prescription was already in our database. Update it.
 				rx.RxNum=rxOld.RxNum;
@@ -268,6 +274,11 @@ namespace OpenDentBusiness {
 		///<summary>Returns true if the passed in erxGuid is in a format that is consistent with having sent the eRx to the third party solution</summary>
 		public static bool IsTwoWayIntegrated(string erxGuid) {
 			return erxGuid.StartsWith(OpenDentalErxPrefix);
+		}
+
+		///<summary>Returns true if the passed in erxGuid is in a format that is consistent with having retreived the eRx from DoseSpot as a Patient Recorded medication.</summary>
+		public static bool IsDoseSpotPatReported(string erxGuid) {
+			return erxGuid.StartsWith(DoseSpotPatReportedPrefix);
 		}
 
 		public static bool IsNpiValid(string npi) {
