@@ -926,7 +926,13 @@ namespace OpenDental {
 							g.DrawString(Lan.g("ContrTreat","Treatment Planned"),bodyFont,Brushes.Black,xPos+16,yPos);
 						}
 						else {
-							XFont bodyFontX=new XFont(bodyFont.SystemFontName,bodyFont.Size,XFontStyle.Regular);
+							XFont bodyFontX;
+							if(string.IsNullOrEmpty(bodyFont.SystemFontName)) {
+								bodyFontX=new Font("Arial",9f,FontStyle.Regular,GraphicsUnit.World);
+							}
+							else {
+								bodyFontX=new XFont(bodyFont.SystemFontName,bodyFont.Size,XFontStyle.Regular);
+							}
 							float yPos=field.YPos-_yPosPrint;
 							//Always centered on page.
 							float xPos=0.5f*(sheet.Width-
