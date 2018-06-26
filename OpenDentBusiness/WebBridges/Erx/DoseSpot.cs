@@ -474,7 +474,7 @@ namespace OpenDentBusiness {
 
 		///<summary>If pat is null, it is assumed that we are making a SSO request for errors and refill requests.
 		///Throws exceptions for invalid Patient data.</summary>
-		public static string GetSingleSignOnQueryString(string clinicID,string clinicKey,string userID,Patient pat) {
+		public static string GetSingleSignOnQueryString(string clinicID,string clinicKey,string userID,string onBehalfOfUserId,Patient pat) {
 			//No need to check RemotingRole; no call to db.
 			DoseSpotService.SingleSignOn sso=GetSingleSignOn(clinicID,clinicKey,userID,true);
 			StringBuilder sb=new StringBuilder();
@@ -482,6 +482,9 @@ namespace OpenDentBusiness {
 			QueryStringAddParameter(sb,"SingleSignOnUserId",POut.Int(sso.SingleSignOnUserId));
 			QueryStringAddParameter(sb,"SingleSignOnUserIdVerify",sso.SingleSignOnUserIdVerify);
 			QueryStringAddParameter(sb,"SingleSignOnClinicId",POut.Int(sso.SingleSignOnClinicId));
+			if(!String.IsNullOrWhiteSpace(onBehalfOfUserId)) {
+				QueryStringAddParameter(sb,"OnBehalfOfUserId",POut.String(onBehalfOfUserId));
+			}
 			if(pat==null) {
 				QueryStringAddParameter(sb,"RefillsErrors",POut.Int(1));//Request transmission errors
 			}

@@ -25,6 +25,7 @@ namespace OpenDental{
 		private GroupBox groupDentalSchools;
 		private TextBox textLName;
 		private Label label2;
+		private CheckBox checkShowAll;
 		private TextBox textFName;
 		private Label label1;
 		private Timer timer1;
@@ -37,6 +38,8 @@ namespace OpenDental{
 		public bool IsNoneAvailable=false;
 		///<summary>Will be set to a specific list of providers passed in.  Will be null if no defined list of providers is desired.</summary>
 		private List<Provider> _listProviders;
+		///<summary>Will enable the checkbox that shows all non-hidden providers regardless of schedule, clinic, or what _listProviders was set to initially</summary>
+		public bool IsShowAllAvailable = false;
 		
 		///<summary></summary>
 		public FormProviderPick(List<Provider> listProviders=null) {
@@ -74,6 +77,7 @@ namespace OpenDental{
 			this.label1 = new System.Windows.Forms.Label();
 			this.timer1 = new System.Windows.Forms.Timer(this.components);
 			this.butSelectNone = new OpenDental.UI.Button();
+			this.checkShowAll = new System.Windows.Forms.CheckBox();
 			this.groupDentalSchools.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -86,9 +90,9 @@ namespace OpenDental{
 			this.butClose.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
 			this.butClose.CornerRadius = 4F;
 			this.butClose.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.butClose.Location = new System.Drawing.Point(491, 628);
+			this.butClose.Location = new System.Drawing.Point(477, 627);
 			this.butClose.Name = "butClose";
-			this.butClose.Size = new System.Drawing.Size(82, 24);
+			this.butClose.Size = new System.Drawing.Size(75, 26);
 			this.butClose.TabIndex = 3;
 			this.butClose.Text = "&Cancel";
 			this.butClose.Click += new System.EventHandler(this.butCancel_Click);
@@ -105,10 +109,10 @@ namespace OpenDental{
 			this.gridMain.HeaderFont = new System.Drawing.Font("Microsoft Sans Serif", 8.5F, System.Drawing.FontStyle.Bold);
 			this.gridMain.HeaderHeight = 15;
 			this.gridMain.HScrollVisible = false;
-			this.gridMain.Location = new System.Drawing.Point(16, 12);
+			this.gridMain.Location = new System.Drawing.Point(16, 30);
 			this.gridMain.Name = "gridMain";
 			this.gridMain.ScrollValue = 0;
-			this.gridMain.Size = new System.Drawing.Size(345, 642);
+			this.gridMain.Size = new System.Drawing.Size(325, 624);
 			this.gridMain.TabIndex = 13;
 			this.gridMain.Title = "Providers";
 			this.gridMain.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
@@ -124,9 +128,9 @@ namespace OpenDental{
 			this.butOK.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
 			this.butOK.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
 			this.butOK.CornerRadius = 4F;
-			this.butOK.Location = new System.Drawing.Point(491, 596);
+			this.butOK.Location = new System.Drawing.Point(477, 595);
 			this.butOK.Name = "butOK";
-			this.butOK.Size = new System.Drawing.Size(82, 24);
+			this.butOK.Size = new System.Drawing.Size(75, 26);
 			this.butOK.TabIndex = 2;
 			this.butOK.Text = "OK";
 			this.butOK.Click += new System.EventHandler(this.butOK_Click);
@@ -160,7 +164,7 @@ namespace OpenDental{
 			this.groupDentalSchools.Controls.Add(this.label1);
 			this.groupDentalSchools.Controls.Add(this.textProvNum);
 			this.groupDentalSchools.Controls.Add(this.labelProvNum);
-			this.groupDentalSchools.Location = new System.Drawing.Point(373, 12);
+			this.groupDentalSchools.Location = new System.Drawing.Point(352, 28);
 			this.groupDentalSchools.Name = "groupDentalSchools";
 			this.groupDentalSchools.Size = new System.Drawing.Size(200, 110);
 			this.groupDentalSchools.TabIndex = 1;
@@ -235,18 +239,31 @@ namespace OpenDental{
 			this.butSelectNone.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
 			this.butSelectNone.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
 			this.butSelectNone.CornerRadius = 4F;
-			this.butSelectNone.Location = new System.Drawing.Point(491, 323);
+			this.butSelectNone.Location = new System.Drawing.Point(477, 545);
 			this.butSelectNone.Name = "butSelectNone";
-			this.butSelectNone.Size = new System.Drawing.Size(82, 24);
+			this.butSelectNone.Size = new System.Drawing.Size(75, 26);
 			this.butSelectNone.TabIndex = 14;
 			this.butSelectNone.Text = "None";
 			this.butSelectNone.UseVisualStyleBackColor = true;
 			this.butSelectNone.Click += new System.EventHandler(this.butSelectNone_Click);
 			// 
+			// checkShowAll
+			// 
+			this.checkShowAll.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.checkShowAll.Location = new System.Drawing.Point(252, 7);
+			this.checkShowAll.Name = "checkShowAll";
+			this.checkShowAll.Size = new System.Drawing.Size(89, 21);
+			this.checkShowAll.TabIndex = 16;
+			this.checkShowAll.Text = "Show All";
+			this.checkShowAll.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.checkShowAll.UseVisualStyleBackColor = true;
+			this.checkShowAll.CheckedChanged += new System.EventHandler(this.checkShowAll_CheckedChanged);
+			// 
 			// FormProviderPick
 			// 
 			this.CancelButton = this.butClose;
-			this.ClientSize = new System.Drawing.Size(594, 670);
+			this.ClientSize = new System.Drawing.Size(574, 670);
+			this.Controls.Add(this.checkShowAll);
 			this.Controls.Add(this.butSelectNone);
 			this.Controls.Add(this.groupDentalSchools);
 			this.Controls.Add(this.butOK);
@@ -268,6 +285,7 @@ namespace OpenDental{
 		#endregion
 
 		private void FormProviderSelect_Load(object sender, System.EventArgs e) {
+			checkShowAll.Visible=IsShowAllAvailable;
 			if(PrefC.GetBool(PrefName.EasyHideDentalSchools)) {
 				groupDentalSchools.Visible=false;
 			}
@@ -315,7 +333,7 @@ namespace OpenDental{
 				classNum=_schoolClasses[comboClass.SelectedIndex].SchoolClassNum;
 			}
 			List<Provider> listProvs;
-			if(_listProviders!=null) {//User wants to use a specific list of providers.
+			if(_listProviders!=null && !checkShowAll.Checked) {//User wants to use a specific list of providers.
 				listProvs=_listProviders;
 			}
 			else {
@@ -379,6 +397,10 @@ namespace OpenDental{
 		}
 
 		private void comboClass_SelectionChangeCommitted(object sender,EventArgs e) {
+			FillGrid();
+		}
+
+		private void checkShowAll_CheckedChanged(object sender,EventArgs e) {
 			FillGrid();
 		}
 

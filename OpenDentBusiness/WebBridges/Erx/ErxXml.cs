@@ -242,14 +242,14 @@ namespace OpenDentBusiness {
 		}
 
 		///<summary>Throws exceptions for invalid Patient data.</summary>
-		public static byte[] BuildDoseSpotPostDataBytes(string clinicID,string clinicKey,string userID,Patient pat,out string queryString) {
-			queryString=DoseSpot.GetSingleSignOnQueryString(clinicID,clinicKey,userID,pat);
+		public static byte[] BuildDoseSpotPostDataBytes(string clinicID,string clinicKey,string userID,string onBehalfOfUserId,Patient pat,out string queryString) {
+			queryString=DoseSpot.GetSingleSignOnQueryString(clinicID,clinicKey,userID,onBehalfOfUserId,pat);
 			return ASCIIEncoding.ASCII.GetBytes(queryString);
 		}
 
 		///<summary>Throws exceptions for invalid Patient data.</summary>
 		public static byte[] BuildDoseSpotPostDataBytesRefillsErrors(string clinicID,string clinicKey,string userID,out string queryString) {
-			queryString=DoseSpot.GetSingleSignOnQueryString(clinicID,clinicKey,userID,null);
+			queryString=DoseSpot.GetSingleSignOnQueryString(clinicID,clinicKey,userID,"",null);
 			return ASCIIEncoding.ASCII.GetBytes(queryString);
 		}
 

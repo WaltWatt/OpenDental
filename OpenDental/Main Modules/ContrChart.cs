@@ -4566,7 +4566,43 @@ namespace OpenDental {
 						postData=ErxXml.BuildDoseSpotPostDataBytesRefillsErrors(doseSpotClinicID,doseSpotClinicKey,doseSpotUserID,out queryString);
 					}
 					else {
-						postData=ErxXml.BuildDoseSpotPostDataBytes(doseSpotClinicID,doseSpotClinicKey,doseSpotUserID,PatCur,out queryString);
+						string onBehalfOfUserId = "";
+						if(isEmp) {
+							List<Provider> listProviders = Providers.GetProvsScheduledToday(clinicNum);
+							if(!listProviders.Any(x => x.ProvNum==prov.ProvNum)) {
+								listProviders.Add(prov);
+							}
+							FormProviderPick FormPP = new FormProviderPick(listProviders);
+							FormPP.SelectedProvNum=prov.ProvNum;
+							FormPP.IsNoneAvailable=false;
+							FormPP.IsShowAllAvailable=true;
+							FormPP.ShowDialog();
+							if(FormPP.DialogResult==DialogResult.Cancel) {
+								return;
+							}
+							List<Userod> listDoseUsers = Userods.GetWhere(x => x.ProvNum==FormPP.SelectedProvNum,true);//Only consider non-hidden users.
+							listDoseUsers=listDoseUsers.FindAll(x => {//Finds users that have a DoseSpot ID
+								try {
+									return !string.IsNullOrWhiteSpace(DoseSpot.GetUserID(x,clinicNum));
+								}
+								catch(Exception) {
+									return false;
+								}
+							});
+							Userod userOnBehalfOf = null;
+							if(listDoseUsers.Count==1) {
+								userOnBehalfOf=listDoseUsers[0];
+							}
+							else if(listDoseUsers.Count==0) {
+								throw new ODException(Lan.g(this,"Could not find DoseSpot User ID for the selected provider."));
+							}
+							else {
+								throw new ODException(Lan.g(this,"There are too many Open Dental users associated to the selected provider."));
+							}
+							prov=Providers.GetProv(FormPP.SelectedProvNum);
+							onBehalfOfUserId=(DoseSpot.GetUserID(userOnBehalfOf,clinicNum));
+						}
+						postData=ErxXml.BuildDoseSpotPostDataBytes(doseSpotClinicID,doseSpotClinicKey,doseSpotUserID,onBehalfOfUserId,PatCur,out queryString);
 					}
 					if(!isEmp && Security.CurUser.ProvNum!=0) {//Not a proxy clinician, so we want to validate that they are allowed access.
 						DoseSpot.ValidateProvider(prov,clinicNum);
@@ -4577,21 +4613,21 @@ namespace OpenDental {
 						if(provErxDoseSpot.IsEnabled!=ErxStatus.Enabled) {
 							MessageBox.Show(Lan.g(this,"Contact support to enable eRx for provider")+" "+prov.Abbr);
 							isDoseSpotAccessAllowed=false;
-            }
-            if(clinicErxCur.EnabledStatus!=ErxStatus.Enabled) {
-              string clinicAbbr="";
-              if(clinicErxCur.ClinicNum==-1) {//ClinicErx was inserted from ODHQ, use the ClinicDesc given by an ODHQ staff
-                clinicAbbr=clinicErxCur.ClinicDesc;
-              }
-              else if(clinicErxCur.ClinicNum==0) {//Office Headquarters
-                clinicAbbr="Headquarters";
-              }
-              else {
-                clinicAbbr=Clinics.GetAbbr(clinicErxCur.ClinicNum);
-              }
-              MessageBox.Show(Lan.g(this,"Contact support to enable eRx for clinic")+" "+clinicAbbr);
-              isDoseSpotAccessAllowed=false;
-            }
+						}
+						if(clinicErxCur.EnabledStatus!=ErxStatus.Enabled) {
+							string clinicAbbr="";
+							if(clinicErxCur.ClinicNum==-1) {//ClinicErx was inserted from ODHQ, use the ClinicDesc given by an ODHQ staff
+								clinicAbbr=clinicErxCur.ClinicDesc;
+							}
+							else if(clinicErxCur.ClinicNum==0) {//Office Headquarters
+								clinicAbbr="Headquarters";
+							}
+							else {
+								clinicAbbr=Clinics.GetAbbr(clinicErxCur.ClinicNum);
+							}
+							MessageBox.Show(Lan.g(this,"Contact support to enable eRx for clinic")+" "+clinicAbbr);
+							isDoseSpotAccessAllowed=false;
+						}
 					}
 					//Try to add any self reported medications to DoseSpot before the user gets views their list.
 					DoseSpot.SyncPrescriptionsToDoseSpot(doseSpotClinicID,doseSpotClinicKey,doseSpotUserID,PatCur.PatNum);

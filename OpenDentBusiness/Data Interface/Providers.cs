@@ -834,6 +834,20 @@ namespace OpenDentBusiness{
 			return true;
 		}
 
+		///<summary>Used to get a list of providers that are scheduled for today.  
+		///Pass in specific clinicNum for providers scheduled in specific clinic, clinicNum of -1 for all clinics</summary>
+		public static List<Provider> GetProvsScheduledToday(long clinicNum=-1) {
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				return Meth.GetObject<List<Provider>>(MethodBase.GetCurrentMethod(),clinicNum);
+			}
+			List<Schedule> listSchedulesForDate=Schedules.GetAllForDateAndType(DateTime.Today,ScheduleType.Provider);
+			if(PrefC.HasClinicsEnabled&&clinicNum>=0) {
+				listSchedulesForDate.FindAll(x => x.ClinicNum==clinicNum);
+			}
+			List<long> listProvNums=listSchedulesForDate.Select(x => x.ProvNum).ToList();
+			return Providers.GetMultProviders(listProvNums);
+		}
+
 		///<summary>Provider merge tool.  Returns the number of rows changed when the tool is used.</summary>
 		public static long Merge(long provNumFrom, long provNumInto) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
