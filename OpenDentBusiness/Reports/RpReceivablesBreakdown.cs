@@ -140,9 +140,11 @@ namespace OpenDentBusiness {
 									+ "FROM claimproc WHERE "
 									+ "Status IN (1,4,5,7) "//Received, supplemental, capclaim, capcomplete.
 									+ "AND DateCP >= '" + bDate + "' "
-									+ "AND DateCP < '" + eDate + "' "
-									+ "AND PayPlanNum=0 "
-									+ whereProv
+									+ "AND DateCP < '" + eDate + "' ";
+									if(!isPayPlan2) {
+										query+= "AND claimproc.PayPlanNum=0 ";
+									}
+									query+= whereProv
 									+ " GROUP BY DateCP ORDER BY DateCP";
 
 					break;
