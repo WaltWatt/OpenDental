@@ -1703,7 +1703,7 @@ namespace OpenDental{
 				AptTypeHelper();
 			}
 			//if this is a new appointment with no procedures attached, set the time pattern using the default preference
-			if(IsNew && gridProc.SelectedIndices.Length < 1) {
+			else if(IsNew && gridProc.SelectedIndices.Length < 1) {
 				AptCur.Pattern=Appointments.GetApptTimePatternForNoProcs();
 			}
 			//convert time pattern from 5 to current increment.
@@ -3447,6 +3447,10 @@ namespace OpenDental{
 				else {
 					//do nothing to the time pattern
 				}
+			}
+			AptCur.Pattern="";
+			for(int i=0;i<strBTime.Length;i++) {
+				AptCur.Pattern+=new string(strBTime[i],(int)PrefC.GetLong(PrefName.AppointmentTimeIncrement)/5);
 			}
 			return true;
 		}
