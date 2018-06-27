@@ -168,18 +168,16 @@ namespace OpenDental {
 			var eServiceData=WebServiceMainHQProxy.GetSignups<WebServiceMainHQProxy.EServiceSetup.SignupOut.SignupOutEService>(_signupOut,eServiceCode.WebSchedNewPatAppt)
 				.Select(x => new {
 					Signup=x,
-					ClinicName=x.ClinicNum==0 ? Lan.g(this,"Headquarters") : (clinicsAll.FirstOrDefault(y => y.ClinicNum==x.ClinicNum)??new Clinic() { Abbr="N\\A" }).Abbr
+					ClinicName=(clinicsAll.FirstOrDefault(y => y.ClinicNum==x.ClinicNum)??new Clinic() { Abbr="N\\A" }).Abbr
 				})
 				.Where(x => 
-					//Always show HQ
-					x.Signup.ClinicNum==0 || 
-					//If not HQ then only show if not hidden.
-					clinicsAll.Any(y => y.ClinicNum==x.Signup.ClinicNum && !y.IsHidden)
+					//When clinics off, only show headquarters
+					(!PrefC.HasClinicsEnabled && x.Signup.ClinicNum==0) || 
+					//When clinics are on, only show if not hidden.
+					(PrefC.HasClinicsEnabled && clinicsAll.Any(y => y.ClinicNum==x.Signup.ClinicNum && !y.IsHidden))
 				)
-				//HQ to the top.
-				.OrderBy(x => x.Signup.ClinicNum!=0)
-				//Everything else is alpha sorted.
-				.ThenBy(x => x.ClinicName);				
+				//Alpha sorted
+				.OrderBy(x => x.ClinicName);				
 			_listClinicPrefsWebSchedNewPats.Clear();
 			foreach(var clinic in eServiceData) {
 				ContrNewPatHostedURL contr=new ContrNewPatHostedURL(clinic.Signup);
