@@ -66,11 +66,11 @@
 			this.butParentPick = new OpenDental.UI.Button();
 			this.textParent = new System.Windows.Forms.TextBox();
 			this.label1 = new System.Windows.Forms.Label();
-			this.textActualHours = new OpenDental.ValidNumber();
+			this.textActualHours = new OpenDental.ValidDouble();
 			this.label8 = new System.Windows.Forms.Label();
 			this.butParentRemove = new OpenDental.UI.Button();
 			this.label7 = new System.Windows.Forms.Label();
-			this.textEstHours = new OpenDental.ValidNumber();
+			this.textEstHours = new OpenDental.ValidDouble();
 			this.tabControlMain = new System.Windows.Forms.TabControl();
 			this.tabMain = new System.Windows.Forms.TabPage();
 			this.gridNotes = new OpenDental.UI.ODGrid();
@@ -83,6 +83,7 @@
 			this.gridLog = new OpenDental.UI.ODGrid();
 			this.panel1 = new System.Windows.Forms.Panel();
 			this.checkShowHistoryText = new System.Windows.Forms.CheckBox();
+			this.timerEstimate = new System.Windows.Forms.Timer(this.components);
 			this.groupLinks.SuspendLayout();
 			this.tableLayoutPanel2.SuspendLayout();
 			this.tableLayoutPanel1.SuspendLayout();
@@ -756,8 +757,8 @@
 			// 
 			this.textActualHours.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.textActualHours.Location = new System.Drawing.Point(193, 348);
-			this.textActualHours.MaxVal = 1000000;
-			this.textActualHours.MinVal = 0;
+			this.textActualHours.MaxVal = 1000000D;
+			this.textActualHours.MinVal = 0D;
 			this.textActualHours.Name = "textActualHours";
 			this.textActualHours.ReadOnly = true;
 			this.textActualHours.Size = new System.Drawing.Size(46, 20);
@@ -802,8 +803,8 @@
 			// 
 			this.textEstHours.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.textEstHours.Location = new System.Drawing.Point(73, 348);
-			this.textEstHours.MaxVal = 1000000;
-			this.textEstHours.MinVal = 0;
+			this.textEstHours.MaxVal = 1000000D;
+			this.textEstHours.MinVal = 0D;
 			this.textEstHours.Name = "textEstHours";
 			this.textEstHours.Size = new System.Drawing.Size(46, 20);
 			this.textEstHours.TabIndex = 269;
@@ -986,6 +987,11 @@
 			this.checkShowHistoryText.UseVisualStyleBackColor = true;
 			this.checkShowHistoryText.CheckedChanged += new System.EventHandler(this.checkShowHistoryText_CheckedChanged);
 			// 
+			// timerEstimate
+			// 
+			this.timerEstimate.Interval = 3000;
+			this.timerEstimate.Tick += new System.EventHandler(this.timerEstimate_Tick);
+			// 
 			// UserControlJobEdit
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1062,11 +1068,11 @@
 		private UI.Button butParentPick;
 		private System.Windows.Forms.TextBox textParent;
 		private System.Windows.Forms.Label label1;
-		private ValidNumber textActualHours;
+		private ValidDouble textActualHours;
 		private System.Windows.Forms.Label label8;
 		private UI.Button butParentRemove;
 		private System.Windows.Forms.Label label7;
-		private ValidNumber textEstHours;
+		private ValidDouble textEstHours;
 		private System.Windows.Forms.TabControl tabControlMain;
 		private System.Windows.Forms.TabPage tabMain;
 		private UI.ODGrid gridNotes;
@@ -1081,5 +1087,6 @@
 		private System.Windows.Forms.CheckBox checkShowHistoryText;
 		private ODtextBox textTitle;
 		private UI.Button butAddTime;
+		private System.Windows.Forms.Timer timerEstimate;
 	}
 }

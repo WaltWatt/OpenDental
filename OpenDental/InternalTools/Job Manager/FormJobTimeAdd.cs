@@ -38,7 +38,7 @@ namespace OpenDental {
 				MsgBox.Show(this,"Please choose an option besides 0 for your hours added.");
 				return;
 			}
-			TimeLogCur.TimeReview=new TimeSpan(0,(int)double.Parse(comboAddedHours.Text)*60,0);
+			TimeLogCur.TimeReview=TimeSpan.FromHours(double.Parse(comboAddedHours.Text));
 			TimeLogCur.Description=textDescription.Text;
 			DialogResult=DialogResult.OK;
 		}

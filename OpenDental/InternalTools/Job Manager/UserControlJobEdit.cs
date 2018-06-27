@@ -2579,6 +2579,7 @@ namespace OpenDental.InternalTools.Job_Manager {
 				textTitle.BackColor=Color.FromArgb(254,235,233);//light red
 				return;
 			}
+			JobLogs.MakeLogEntryForTitleChange(_jobCur,_jobOld.Title,textTitle.Text);
 			textTitle.BackColor=Color.White;
 			_jobCur.Title=textTitle.Text;
 			_jobOld.Title=textTitle.Text;
@@ -2588,7 +2589,6 @@ namespace OpenDental.InternalTools.Job_Manager {
 			else {
 				Job job = Jobs.GetOne(_jobCur.JobNum);
 				job.Title=textTitle.Text;
-				JobLogs.MakeLogEntry(job,_jobOld);
 				Jobs.Update(job);
 				Signalods.SetInvalid(InvalidType.Jobs,KeyType.Job,job.JobNum);
 			}
@@ -2669,17 +2669,20 @@ namespace OpenDental.InternalTools.Job_Manager {
 			}
 		}
 
-		private void textEstHours_TextChanged(object sender,EventArgs e) {
+		private void timerEstimate_Tick(object sender,EventArgs e) {
 			if(_isLoading) {
 				return;
 			}
+			timerEstimate.Stop();
 			//Do not update the textbox or this could be put in an infinite loop
 			double hrsEst=0;
 			if(!double.TryParse(textEstHours.Text,out hrsEst)) {
 				hrsEst=0;
 			}
+			JobLogs.MakeLogEntryForEstimateChange(_jobCur,_jobOld.HoursEstimate,hrsEst);
 			_jobCur.HoursEstimate=hrsEst;
 			_jobOld.HoursEstimate=hrsEst;
+			textEstHours.BackColor=Color.White;
 			if(IsNew) {
 				IsChanged=true;
 			}
@@ -2689,6 +2692,15 @@ namespace OpenDental.InternalTools.Job_Manager {
 				Jobs.Update(jobFromDB);//update the checkout num.
 				Signalods.SetInvalid(InvalidType.Jobs,KeyType.Job,_jobCur.JobNum);//send signal that the job has been checked out.
 			}
+		}
+
+		private void textEstHours_TextChanged(object sender,EventArgs e) {
+			if(_isLoading) {
+				return;
+			}
+			textEstHours.BackColor=Color.FromArgb(255,255,230);//light yellow
+			timerEstimate.Stop();
+			timerEstimate.Start();
 		}
 
 		private void gridFeatureReq_CellDoubleClick(object sender,ODGridClickEventArgs e) {

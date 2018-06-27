@@ -984,7 +984,7 @@ namespace OpenDental.InternalTools.Job_Manager {
 			if(!(gridTasks.Rows[e.Row].Tag is long)) {
 				return;//should never happen
 			}
-			//GoTo patietn will not work from this form. It would require a delegate to be passed in all the way from FormOpenDental.
+			//GoTo patient will not work from this form. It would require a delegate to be passed in all the way from FormOpenDental.
 			Task task=Tasks.GetOne((long)gridTasks.Rows[e.Row].Tag);
 			FormTaskEdit FormTE=new FormTaskEdit(task,task.Copy());
 			FormTE.Show();

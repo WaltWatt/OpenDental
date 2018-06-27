@@ -105,6 +105,32 @@ namespace OpenDentBusiness{
 			return JobLogs.GetOne(jobLog.JobLogNum);//to get new timestamp.
 		}
 
+		public static JobLog MakeLogEntryForEstimateChange(Job job,double oldHours,double newHours) {
+			JobLog jobLog = new JobLog() {
+				JobNum=job.JobNum,
+				UserNumChanged=Security.CurUser.UserNum,
+				UserNumExpert=job.UserNumExpert,
+				UserNumEngineer=job.UserNumEngineer,
+				Title=job.Title,
+				Description="Job Estimate Changed From "+oldHours+" hours To "+newHours+" hours."
+			};
+			JobLogs.Insert(jobLog);
+			return JobLogs.GetOne(jobLog.JobLogNum);//to get new timestamp.
+		}
+
+		public static JobLog MakeLogEntryForTitleChange(Job job,string oldTitle,string newTitle) {
+			JobLog jobLog = new JobLog() {
+				JobNum=job.JobNum,
+				UserNumChanged=Security.CurUser.UserNum,
+				UserNumExpert=job.UserNumExpert,
+				UserNumEngineer=job.UserNumEngineer,
+				Title=newTitle,
+				Description="Job Title Changed From\r\n"+oldTitle+"\r\nTo\r\n"+newTitle+"."
+			};
+			JobLogs.Insert(jobLog);
+			return JobLogs.GetOne(jobLog.JobLogNum);//to get new timestamp.
+		}
+
 		public static void DeleteForJob(long jobNum) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
 				Meth.GetVoid(MethodBase.GetCurrentMethod(),jobNum);
