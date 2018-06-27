@@ -1079,7 +1079,7 @@ namespace OpenDental{
 			this.groupBox4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.groupBox4.Controls.Add(this.signatureBoxWrapper);
 			this.groupBox4.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.groupBox4.Location = new System.Drawing.Point(59, 542);
+			this.groupBox4.Location = new System.Drawing.Point(10, 542);
 			this.groupBox4.Name = "groupBox4";
 			this.groupBox4.Size = new System.Drawing.Size(363, 96);
 			this.groupBox4.TabIndex = 184;
