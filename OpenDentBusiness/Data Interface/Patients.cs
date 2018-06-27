@@ -3255,8 +3255,7 @@ namespace OpenDentBusiness {
 			command="UPDATE patient "
 				+"SET PatStatus="+((int)PatientStatus.Archived)+" "
 				+"WHERE PatNum="+POut.Long(patFrom)+" "
-				+"AND PatStatus<>"+((int)PatientStatus.Deceased)+" "
-				+DbHelper.LimitAnd(1);
+				+"AND PatStatus!="+((int)PatientStatus.Deceased);
 			Db.NonQ(command);
 			//Update patplan.Ordinal in case multiple patplans wound up with the same Ordinal
 			List<PatPlan> listPatPlans=PatPlans.GetPatPlansForPat(patTo).OrderBy(x => x.Ordinal).ToList();
