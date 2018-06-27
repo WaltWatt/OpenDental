@@ -216,7 +216,7 @@ namespace OpenDentBusiness {
 							if(string.IsNullOrEmpty(objCur.ToString())) {
 								continue;
 							}
-							if(IsPropertyDataTableXmlElement(type,pi)) {
+							if(IsPropertyCustomSerializedXmlElement(type,pi)) {
 								continue;
 							}
 							objCur=XmlEscape(objCur.ToString());
@@ -322,7 +322,7 @@ namespace OpenDentBusiness {
 							if(string.IsNullOrEmpty(objCur.ToString())) {
 								continue;
 							}
-							if(IsPropertyDataTableXmlElement(type,pi)) {
+							if(IsPropertyCustomSerializedXmlElement(type,pi)) {
 								continue;
 							}
 							objCur=XmlUnescape(objCur.ToString());
@@ -492,17 +492,17 @@ namespace OpenDentBusiness {
 			return ds;
 		}
 
-		///<summary>Pass in the object type of the class that contains a DataTable within it.
-		///Also, provide the property that will be checked to see if it is of type string and if it is meant to replace the DataTable.</summary>
-		private static bool IsPropertyDataTableXmlElement(Type type,PropertyInfo propertyInfo) {
+		///<summary>Pass in the object type of the class that contains an element that we handle not using the typical method.(DataTable or DataSet)
+		///Also, provide the property that will be checked to see if it is of type string and if it is meant to replace the element type.</summary>
+		private static bool IsPropertyCustomSerializedXmlElement(Type type,PropertyInfo propertyInfo) {
 			if(propertyInfo.PropertyType!=typeof(string)) {
 				return false;
 			}
 			XmlElementAttribute attribute = propertyInfo.GetCustomAttribute<XmlElementAttribute>();
-			//We have already escaped the string inside of the TableToXML method for property that are helping serialize a datatable.
-			//If this property has an XML element name the same as a datatable field, we can skip it.
-			if(attribute!=null&&type.GetFields().Where(x => x!=null)
-				.Where(x => x.FieldType==typeof(DataTable))
+			//We have already escaped the string inside of the TableToXML or DSToXML method for property that are helping serialize a datatable.
+			//If this property has an XML element name the same as a datatable or dataset field, we can skip it.
+			if(attribute!=null && type.GetFields().Where(x => x!=null)
+				.Where(x => x.FieldType==typeof(DataTable) || x.FieldType==typeof(DataSet))
 				.Where(x => x.GetCustomAttributes<XmlIgnoreAttribute>().Count()>0)
 				.Any(x => x.Name==attribute.ElementName)) 
 			{
