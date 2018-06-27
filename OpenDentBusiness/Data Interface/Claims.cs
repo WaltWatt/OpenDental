@@ -116,10 +116,10 @@ namespace OpenDentBusiness{
 			else {//oracle
 				command+="GROUP BY claim.ClaimNum,claim.DateService,claim.ProvTreat,carrierA.CarrierName,claim.ClaimFee,claim.ClaimStatus,claim.ClinicNum,claim.PatNum";
 			}
-			command+=") outstanding WHERE UnattachedPayCount > 0 ";//Either unfinalized ins pay amounts on at least one claimproc on the claim,
-			if(claimPayDate.Year > 1880) {//or if preference is enabled with a specific date, also include "NO PAYMENT" claims.
-				command+="OR AttachedCount=0";
-			}
+			command+=") outstanding WHERE UnattachedPayCount > 0 "//Either unfinalized ins pay amounts on at least one claimproc on the claim,
+				//or if preference is enabled with a specific date, also include received "NO PAYMENT" claims.
+				//Always show Sent claims regardless of preference to match version 16.4 behavior (see job B8189).
+				+"OR (AttachedCount=0"+((claimPayDate.Year>1880)?"":" AND ClaimStatus='S'")+")";
 			DataTable table=Db.GetTable(command);
 			if(table.Rows.Count==0) {
 				return new List<ClaimPaySplit>();//no claims
