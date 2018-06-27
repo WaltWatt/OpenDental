@@ -80,7 +80,7 @@ namespace OpenDental {
 				if(line.Trim().Length > 0) {
 					float x=PixelsToPoints(bounds.X+listTextLines[i].Left*scale);
 					//The +11 was arrived at via trial an error. Without this, the first line of each page after the first is halfway on the previous page.
-					float y=PixelsToPoints(bounds.Y+11f+listTextLines[i].Top*scale);
+					float y=PixelsToPoints(bounds.Y+listTextLines[i].Bottom*scale);
 					//There is currently a problem with printing the tab character '\t' when using XStringFormat.
 					//C#'s StringFormat has a method called SetTabStops() which can be used to get the tabs to be drawn (see regular printing above).
 					//We're doing nothing for now because the current complaint is only for printing, not PDF creation.  
@@ -140,15 +140,28 @@ namespace OpenDental {
 
 		///<summary>If lineIndex is past the last line, then the information of the last line will be returned. </summary>
 		public static RichTextLineInfo GetOneTextLine(RichTextBox textbox,int lineIndex) {
+			if(lineIndex<0 || GetTextLineCount(textbox)==0) {
+				return new RichTextLineInfo();
+			}
+			RichTextBox rtb=new RichTextBox();//Copy values to new RichTextBox because we might modify text below.
+			rtb.Text=textbox.Text;
+			rtb.Font=textbox.Font;
+			rtb.Size=textbox.Size;
 			RichTextLineInfo lineInfo=new RichTextLineInfo();
 			//GetFirstCharIndexFromLine() returns -1 if lineIndex is past the last line.
-			lineInfo.FirstCharIndex=textbox.GetFirstCharIndexFromLine(lineIndex);
+			lineInfo.FirstCharIndex=rtb.GetFirstCharIndexFromLine(lineIndex);//-1 if lineIndex >= count of lines in rtb.
 			if(lineInfo.FirstCharIndex==-1) {//Return the last line's information.
-				lineInfo.FirstCharIndex=textbox.GetFirstCharIndexFromLine(GetTextLineCount(textbox)-1);//First character of last line.
+				lineIndex=GetTextLineCount(rtb)-1;
+				lineInfo.FirstCharIndex=rtb.GetFirstCharIndexFromLine(lineIndex);//First character of last line.
 			}
-			Point pos=textbox.GetPositionFromCharIndex(lineInfo.FirstCharIndex);
-			lineInfo.Left=pos.X;
-			lineInfo.Top=pos.Y;
+			if(lineIndex==GetTextLineCount(rtb)-1) {//This is the last line.
+				rtb.AppendText("\r\n\t");//Add a phony line.
+			}
+			Point posThisLine=rtb.GetPositionFromCharIndex(lineInfo.FirstCharIndex);
+			Point posNextLine=rtb.GetPositionFromCharIndex(rtb.GetFirstCharIndexFromLine(lineIndex+1));//Top of next line=bottom of this line.
+			lineInfo.Left=posThisLine.X;
+			lineInfo.Top=posThisLine.Y;
+			lineInfo.Bottom=posNextLine.Y;
 			return lineInfo;
 		}
 
@@ -259,6 +272,8 @@ namespace OpenDental {
 		public int Left=0;
 		///<summary>The vertical location in pixels where the text begins on the line.</summary>
 		public int Top=0;
+		///<summary>The vertical location in pixels where the text ends on the line.</summary>
+		public int Bottom=0;
 
 		///<summary>We get text in this manner so that we can wait as long as possible in the process before converting strings.
 		///This lazy loading approach increases efficiency.</summary>
