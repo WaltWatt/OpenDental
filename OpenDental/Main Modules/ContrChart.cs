@@ -27,6 +27,7 @@ using SHDocVw;
 using SparksToothChart;
 using OpenDental.Bridges;
 using System.Drawing.Imaging;
+using SharpDX;
 #if EHRTEST
 using EHR;
 #endif
@@ -5563,19 +5564,31 @@ namespace OpenDental {
 				MessageBox.Show(Lan.g(this,"No Def set for Tooth Charts."));
 				return;
 			}
-			Bitmap chartBitmap=toothChart.GetBitmap();
+			Bitmap chartBitmap=null;
 			try {
+				chartBitmap=toothChart.GetBitmap();
 				ImageStore.Import(chartBitmap,defNum,ImageType.Photo,PatCur);
 			}
-			catch(Exception ex) {
-				MessageBox.Show(Lan.g(this,"Unable to save file: ") + ex.Message);
-				chartBitmap.Dispose();
-				chartBitmap=null;
+			catch(SharpDXException sdxEx) {
+				MsgBoxCopyPaste errorMsg=new MsgBoxCopyPaste(Lan.g(this,"Failed to capture tooth chart image from graphics card. \r\n"
+					+"Please contact support to help with graphics troubleshooting:\r\n")
+					+sdxEx.Message+"\r\n"
+					+sdxEx.StackTrace
+				);
+				errorMsg.ShowDialog();
 				return;
 			}
+			catch(Exception ex) {
+				MessageBox.Show(Lan.g(this,"Unable to save file: ")+ex.Message);
+				return;
+			}
+			finally {//Executes regardles of above returns in the catches, "Saved." msgbox will not show.
+				if(chartBitmap!=null) {
+					chartBitmap.Dispose();
+					chartBitmap=null;
+				}
+			}
 			MsgBox.Show(this,"Saved.");
-			chartBitmap.Dispose();
-			chartBitmap=null;
 		}
 
 		public void FillPtInfo(bool doRefreshData = true) {
