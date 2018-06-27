@@ -2027,7 +2027,7 @@ namespace OpenDental {
 				Application.OpenForms.OfType<FormReleaseCalculator>().ToList()[0].BringToFront();
 				return;
 			}
-			FormReleaseCalculator FormRC=new FormReleaseCalculator();
+			FormReleaseCalculator FormRC=new FormReleaseCalculator(_listJobsAll);
 			FormRC.Show();
 		}
 

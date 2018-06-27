@@ -221,13 +221,13 @@ namespace OpenDental{
 			// 
 			// label12
 			// 
-			this.label12.AutoSize = true;
 			this.label12.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Underline))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.label12.Location = new System.Drawing.Point(48, 88);
+			this.label12.Location = new System.Drawing.Point(3, 88);
 			this.label12.Name = "label12";
-			this.label12.Size = new System.Drawing.Size(231, 24);
+			this.label12.Size = new System.Drawing.Size(311, 24);
 			this.label12.TabIndex = 16;
 			this.label12.Text = "Estimated Release Date";
+			this.label12.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
 			// 
 			// labelJobHours
 			// 
@@ -321,13 +321,13 @@ namespace OpenDental{
 			// 
 			// labelReleaseDate
 			// 
-			this.labelReleaseDate.AutoSize = true;
 			this.labelReleaseDate.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.labelReleaseDate.Location = new System.Drawing.Point(120, 112);
+			this.labelReleaseDate.Location = new System.Drawing.Point(3, 112);
 			this.labelReleaseDate.Name = "labelReleaseDate";
-			this.labelReleaseDate.Size = new System.Drawing.Size(87, 18);
+			this.labelReleaseDate.Size = new System.Drawing.Size(309, 18);
 			this.labelReleaseDate.TabIndex = 5;
 			this.labelReleaseDate.Text = "releaseDate";
+			this.labelReleaseDate.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
 			this.labelReleaseDate.Visible = false;
 			// 
 			// tabPage2

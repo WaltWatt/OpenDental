@@ -15,11 +15,13 @@ namespace OpenDental {
 		private List<long> _listDefaultEngEmpNums = new List<long>() {15,34,36,64,72,74,88,94,118,121,163,173,179,253,257};
 		private List<Tuple<long,double>> _listTopJobs=new List<Tuple<long,double>>();
 		private double _avgJobHours=9.43;
-		private double _jobTimePercent=0.3;
+		private double _jobTimePercent=0.173;
 		private double _avgBreakHours=0.85;
+		private List<Job> _listJobsAll;
 
 
-		public FormReleaseCalculator() {
+		public FormReleaseCalculator(List<Job> listJobsAll) {
+			_listJobsAll=listJobsAll;
 			InitializeComponent();
 			Lan.F(this);
 		}
@@ -64,10 +66,9 @@ namespace OpenDental {
 			List<Schedule> listSchedules=Schedules.RefreshPeriodForEmps(DateTime.Today,DateTime.Today.AddMonths(6),listEngNums);
 			//Get all the jobs according to the selected criteria.
 			//No need to fill currently, but I may want to add reviews into this to improve accuracy for unfinished jobs
-			List<Job> listJobs=Jobs.GetReleaseCalculatorJobs(
-				listPriorities.SelectedTags<Def>().Select(x=>x.DefNum).ToList()
-				,listPhases.SelectedTags<JobPhase>()
-				,listCategories.SelectedTags<JobCategory>());
+			List<Job> listJobs=_listJobsAll.Where(x => x.Priority.In(listPriorities.SelectedTags<Def>().Select(y => y.DefNum)) 
+				&& x.PhaseCur.In(listPhases.SelectedTags<JobPhase>())
+				&& x.Category.In(listCategories.SelectedTags<JobCategory>())).ToList();
 			double totalJobHours=0;
 			DateTime releaseDate=DateTime.Today;
 			double avgJobHours=_avgJobHours;
@@ -90,7 +91,7 @@ namespace OpenDental {
 					listUserNums.Remove(job.UserNumEngineer);
 				}
 				//If hrsEst is 0 then use the avgJobHours as a base.
-				double hrsEst=job.TimeEstimate.TotalHours==0?avgJobHours:0;
+				double hrsEst=job.TimeEstimate.TotalHours==0?avgJobHours:job.TimeEstimate.TotalHours;
 				//Remove the actual hours spent on the job currently
 				//If negative then just use 0 (We aren't in a dimension where negative time estimates can be used for other jobs)
 				double hrsCalculated=(hrsEst-job.HoursActual)<0?0:hrsEst-job.HoursActual;
@@ -140,14 +141,14 @@ namespace OpenDental {
 				//Remove the scheduled hours from the total job hours
 				totalJobHours-=schedHours;
 				if(totalJobHours<0) {
-					releaseDate=sched.SchedDate.AddDays(7);//Add a week as a buffer
+					releaseDate=sched.SchedDate;//Add a week as a buffer
 					break;
 				}
 			}
 			labelEngHours.Text=Math.Round(schedHoursTotal).ToString();
 			labelAfterBreak.Text=Math.Round(schedHoursBreaksTotal).ToString();
 			labelRatioHours.Text=Math.Round(schedHoursPercentTotal).ToString();
-			labelReleaseDate.Text=releaseDate.ToShortDateString();
+			labelReleaseDate.Text=releaseDate.ToShortDateString()+" - "+releaseDate.AddDays(7).ToShortDateString();
 			labelReleaseDate.Visible=true;
 			panelExtra.Visible=true;
 		}
