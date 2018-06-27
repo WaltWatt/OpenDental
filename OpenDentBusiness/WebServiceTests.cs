@@ -265,6 +265,40 @@ namespace OpenDentBusiness {
 			return null;
 		}
 
+		public static int[] SendIntParams(params int[] arrayInts) {
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				return Meth.GetObject<int[]>(MethodBase.GetCurrentMethod(),arrayInts);
+			}
+			return arrayInts;
+		}
+
+		public static string[] SendStringParams(params string[] arrayStrings) {
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				return Meth.GetObject<string[]>(MethodBase.GetCurrentMethod(),arrayStrings);
+			}
+			return arrayStrings;
+		}
+
+		public static InvalidType[] SendEnumParamsWithArgs(bool argBool,string argString,params InvalidType[] arrayITypes) {
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				return Meth.GetObject<InvalidType[]>(MethodBase.GetCurrentMethod(),argBool,argString,arrayITypes);
+			}
+			if(!argBool) {
+				throw new ArgumentException("Invalid boolean value.  Required to be set to true.","argBool");
+			}
+			if(argString!=DirtyString) {
+				throw new ArgumentException("Invalid string value.  Required to be equal to DirtyString.","argString");
+			}
+			return arrayITypes;
+		}
+
+		public static InvalidType[] SendEnumParams(params InvalidType[] arrayITypes) {
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				return Meth.GetObject<InvalidType[]>(MethodBase.GetCurrentMethod(),arrayITypes);
+			}
+			return arrayITypes;
+		}
+
 		public static List<Schedule> SendObjectParams(params Schedule[] arraySchedules) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
 				return Meth.GetObject<List<Schedule>>(MethodBase.GetCurrentMethod(),arraySchedules);

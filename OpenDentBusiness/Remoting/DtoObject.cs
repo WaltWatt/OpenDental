@@ -174,7 +174,12 @@ namespace OpenDentBusiness {
 			//will translate correctly into two objects (object[],bool) or (bool,object[]).
 			//Therefore, when we have exactly one parameter, check to see if it is an array and if it is, artifically group together all objects
 			//that were passed into objArray so that we end up with one and only one DtoObject that represents an array of objects.
-			if(arrayParameterInfos.Length==1 && arrayParameterInfos[0].ParameterType.IsArray) {
+			//NOTE: The exception to the rule above is a method with a single array whose element type is a primitive or an array.
+			//      An array of primitives or enums will correctly translate to a single array (int[]) instead of (int1,int2,int3...) for whatever reason.
+			if(arrayParameterInfos.Length==1 
+				&& arrayParameterInfos[0].ParameterType.IsArray 
+				&& !(arrayParameterInfos[0].ParameterType.GetElementType().IsPrimitive || arrayParameterInfos[0].ParameterType.GetElementType().IsEnum))
+			{
 				isSingleArray=true;
 			}
 			//Methods that utilize the params keyword will allow a variable number of arguments in its invocation.

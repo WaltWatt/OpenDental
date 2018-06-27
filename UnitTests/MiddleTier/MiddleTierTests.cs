@@ -284,6 +284,47 @@ namespace UnitTests.MiddleTier {
 			Assert.AreEqual(arrayPatientsReturned[2].SchedAfterTime.Minutes,30);
 			Assert.AreEqual(arrayPatientsReturned[2].SchedAfterTime.Seconds,22);
 		}
+		
+		[TestMethod]
+		public void MiddleTier_SendIntParams() {
+			int[] arrayITypesReturned=WebServiceTests.SendIntParams(6,2,9);
+			Assert.AreNotEqual(arrayITypesReturned,null);
+			Assert.AreEqual(arrayITypesReturned.Length,3);
+			Assert.AreEqual(arrayITypesReturned[0],6);
+			Assert.AreEqual(arrayITypesReturned[1],2);
+			Assert.AreEqual(arrayITypesReturned[2],9);
+		}
+		
+		[TestMethod]
+		public void MiddleTier_SendStringParams() {
+			string[] arrayStringsReturned=WebServiceTests.SendStringParams("Str",null,WebServiceTests.DirtyString);
+			Assert.AreNotEqual(arrayStringsReturned,null);
+			Assert.AreEqual(arrayStringsReturned.Length,3);
+			Assert.AreEqual(arrayStringsReturned[0],"Str");
+			Assert.AreEqual(arrayStringsReturned[1],null);
+			Assert.AreEqual(arrayStringsReturned[2],WebServiceTests.DirtyString);
+		}
+		
+		[TestMethod]
+		public void MiddleTier_SendEnumParams() {
+			InvalidType[] arrayITypesReturned=WebServiceTests.SendEnumParams(InvalidType.Prefs,InvalidType.AccountingAutoPays,InvalidType.AlertSubs);
+			Assert.AreNotEqual(arrayITypesReturned,null);
+			Assert.AreEqual(arrayITypesReturned.Length,3);
+			Assert.AreEqual(arrayITypesReturned[0],InvalidType.Prefs);
+			Assert.AreEqual(arrayITypesReturned[1],InvalidType.AccountingAutoPays);
+			Assert.AreEqual(arrayITypesReturned[2],InvalidType.AlertSubs);
+		}
+		
+		[TestMethod]
+		public void MiddleTier_SendEnumParams_WithArgs() {
+			InvalidType[] arrayITypesReturned=WebServiceTests.SendEnumParamsWithArgs(true,WebServiceTests.DirtyString,
+				InvalidType.Prefs,InvalidType.AccountingAutoPays,InvalidType.AlertSubs);
+			Assert.AreNotEqual(arrayITypesReturned,null);
+			Assert.AreEqual(arrayITypesReturned.Length,3);
+			Assert.AreEqual(arrayITypesReturned[0],InvalidType.Prefs);
+			Assert.AreEqual(arrayITypesReturned[1],InvalidType.AccountingAutoPays);
+			Assert.AreEqual(arrayITypesReturned[2],InvalidType.AlertSubs);
+		}
 
 		[TestMethod]
 		public void MiddleTier_SendNullParam() {
@@ -308,7 +349,7 @@ namespace UnitTests.MiddleTier {
 
 		///<summary>The purpose of this test is to make sure middle tier can invoke methods that utilize the params keyword with other args.</summary>
 		[TestMethod]
-		public void MiddleTier_SendObjectParamsWithArgs() {
+		public void MiddleTier_SendObjectParams_WithArgs() {
 			List<Schedule> listRetVals=WebServiceTests.SendObjectParamsWithArgs(true,WebServiceTests.DirtyString
 				,new Schedule() { ScheduleNum=5 }
 				,new Schedule() { ScheduleNum=23 });
