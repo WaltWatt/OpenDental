@@ -217,6 +217,7 @@ namespace OpenDental {
 				AgeAccount = GetAgeOfAccount(),
 				NegativeBalOptions = GetNegativeBalOptions(),
 				ExcludeInactive = checkExcludeInactive.Checked,
+				ExcludeArchive=checkExcludeArchive.Checked,
 				ExcludeBadAddress = checkExcludeBadAddresses.Checked,
 				//pass in null for lists to not limit by them.
 				ListProvs = checkAllProv.Checked ? null : listBoxProvs.SelectedItems.OfType<ODBoxItem<Provider>>().Select(x => x.Tag).ToList(),

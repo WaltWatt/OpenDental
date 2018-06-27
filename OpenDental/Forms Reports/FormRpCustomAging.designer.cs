@@ -71,6 +71,7 @@ namespace OpenDental {
 			this.checkAgeInsPayments = new System.Windows.Forms.CheckBox();
 			this.checkAgeInsEsts = new System.Windows.Forms.CheckBox();
 			this.checkAgeAdjustments = new System.Windows.Forms.CheckBox();
+			this.checkExcludeArchive = new System.Windows.Forms.CheckBox();
 			this.contextMenuStrip.SuspendLayout();
 			this.groupBox4.SuspendLayout();
 			this.groupGroupBy.SuspendLayout();
@@ -194,7 +195,7 @@ namespace OpenDental {
 			// 
 			this.checkExcludeBadAddresses.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this.checkExcludeBadAddresses.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.checkExcludeBadAddresses.Location = new System.Drawing.Point(884, 636);
+			this.checkExcludeBadAddresses.Location = new System.Drawing.Point(884, 654);
 			this.checkExcludeBadAddresses.Name = "checkExcludeBadAddresses";
 			this.checkExcludeBadAddresses.Size = new System.Drawing.Size(157, 18);
 			this.checkExcludeBadAddresses.TabIndex = 117;
@@ -338,7 +339,7 @@ namespace OpenDental {
 			// 
 			this.checkExcludeInactive.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this.checkExcludeInactive.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.checkExcludeInactive.Location = new System.Drawing.Point(884, 612);
+			this.checkExcludeInactive.Location = new System.Drawing.Point(884, 610);
 			this.checkExcludeInactive.Name = "checkExcludeInactive";
 			this.checkExcludeInactive.Size = new System.Drawing.Size(157, 18);
 			this.checkExcludeInactive.TabIndex = 107;
@@ -616,11 +617,22 @@ namespace OpenDental {
 			this.checkAgeAdjustments.TabIndex = 13;
 			this.checkAgeAdjustments.Text = "Adjustments";
 			// 
+			// checkExcludeArchive
+			// 
+			this.checkExcludeArchive.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.checkExcludeArchive.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.checkExcludeArchive.Location = new System.Drawing.Point(884, 632);
+			this.checkExcludeArchive.Name = "checkExcludeArchive";
+			this.checkExcludeArchive.Size = new System.Drawing.Size(157, 18);
+			this.checkExcludeArchive.TabIndex = 118;
+			this.checkExcludeArchive.Text = "Exclude archived patients";
+			// 
 			// FormRpCustomAging
 			// 
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
 			this.CancelButton = this.butCancel;
 			this.ClientSize = new System.Drawing.Size(1059, 723);
+			this.Controls.Add(this.checkExcludeArchive);
 			this.Controls.Add(this.checkExcludeBadAddresses);
 			this.Controls.Add(this.checkAllClin);
 			this.Controls.Add(this.checkAllProv);
@@ -708,5 +720,6 @@ namespace OpenDental {
 		private System.Windows.Forms.CheckBox checkAgeInsPayments;
 		private System.Windows.Forms.CheckBox checkAgeInsEsts;
 		private System.Windows.Forms.CheckBox checkAgeAdjustments;
+		private System.Windows.Forms.CheckBox checkExcludeArchive;
 	}
 }

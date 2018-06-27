@@ -107,7 +107,12 @@ namespace OpenDentBusiness {
 					)tSums
 					INNER JOIN patient pat on pat.PatNum = tSums.Guarantor ";
 			}
-			command+=" AND pat.PatStatus IN ("+ (int)PatientStatus.Patient + (ageOptions.ExcludeInactive ? "" : ","+((int)PatientStatus.Inactive).ToString()) + ") ";
+			if(ageOptions.ExcludeInactive) {//made to match the way regular aging looks a patient status. 
+				command+=" AND pat.PatStatus != "+(int)PatientStatus.Inactive+" ";
+			}
+			if(ageOptions.ExcludeArchive) {
+				command+=" AND pat.PatStatus != "+(int)PatientStatus.Archived+" ";
+			}
 			if(ageOptions.ExcludeBadAddress) {
 				command+=" AND pat.Zip != '' ";
 			}
@@ -276,6 +281,7 @@ namespace OpenDentBusiness {
 		public double BalTotal;
 	}
 
+	[Serializable()]
 	public class AgingOptions {
 		public DateTime DateAsOf;
 		public AgingInclude AgingInc;
@@ -287,6 +293,7 @@ namespace OpenDentBusiness {
 		public List<Clinic> ListClins;
 		public List<Def> ListBillTypes;
 		public bool ExcludeInactive;
+		public bool ExcludeArchive;
 		public bool ExcludeBadAddress;
 		public bool AgeCredits;
 
