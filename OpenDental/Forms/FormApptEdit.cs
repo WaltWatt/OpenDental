@@ -3437,20 +3437,22 @@ namespace OpenDental{
 				if(aptTypeCur.Pattern=="" && listAptTypeProcs.Count > 0) {
 					//Calculate and Fill
 					CalculateTime(true);
+					AptCur.Pattern="";
+					for(int i=0;i<strBTime.Length;i++) {
+						AptCur.Pattern+=new string(strBTime[i],(int)PrefC.GetLong(PrefName.AppointmentTimeIncrement)/5);
+					}
 					FillTime();
 				}
 				//Has fixed time
 				else if(aptTypeCur.Pattern!="") {
+					AptCur.Pattern=aptTypeCur.Pattern;
+					//Usually we would set strBTime, but it is created above based on aptTypeCur.Pattern, so we don't need to.
 					FillTime();
 				}
 				//No Procs, No time.
 				else {
 					//do nothing to the time pattern
 				}
-			}
-			AptCur.Pattern="";
-			for(int i=0;i<strBTime.Length;i++) {
-				AptCur.Pattern+=new string(strBTime[i],(int)PrefC.GetLong(PrefName.AppointmentTimeIncrement)/5);
 			}
 			return true;
 		}
