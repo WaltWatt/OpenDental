@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using CodeBase;
 
 namespace OpenDentBusiness {
 	///<summary>These are only run from the Unit Testing framework</summary>
@@ -256,6 +257,23 @@ namespace OpenDentBusiness {
 				return Meth.GetString(MethodBase.GetCurrentMethod(),str);
 			}
 			return str;
+		}
+
+		public static Logger.IWriteLine GetInterface(Logger.IWriteLine log) {
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				return Meth.GetObject<Logger.IWriteLine>(MethodBase.GetCurrentMethod(),log);
+			}
+			return log;
+		}
+
+		public static List<long> SendInterfaceParamWithArgs(bool argBool,Logger.IWriteLine argLogger=null,List<long> listArgLongs=null) {
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				return Meth.GetObject<List<long>>(MethodBase.GetCurrentMethod(),argBool,argLogger,listArgLongs);
+			}
+			if(!argBool) {
+				throw new ApplicationException("argBool must be true.");
+			}
+			return listArgLongs;
 		}
 
 		public static Patient GetObjectNull() {

@@ -333,6 +333,23 @@ namespace UnitTests.MiddleTier {
 		}
 
 		[TestMethod]
+		public void MiddleTier_GetInterface() {
+			LogWriter log=new LogWriter(LogLevel.Error,"LogWeb\\WebSchedRecall");
+			LogWriter logReturned=(LogWriter)WebServiceTests.GetInterface(log);
+			Assert.AreEqual(logReturned.LogLevel,LogLevel.Error);
+			Assert.AreEqual(logReturned.BaseDirectory,"LogWeb\\WebSchedRecall");
+		}
+
+		[TestMethod]
+		public void MiddleTier_SendInterface_WithArgs() {
+			List<long> listLongs=WebServiceTests.SendInterfaceParamWithArgs(true,listArgLongs:new List<long>() { 6,2,9 });
+			Assert.AreEqual(listLongs.Count,3);
+			Assert.AreEqual(listLongs[0],6);
+			Assert.AreEqual(listLongs[1],2);
+			Assert.AreEqual(listLongs[2],9);
+		}
+
+		[TestMethod]
 		public void MiddleTier_GetObjectNull() {
 			Patient pat2=WebServiceTests.GetObjectNull();
 			Assert.IsTrue(pat2==null);
