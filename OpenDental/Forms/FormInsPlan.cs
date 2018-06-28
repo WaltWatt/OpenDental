@@ -2527,7 +2527,6 @@ namespace OpenDental{
 			if(Clinics.IsMedicalPracticeOrClinic(Clinics.ClinicNum)) {
 				checkCodeSubst.Visible=false;
 			}
-			_dateInsPlanLastVerified=PIn.Date(textDateLastVerifiedBenefits.Text);
 			_datePatPlanLastVerified=PIn.Date(textDateLastVerifiedPatPlan.Text);
 			_orthoAutoProc=_planCur.OrthoAutoProcCodeNumOverride==0 ? null : ProcedureCodes.GetProcCode(_planCur.OrthoAutoProcCodeNumOverride);
 			FillOrtho();
@@ -2749,6 +2748,7 @@ namespace OpenDental{
 			InsVerify insVerifyBenefitsCur=InsVerifies.GetOneByFKey(_planCur.PlanNum,VerifyTypes.InsuranceBenefit);
 			if(insVerifyBenefitsCur!=null && insVerifyBenefitsCur.DateLastVerified.Year>1880) {//Only show a date if this insurance has ever been verified
 				textDateLastVerifiedBenefits.Text=insVerifyBenefitsCur.DateLastVerified.ToShortDateString();
+				_dateInsPlanLastVerified=PIn.Date(textDateLastVerifiedBenefits.Text);
 			}
 			//if(PlanCur.BenefitNotes==""){
 			//	butBenefitNotes.Enabled=false;
