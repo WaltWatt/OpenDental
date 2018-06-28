@@ -848,9 +848,6 @@ namespace OpenDentBusiness{
 			if(errors!="") {
 				throw new Exception(Employees.GetNameFL(EmployeeCur)+" has the following errors:\r\n"+errors);
 			}
-			
-
-
 			//first, delete all existing non manual overtime entries
 			for(int i=0;i<listTimeAdjust.Count;i++) {
 				if(listTimeAdjust[i].IsAuto) {
@@ -858,16 +855,8 @@ namespace OpenDentBusiness{
 				}
 			}
 			//refresh list after it has been cleaned up.
-			
-			
 			listTimeAdjust=TimeAdjusts.Refresh(EmployeeCur.EmployeeNum,StartDate,StopDate);
-			ArrayList mergedAL = new ArrayList();
-			foreach(ClockEvent clockEvent in listClockEvent) {
-				mergedAL.Add(clockEvent);
-			}
-			foreach(TimeAdjust timeAdjust in listTimeAdjust) {
-				mergedAL.Add(timeAdjust);
-			}
+			ArrayList mergedAL=MergeClockEventAndTimeAdjust(listClockEvent,listTimeAdjust);
 			//then, fill grid
 			Calendar cal=CultureInfo.CurrentCulture.Calendar;
 			CalendarWeekRule rule=CalendarWeekRule.FirstFullWeek;//CultureInfo.CurrentCulture.DateTimeFormat.CalendarWeekRule;
@@ -941,8 +930,10 @@ namespace OpenDentBusiness{
 						listOTEntries.RemoveAll(x=>x.Item2==TimeSpan.Zero);
 					}
 					if(weeklyHours.TotalHours>40) {//this clock event put us into overtime.
-						listOTEntries.Add(new Tuple<long, TimeSpan>(tupleCur.Item1,TimeSpan.FromHours(weeklyHours.TotalHours-Math.Max(40,prevTotal.TotalHours))));
-						//weeklyHours=TimeSpan.FromHours(40);//reset running total to 40 so the next clock event calculates corect
+						Tuple<long,TimeSpan> otEntry=new Tuple<long, TimeSpan>(tupleCur.Item1,TimeSpan.FromHours(weeklyHours.TotalHours-Math.Max(40,prevTotal.TotalHours)));
+						if(otEntry.Item2>TimeSpan.Zero) {
+							listOTEntries.Add(otEntry);
+						}
 					}
 				}
 				//Build dictOvertime by aggregating all entries in list above. Dict contains one entry per clinic with a timespan for OT time worked.
@@ -963,6 +954,37 @@ namespace OpenDentBusiness{
 				}
 				weekIdx++;
 			}
+		}
+
+		///<summary>Merges a list of ClockEvent and a list of TimeAdjust, sorted by ClockEvent.TimeDisplayed1 and TimeAdjust.TimeEntry</summary>
+		private static ArrayList MergeClockEventAndTimeAdjust(List<ClockEvent> listClockEvents,List<TimeAdjust> listTimeAdjusts) {
+			List<ClockEvent> listOrderedClockEvents=listClockEvents.OrderBy(x => x.TimeDisplayed1).ToList();//Oldest entries first
+			List<TimeAdjust> listOrderedTimeAdjusts=listTimeAdjusts.OrderBy(x => x.TimeEntry).ToList();
+			ArrayList mergedAL=new ArrayList();
+			int idxCE=0;
+			int idxTA=0;
+			while(idxCE<listOrderedClockEvents.Count || idxTA<listOrderedTimeAdjusts.Count) {//Merge listClockEvent and listTimeAdjust, sort by TimeDisplayed1/TimeEntry
+				if(idxCE>listOrderedClockEvents.Count || idxTA>listOrderedTimeAdjusts.Count) {
+						break;//Shouldn't happen.
+				}
+				if(idxCE==listOrderedClockEvents.Count) {//All ClockEvents added, so remaining TimeAdjusts will all be added.
+					mergedAL.Add(listOrderedTimeAdjusts[idxTA]);
+					idxTA++;
+				}
+				else if(idxTA==listOrderedTimeAdjusts.Count) {//All TimeAdjusts added, so remaining ClockEvents will all be added.
+					mergedAL.Add(listOrderedClockEvents[idxCE]);//So add next ClockEvent
+					idxCE++;
+				}
+				else if(listOrderedClockEvents[idxCE].TimeDisplayed1<=listOrderedTimeAdjusts[idxTA].TimeEntry) {//ClockEvent is next
+					mergedAL.Add(listOrderedClockEvents[idxCE]);
+					idxCE++;
+				}
+				else {//TimeAdjust is next
+					mergedAL.Add(listOrderedTimeAdjusts[idxTA]);
+					idxTA++;
+				}
+			}
+			return mergedAL;
 		}
 
 		/// <summary>This was originally analogous to the FormTimeCard.FillGrid(), before this logic was moved to the business layer.</summary>
@@ -1069,8 +1091,16 @@ namespace OpenDentBusiness{
 					daySpan+=adjust.RegHours;//might be negative
 					weekSpan+=adjust.RegHours;
 					periodSpan+=adjust.RegHours;
+					oneAdj=adjust.RegHours;
+					if(oneAdj!=TimeSpan.Zero) {
+						listWeek.Add(Tuple.Create(adjust.ClinicNum,oneAdj));
+					}
 					//Overtime------------------------------
 					otspan+=adjust.OTimeHours;
+					oneOT=adjust.OTimeHours;
+					if(oneOT!=TimeSpan.Zero) {
+						listWeek.Add(Tuple.Create(adjust.ClinicNum,oneOT));
+					}
 					//Daily-----------------------------------
 					//if this is the last entry for a given date
 					if(i==mergedAL.Count-1//if this is the last row
