@@ -629,7 +629,33 @@ namespace OpenDental{
 				textProvName.Visible=true;
 				labelErxAccountId.Visible=true;
 				textErxAccountId.Visible=true;
-				if(!IsNew) {//Existing eRx repeating charge.
+				if(IsNew && RepeatCur.ProcCode=="Z100") {//DoseSpot Procedure Code
+					List<string> listDoseSpotAccountIds=ClinicErxs.GetAccountIdsForPatNum(RepeatCur.PatNum)
+					.Union(ProviderErxs.GetAccountIdsForPatNum(RepeatCur.PatNum))
+					.Union(
+						RepeatCharges.GetForErx()
+						.FindAll(x => x.PatNum==RepeatCur.PatNum && x.ProcCode=="Z100")
+						.Select(x => x.ErxAccountId)
+						.ToList()
+					)
+					.Distinct()
+					.ToList()
+					.FindAll(x => DoseSpot.IsDoseSpotAccountId(x));
+					if(listDoseSpotAccountIds.Count==0) {
+						listDoseSpotAccountIds.Add(DoseSpot.GenerateAccountId(RepeatCur.PatNum));
+					}
+					if(listDoseSpotAccountIds.Count==1) {
+						textErxAccountId.Text=listDoseSpotAccountIds[0];
+					}
+					else if(listDoseSpotAccountIds.Count>1) {
+						InputBox inputAccountIds=new InputBox(Lans.g(this,"Multiple Account IDs found.  Select one to assign to this repeat charge."),listDoseSpotAccountIds,0);
+						inputAccountIds.ShowDialog();
+						if(inputAccountIds.DialogResult==DialogResult.OK) {
+							textErxAccountId.Text=listDoseSpotAccountIds[inputAccountIds.SelectedIndex];
+						}
+					}
+				}
+				else {//Existing eRx repeating charge.
 					textNpi.Text=RepeatCur.Npi;
 					textErxAccountId.Text=RepeatCur.ErxAccountId;
 					textProvName.Text=RepeatCur.ProviderName;

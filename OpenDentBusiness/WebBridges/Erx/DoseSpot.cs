@@ -148,6 +148,12 @@ namespace OpenDentBusiness {
 			}
 		}
 
+		///<summary>Returns true if the passed in accountId is a DoseSpot account id.</summary>
+		public static bool IsDoseSpotAccountId(string accountId) {
+			//No need to check RemotingRole; no call to db.
+			return accountId.ToUpper().StartsWith("DS;");//ToUpper because user might have manually typed in.
+		}
+
 		///<summary>Creates a unique account id for DoseSpot.  Uses the same generation logic as NewCrop, with DS; preceeding it.</summary>
 		public static string GenerateAccountId(long patNum) {
 			string retVal="DS;"+POut.Long(patNum);

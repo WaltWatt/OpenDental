@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 
@@ -122,6 +123,13 @@ namespace OpenDentBusiness{
 		public static ClinicErx GetByClinicIdAndKey(string clinicId,string clinicKey) {
 			//No need to check RemotingRole; no call to db.
 			return GetFirstOrDefault(x => x.ClinicId==clinicId && x.ClinicKey==clinicKey);
+		}
+
+		///<summary>This should only be used for ODHQ.  Gets all account ids associated to the patient account.</summary>
+		public static List<string> GetAccountIdsForPatNum(long patNum) {
+			return GetDeepCopy().FindAll(x => x.PatNum==patNum && !string.IsNullOrWhiteSpace(x.AccountId))
+				.Select(x => x.AccountId)
+				.ToList();
 		}
 
 		#endregion
