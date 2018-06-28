@@ -217,6 +217,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Required dlls\RdlViewer.dll</HintPath>
     </Reference>
+    <Reference Include="SharpDX, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Required dlls\SharpDX.dll</HintPath>
+    </Reference>
     <Reference Include="SigPlusNET, Version=1.1.4050.24928, Culture=neutral, PublicKeyToken=6aef07010bb0624f, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Required dlls\SigPlusNET.dll</HintPath>
