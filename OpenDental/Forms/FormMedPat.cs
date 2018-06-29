@@ -562,7 +562,11 @@ namespace OpenDental{
 		private void butEdit_Click(object sender, System.EventArgs e) {
 			Medications.RefreshCache();
 			FormMedicationEdit FormME=new FormMedicationEdit();
-			FormME.MedicationCur=Medications.GetMedication(MedicationPatCur.MedicationNum);//The edit button is not visible if MedicationNum=0.
+			Medication med=Medications.GetMedication(MedicationPatCur.MedicationNum);//The edit button is not visible if MedicationNum=0.
+			if(med==null) {//Possible to delete the medication from a separate WS while medication loaded in memory.
+				MsgBox.Show(this,"An error occurred loading medication.");
+				return;
+			}
 			FormME.ShowDialog();
 			if(FormME.DialogResult!=DialogResult.OK){
 				return;

@@ -494,6 +494,11 @@ namespace OpenDental{
 
 		private void gridAllMedications_CellDoubleClick(object sender,ODGridClickEventArgs e) {
 			Medication med=(Medication)gridAllMedications.Rows[e.Row].Tag;
+			med=Medications.GetMedication(med.MedicationNum);
+			if(med==null) {//Possible to delete the medication from a separate WS while medication loaded in memory.
+				MsgBox.Show(this,"An error occurred loading medication.");
+				return;
+			}
 			if(IsSelectionMode){
 				SelectedMedicationNum=med.MedicationNum;
 				DialogResult=DialogResult.OK;
