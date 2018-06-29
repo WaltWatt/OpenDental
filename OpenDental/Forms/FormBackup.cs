@@ -49,21 +49,19 @@ namespace OpenDental {
 		private TabControl tabControl1;
 		private TabPage tabPageArchive;
 		private TabPage tabPageBackup;
-		private Label label6;
-		private Label label5;
-		private Label label4;
-		private Label label3;
 		private DateTimePicker dateTimeArchive;
 		private Label label2;
 		private TextBox textArchiveServerName;
 		private TextBox textArchivePass;
 		private TextBox textArchiveUser;
-		private TextBox textArchiveURI;
 		private UI.Button butArchive;
 		private GroupBox groupBox3;
 		private Label label7;
 		private UI.Button butSaveArchive;
 		private Label labelWarning;
+		private Label label3;
+		private Label label8;
+		private Label label5;
 
 		//private bool usesInternalImages;
 		///<summary>This message will only get filled when a backup attempt has failed.  It will hold the message text that we want to show to the user giving them more information about the failure.</summary>
@@ -131,15 +129,13 @@ namespace OpenDental {
 			this.labelWarning = new System.Windows.Forms.Label();
 			this.label7 = new System.Windows.Forms.Label();
 			this.groupBox3 = new System.Windows.Forms.GroupBox();
-			this.butSaveArchive = new OpenDental.UI.Button();
+			this.label5 = new System.Windows.Forms.Label();
+			this.label8 = new System.Windows.Forms.Label();
 			this.label3 = new System.Windows.Forms.Label();
+			this.butSaveArchive = new OpenDental.UI.Button();
 			this.textArchiveServerName = new System.Windows.Forms.TextBox();
 			this.textArchivePass = new System.Windows.Forms.TextBox();
-			this.label6 = new System.Windows.Forms.Label();
-			this.label4 = new System.Windows.Forms.Label();
 			this.textArchiveUser = new System.Windows.Forms.TextBox();
-			this.label5 = new System.Windows.Forms.Label();
-			this.textArchiveURI = new System.Windows.Forms.TextBox();
 			this.butArchive = new OpenDental.UI.Button();
 			this.label2 = new System.Windows.Forms.Label();
 			this.dateTimeArchive = new System.Windows.Forms.DateTimePicker();
@@ -495,42 +491,71 @@ namespace OpenDental {
 			// 
 			// labelWarning
 			// 
+			this.labelWarning.Anchor = System.Windows.Forms.AnchorStyles.Top;
 			this.labelWarning.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.labelWarning.ForeColor = System.Drawing.Color.Red;
-			this.labelWarning.Location = new System.Drawing.Point(66, 363);
+			this.labelWarning.Location = new System.Drawing.Point(244, 389);
 			this.labelWarning.Name = "labelWarning";
-			this.labelWarning.Size = new System.Drawing.Size(252, 55);
+			this.labelWarning.Size = new System.Drawing.Size(509, 55);
 			this.labelWarning.TabIndex = 13;
-			this.labelWarning.Text = "Archival is not available with random primary keys at this time.  Please check ba" +
-    "ck later.";
+			this.labelWarning.Text = "Not available when using random primary keys.\r\nPlease call support.";
 			this.labelWarning.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			this.labelWarning.Visible = false;
 			// 
 			// label7
 			// 
+			this.label7.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.label7.Location = new System.Drawing.Point(19, 12);
 			this.label7.Name = "label7";
-			this.label7.Size = new System.Drawing.Size(734, 44);
+			this.label7.Size = new System.Drawing.Size(734, 58);
 			this.label7.TabIndex = 12;
 			this.label7.Text = resources.GetString("label7.Text");
 			// 
 			// groupBox3
 			// 
-			this.groupBox3.Controls.Add(this.butSaveArchive);
+			this.groupBox3.Anchor = System.Windows.Forms.AnchorStyles.Top;
+			this.groupBox3.Controls.Add(this.label5);
+			this.groupBox3.Controls.Add(this.label8);
 			this.groupBox3.Controls.Add(this.label3);
+			this.groupBox3.Controls.Add(this.butSaveArchive);
 			this.groupBox3.Controls.Add(this.textArchiveServerName);
 			this.groupBox3.Controls.Add(this.textArchivePass);
-			this.groupBox3.Controls.Add(this.label6);
-			this.groupBox3.Controls.Add(this.label4);
 			this.groupBox3.Controls.Add(this.textArchiveUser);
-			this.groupBox3.Controls.Add(this.label5);
-			this.groupBox3.Controls.Add(this.textArchiveURI);
-			this.groupBox3.Location = new System.Drawing.Point(22, 118);
+			this.groupBox3.Location = new System.Drawing.Point(140, 140);
 			this.groupBox3.Name = "groupBox3";
-			this.groupBox3.Size = new System.Drawing.Size(397, 235);
+			this.groupBox3.Size = new System.Drawing.Size(493, 223);
 			this.groupBox3.TabIndex = 0;
 			this.groupBox3.TabStop = false;
-			this.groupBox3.Text = "Archive Server Settings";
+			this.groupBox3.Text = "Archive Connection Settings";
+			// 
+			// label5
+			// 
+			this.label5.Location = new System.Drawing.Point(7, 122);
+			this.label5.Name = "label5";
+			this.label5.Size = new System.Drawing.Size(480, 18);
+			this.label5.TabIndex = 37;
+			this.label5.Text = "Password: For new installations, the password will be blank.";
+			this.label5.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
+			// 
+			// label8
+			// 
+			this.label8.Location = new System.Drawing.Point(7, 78);
+			this.label8.Name = "label8";
+			this.label8.Size = new System.Drawing.Size(480, 18);
+			this.label8.TabIndex = 36;
+			this.label8.Text = "User: When MySQL is first installed, the user is root.";
+			this.label8.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
+			// 
+			// label3
+			// 
+			this.label3.Location = new System.Drawing.Point(6, 16);
+			this.label3.Name = "label3";
+			this.label3.Size = new System.Drawing.Size(481, 36);
+			this.label3.TabIndex = 35;
+			this.label3.Text = "Server Name: The name of the computer where the archive server and database are l" +
+    "ocated.\r\nIf running on a single computer only, Server Name may be localhost.";
+			this.label3.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
 			// 
 			// butSaveArchive
 			// 
@@ -539,7 +564,7 @@ namespace OpenDental {
 			this.butSaveArchive.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
 			this.butSaveArchive.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
 			this.butSaveArchive.CornerRadius = 4F;
-			this.butSaveArchive.Location = new System.Drawing.Point(299, 194);
+			this.butSaveArchive.Location = new System.Drawing.Point(12, 180);
 			this.butSaveArchive.Name = "butSaveArchive";
 			this.butSaveArchive.Size = new System.Drawing.Size(86, 26);
 			this.butSaveArchive.TabIndex = 4;
@@ -547,78 +572,38 @@ namespace OpenDental {
 			this.butSaveArchive.UseVisualStyleBackColor = true;
 			this.butSaveArchive.Click += new System.EventHandler(this.butSaveArchive_Click);
 			// 
-			// label3
-			// 
-			this.label3.Location = new System.Drawing.Point(6, 26);
-			this.label3.Name = "label3";
-			this.label3.Size = new System.Drawing.Size(136, 17);
-			this.label3.TabIndex = 6;
-			this.label3.Text = "Server Name";
-			this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-			// 
 			// textArchiveServerName
 			// 
-			this.textArchiveServerName.Location = new System.Drawing.Point(148, 25);
+			this.textArchiveServerName.Location = new System.Drawing.Point(9, 55);
 			this.textArchiveServerName.Name = "textArchiveServerName";
-			this.textArchiveServerName.Size = new System.Drawing.Size(237, 20);
+			this.textArchiveServerName.Size = new System.Drawing.Size(283, 20);
 			this.textArchiveServerName.TabIndex = 0;
 			// 
 			// textArchivePass
 			// 
-			this.textArchivePass.Location = new System.Drawing.Point(148, 139);
+			this.textArchivePass.Location = new System.Drawing.Point(10, 143);
 			this.textArchivePass.Name = "textArchivePass";
-			this.textArchivePass.Size = new System.Drawing.Size(237, 20);
+			this.textArchivePass.Size = new System.Drawing.Size(283, 20);
 			this.textArchivePass.TabIndex = 3;
-			// 
-			// label6
-			// 
-			this.label6.Location = new System.Drawing.Point(6, 140);
-			this.label6.Name = "label6";
-			this.label6.Size = new System.Drawing.Size(136, 17);
-			this.label6.TabIndex = 9;
-			this.label6.Text = "Password";
-			this.label6.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-			// 
-			// label4
-			// 
-			this.label4.Location = new System.Drawing.Point(6, 64);
-			this.label4.Name = "label4";
-			this.label4.Size = new System.Drawing.Size(136, 17);
-			this.label4.TabIndex = 7;
-			this.label4.Text = "Server URI";
-			this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.textArchivePass.TextChanged += new System.EventHandler(this.textArchivePass_TextChanged);
+			this.textArchivePass.Leave += new System.EventHandler(this.textArchivePass_Leave);
 			// 
 			// textArchiveUser
 			// 
-			this.textArchiveUser.Location = new System.Drawing.Point(148, 101);
+			this.textArchiveUser.Location = new System.Drawing.Point(10, 99);
 			this.textArchiveUser.Name = "textArchiveUser";
-			this.textArchiveUser.Size = new System.Drawing.Size(237, 20);
+			this.textArchiveUser.Size = new System.Drawing.Size(283, 20);
 			this.textArchiveUser.TabIndex = 2;
-			// 
-			// label5
-			// 
-			this.label5.Location = new System.Drawing.Point(6, 102);
-			this.label5.Name = "label5";
-			this.label5.Size = new System.Drawing.Size(136, 17);
-			this.label5.TabIndex = 8;
-			this.label5.Text = "User Name";
-			this.label5.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-			// 
-			// textArchiveURI
-			// 
-			this.textArchiveURI.Location = new System.Drawing.Point(148, 63);
-			this.textArchiveURI.Name = "textArchiveURI";
-			this.textArchiveURI.Size = new System.Drawing.Size(237, 20);
-			this.textArchiveURI.TabIndex = 1;
 			// 
 			// butArchive
 			// 
 			this.butArchive.AdjustImageLocation = new System.Drawing.Point(0, 0);
+			this.butArchive.Anchor = System.Windows.Forms.AnchorStyles.Top;
 			this.butArchive.Autosize = true;
 			this.butArchive.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
 			this.butArchive.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
 			this.butArchive.CornerRadius = 4F;
-			this.butArchive.Location = new System.Drawing.Point(321, 377);
+			this.butArchive.Location = new System.Drawing.Point(152, 404);
 			this.butArchive.Name = "butArchive";
 			this.butArchive.Size = new System.Drawing.Size(86, 26);
 			this.butArchive.TabIndex = 2;
@@ -628,16 +613,18 @@ namespace OpenDental {
 			// 
 			// label2
 			// 
-			this.label2.Location = new System.Drawing.Point(28, 71);
+			this.label2.Anchor = System.Windows.Forms.AnchorStyles.Top;
+			this.label2.Location = new System.Drawing.Point(149, 76);
 			this.label2.Name = "label2";
-			this.label2.Size = new System.Drawing.Size(136, 17);
+			this.label2.Size = new System.Drawing.Size(272, 17);
 			this.label2.TabIndex = 1;
-			this.label2.Text = "Archive entries from:";
-			this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.label2.Text = "Archive entries on or before:";
+			this.label2.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
 			// 
 			// dateTimeArchive
 			// 
-			this.dateTimeArchive.Location = new System.Drawing.Point(170, 69);
+			this.dateTimeArchive.Anchor = System.Windows.Forms.AnchorStyles.Top;
+			this.dateTimeArchive.Location = new System.Drawing.Point(150, 96);
 			this.dateTimeArchive.Name = "dateTimeArchive";
 			this.dateTimeArchive.Size = new System.Drawing.Size(237, 20);
 			this.dateTimeArchive.TabIndex = 1;
@@ -646,9 +633,11 @@ namespace OpenDental {
 			// 
 			this.ClientSize = new System.Drawing.Size(777, 582);
 			this.Controls.Add(this.tabControl1);
+			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
+			this.MinimumSize = new System.Drawing.Size(793, 621);
 			this.Name = "FormBackup";
 			this.ShowInTaskbar = false;
 			this.Text = "Backup & Archive";
@@ -668,6 +657,7 @@ namespace OpenDental {
 		#endregion
 
 		private void FormBackup_Load(object sender, System.EventArgs e) {
+			#region Backup Tab
 			//already include the \
 			checkExcludeImages.Checked=PrefC.GetBool(PrefName.BackupExcludeImageFolder);
 			textBackupFromPath.Text=PrefC.GetString(PrefName.BackupFromPath);
@@ -677,24 +667,30 @@ namespace OpenDental {
 			textBackupRestoreAtoZToPath.Text=PrefC.GetString(PrefName.BackupRestoreAtoZToPath);
 			//usesInternalImages=(PrefC.GetString(PrefName.ImageStore)=="OpenDental.Imaging.SqlStore");
 			textBackupRestoreAtoZToPath.Enabled=ShouldUseAtoZFolder();
-			string decryptedPass;
-      CDT.Class1.Decrypt(PrefC.GetString(PrefName.ArchivePassHash),out decryptedPass);
-			textArchivePass.Text=decryptedPass;
-			textArchiveServerName.Text=PrefC.GetString(PrefName.ArchiveServerName);
-			textArchiveURI.Text=PrefC.GetString(PrefName.ArchiveServerURI);
-			textArchiveUser.Text=PrefC.GetString(PrefName.ArchiveUserName);
-			dateTimeArchive.Value=PrefC.GetDate(PrefName.ArchiveDate)==DateTime.MinValue?DateTime.Today.AddYears(-3):PrefC.GetDate(PrefName.ArchiveDate);//If pref is set, use it.  Otherwise, 3 years ago.
-			if(PrefC.GetBool(PrefName.RandomPrimaryKeys) || ReplicationServers.Server_id!=0) {//show warning if replication is enabled
-				butArchive.Enabled=false;
-				labelWarning.Visible=true;
-			}
 			butBrowseRestoreAtoZTo.Enabled=ShouldUseAtoZFolder();
 			if(ProgramProperties.IsAdvertisingDisabled(ProgramName.CentralDataStorage)) {
 				groupManagedBackups.Visible=false;
 			}
+			#endregion
+			#region Archive Tab
+			string decryptedPass;
+			CDT.Class1.Decrypt(PrefC.GetString(PrefName.ArchivePassHash),out decryptedPass);
+			textArchivePass.Text=decryptedPass;
+			textArchivePass.PasswordChar=(textArchivePass.Text=="" ? default(char) : '*');
+			textArchiveServerName.Text=PrefC.GetString(PrefName.ArchiveServerName);
+			textArchiveUser.Text=PrefC.GetString(PrefName.ArchiveUserName);
+			//If pref is set, use it.  Otherwise, 3 years ago.
+			dateTimeArchive.Value=PrefC.GetDate(PrefName.ArchiveDate)==DateTime.MinValue?DateTime.Today.AddYears(-3):PrefC.GetDate(PrefName.ArchiveDate);
+			if(PrefC.GetBool(PrefName.RandomPrimaryKeys) || ReplicationServers.Server_id!=0) {//show warning if replication is enabled
+				butArchive.Enabled=false;
+				labelWarning.Visible=true;
+			}
+			#endregion
 		}
 
-		private bool ShouldUseAtoZFolder(){
+		#region Backup Tab
+
+		private bool ShouldUseAtoZFolder() {
 			return (PrefC.AtoZfolderUsed==DataStorageType.LocalAtoZ //&& !usesInternalImages 
 				&& !checkExcludeImages.Checked);
 		}
@@ -1221,178 +1217,284 @@ namespace OpenDental {
 			CDS.ShowPage();
 		}
 
-		private void butArchive_Click(object sender,EventArgs e) {
-			if(!string.IsNullOrWhiteSpace(textArchiveServerName.Text) && !string.IsNullOrWhiteSpace(textArchiveURI.Text)) {
-				MsgBox.Show(this,"Please specify only the server address or the server URI, not both.");
-				return;
+		#endregion
+
+		#region Archive Tab
+
+		private void textArchivePass_TextChanged(object sender,EventArgs e) {
+			//If text is cleared, turn off password char mask
+			if(textArchivePass.Text=="") {
+				textArchivePass.PasswordChar=default(char);
 			}
-			if(string.IsNullOrWhiteSpace(textArchiveServerName.Text) && string.IsNullOrWhiteSpace(textArchiveURI.Text)) {
-				MsgBox.Show(this,"Please specify either server address or server URI.");
+		}
+
+		private void textArchivePass_Leave(object sender,EventArgs e) {
+			textArchivePass.PasswordChar=(textArchivePass.Text=="" ? default(char) : '*');
+		}
+
+		private void butArchive_Click(object sender,EventArgs e) {
+			#region Connection settings UI validation
+			if(string.IsNullOrWhiteSpace(textArchiveServerName.Text)) {
+				MsgBox.Show(this,"Please specify a Server Name.");
 				return;
 			}
 			if(string.IsNullOrWhiteSpace(textArchiveUser.Text)) {
-				MsgBox.Show(this,"Please enter a user name for the server.");
+				MsgBox.Show(this,"Please enter a User.");
 				return;
 			}
-			//Attempt to connect to the database
+			#endregion
+			DataConnection dcon=new DataConnection();
+			//Keep track of the original connection settings so that we can revert back to them once finished archiving.
 			string connectionStrOrig=DataConnection.GetCurrentConnectionString();
 			DatabaseType dbTypeOrig=DataConnection.DBtype;
-			Version versionDbOrig=new Version(PrefC.GetString(PrefName.DataBaseVersion));
-			string connectionStrArchive=DataConnection.BuildSimpleConnectionString(DatabaseType.MySql,
-				string.IsNullOrWhiteSpace(textArchiveServerName.Text)?textArchiveURI.Text:textArchiveServerName.Text,
-				"opendentalarchive",textArchiveUser.Text,textArchivePass.Text);
-			DatabaseType dbTypeArchive=DataConnection.DBtype;
-			DataConnection dcon=new DataConnection();
-			try { 
-				dcon.SetDb(connectionStrArchive,"",dbTypeArchive,true);
-			}
-			catch (Exception ex) {
-				if(ex.Message=="Unable to connect to any of the specified MySQL hosts.") {
-					//Server name or URI incorrect - Message box and Return
-					MsgBox.Show(this,"The specified server name or URI is incorrect, or the server is offline.  Please check try again.");
-					return;
+			//Keep track of what the current global exit code is (should always be zero) so that we can put it back to what it was after upgrading.
+			int exitCodeOld=FormOpenDental.ExitCode;
+			try {
+				Version versionDbOrig=new Version(PrefC.GetString(PrefName.DataBaseVersion));
+				string connectionStrArchive=DataConnection.BuildSimpleConnectionString(DatabaseType.MySql,
+					textArchiveServerName.Text,
+					MiscData.GetArchiveDatabaseName(),
+					textArchiveUser.Text,
+					textArchivePass.Text);
+				DatabaseType dbTypeArchive=DataConnection.DBtype;
+				#region Connect or create archive database
+				//Attempt to connect to the archive database.
+				try { 
+					dcon.SetDb(connectionStrArchive,"",dbTypeArchive,true);
 				}
-				else if(ex.Message.Contains("Access denied for user")) {
-					//User name or password incorrect - Message box and Return
-					MsgBox.Show(this,"The supplied user name and/or password are incorrect.  Please check them and try again.");
-					return;
-				}
-				else if(ex.Message.Contains("Unknown database 'opendentalarchive'")) {
-					//Archive DB doesn't exist - Create it, then try to connect again.
-					if(MsgBox.Show(this,MsgBoxButtons.YesNo,"The archive database doesn't exist at the specified server.  Would you like to create it?  "
-						+"(WARNING: This can take a while!  DO NOT CLOSE THE PROGRAM!)"))
-					{
-						//Create opendentalarchive database
-						try {
-							Cursor=Cursors.WaitCursor; 
-							MiscData.MakeArchive();
-							Cursor=Cursors.Default;
-						}
-						catch (Exception ex2) {
-							Cursor=Cursors.Default;
-							MsgBox.Show(this,"Archive database could not be created - \r\n"+ex2.InnerException.Message);
-							return;
-						}
-						//Now we have determined the archive db needs to be created, connect back to original connection
-						dcon.SetDb(connectionStrOrig,"",dbTypeOrig);
-						//The following section of code was donated by the Crud Generator - A very selfless act (Also Form1 when running the crud)
-						Type typeTableBase=typeof(TableBase);
-						List<string> listTableCommands=new List<string>();
-						Assembly assembly=Assembly.GetAssembly(typeTableBase);
-						Cursor=Cursors.WaitCursor;
-						foreach(Type typeClass in assembly.GetTypes()){
-							if(typeClass.IsSubclassOf(typeTableBase)) {
-								try { 
-									//Some tables have a different name than the tabletype object from Assembly. (preference vs. pref for instance)
-									string tableName=typeClass.Name.ToLower();
-									object[] attributes=typeClass.GetCustomAttributes(typeof(CrudTableAttribute),true);
-									for(int i=0;i<attributes.Length;i++) {
-										if(attributes[i].GetType()!=typeof(CrudTableAttribute)) {
-											continue;
-										}
-										if(((CrudTableAttribute)attributes[i]).TableName!="") {
-											tableName=((CrudTableAttribute)attributes[i]).TableName;
-										}
-									}
-									listTableCommands.Add(MiscData.GenerateTableQuery(tableName));//Generate CREATE TABLE statements from current db.
-								}
-								catch (Exception ex2) {
-									if(ex2.Message.Contains("doesn't exist")) {//table doesn't exist.  Like phone table or other HQ specific tables.
-										continue;
-									}
-								}
+				catch(Exception ex) {
+					if(ex.Message=="Unable to connect to any of the specified MySQL hosts.") {
+						//Server name incorrect - Message box and Return
+						MsgBox.Show(this,"The specified server name is incorrect or the server is offline.\r\n"
+							+"Please check and try again.");
+						return;
+					}
+					else if(ex.Message.Contains("Access denied for user")) {
+						//User name or password incorrect - Message box and Return
+						MsgBox.Show(this,"The supplied User and/or Password are incorrect.\r\n"
+							+"Please check and try again.");
+						return;
+					}
+					else if(ex.Message.Contains("Unknown database")) {
+						//Archive DB doesn't exist - Create it, then try to connect again.
+						if(MsgBox.Show(this,MsgBoxButtons.YesNo,"The archive database doesn't exist at the specified server.\r\n"
+							+"Would you like to create it?\r\n\r\n"
+							+"WARNING: This can take a while, DO NOT CLOSE THE PROGRAM!"))
+						{
+							if(!CreateArchiveDB(dcon,connectionStrOrig,dbTypeOrig,connectionStrArchive,dbTypeArchive)) {
+								return;//Creating archive database failed.
 							}
 						}
-						DataTable preferences=Prefs.GetTableFromCache(true);//Copy preferences from current db.
-						//Reconnect to new db
-						dcon.SetDb(connectionStrArchive,"",dbTypeArchive,true);//Switch connection to new db so we can create tables and copy over preferences (keeps track of db version)
-						MiscData.MakeTables(listTableCommands);
-						MiscData.InsertPreferences(preferences);
-						Cursor=Cursors.Default;
+						else {
+							return;
+						}
 					}
-					else {
+				}
+				#endregion
+				#region Validate archive database version
+				//At this point there is an active connection to the archive database, validate the DataBaseVersion.
+				string version=PrefC.GetStringNoCache(PrefName.DataBaseVersion);
+				if(string.IsNullOrEmpty(version)) {
+					//Preference table does not have version information.  Somehow they have a database with proper structure but no data.
+					//This archive database can't be trusted and we have no idea what version the schema is at.
+					//They need to call support so that we can take a look or they need to delete the invalid archive (or remove it from the data dir) 
+					//so that a new archive database can be made from scratch.
+					MsgBox.Show(this,"Invalid archive database detected.\r\n"
+						+"Please call support.");
+					return;
+				}
+				Version versionDbArchive=new Version(version);
+				if(versionDbOrig>versionDbArchive) {
+					//We need to update the archive version
+					if(!MsgBox.Show(this,MsgBoxButtons.YesNo,"Archive database needs to be backed up and updated."
+						+"Continue?\r\n\r\n"
+						+"WARNING: This can take a while, DO NOT CLOSE THE PROGRAM!"))
+					{
+						return;
+					}
+					//Back the archive database up and upgrade it to the version that we are currently connected with.
+					if(!new ClassConvertDatabase().Convert(versionDbArchive.ToString(),versionDbOrig.ToString(),true)) {
+						MsgBox.Show(this,"Error backing up or upgrading archive database - error code: "+FormOpenDental.ExitCode+"\r\n"
+							+"Please call support.");
 						return;
 					}
 				}
-			}
-			//Check database version.  At this point the database is newly created or already exists.
-			string version=PrefC.GetStringNoCache(PrefName.DataBaseVersion);
-			if(string.IsNullOrEmpty(version)) {
-				//Preference table does not have version information.  Somehow they have a database with proper structure but no data.
-				//Best option is to truncate preference table and then insert preferences.  We don't want to truncate all tables, as they may have info for some reason in the others.
-				dcon.SetDb(connectionStrOrig,"",dbTypeOrig);
-				DataTable preferences=Prefs.GetTableFromCache(true);//Copy preferences from current db.
-				//Reconnect to new db
-				dcon.SetDb(connectionStrArchive,"",dbTypeArchive,true);//Switch connection to new db so we can copy over preferences (keeps track of db version)
-				MiscData.InsertPreferences(preferences);
-				dcon.SetDb(connectionStrArchive,"",dbTypeArchive);
-				version=PrefC.GetStringNoCache(PrefName.DataBaseVersion);
-			}
-			Version versionDbArchive=new Version(version);
-			if(versionDbOrig>versionDbArchive) {
-				//We need to update the archive version
-				if(!MsgBox.Show(this,MsgBoxButtons.YesNo,"Archive database needs to be updated.  Continue?  (WARNING: This can take a while!  DO NOT CLOSE THE PROGRAM!)")) {
-					dcon.SetDb(connectionStrOrig,"",dbTypeOrig);
+				else if(versionDbArchive>versionDbOrig) {
+					MsgBox.Show(this,"Archive database version is higher than the current database.  Process cannot continue.");
 					return;
 				}
-				//Perform the update
-				ClassConvertDatabase convertDatabase=new ClassConvertDatabase();
-				convertDatabase.Convert(versionDbArchive.ToString(),versionDbOrig.ToString(),true);
+				if(!MsgBox.Show(this,MsgBoxButtons.YesNo,"Archival process is about to commence.\r\n"
+					+"Continue?\r\n\r\n"
+					+"WARNING: This can take a while, DO NOT CLOSE THE PROGRAM!"))
+				{
+					return;
+				}
+				#endregion
+				#region Commence archive process
+				if(Archive(dcon,connectionStrOrig,dbTypeOrig,connectionStrArchive,dbTypeArchive)) {
+					//Successful archive was made.
+					MsgBox.Show(this,"Archive process completed successfully.");
+				}
+				#endregion
 			}
-			else if(versionDbArchive>versionDbOrig) {
-				MsgBox.Show(this,"Archive database version is higher than the current database.  Process cannot continue.");
-				dcon.SetDb(connectionStrOrig,"",dbTypeOrig);
-				return;
+			catch(Exception ex) {
+				FriendlyException.Show("Unexpected error.",ex);
 			}
-			MsgBox.Show(this,"Archival Process commencing.  WARNING: This can take a while!  DO NOT CLOSE THE PROGRAM!");
-			Cursor=Cursors.WaitCursor;
-			//Database has been created and updated - Begin copying values over.
-			dcon.SetDb(connectionStrOrig,"",dbTypeOrig);//Reset to the original db once again.  Bulk insert securitylog entries and securityloghash entries that are prior to the selected date.
-			//Insert security logs and security log hashes using our large table helper logic - Uses insert batches, multiple threads, and makes sure inserts are under the max allowed packet size.
-			string errorMsg=LargeTableHelper.BulkInsertSecurityLogs((textArchiveServerName.Text==""?textArchiveURI.Text :textArchiveServerName.Text),
-				textArchiveUser.Text,textArchivePass.Text,dateTimeArchive.Value);
-			long maxPriKeySecurityLog=LargeTableHelper.ListPriKeyMaxPerBatch.Count>0 ? LargeTableHelper.ListPriKeyMaxPerBatch.Max() : 0;//Grab security log max primary key for delete statements later.  
-			errorMsg+=LargeTableHelper.BulkInsertSecurityLogHashes();//Must be run after BulkInsertSecurityLogs
-			long maxPriKeySecurityLogHash=LargeTableHelper.ListPriKeyMaxPerBatch.Count>0 ? LargeTableHelper.ListPriKeyMaxPerBatch.Max() : 0;//Grab security log hash max primary key for delete statements later.
-			if(errorMsg!="") {
-				Cursor=Cursors.Default;
-				MsgBox.Show(this,errorMsg);
-				return;
+			finally {//Always put the connection back to the original no matter what happened above when trying to make an archive.
+				dcon.SetDb(connectionStrOrig,"",dbTypeOrig);//It is acceptable to crash the program if this fails.
+				//Always set the global exit code back to whatever it was before we tried messing around with the archive.
+				FormOpenDental.ExitCode=exitCodeOld;
 			}
-			dcon.SetDb(connectionStrArchive,"",dbTypeArchive,true);
-			if(maxPriKeySecurityLog!=0 && SecurityLogs.GetOne(maxPriKeySecurityLog)==null) {
-				Cursor=Cursors.Default;
-				MsgBox.Show(this,"Archival process failed.  The archive securitylog table does not have all of the archived rows.  Contact us for support.");
-				return;
-			}
-			if(maxPriKeySecurityLogHash!=0 && SecurityLogHashes.GetOne(maxPriKeySecurityLogHash)==null) {
-				Cursor=Cursors.Default;
-				MsgBox.Show(this,"Archival process failed.  The archive securityloghash table does not have all of the archived rows.  Contact us for support.");
-				return;
-			}
-			dcon.SetDb(connectionStrOrig,"",dbTypeOrig);//Reset to the original db once again.
-			//Cleaning up - Delete SecurityLog and SecurityLogHash items in our original database
-			SecurityLogs.DeleteWithMaxPriKey(maxPriKeySecurityLog);//Due to the nature of bulk inserts (and how the rows were selected for insert) we only know the maximum primary key.
-			SecurityLogHashes.DeleteWithMaxPriKey(maxPriKeySecurityLogHash);//Due to the nature of bulk inserts (and how the rows were selected for insert) we only know the maximum primary key.
-			Prefs.UpdateDateT(PrefName.ArchiveDate,dateTimeArchive.Value);
-			Prefs.UpdateString(PrefName.ArchiveServerName,textArchiveServerName.Text);
-			Prefs.UpdateString(PrefName.ArchiveServerURI,textArchiveURI.Text);
-			Prefs.UpdateString(PrefName.ArchiveUserName,textArchiveUser.Text);
-			string encryptedPass;
-      CDT.Class1.Encrypt(textArchivePass.Text,out encryptedPass);
-			Prefs.UpdateString(PrefName.ArchivePassHash,encryptedPass);
-			Cursor=Cursors.Default;
-			MsgBox.Show(this,"Archival Process Completed!");
+		}
+
+		///<summary>Creates an archive database for the connection information passed in.  Shows error messages to the user.
+		///Returns true if the archive database was created; Overwise, false.</summary>
+		private bool CreateArchiveDB(DataConnection dcon,string connectionStrOrig,DatabaseType dbTypeOrig,string connectionStrArchive,
+			DatabaseType dbTypeArchive) 
+		{
+			bool isSuccess=false;
+			ODProgress.ShowProgressForThread(
+				odThread => {
+					#region Create archive database
+					//Create the archive database with the current connection settings.
+					MiscData.CreateArchiveDatabase();
+					#endregion
+					#region Generate table queries
+					//Create the shell of an archive database from the original.
+					//The following section of code was donated by the Crud Generator - A very selfless act (Also Form1 when running the crud)
+					Type typeTableBase=typeof(TableBase);
+					List<string> listTableCommands=new List<string>();
+					Assembly assembly=Assembly.GetAssembly(typeTableBase);
+					foreach(Type typeClass in assembly.GetTypes()) {
+						if(typeClass.IsSubclassOf(typeTableBase)) {
+							try { 
+								//Some tables have a different name than the tabletype object from Assembly. (preference vs. pref for instance)
+								string tableName=typeClass.Name.ToLower();
+								object[] attributes=typeClass.GetCustomAttributes(typeof(CrudTableAttribute),true);
+								for(int i=0;i<attributes.Length;i++) {
+									if(attributes[i].GetType()!=typeof(CrudTableAttribute)) {
+										continue;
+									}
+									if(((CrudTableAttribute)attributes[i]).TableName!="") {
+										tableName=((CrudTableAttribute)attributes[i]).TableName;
+									}
+								}
+								listTableCommands.Add(MiscData.GenerateTableQuery(tableName));//Generate CREATE TABLE statements from current db.
+							}
+							catch (Exception ex2) {
+								if(ex2.Message.Contains("doesn't exist")) {//table doesn't exist.  Like phone table or other HQ specific tables.
+									continue;
+								}
+							}
+						}
+					}
+					#endregion
+					#region Execute table queries and copy preferences
+					DataTable preferences=Prefs.GetTableFromCache(true);//Copy preferences from current db.
+					//Switch connection to archive db so we can create tables and copy over preferences (keeps track of db version)
+					dcon.SetDb(connectionStrArchive,"",dbTypeArchive,true);
+					odThread.ProgressLog.UpdateProgress("Making new tables");
+					MiscData.MakeTables(listTableCommands);
+					odThread.ProgressLog.UpdateProgress("Inserting preferences");
+					MiscData.InsertPreferences(preferences);
+					#endregion
+					isSuccess=true;
+				},
+				this,
+				"Creating archive database...",
+				ProgBarStyle.Marquee,
+				"CreateArchiveDB",
+				e => this.Invoke(() => {
+					FriendlyException.Show(Lan.g(this,"Error creating the archive database."),e);
+				})
+			);
+			//No matter what happened above, set the db context back to the original connection.
+			dcon.SetDb(connectionStrOrig,"",dbTypeOrig);
+			return isSuccess;
+		}
+
+		///<summary>Performs the actual archive process.  Shows error messages to the user.
+		///Returns true if the archive process was successful; Overwise, false.</summary>
+		private bool Archive(DataConnection dcon,string connectionStrOrig,DatabaseType dbTypeOrig,string connectionStrArchive,
+			DatabaseType dbTypeArchive) 
+		{
+			bool isSuccess=false;
+			ODProgress.ShowProgressForThread(
+				odThread => {
+					#region Insert items from original to archive
+					//Reset to the original db once again.  Bulk insert securitylog entries and securityloghash entries that are prior to the selected date.
+					dcon.SetDb(connectionStrOrig,"",dbTypeOrig);
+					//Insert security logs and security log hashes using our large table helper logic.
+					//Uses insert batches, multiple threads, and makes sure inserts are under the max allowed packet size.
+					odThread.ProgressLog.UpdateProgress("Inserting security logs");
+					string errorMsg=LargeTableHelper.BulkInsertSecurityLogs(textArchiveServerName.Text,
+						textArchiveUser.Text,
+						textArchivePass.Text,
+						dateTimeArchive.Value);
+					//Grab security log max primary key for delete statements later.  
+					long maxPriKeySecurityLog=(LargeTableHelper.ListPriKeyMaxPerBatch.Count>0 ? LargeTableHelper.ListPriKeyMaxPerBatch.Max() : 0);
+					odThread.ProgressLog.UpdateProgress("Inserting security log hashes");
+					//BulkInsertSecurityLogHashes must be run after BulkInsertSecurityLogs.
+					errorMsg+=LargeTableHelper.BulkInsertSecurityLogHashes();
+					//Grab security log hash max primary key for delete statements later.
+					long maxPriKeySecurityLogHash=(LargeTableHelper.ListPriKeyMaxPerBatch.Count>0 ? LargeTableHelper.ListPriKeyMaxPerBatch.Max() : 0);
+					if(errorMsg!="") {
+						throw new ApplicationException(errorMsg);
+					}
+					#endregion
+					#region Verify archive integrity
+					dcon.SetDb(connectionStrArchive,"",dbTypeArchive,true);
+					if(maxPriKeySecurityLog!=0 && SecurityLogs.GetOne(maxPriKeySecurityLog)==null) {
+						throw new ApplicationException("Archival process failed.  The archive securitylog table does not have all of the archived rows.\r\n"
+							+"Please call support.");
+					}
+					if(maxPriKeySecurityLogHash!=0 && SecurityLogHashes.GetOne(maxPriKeySecurityLogHash)==null) {
+						throw new ApplicationException("Archival process failed.  The archive securityloghash table does not have all of the archived rows.\r\n"
+							+"Please call support.");
+					}
+					#endregion
+					#region Delete items from original database
+					dcon.SetDb(connectionStrOrig,"",dbTypeOrig);//Reset to the original db once again.
+					//Cleaning up - Delete SecurityLog and SecurityLogHash items in our original databasesecurity logs
+					odThread.ProgressLog.UpdateProgress("Deleting security logs");
+					SecurityLogs.DeleteWithMaxPriKey(maxPriKeySecurityLog);//Due to the nature of bulk inserts (and how the rows were selected for insert) we only know the maximum primary key.
+					odThread.ProgressLog.UpdateProgress("Deleting security log hashes");
+					SecurityLogHashes.DeleteWithMaxPriKey(maxPriKeySecurityLogHash);//Due to the nature of bulk inserts (and how the rows were selected for insert) we only know the maximum primary key.
+					#endregion
+					#region Save ArchiveDate and defaults
+					Prefs.UpdateDateT(PrefName.ArchiveDate,dateTimeArchive.Value);
+					Prefs.UpdateString(PrefName.ArchiveServerName,textArchiveServerName.Text);
+					Prefs.UpdateString(PrefName.ArchiveUserName,textArchiveUser.Text);
+					string encryptedPass;
+					CDT.Class1.Encrypt(textArchivePass.Text,out encryptedPass);
+					Prefs.UpdateString(PrefName.ArchivePassHash,encryptedPass);
+					#endregion
+					isSuccess=true;
+				},
+				this,
+				"Archiving...",
+				ProgBarStyle.Marquee,
+				"ArchiveDB",
+				ex => this.Invoke(() => {
+					FriendlyException.Show(Lan.g(this,"Error during the archival process."),ex);
+				})
+			);
+			//No matter what happened above, set the db context back to the original connection.
+			dcon.SetDb(connectionStrOrig,"",dbTypeOrig);
+			return isSuccess;
 		}
 
 		private void butSaveArchive_Click(object sender,EventArgs e) {
 			Prefs.UpdateString(PrefName.ArchiveServerName,textArchiveServerName.Text);
-			Prefs.UpdateString(PrefName.ArchiveServerURI,textArchiveURI.Text);
 			Prefs.UpdateString(PrefName.ArchiveUserName,textArchiveUser.Text);
 			string encryptedPass;
       CDT.Class1.Encrypt(textArchivePass.Text,out encryptedPass);
 			Prefs.UpdateString(PrefName.ArchivePassHash,encryptedPass);
+			DataValid.SetInvalid(InvalidType.Prefs);
+			MsgBox.Show(this,"Saved");
 		}
+
+		#endregion
 	}
 
 	///<summary>Backing up can fail at two points, when backing up the database or the A to Z images.  This delegate lets the backup thread manipulate a local variable so that we can let the user know at what point the backup failed.</summary>

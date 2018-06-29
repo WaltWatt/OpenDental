@@ -67,7 +67,8 @@ namespace OpenDentBusiness{
 		#endregion
 
 
-		///<summary>Used when viewing securityLog from the security admin window.  PermTypes can be length 0 to get all types.</summary>
+		///<summary>Used when viewing securityLog from the security admin window.  PermTypes can be length 0 to get all types.
+		///Throws exceptions.</summary>
 		public static SecurityLog[] Refresh(DateTime dateFrom,DateTime dateTo,Permissions permType,long patNum,long userNum,
 			DateTime datePreviousFrom,DateTime datePreviousTo,bool includeArchived,int limit=0) 
 		{
@@ -110,18 +111,12 @@ namespace OpenDentBusiness{
 				}
 				listLogs[i].LogHash=table.Rows[i]["LogHash"].ToString();
 			}
-			if(includeArchived && dateFrom<=PrefC.GetDate(PrefName.ArchiveDate)) {//They are attempting to find security logs that are prior to archived date.
-				string decryptedPass;
-				CDT.Class1.Decrypt(PrefC.GetString(PrefName.ArchivePassHash),out decryptedPass);
-				string connectionStrOrig=DataConnection.GetCurrentConnectionString();
-				DatabaseType dbTypeOrig=DataConnection.DBtype;
-				DataConnection dcon=new DataConnection();
-				//Connect to archive database
-				dcon.SetDb(PrefC.GetString(PrefName.ArchiveServerName)==""?PrefC.GetString(PrefName.ArchiveServerURI):PrefC.GetString(PrefName.ArchiveServerName),
-					"opendentalarchive",PrefC.GetString(PrefName.ArchiveUserName),decryptedPass,"","",dbTypeOrig);
-				DataTable tableArchive=Db.GetTable(command);//Query the archive
+			if(includeArchived) {
+				//This will purposefully throw exceptions.
+				DataTable tableArchive=MiscData.RunFuncOnArchiveDatabase<DataTable>(() => {
+					return Db.GetTable(command);
+				});
 				List<SecurityLog> listLogsArchive=Crud.SecurityLogCrud.TableToList(tableArchive);
-				dcon.SetDb(connectionStrOrig,"",dbTypeOrig);//Reconnect to initial db
 				Dictionary<long,Patient> dictPats=Patients.GetMultPats(listLogsArchive.Select(x => x.PatNum).Distinct().ToList())
 					.ToDictionary(x => x.PatNum);
 				for(int i=0;i<listLogsArchive.Count;i++) {
@@ -156,7 +151,12 @@ namespace OpenDentBusiness{
 			return Refresh(patNum,permTypes,new List<long>(){ fKey },includeArchived);
 		}
 
-		///<summary>Used when viewing various audit trails of specific types.  This overload will return security logs for multiple objects (or fKeys).  Typically you will only need a specific type audit log for one type.  However, for things like ortho charts, each row (FK) in the database represents just one part of a larger ortho chart "object".  Thus, to get the full experience of a specific type audit trail window, we need to get security logs for multiple objects (FKs) that comprise the larger object (what the user sees).  Only implemented with ortho chart so far.  FKeys can be null.</summary>
+		///<summary>Used when viewing various audit trails of specific types.  This overload will return security logs for multiple objects (or fKeys).
+		///Typically you will only need a specific type audit log for one type.
+		///However, for things like ortho charts, each row (FK) in the database represents just one part of a larger ortho chart "object".
+		///Thus, to get the full experience of a specific type audit trail window, we need to get security logs for multiple objects (FKs) that
+		///comprise the larger object (what the user sees).  Only implemented with ortho chart so far.  FKeys can be null.
+		///Throws exceptions.</summary>
 		public static SecurityLog[] Refresh(long patNum,List<Permissions> permTypes,List<long> fKeys,bool includeArchived) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
 				return Meth.GetObject<SecurityLog[]>(MethodBase.GetCurrentMethod(),patNum,permTypes,fKeys,includeArchived);
@@ -180,16 +180,10 @@ namespace OpenDentBusiness{
 			command+="ORDER BY LogDateTime";
 			List<SecurityLog> listLogs=Crud.SecurityLogCrud.SelectMany(command);
 			if(includeArchived) {
-				string decryptedPass;
-				CDT.Class1.Decrypt(PrefC.GetString(PrefName.ArchivePassHash),out decryptedPass);
-				string connectionStrOrig=DataConnection.GetCurrentConnectionString();
-				DatabaseType dbTypeOrig=DataConnection.DBtype;
-				DataConnection dcon=new DataConnection();
-				//Connect to archive database
-				dcon.SetDb(PrefC.GetString(PrefName.ArchiveServerName)==""?PrefC.GetString(PrefName.ArchiveServerURI):PrefC.GetString(PrefName.ArchiveServerName),
-					"opendentalarchive",PrefC.GetString(PrefName.ArchiveUserName),decryptedPass,"","",dbTypeOrig);
-				listLogs.AddRange(Crud.SecurityLogCrud.SelectMany(command));//Append results
-				dcon.SetDb(connectionStrOrig,"",dbTypeOrig);//Reconnect to initial db
+				//This will purposefully throw exceptions.
+				listLogs.AddRange(MiscData.RunFuncOnArchiveDatabase<List<SecurityLog>>(() => {
+					return Crud.SecurityLogCrud.SelectMany(command);
+				}));
 			}
 			return listLogs.OrderBy(x => x.LogDateTime).ToArray();
 		}

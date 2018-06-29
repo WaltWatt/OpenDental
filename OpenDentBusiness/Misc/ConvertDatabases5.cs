@@ -8671,5 +8671,20 @@ No Action Required in many cases, check your new patient Web Sched on your web s
 			}
 			Db.NonQ(command);
 		}
+
+		private static void To18_1_32() {
+			string command="SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = 'opendentalarchive'";
+			DataTable table=Db.GetTable(command);
+			if(table.Rows.Count==1) {
+				//Check the preference table to double check that this database has made a valid archive before.
+				command="SELECT ValueString FROM preference WHERE PrefName = 'ArchiveDate'";
+				DateTime dateArchive=PIn.Date(Db.GetScalar(command));
+				if(dateArchive.Year > 1880) {
+					//This is most likely the database that had its data archived into the opendentalarchive database.
+					//Rename the opendentalarchive database to '[currentdatabasename]_archive' so that multiple databases on the same server can archive.
+					LargeTableHelper.RenameDatabase("opendentalarchive",(Db.GetScalar("SELECT DATABASE()")+"_archive"));
+				}
+			}
+		}
 	}
 }

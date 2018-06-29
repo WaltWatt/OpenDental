@@ -473,14 +473,20 @@ namespace OpenDental{
 			if(textDateEditedTo.Text!="") { 
 				datePreviousTo=PIn.Date(textDateEditedTo.Text);
 			}
-			if(comboPermission.SelectedIndex==0) {
-				logList=SecurityLogs.Refresh(PIn.Date(textDateFrom.Text),PIn.Date(textDateTo.Text),
-					Permissions.None,PatNum,userNum,datePreviousFrom,datePreviousTo,checkIncludeArchived.Checked,PIn.Int(textRows.Text));
+			try {
+				if(comboPermission.SelectedIndex==0) {
+					logList=SecurityLogs.Refresh(PIn.Date(textDateFrom.Text),PIn.Date(textDateTo.Text),
+						Permissions.None,PatNum,userNum,datePreviousFrom,datePreviousTo,checkIncludeArchived.Checked,PIn.Int(textRows.Text));
+				}
+				else {
+					logList=SecurityLogs.Refresh(PIn.Date(textDateFrom.Text),PIn.Date(textDateTo.Text),
+						(Permissions)Enum.Parse(typeof(Permissions),comboPermission.SelectedItem.ToString()),PatNum,userNum,
+						datePreviousFrom,datePreviousTo,checkIncludeArchived.Checked,PIn.Int(textRows.Text));
+				}
 			}
-			else {
-				logList=SecurityLogs.Refresh(PIn.Date(textDateFrom.Text),PIn.Date(textDateTo.Text),
-					(Permissions)Enum.Parse(typeof(Permissions),comboPermission.SelectedItem.ToString()),PatNum,userNum,
-					datePreviousFrom,datePreviousTo,checkIncludeArchived.Checked,PIn.Int(textRows.Text));
+			catch(Exception ex) {
+				FriendlyException.Show(Lan.g(this,"There was a problem refreshing the Audit Trail with the current filters."),ex);
+				logList=new SecurityLog[0];
 			}
 			grid.BeginUpdate();
 			grid.Columns.Clear();
@@ -494,8 +500,7 @@ namespace OpenDental{
 			grid.Columns.Add(new ODGridColumn(Lan.g("TableAudit","Last Edit"),100));
 			grid.Rows.Clear();
 			ODGridRow row;
-			for(int i=0;i<logList.Length;i++) {
-				SecurityLog logCur = logList[i];
+			foreach(SecurityLog logCur in logList) {
 				row=new ODGridRow();
 				row.Cells.Add(logCur.LogDateTime.ToShortDateString());
 				row.Cells.Add(logCur.LogDateTime.ToShortTimeString());

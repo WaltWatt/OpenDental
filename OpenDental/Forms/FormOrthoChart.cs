@@ -654,10 +654,17 @@ namespace OpenDental {
 		}
 
 		private void butAudit_Click(object sender,EventArgs e) {
-			FormAuditOrtho FormAO=new FormAuditOrtho();
-			SecurityLog[] orthoChartLogs=SecurityLogs.Refresh(_patCur.PatNum,new List<Permissions> { Permissions.OrthoChartEditFull },null,checkIncludeArchived.Checked);
-			SecurityLog[] patientFieldLogs=SecurityLogs.Refresh(new DateTime(1,1,1),DateTime.Today,Permissions.PatientFieldEdit,_patCur.PatNum,0,
-				DateTime.MinValue,DateTime.Today,checkIncludeArchived.Checked);
+			SecurityLog[] orthoChartLogs;
+			SecurityLog[] patientFieldLogs;
+			try {
+				orthoChartLogs=SecurityLogs.Refresh(_patCur.PatNum,new List<Permissions> { Permissions.OrthoChartEditFull },null,checkIncludeArchived.Checked);
+				patientFieldLogs=SecurityLogs.Refresh(new DateTime(1,1,1),DateTime.Today,Permissions.PatientFieldEdit,_patCur.PatNum,0,
+					DateTime.MinValue,DateTime.Today,checkIncludeArchived.Checked);
+			}
+			catch(Exception ex) {
+				FriendlyException.Show(Lan.g(this,"There was a problem loading the Audit Trail."),ex);
+				return;
+			}
 			SortedDictionary<DateTime,List<SecurityLog>> dictDatesOfServiceLogEntries=new SortedDictionary<DateTime,List<SecurityLog>>();
 			//Add all dates from grid first, some may not have audit trail entries, but should be selectable from FormAO
 			for(int i=0;i<gridMain.Rows.Count;i++) {
@@ -675,6 +682,7 @@ namespace OpenDental {
 				}
 				dictDatesOfServiceLogEntries[dtCur].Add(orthoChartLogs[i]);//add entry to existing list.
 			}
+			FormAuditOrtho FormAO=new FormAuditOrtho();
 			FormAO.DictDateOrthoLogs=dictDatesOfServiceLogEntries;
 			FormAO.PatientFieldLogs.AddRange(patientFieldLogs);
 			FormAO.ShowDialog();

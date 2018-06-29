@@ -178,12 +178,17 @@ namespace OpenDentBusiness {
 		ApptsCheckFrequency,
 		///<summary>Bool; False by default.  When true, the secondary provider used when scheduling an appointment will use the Operatory's secondary provider no matter what.</summary>
 		ApptSecondaryProviderConsiderOpOnly,
-		///<summary>Date, MinDate by default.  When set, it represents the date used to archive as of.</summary>
+		///<summary>Date, MinDate by default.  The Date that was set within the "Archive entries on or before:" field within the Archive tab of the 
+		///Backup window when the archive process was last ran successfully.</summary>
 		ArchiveDate,
-		///<summary>The next four preferences contain information for the archival server.  Password hash, name, uri, and username.</summary>
+		///<summary>Encrypted password for the database user that will be used when directly connecting to the archive server.</summary>
 		ArchivePassHash,
+		///<summary>The name of the server where the archive database should be located.</summary>
 		ArchiveServerName,
+		///<summary>DEPRECATED.  Archiving with Middle Tier connection never fully implemented.  Here was the original intent behind the preference:
+		///URI to a Middle Tier web service that is connected to the database where archives should be made.</summary>
 		ArchiveServerURI,
+		///<summary>The user name for the database user that will be used when directly connecting to the archive server.</summary>
 		ArchiveUserName,
 		///<summary>Default billing types selected when loading the Unsent Tab of the Accounts Receivable Manager.</summary>
 		ArManagerBillingTypes,

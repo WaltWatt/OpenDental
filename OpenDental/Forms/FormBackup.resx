@@ -118,7 +118,8 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="label7.Text" xml:space="preserve">
-    <value>The archival process will archive entries in the SecurityLog and SecurityLogHash tables.  Using the archive server settings, rows will be moved from this current database to the archive database with log date on or before the date selected.
+    <value>The archival process will archive entries in the SecurityLog and SecurityLogHash tables.  
+Using the archive server settings, rows will be moved from this current database to the archive database with log date on or before the date selected.
 DO NOT TURN OFF OR RESTART THIS COMPUTER UNTIL THE PROCESS HAS FINISHED!</value>
   </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />

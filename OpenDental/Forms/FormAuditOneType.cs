@@ -132,10 +132,13 @@ namespace OpenDental{
 			FillGrid();
 		}
 
-		private void FillGrid(){
-			//Fill the log if it wasn't filled outside of this window.
-			if(LogList==null) {
+		private void FillGrid() {
+			try {
 				LogList=SecurityLogs.Refresh(PatNum,PermTypes,FKey,checkIncludeArchived.Checked);
+			}
+			catch(Exception ex) {
+				FriendlyException.Show(Lan.g(this,"There was a problem refreshing the Audit Trail with the current filters."),ex);
+				LogList=new SecurityLog[0];
 			}
 			grid.BeginUpdate();
 			grid.Columns.Clear();
@@ -151,18 +154,18 @@ namespace OpenDental{
 			grid.Rows.Clear();
 			ODGridRow row;
 			Userod user;
-			for(int i=0;i<LogList.Length;i++){
+			foreach(SecurityLog logCur in LogList) {
 				row=new ODGridRow();
-				row.Cells.Add(LogList[i].LogDateTime.ToShortDateString()+" "+LogList[i].LogDateTime.ToShortTimeString());
-				user=Userods.GetUser(LogList[i].UserNum);
+				row.Cells.Add(logCur.LogDateTime.ToShortDateString()+" "+logCur.LogDateTime.ToShortTimeString());
+				user=Userods.GetUser(logCur.UserNum);
 				if(user==null) {//Will be null for audit trails made by outside entities that do not require users to be logged in.  E.g. Web Sched.
 					row.Cells.Add("unknown");
 				}
 				else {
 					row.Cells.Add(user.UserName);
 				}
-				row.Cells.Add(LogList[i].PermType.ToString());
-				row.Cells.Add(LogList[i].LogText);
+				row.Cells.Add(logCur.PermType.ToString());
+				row.Cells.Add(logCur.LogText);
 				grid.Rows.Add(row);
 			}
 			grid.EndUpdate();

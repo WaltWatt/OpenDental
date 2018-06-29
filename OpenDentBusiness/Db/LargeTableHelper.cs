@@ -142,6 +142,64 @@ namespace OpenDentBusiness {
 		}
 		#endregion Getters/Setters
 
+		#region Database Methods
+
+		///<summary>Renames the database that has the exact name of databaseNameCur to databaseNameNew.
+		///The renaming process extremely fast (not moving any data) but is rather convoluted:
+		///1. Check to see if databaseNameCur exists (throw if it doesn't)
+		///2. Check to see if databaseNameNew exists (throw if it does)
+		///3. Create a new database utilizing databaseNameNew.
+		///4. Rename each individual table one at a time using database specificity (e.g. [databaseNameCur].appointment => [databaseNameNew].appointment)
+		///5. Verify that no tables exist within databaseNameCur (throw if some linger)
+		///6. Drop databaseNameCur.
+		///Throws exceptions.</summary>
+		public static void RenameDatabase(string databaseNameCur,string databaseNameNew) {
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				Meth.GetVoid(MethodBase.GetCurrentMethod(),databaseNameCur,databaseNameNew);
+				return;
+			}
+			#region Pre-validation
+			string command="SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '"+POut.String(databaseNameCur)+"'";
+			DataTable table=Db.GetTable(command);
+			if(table.Rows.Count==0) {
+				throw new ApplicationException("Database does not exist so it cannot be renamed: "+POut.String(databaseNameCur));
+			}
+			command="SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '"+POut.String(databaseNameNew)+"'";
+			table=Db.GetTable(command);
+			if(table.Rows.Count > 0) {
+				throw new ApplicationException("Database already exists so it cannot have another database renamed to it: "+POut.String(databaseNameNew));
+			}
+			#endregion
+			#region Create databaseNameNew
+			command="CREATE DATABASE `"+POut.String(databaseNameNew)+"` CHARACTER SET utf8";
+			Db.NonQ(command);
+			#endregion
+			#region Rename
+			//Get the names of all tables within databaseNameCur.
+			command="SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='"+POut.String(databaseNameCur)+"'";
+			table=Db.GetTable(command);
+			//Loop through every table for databaseNameCur and rename it to databaseNameCur.
+			foreach(DataRow row in table.Rows) {
+				command="RENAME TABLE `"+POut.String(databaseNameCur)+"`.`"+row["TABLE_NAME"].ToString()+"` "
+					+"TO `"+POut.String(databaseNameNew)+"`.`"+row["TABLE_NAME"].ToString()+"`";
+				Db.NonQ(command);
+			}
+			#endregion
+			#region Post-validation and Cleanup
+			//Verify that there are no tables left within databaseNameCur.
+			command="SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='"+POut.String(databaseNameCur)+"'";
+			table=Db.GetTable(command);
+			if(table.Rows.Count > 0) {
+				throw new ApplicationException("Not all tables were successfully renamed from the database: "+POut.String(databaseNameCur));
+			}
+			//Drop databaseNameCur.
+			command="DROP DATABASE `"+POut.String(databaseNameCur)+"`";
+			Db.NonQ(command);
+			#endregion
+		}
+
+		#endregion
+
 		#region Large Table Methods
 		public static string GetCurrentDatabase() {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
@@ -613,7 +671,7 @@ namespace OpenDentBusiness {
 			ServerTo=POut.String(serverName);
 			UserTo=POut.String(userName);
 			PasswordTo=POut.String(pass);
-			DatabaseTo="opendentalarchive";
+			DatabaseTo=MiscData.GetArchiveDatabaseName();
 			TableName="securitylog";
 			TablePriKey="SecurityLogNum";
 			try { 
@@ -629,12 +687,14 @@ namespace OpenDentBusiness {
 		///<summary>Uses bulk insertion techniques to find and insert all securityloghash rows that are in the specified server/database and equal to or prior to the date.
 		///NOTE ----- MUST BE RUN AFTER BulkInsertSecurityLogs - DOES NOT WORK WITH RANDOM PRIMARY KEYS</summary>
 		public static string BulkInsertSecurityLogHashes() {
-			DatabaseTo="opendentalarchive";
+			DatabaseTo=MiscData.GetArchiveDatabaseName();
 			TableName="securityloghash";
 			TablePriKey="SecurityLogHashNum";
-			try { 
-				//Insert security log hashes that correspond to maximum security log primary key obtained previously.,
-				InsertIntoLargeTable("WHERE SecurityLogNum <= "+POut.Long(LargeTableHelper.ListPriKeyMaxPerBatch.Max()));
+			try {
+				//Insert security log hashes that correspond to maximum security log primary key obtained previously.
+				if(LargeTableHelper.ListPriKeyMaxPerBatch!=null && LargeTableHelper.ListPriKeyMaxPerBatch.Count > 0) {
+					InsertIntoLargeTable("WHERE SecurityLogNum <= "+POut.Long(LargeTableHelper.ListPriKeyMaxPerBatch.Max()));
+				}
 			}
 			catch (Exception ex) {
 				return ex.Message;

@@ -149,13 +149,13 @@ namespace OpenDentBusiness {
 			return 0;
 		}
 		
-		///<summary>SetDbT prior to calling.</summary>
-		public static void MakeArchive() {
+		///<summary></summary>
+		public static void CreateArchiveDatabase() {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
 				Meth.GetVoid(MethodBase.GetCurrentMethod());
 				return;
 			}
-			string command="CREATE DATABASE `opendentalarchive` CHARACTER SET utf8";
+			string command="CREATE DATABASE `"+GetArchiveDatabaseName()+"` CHARACTER SET utf8";
 			Db.NonQ(command);//We should already be connected to the archive server.
 		}
 
@@ -203,6 +203,61 @@ namespace OpenDentBusiness {
 			string command="SELECT database()";
 			DataTable table=Db.GetTable(command);
 			return PIn.String(table.Rows[0][0].ToString());
+		}
+
+		///<summary>Returns the name of the archive database based on the current connection settings.
+		///E.g. if the current database that is connected is called 'opendental182' then the archive name will be 'opendental182_archive'</summary>
+		public static string GetArchiveDatabaseName() {
+			//No need to check RemotingRole; no call to db.
+			return GetCurrentDatabase()+"_archive";
+		}
+
+		///<summary>Makes a connection to the archive database, validates that the version of the database is the same as the current database version,
+		///executes the func passed in, and then sets the connection back to the original database before returning the results of the func passed in.
+		///Optionally pass in connection settings to override the archive preferences.  Throws exceptions.</summary>
+		public static T RunFuncOnArchiveDatabase<T>(Func<T> f) {
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				//This method will eventually invoke SetDB() which is unacceptable for the Middle Tier.
+				throw new ApplicationException("Archive databases are not available to Middle Tier users.");
+			}
+			string connectionStrOrig=DataConnection.GetCurrentConnectionString();
+			DatabaseType dbTypeOrig=DataConnection.DBtype;
+			DataConnection dcon=new DataConnection();
+			try {
+				//Keep track of the original connection settings so that we can revert back to them once finished archiving.
+				Version versionDbOrig=new Version(PrefC.GetString(PrefName.DataBaseVersion));
+				string archiveServerName=PrefC.GetString(PrefName.ArchiveServerName);
+				string archiveUserName=PrefC.GetString(PrefName.ArchiveUserName);
+				string decryptedPass;
+				CDT.Class1.Decrypt(PrefC.GetString(PrefName.ArchivePassHash),out decryptedPass);
+				//Connect to the archive database.  This can throw many exceptions.
+				dcon.SetDb(archiveServerName,MiscData.GetArchiveDatabaseName(),archiveUserName,decryptedPass,"","",dbTypeOrig);
+				#region Validate archive database version
+				//At this point there is an active connection to the archive database, validate the DataBaseVersion.
+				string version=PrefC.GetStringNoCache(PrefName.DataBaseVersion);
+				if(string.IsNullOrEmpty(version)) {
+					//Preference table does not have version information.  Somehow they have a database with proper structure but no data.
+					//This archive database can't be trusted and we have no idea what version the schema is at.
+					//They need to call support so that we can take a look or they need to delete the invalid archive (or remove it from the data dir) 
+					//so that a new archive database can be made from scratch.
+					throw new ApplicationException("Invalid archive database detected.");
+				}
+				Version versionDbArchive=new Version(version);
+				if(versionDbOrig>versionDbArchive) {
+					//The archive database needs to be updated before funcs can be invoked against it.
+					throw new ApplicationException("Archive database is at a lower version than the current database."
+						+"  Run the Archive tool in order to update the database.");
+				}
+				else if(versionDbArchive>versionDbOrig) {
+					throw new ApplicationException("Archive database version is higher than the current database.  Process cannot continue.");
+				}
+				#endregion
+				//Invoke the func passed in.
+				return f();
+			}
+			finally {//Always put the connection back to the original no matter what happened above when trying to make an archive.
+				dcon.SetDb(connectionStrOrig,"",dbTypeOrig);//It is acceptable to crash the program if this fails.
+			}
 		}
 
 		///<summary>Returns the major and minor version of MySQL for the current connection.  Returns a version of 0.0 if the MySQL version cannot be determined.</summary>
