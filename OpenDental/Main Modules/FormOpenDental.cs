@@ -4640,6 +4640,7 @@ namespace OpenDental{
 		///<summary>This is used to set the private class wide variable _clinicNum and refreshes the current module.</summary>
 		private void RefreshCurrentClinic(Clinic clinicCur) {
 			Clinics.ClinicNum=clinicCur.ClinicNum;
+			Text=PatientL.GetMainTitle(Patients.GetPat(CurPatNum),Clinics.ClinicNum);
 			SetSmsNotificationText();
 			if(PrefC.GetBool(PrefName.AppointmentClinicTimeReset)) {
 				AppointmentL.DateSelected=DateTimeOD.Today;
