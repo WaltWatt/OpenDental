@@ -95,6 +95,7 @@ namespace OpenDental {
 		private UI.Button butSelectAll;
 		private Label label11;
 		private UI.Button butPayPlanPayments;
+		private CheckBox checkShowHidden;
 
 		///<summary>This bool keeps track of whether we need to invalidate cache for all users.</summary>
 		private bool _isCacheInvalid; 
@@ -189,6 +190,7 @@ namespace OpenDental {
 			this.label9 = new System.Windows.Forms.Label();
 			this.butRawEmails = new OpenDental.UI.Button();
 			this.labelSkipCheckTable = new System.Windows.Forms.Label();
+			this.checkShowHidden = new System.Windows.Forms.CheckBox();
 			this.contextMenuStrip1.SuspendLayout();
 			this.tabControlDBM.SuspendLayout();
 			this.tabChecks.SuspendLayout();
@@ -673,6 +675,7 @@ namespace OpenDental {
 			// tabOld
 			// 
 			this.tabOld.BackColor = System.Drawing.Color.Transparent;
+			this.tabOld.Controls.Add(this.checkShowHidden);
 			this.tabOld.Controls.Add(this.textNoneOld);
 			this.tabOld.Controls.Add(this.butNoneOld);
 			this.tabOld.Controls.Add(this.butFixOld);
@@ -765,6 +768,7 @@ namespace OpenDental {
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.gridOld.CellFont = new System.Drawing.Font("Microsoft Sans Serif", 8.5F);
+			this.gridOld.ContextMenuStrip = this.contextMenuStrip1;
 			this.gridOld.HasAddButton = false;
 			this.gridOld.HasDropDowns = false;
 			this.gridOld.HasMultilineHeaders = true;
@@ -781,6 +785,7 @@ namespace OpenDental {
 			this.gridOld.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
 			this.gridOld.TitleHeight = 18;
 			this.gridOld.TranslationName = "TableOldDbmMethods";
+			this.gridOld.MouseUp += new System.Windows.Forms.MouseEventHandler(this.gridOld_MouseUp);
 			// 
 			// tabTools
 			// 
@@ -957,6 +962,18 @@ namespace OpenDental {
 			this.labelSkipCheckTable.TextAlign = System.Drawing.ContentAlignment.TopCenter;
 			this.labelSkipCheckTable.Visible = false;
 			// 
+			// checkShowHidden
+			// 
+			this.checkShowHidden.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.checkShowHidden.Location = new System.Drawing.Point(6, 514);
+			this.checkShowHidden.Name = "checkShowHidden";
+			this.checkShowHidden.Size = new System.Drawing.Size(134, 17);
+			this.checkShowHidden.TabIndex = 103;
+			this.checkShowHidden.Text = "Show Hidden";
+			this.checkShowHidden.UseVisualStyleBackColor = true;
+			this.checkShowHidden.CheckedChanged += new System.EventHandler(this.checkShowHidden_CheckedChanged);
+
+			// 
 			// FormDatabaseMaintenance
 			// 
 			this.AcceptButton = this.butCheck;
@@ -1060,16 +1077,28 @@ namespace OpenDental {
 
 		private void FillGridOld() {
 			_listDbmMethodsGridOld=GetDbmMethodsForGrid(isHidden: false,isOld: true);
+			_listDbmMethodsGridOld.AddRange(GetDbmMethodsForGrid(isHidden: true,isOld: true));
+			_listDbmMethodsGridOld.Sort(new MethodInfoComparer());
 			gridOld.BeginUpdate();
 			gridOld.Columns.Clear();
 			gridOld.Columns.Add(new ODGridColumn(Lan.g(this,"Name"),300));
+			if(checkShowHidden.Checked) {
+				gridOld.Columns.Add(new ODGridColumn(Lan.g(this,"Hidden"),45,HorizontalAlignment.Center));
+			}
 			gridOld.Columns.Add(new ODGridColumn(Lan.g(this,"Break\r\nDown"),40,HorizontalAlignment.Center));
 			gridOld.Columns.Add(new ODGridColumn(Lan.g(this,"Results"),0));
 			gridOld.Rows.Clear();
 			ODGridRow row;
 			for(int i = 0;i<_listDbmMethodsGridOld.Count;i++) {
+				bool isMethodHidden=_listDatabaseMaintenances.Any(x => x.MethodName==_listDbmMethodsGridOld[i].Name && x.IsHidden);
+				if(!checkShowHidden.Checked && isMethodHidden) {
+					continue;
+				}
 				row=new ODGridRow();
 				row.Cells.Add(_listDbmMethodsGridOld[i].Name);
+				if(checkShowHidden.Checked) {
+					row.Cells.Add(isMethodHidden ? "X" : "");
+				}
 				row.Cells.Add(DatabaseMaintenances.MethodHasBreakDown(_listDbmMethodsGridOld[i]) ? "X" : "");
 				row.Cells.Add("");
 				row.Tag=_listDbmMethodsGridOld[i];
@@ -1114,42 +1143,60 @@ namespace OpenDental {
 		}
 
 		private void gridMain_MouseUp(object sender,MouseEventArgs e) {
-			if(gridMain.SelectedIndices.Length==0) {
-				contextMenuStrip1.Hide();
-				return;
-			}
-			if(e.Button==MouseButtons.Right) {
-				//Shouldn't ever happen, but in case the user clicks on the edge of a control or something
-				MethodInfo method=(MethodInfo)gridMain.Rows[gridMain.SelectedIndices[0]].Tag;
-				if(method!=null) {
-					hideToolStripMenuItem.Visible=true;
-					unhideToolStripMenuItem.Visible=false;
-				}
-			}
+			OnMouseUp(e,gridMain);
 		}
 
 		private void gridHidden_MouseUp(object sender,MouseEventArgs e) {
-			if(gridHidden.SelectedIndices.Length==0) {
+			OnMouseUp(e,gridHidden);
+		}
+
+		private void gridOld_MouseUp(object sender,MouseEventArgs e) {
+			OnMouseUp(e,gridOld);
+		}
+
+		private void OnMouseUp(MouseEventArgs e,ODGrid grid) {
+			if(grid.SelectedIndices.Length==0 || e.Button!=MouseButtons.Right) {
 				contextMenuStrip1.Hide();
 				return;
 			}
-			if(e.Button==MouseButtons.Right) {
-				MethodInfo method=(MethodInfo)gridHidden.Rows[gridHidden.SelectedIndices[0]].Tag;
-				if(method!=null) {
-					hideToolStripMenuItem.Visible=false;
-					unhideToolStripMenuItem.Visible=true;
-				}
+			MethodInfo method=(MethodInfo)grid.Rows[grid.SelectedIndices[0]].Tag;
+			if(method!=null) {
+				bool isMethodHidden=_listDatabaseMaintenances.Any(x => x.MethodName==method.Name && x.IsHidden);
+				hideToolStripMenuItem.Visible=!isMethodHidden;
+				unhideToolStripMenuItem.Visible=isMethodHidden;
 			}
 		}
 
 		private void hideToolStripMenuItem_Click(object sender,EventArgs e) {
-			//Users can only hide DBM methods from gridMain.
-			UpdateDbmIsHiddenForGrid(gridMain,true);
+			//Users can only hide DBM methods from gridMain or gridOld.
+			switch(tabControlDBM.SelectedIndex) {
+				case 0://tabChecks
+					UpdateDbmIsHiddenForGrid(gridMain,true);
+					break;
+				case 2://tabOld
+					UpdateDbmIsHiddenForGrid(gridOld,true);
+					break;
+				case 1://tabHidden
+				case 3://tabTools
+				default:
+					return;
+			}
 		}
 
 		private void unhideToolStripMenuItem_Click(object sender,EventArgs e) {
-			//Users can only unhide DBM methods from gridHidden.
-			UpdateDbmIsHiddenForGrid(gridHidden,false);
+			//Users can only unhide DBM methods from gridHidden or gridOld.
+			switch(tabControlDBM.SelectedIndex) {
+				case 1://tabHidden
+					UpdateDbmIsHiddenForGrid(gridHidden,false);
+					break;
+				case 2://tabOld
+					UpdateDbmIsHiddenForGrid(gridOld,false);
+					break;
+				case 0://tabChecks
+				case 3://tabTools
+				default:
+					return;
+			}
 		}
 
 		private void UpdateDbmIsHiddenForGrid(ODGrid grid,bool isHidden) {
@@ -1165,6 +1212,7 @@ namespace OpenDental {
 			_listDatabaseMaintenances=DatabaseMaintenances.GetAll();
 			FillGrid();
 			FillGridHidden();
+			FillGridOld();
 		}
 
 		private void butNone_Click(object sender,EventArgs e) {
@@ -1382,9 +1430,13 @@ namespace OpenDental {
 				MsgBox.Show(this,"Must have at least three columns in the grid.");
 				return;
 			}
+			int colresults=2;
+			if(grid==gridOld && checkShowHidden.Checked) {
+				colresults=3;//There is an extra "Hidden" column to account for when setting the "Results" column.
+			}
 			//Clear out the result column for all rows before every "run"
 			for(int i=0;i<grid.Rows.Count;i++) {
-				grid.Rows[i].Cells[2].Text="";//Don't use UpdateResultTextForRow here because users will see the rows clearing out one by one.
+				grid.Rows[i].Cells[colresults].Text="";//Don't use UpdateResultTextForRow here because users will see the rows clearing out one by one.
 			}
 			bool verbose=checkShow.Checked;
 			StringBuilder logText=new StringBuilder();
@@ -1460,15 +1512,19 @@ namespace OpenDental {
 
 		/// <summary>Updates the result column for the specified row in gridMain with the text passed in.</summary>
 		private void UpdateResultTextForRow(ODGrid grid,MethodInfo method,int index,string text) {
+			int colresults=2;
+			if(grid==gridOld && checkShowHidden.Checked) {
+				colresults=3;//There is an extra "Hidden" column to account for when setting the "Results" column.
+			}
 			grid.BeginUpdate();
 			//Checks to see if it has a breakdown, and if it needs any maintenenece to decide whether or not to apply the "X"
 			if(!DatabaseMaintenances.MethodHasBreakDown(method) || text == "Done.  No maintenance needed.") {
-				grid.Rows[index].Cells[1].Text="";
+				grid.Rows[index].Cells[colresults-1].Text="";
 			}
 			else {
-				grid.Rows[index].Cells[1].Text="X";
+				grid.Rows[index].Cells[colresults-1].Text="X";
 			}
-			grid.Rows[index].Cells[2].Text=text;
+			grid.Rows[index].Cells[colresults].Text=text;
 			grid.EndUpdate();
 			Application.DoEvents();
 		}
@@ -1520,6 +1576,10 @@ namespace OpenDental {
 			ev.Graphics.DrawString(LogTextPrint,font,Brushes.Black,ev.MarginBounds,StringFormat.GenericTypographic);
 			LogTextPrint=LogTextPrint.Substring(charsOnPage);
 			ev.HasMorePages=(LogTextPrint.Length > 0);
+		}
+
+		private void checkShowHidden_CheckedChanged(object sender,EventArgs e) {
+			FillGridOld();
 		}
 
 		private void butCheck_Click(object sender,System.EventArgs e) {
