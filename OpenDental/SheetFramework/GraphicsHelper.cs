@@ -143,22 +143,26 @@ namespace OpenDental {
 			if(lineIndex<0 || GetTextLineCount(textbox)==0) {
 				return new RichTextLineInfo();
 			}
-			RichTextBox rtb=new RichTextBox();//Copy values to new RichTextBox because we might modify text below.
-			rtb.Text=textbox.Text;
-			rtb.Font=textbox.Font;
-			rtb.Size=textbox.Size;
 			RichTextLineInfo lineInfo=new RichTextLineInfo();
-			//GetFirstCharIndexFromLine() returns -1 if lineIndex is past the last line.
-			lineInfo.FirstCharIndex=rtb.GetFirstCharIndexFromLine(lineIndex);//-1 if lineIndex >= count of lines in rtb.
-			if(lineInfo.FirstCharIndex==-1) {//Return the last line's information.
-				lineIndex=GetTextLineCount(rtb)-1;
-				lineInfo.FirstCharIndex=rtb.GetFirstCharIndexFromLine(lineIndex);//First character of last line.
+			Point posThisLine;
+			Point posNextLine;
+			using(RichTextBox rtb = new RichTextBox()) {
+				//Copy values to new RichTextBox because we might modify text below.
+				rtb.Text=textbox.Text;
+				rtb.Font=textbox.Font;
+				rtb.Size=textbox.Size;
+				//GetFirstCharIndexFromLine() returns -1 if lineIndex is past the last line.
+				lineInfo.FirstCharIndex=rtb.GetFirstCharIndexFromLine(lineIndex);//-1 if lineIndex >= count of lines in rtb.
+				if(lineInfo.FirstCharIndex==-1) {//Return the last line's information.
+					lineIndex=GetTextLineCount(rtb)-1;
+					lineInfo.FirstCharIndex=rtb.GetFirstCharIndexFromLine(lineIndex);//First character of last line.
+				}
+				if(lineIndex==GetTextLineCount(rtb)-1) {//This is the last line.
+					rtb.AppendText("\r\n\t");//Add a phony line.
+				}
+				posThisLine=rtb.GetPositionFromCharIndex(lineInfo.FirstCharIndex);
+				posNextLine=rtb.GetPositionFromCharIndex(rtb.GetFirstCharIndexFromLine(lineIndex+1));//Top of next line=bottom of this line.
 			}
-			if(lineIndex==GetTextLineCount(rtb)-1) {//This is the last line.
-				rtb.AppendText("\r\n\t");//Add a phony line.
-			}
-			Point posThisLine=rtb.GetPositionFromCharIndex(lineInfo.FirstCharIndex);
-			Point posNextLine=rtb.GetPositionFromCharIndex(rtb.GetFirstCharIndexFromLine(lineIndex+1));//Top of next line=bottom of this line.
 			lineInfo.Left=posThisLine.X;
 			lineInfo.Top=posThisLine.Y;
 			lineInfo.Bottom=posNextLine.Y;
