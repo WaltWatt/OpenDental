@@ -53,6 +53,8 @@
 			this.textJobNum = new System.Windows.Forms.TextBox();
 			this.label1 = new System.Windows.Forms.Label();
 			this.panel4 = new System.Windows.Forms.Panel();
+			this.butEmail = new OpenDental.UI.Button();
+			this.butCommlog = new OpenDental.UI.Button();
 			this.label10 = new System.Windows.Forms.Label();
 			this.textSchedDate = new System.Windows.Forms.TextBox();
 			this.butActions = new OpenDental.UI.Button();
@@ -62,6 +64,8 @@
 			this.tabControlMain = new System.Windows.Forms.TabControl();
 			this.tabMain = new System.Windows.Forms.TabPage();
 			this.gridNotes = new OpenDental.UI.ODGrid();
+			this.tabReviews = new System.Windows.Forms.TabPage();
+			this.gridReview = new OpenDental.UI.ODGrid();
 			this.tabHistory = new System.Windows.Forms.TabPage();
 			this.panel2 = new System.Windows.Forms.Panel();
 			this.gridHistory = new OpenDental.UI.ODGrid();
@@ -78,6 +82,7 @@
 			this.splitContainerNoFlicker2.SuspendLayout();
 			this.tabControlMain.SuspendLayout();
 			this.tabMain.SuspendLayout();
+			this.tabReviews.SuspendLayout();
 			this.tabHistory.SuspendLayout();
 			this.panel2.SuspendLayout();
 			this.panel1.SuspendLayout();
@@ -124,6 +129,7 @@
 			this.gridFiles.TranslationName = "";
 			this.gridFiles.CellDoubleClick += new OpenDental.UI.ODGridClickEventHandler(this.gridFiles_CellDoubleClick);
 			this.gridFiles.TitleAddClick += new System.EventHandler(this.gridFiles_TitleAddClick);
+			this.gridFiles.MouseMove += new System.Windows.Forms.MouseEventHandler(this.gridFiles_MouseMove);
 			// 
 			// gridAppointments
 			// 
@@ -229,7 +235,7 @@
 			// 
 			// label9
 			// 
-			this.label9.Location = new System.Drawing.Point(427, 12);
+			this.label9.Location = new System.Drawing.Point(345, 10);
 			this.label9.Name = "label9";
 			this.label9.Size = new System.Drawing.Size(70, 13);
 			this.label9.TabIndex = 328;
@@ -237,15 +243,16 @@
 			// 
 			// textQuoteDate
 			// 
-			this.textQuoteDate.Location = new System.Drawing.Point(430, 26);
+			this.textQuoteDate.Location = new System.Drawing.Point(348, 26);
 			this.textQuoteDate.Name = "textQuoteDate";
-			this.textQuoteDate.ReadOnly = true;
-			this.textQuoteDate.Size = new System.Drawing.Size(119, 20);
+			this.textQuoteDate.Size = new System.Drawing.Size(101, 20);
 			this.textQuoteDate.TabIndex = 327;
+			this.textQuoteDate.Leave += new System.EventHandler(this.textQuoteDate_Leave);
 			// 
 			// checkApproved
 			// 
-			this.checkApproved.Location = new System.Drawing.Point(354, 24);
+			this.checkApproved.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.checkApproved.Location = new System.Drawing.Point(662, 70);
 			this.checkApproved.Name = "checkApproved";
 			this.checkApproved.Size = new System.Drawing.Size(74, 24);
 			this.checkApproved.TabIndex = 326;
@@ -303,7 +310,7 @@
 			// 
 			// label4
 			// 
-			this.label4.Location = new System.Drawing.Point(552, 48);
+			this.label4.Location = new System.Drawing.Point(458, 48);
 			this.label4.Name = "label4";
 			this.label4.Size = new System.Drawing.Size(198, 13);
 			this.label4.TabIndex = 318;
@@ -311,7 +318,7 @@
 			// 
 			// label3
 			// 
-			this.label3.Location = new System.Drawing.Point(552, 10);
+			this.label3.Location = new System.Drawing.Point(458, 10);
 			this.label3.Name = "label3";
 			this.label3.Size = new System.Drawing.Size(118, 13);
 			this.label3.TabIndex = 317;
@@ -347,7 +354,7 @@
 			// 
 			this.textCustomer.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.textCustomer.Location = new System.Drawing.Point(555, 64);
+			this.textCustomer.Location = new System.Drawing.Point(461, 64);
 			this.textCustomer.Name = "textCustomer";
 			this.textCustomer.ReadOnly = true;
 			this.textCustomer.Size = new System.Drawing.Size(195, 20);
@@ -358,7 +365,7 @@
 			// 
 			this.textTitle.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.textTitle.Location = new System.Drawing.Point(555, 26);
+			this.textTitle.Location = new System.Drawing.Point(461, 26);
 			this.textTitle.Name = "textTitle";
 			this.textTitle.Size = new System.Drawing.Size(195, 20);
 			this.textTitle.TabIndex = 309;
@@ -390,6 +397,8 @@
 			// 
 			// panel4
 			// 
+			this.panel4.Controls.Add(this.butEmail);
+			this.panel4.Controls.Add(this.butCommlog);
 			this.panel4.Controls.Add(this.label10);
 			this.panel4.Controls.Add(this.textSchedDate);
 			this.panel4.Controls.Add(this.butActions);
@@ -418,9 +427,41 @@
 			this.panel4.Size = new System.Drawing.Size(773, 100);
 			this.panel4.TabIndex = 329;
 			// 
+			// butEmail
+			// 
+			this.butEmail.AdjustImageLocation = new System.Drawing.Point(0, 0);
+			this.butEmail.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.butEmail.Autosize = true;
+			this.butEmail.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
+			this.butEmail.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
+			this.butEmail.CornerRadius = 4F;
+			this.butEmail.Location = new System.Drawing.Point(712, 47);
+			this.butEmail.Name = "butEmail";
+			this.butEmail.Size = new System.Drawing.Size(58, 23);
+			this.butEmail.TabIndex = 332;
+			this.butEmail.Text = "Email";
+			this.butEmail.UseVisualStyleBackColor = true;
+			this.butEmail.Click += new System.EventHandler(this.butEmail_Click);
+			// 
+			// butCommlog
+			// 
+			this.butCommlog.AdjustImageLocation = new System.Drawing.Point(0, 0);
+			this.butCommlog.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.butCommlog.Autosize = true;
+			this.butCommlog.BtnShape = OpenDental.UI.enumType.BtnShape.Rectangle;
+			this.butCommlog.BtnStyle = OpenDental.UI.enumType.XPStyle.Silver;
+			this.butCommlog.CornerRadius = 4F;
+			this.butCommlog.Location = new System.Drawing.Point(712, 24);
+			this.butCommlog.Name = "butCommlog";
+			this.butCommlog.Size = new System.Drawing.Size(58, 23);
+			this.butCommlog.TabIndex = 331;
+			this.butCommlog.Text = "Commlog";
+			this.butCommlog.UseVisualStyleBackColor = true;
+			this.butCommlog.Click += new System.EventHandler(this.butCommlog_Click);
+			// 
 			// label10
 			// 
-			this.label10.Location = new System.Drawing.Point(351, 50);
+			this.label10.Location = new System.Drawing.Point(345, 49);
 			this.label10.Name = "label10";
 			this.label10.Size = new System.Drawing.Size(70, 13);
 			this.label10.TabIndex = 330;
@@ -428,9 +469,9 @@
 			// 
 			// textSchedDate
 			// 
-			this.textSchedDate.Location = new System.Drawing.Point(354, 64);
+			this.textSchedDate.Location = new System.Drawing.Point(348, 63);
 			this.textSchedDate.Name = "textSchedDate";
-			this.textSchedDate.Size = new System.Drawing.Size(195, 20);
+			this.textSchedDate.Size = new System.Drawing.Size(101, 20);
 			this.textSchedDate.TabIndex = 329;
 			this.textSchedDate.Leave += new System.EventHandler(this.textSchedDate_Leave);
 			// 
@@ -493,10 +534,12 @@
 			this.textEditorMain.Size = new System.Drawing.Size(501, 626);
 			this.textEditorMain.TabIndex = 306;
 			this.textEditorMain.SaveClick += new OpenDental.ODtextEditorSaveEventHandler(this.textEditor_SaveClick);
+			this.textEditorMain.OnTextEdited += new OpenDental.OdtextEditor.textChangedEventHandler(this.textEditorMain_OnTextEdited);
 			// 
 			// tabControlMain
 			// 
 			this.tabControlMain.Controls.Add(this.tabMain);
+			this.tabControlMain.Controls.Add(this.tabReviews);
 			this.tabControlMain.Controls.Add(this.tabHistory);
 			this.tabControlMain.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.tabControlMain.Location = new System.Drawing.Point(0, 0);
@@ -537,6 +580,40 @@
 			this.gridNotes.TranslationName = "FormTaskEdit";
 			this.gridNotes.CellDoubleClick += new OpenDental.UI.ODGridClickEventHandler(this.gridNotes_CellDoubleClick);
 			this.gridNotes.TitleAddClick += new System.EventHandler(this.gridNotes_TitleAddClick);
+			// 
+			// tabReviews
+			// 
+			this.tabReviews.Controls.Add(this.gridReview);
+			this.tabReviews.Location = new System.Drawing.Point(4, 22);
+			this.tabReviews.Name = "tabReviews";
+			this.tabReviews.Padding = new System.Windows.Forms.Padding(3);
+			this.tabReviews.Size = new System.Drawing.Size(260, 600);
+			this.tabReviews.TabIndex = 4;
+			this.tabReviews.Text = "Reviews";
+			this.tabReviews.UseVisualStyleBackColor = true;
+			// 
+			// gridReview
+			// 
+			this.gridReview.CellFont = new System.Drawing.Font("Microsoft Sans Serif", 8.5F);
+			this.gridReview.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.gridReview.HasAddButton = true;
+			this.gridReview.HasDropDowns = false;
+			this.gridReview.HasMultilineHeaders = false;
+			this.gridReview.HeaderFont = new System.Drawing.Font("Microsoft Sans Serif", 8.5F, System.Drawing.FontStyle.Bold);
+			this.gridReview.HeaderHeight = 15;
+			this.gridReview.HScrollVisible = true;
+			this.gridReview.Location = new System.Drawing.Point(3, 3);
+			this.gridReview.Name = "gridReview";
+			this.gridReview.ScrollValue = 0;
+			this.gridReview.Size = new System.Drawing.Size(254, 594);
+			this.gridReview.TabIndex = 22;
+			this.gridReview.TabStop = false;
+			this.gridReview.Title = "Reviews";
+			this.gridReview.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
+			this.gridReview.TitleHeight = 18;
+			this.gridReview.TranslationName = "TableReviews";
+			this.gridReview.CellDoubleClick += new OpenDental.UI.ODGridClickEventHandler(this.gridReview_CellDoubleClick);
+			this.gridReview.TitleAddClick += new System.EventHandler(this.gridReview_TitleAddClick);
 			// 
 			// tabHistory
 			// 
@@ -633,6 +710,7 @@
 			this.splitContainerNoFlicker2.ResumeLayout(false);
 			this.tabControlMain.ResumeLayout(false);
 			this.tabMain.ResumeLayout(false);
+			this.tabReviews.ResumeLayout(false);
 			this.tabHistory.ResumeLayout(false);
 			this.tabHistory.PerformLayout();
 			this.panel2.ResumeLayout(false);
@@ -689,5 +767,9 @@
 		private SplitContainerNoFlicker splitContainerNoFlicker1;
 		private System.Windows.Forms.Label label10;
 		private System.Windows.Forms.TextBox textSchedDate;
+		private System.Windows.Forms.TabPage tabReviews;
+		private UI.ODGrid gridReview;
+		private UI.Button butEmail;
+		private UI.Button butCommlog;
 	}
 }

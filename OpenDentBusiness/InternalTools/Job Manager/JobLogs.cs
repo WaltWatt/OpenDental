@@ -1,3 +1,4 @@
+using CodeBase;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -61,13 +62,16 @@ namespace OpenDentBusiness{
 					jobLog.RequirementsRTF+=jobNew.Requirements;
 				}
 			}
-			else if(jobNew.PhaseCur==JobPhase.Documentation && jobOld.PhaseCur!=JobPhase.Documentation) {
+			else if(jobNew.PhaseCur.In(JobPhase.Documentation,JobPhase.Complete) && !jobOld.PhaseCur.In(JobPhase.Documentation,JobPhase.Complete)) {
 				logDescriptions.Add("Job implemented.");
 				jobLog.MainRTF+=jobNew.Implementation;
 				jobLog.RequirementsRTF+=jobNew.Requirements;
 			}
 			if(jobOld.PhaseCur>jobNew.PhaseCur && jobOld.PhaseCur!=JobPhase.Cancelled) {
 				logDescriptions.Add("Job Unapproved.");//may be a chance for a false positive when using override permission.
+			}
+			if(jobOld.PhaseCur!=JobPhase.Cancelled && jobNew.PhaseCur==JobPhase.Cancelled) {
+				logDescriptions.Add("Job Cancelled.");//may be a chance for a false positive when using override permission.
 			}
 			if(jobNew.UserNumExpert!=jobOld.UserNumExpert) {
 				logDescriptions.Add("Expert changed.");

@@ -906,15 +906,21 @@ namespace OpenDental {
 			gridQueries.Rows.Clear();
 			//Sort jobs into action dictionary
 			List<Job> listJobsSorted=_listJobsAll.Where(x => x.Category==JobCategory.Query).ToList();
-			if(!checkShowQueryComplete.Checked) {
-				listJobsSorted=listJobsSorted.Where(x => x.PhaseCur!=JobPhase.Complete).ToList();
-			}
-			if(!checkShowQueryCancelled.Checked) {
-				listJobsSorted=listJobsSorted.Where(x => x.PhaseCur!=JobPhase.Cancelled).ToList();
-			}
 			listJobsSorted=listJobsSorted.OrderBy(x => x.AckDateTime).ThenBy(x => _listJobPriorities.FirstOrDefault(y => y.DefNum==x.Priority).ItemOrder).ToList();
 			Dictionary<JobPhase,List<Job>> dictPhases = new Dictionary<JobPhase,List<Job>>();
 			foreach(Job job in listJobsSorted) {
+				if((!checkShowQueryComplete.Checked && job.PhaseCur==JobPhase.Complete) 
+					|| (checkShowQueryComplete.Checked && job.PhaseCur==JobPhase.Complete
+					&& !job.ListJobLogs.Exists(y => y.Description.Contains("Job implemented") && y.DateTimeEntry.Between(dateFrom.Value,dateTo.Value)))) 
+				{
+					continue;
+				}
+				if((!checkShowQueryCancelled.Checked && job.PhaseCur==JobPhase.Cancelled)
+					|| (checkShowQueryCancelled.Checked && job.PhaseCur==JobPhase.Cancelled
+					&& !job.ListJobLogs.Exists(y => y.Description.Contains("Job Cancelled") && y.DateTimeEntry.Between(dateFrom.Value,dateTo.Value)))) 
+				{
+					continue;
+				}
 				JobPhase phase=job.PhaseCur;
 				if(!dictPhases.ContainsKey(phase)) {
 					dictPhases[phase]=new List<Job>();
@@ -922,13 +928,20 @@ namespace OpenDental {
 				dictPhases[phase].Add(job);
 			}
 			//sort dictionary so actions will appear in same order
-			//dictPhases=dictPhases.OrderBy(x => (int)x.Key).ToDictionary(x => x.Key,x => x.Value);
+			dictPhases=dictPhases.OrderBy(x => (int)x.Key).ToDictionary(x => x.Key,x => x.Value);
 			foreach(KeyValuePair<JobPhase,List<Job>> kvp in dictPhases) {
 				if(listJobsSorted.Count==0) {
 					continue;
 				}
 				gridQueries.Rows.Add(new ODGridRow("","","",kvp.Key.ToString()) { ColorBackG=gridQueries.HeaderColor,Bold=true });
 				foreach(Job job in kvp.Value) {
+					Color backColor=Color.White;
+					if(selectedJobNum>0 
+						&& selectedJobNum==userControlQueryEdit.GetJob().JobNum 
+						&& job.ListJobQuotes.FirstOrDefault().PatNum==userControlQueryEdit.GetJob().ListJobQuotes.FirstOrDefault().PatNum) 
+					{
+						backColor=Color.LightBlue;
+					}
 					Def jobPriority = _listJobPriorities.FirstOrDefault(y => y.DefNum==job.Priority);
 					gridQueries.Rows.Add(
 					new ODGridRow(
@@ -940,7 +953,8 @@ namespace OpenDental {
 						new ODGridCell(job.UserNumEngineer==0 ? "-" : Userods.GetName(job.UserNumEngineer)),
 						new ODGridCell(job.ToString()) { CellColor=(job.ToString().ToLower().Contains(textSearch.Text.ToLower())&&!string.IsNullOrWhiteSpace(textSearch.Text) ? Color.LightYellow : Color.Empty) }
 						) {
-						Tag=job
+						Tag=job,
+						ColorBackG=backColor
 					}
 					);
 				}
@@ -1691,6 +1705,14 @@ namespace OpenDental {
 					if(jobCur!=null) {//someone updated the currently loaded job.
 						userControlJobEdit.LoadMergeJob(jobCur);
 					}
+					//Current job loaded in UserControlQueryEdit (Should now be prevented by job checkout.)
+					jobCur = null;//job currently loaded into the UserControlJobEdit AND included in a signal.
+					if(userControlQueryEdit.GetJob()!=null) {//get job curently loaded
+						jobCur=newJobs.FirstOrDefault(x => x.JobNum==userControlQueryEdit.GetJob().JobNum);
+					}
+					if(jobCur!=null) {//someone updated the currently loaded job.
+						userControlQueryEdit.LoadMergeJob(jobCur);
+					}
 					//Update in memory lists.
 					foreach(KeyValuePair<long,Job> kvp in dictNewJobs) {
 						if(kvp.Value==null) {//deleted job
@@ -1816,7 +1838,7 @@ namespace OpenDental {
 		}
 
 		private void gridQueries_CellClick(object sender,ODGridClickEventArgs e) {
-			if(JobUnsavedChangesCheck()) {
+			if(QueryUnsavedChangesCheck()) {
 				return;
 			}
 			try {
@@ -1833,11 +1855,24 @@ namespace OpenDental {
 				userControlQueryEdit.Visible=true;
 				userControlJobEdit.Visible=false;
 				userControlQueryEdit.LoadJob(selectedjob,GetJobTree(selectedjob));
+				FillGridQueries();
 			}
 			else {
 				userControlQueryEdit.Visible=false;
 				userControlJobEdit.Visible=true;
 				userControlJobEdit.LoadJob(selectedjob,GetJobTree(selectedjob));
+			}
+		}
+
+		private void dateFrom_ValueChanged(object sender,EventArgs e) {
+			if(checkShowQueryCancelled.Checked || checkShowQueryComplete.Checked) {
+				FillGridQueries();
+			}
+		}
+
+		private void dateTo_ValueChanged(object sender,EventArgs e) {
+			if(checkShowQueryCancelled.Checked || checkShowQueryComplete.Checked) {
+				FillGridQueries();
 			}
 		}
 
@@ -2106,8 +2141,38 @@ namespace OpenDental {
 			return false;//no unsaved changes
 		}
 
+		private bool QueryUnsavedChangesCheck() {
+			if(userControlQueryEdit.IsChanged) {
+				switch(MessageBox.Show("Save changes to current job?","",MessageBoxButtons.YesNoCancel)) {
+					case System.Windows.Forms.DialogResult.OK:
+					case System.Windows.Forms.DialogResult.Yes:
+						userControlQueryEdit.ForceSave();
+						break;
+					case System.Windows.Forms.DialogResult.No:
+						CheckinQuery();
+						break;
+					case System.Windows.Forms.DialogResult.Cancel:
+						return true;
+				}
+			}
+			return false;//no unsaved changes
+		}
+
 		private void CheckinJob() {
 			Job jobCur = userControlJobEdit.GetJob();
+			if(jobCur==null) {
+				return;
+			}
+			if(jobCur.UserNumCheckout==Security.CurUser.UserNum) {
+				jobCur= Jobs.GetOne(jobCur.JobNum);
+				jobCur.UserNumCheckout=0;
+				Jobs.Update(jobCur);
+				Signalods.SetInvalid(InvalidType.Jobs,KeyType.Job,jobCur.JobNum);
+			}
+		}
+
+		private void CheckinQuery() {
+			Job jobCur = userControlQueryEdit.GetJob();
 			if(jobCur==null) {
 				return;
 			}

@@ -43,8 +43,13 @@
 			this.textVersionText = new System.Windows.Forms.TextBox();
 			this.gridTesting = new OpenDental.UI.ODGrid();
 			this.tabQuery = new System.Windows.Forms.TabPage();
-			this.checkShowQueryCancelled = new System.Windows.Forms.CheckBox();
+			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.label6 = new System.Windows.Forms.Label();
+			this.label2 = new System.Windows.Forms.Label();
+			this.dateTo = new System.Windows.Forms.DateTimePicker();
+			this.dateFrom = new System.Windows.Forms.DateTimePicker();
 			this.checkShowQueryComplete = new System.Windows.Forms.CheckBox();
+			this.checkShowQueryCancelled = new System.Windows.Forms.CheckBox();
 			this.gridQueries = new OpenDental.UI.ODGrid();
 			this.tabNotify = new System.Windows.Forms.TabPage();
 			this.gridNotify = new OpenDental.UI.ODGrid();
@@ -96,6 +101,7 @@
 			this.tabDocumentation.SuspendLayout();
 			this.tabTesting.SuspendLayout();
 			this.tabQuery.SuspendLayout();
+			this.groupBox1.SuspendLayout();
 			this.tabNotify.SuspendLayout();
 			this.tabSubscribed.SuspendLayout();
 			this.tabTree.SuspendLayout();
@@ -329,8 +335,7 @@
 			// 
 			// tabQuery
 			// 
-			this.tabQuery.Controls.Add(this.checkShowQueryCancelled);
-			this.tabQuery.Controls.Add(this.checkShowQueryComplete);
+			this.tabQuery.Controls.Add(this.groupBox1);
 			this.tabQuery.Controls.Add(this.gridQueries);
 			this.tabQuery.Location = new System.Drawing.Point(4, 22);
 			this.tabQuery.Name = "tabQuery";
@@ -340,24 +345,62 @@
 			this.tabQuery.Text = "Queries";
 			this.tabQuery.UseVisualStyleBackColor = true;
 			// 
-			// checkShowQueryCancelled
+			// groupBox1
 			// 
-			this.checkShowQueryCancelled.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.checkShowQueryCancelled.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-			this.checkShowQueryCancelled.Location = new System.Drawing.Point(156, 3);
-			this.checkShowQueryCancelled.Name = "checkShowQueryCancelled";
-			this.checkShowQueryCancelled.Size = new System.Drawing.Size(135, 20);
-			this.checkShowQueryCancelled.TabIndex = 238;
-			this.checkShowQueryCancelled.Text = "Include Cancelled";
-			this.checkShowQueryCancelled.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-			this.checkShowQueryCancelled.UseVisualStyleBackColor = true;
-			this.checkShowQueryCancelled.CheckedChanged += new System.EventHandler(this.checkShowQueryCancelled_CheckedChanged);
+			this.groupBox1.Controls.Add(this.label6);
+			this.groupBox1.Controls.Add(this.label2);
+			this.groupBox1.Controls.Add(this.dateTo);
+			this.groupBox1.Controls.Add(this.dateFrom);
+			this.groupBox1.Controls.Add(this.checkShowQueryComplete);
+			this.groupBox1.Controls.Add(this.checkShowQueryCancelled);
+			this.groupBox1.Dock = System.Windows.Forms.DockStyle.Top;
+			this.groupBox1.Location = new System.Drawing.Point(3, 3);
+			this.groupBox1.Name = "groupBox1";
+			this.groupBox1.Size = new System.Drawing.Size(288, 71);
+			this.groupBox1.TabIndex = 239;
+			this.groupBox1.TabStop = false;
+			this.groupBox1.Text = "Complete and Cancelled Filters";
+			// 
+			// label6
+			// 
+			this.label6.Location = new System.Drawing.Point(150, 45);
+			this.label6.Name = "label6";
+			this.label6.Size = new System.Drawing.Size(35, 23);
+			this.label6.TabIndex = 242;
+			this.label6.Text = "To";
+			this.label6.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			// 
+			// label2
+			// 
+			this.label2.Location = new System.Drawing.Point(7, 45);
+			this.label2.Name = "label2";
+			this.label2.Size = new System.Drawing.Size(35, 23);
+			this.label2.TabIndex = 241;
+			this.label2.Text = "From";
+			this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			// 
+			// dateTo
+			// 
+			this.dateTo.Format = System.Windows.Forms.DateTimePickerFormat.Short;
+			this.dateTo.Location = new System.Drawing.Point(189, 48);
+			this.dateTo.Name = "dateTo";
+			this.dateTo.Size = new System.Drawing.Size(96, 20);
+			this.dateTo.TabIndex = 240;
+			this.dateTo.ValueChanged += new System.EventHandler(this.dateTo_ValueChanged);
+			// 
+			// dateFrom
+			// 
+			this.dateFrom.Format = System.Windows.Forms.DateTimePickerFormat.Short;
+			this.dateFrom.Location = new System.Drawing.Point(48, 48);
+			this.dateFrom.Name = "dateFrom";
+			this.dateFrom.Size = new System.Drawing.Size(96, 20);
+			this.dateFrom.TabIndex = 239;
+			this.dateFrom.ValueChanged += new System.EventHandler(this.dateFrom_ValueChanged);
 			// 
 			// checkShowQueryComplete
 			// 
-			this.checkShowQueryComplete.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this.checkShowQueryComplete.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-			this.checkShowQueryComplete.Location = new System.Drawing.Point(11, 3);
+			this.checkShowQueryComplete.Location = new System.Drawing.Point(9, 14);
 			this.checkShowQueryComplete.Name = "checkShowQueryComplete";
 			this.checkShowQueryComplete.Size = new System.Drawing.Size(135, 20);
 			this.checkShowQueryComplete.TabIndex = 237;
@@ -365,6 +408,18 @@
 			this.checkShowQueryComplete.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			this.checkShowQueryComplete.UseVisualStyleBackColor = true;
 			this.checkShowQueryComplete.CheckedChanged += new System.EventHandler(this.checkShowQueryComplete_CheckedChanged);
+			// 
+			// checkShowQueryCancelled
+			// 
+			this.checkShowQueryCancelled.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.checkShowQueryCancelled.Location = new System.Drawing.Point(150, 14);
+			this.checkShowQueryCancelled.Name = "checkShowQueryCancelled";
+			this.checkShowQueryCancelled.Size = new System.Drawing.Size(135, 20);
+			this.checkShowQueryCancelled.TabIndex = 238;
+			this.checkShowQueryCancelled.Text = "Include Cancelled";
+			this.checkShowQueryCancelled.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.checkShowQueryCancelled.UseVisualStyleBackColor = true;
+			this.checkShowQueryCancelled.CheckedChanged += new System.EventHandler(this.checkShowQueryCancelled_CheckedChanged);
 			// 
 			// gridQueries
 			// 
@@ -378,10 +433,10 @@
 			this.gridQueries.HeaderFont = new System.Drawing.Font("Microsoft Sans Serif", 8.5F, System.Drawing.FontStyle.Bold);
 			this.gridQueries.HeaderHeight = 15;
 			this.gridQueries.HScrollVisible = false;
-			this.gridQueries.Location = new System.Drawing.Point(2, 29);
+			this.gridQueries.Location = new System.Drawing.Point(2, 80);
 			this.gridQueries.Name = "gridQueries";
 			this.gridQueries.ScrollValue = 0;
-			this.gridQueries.Size = new System.Drawing.Size(289, 596);
+			this.gridQueries.Size = new System.Drawing.Size(289, 545);
 			this.gridQueries.TabIndex = 230;
 			this.gridQueries.Title = "Queries to be done";
 			this.gridQueries.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
@@ -933,6 +988,7 @@
 			this.tabTesting.ResumeLayout(false);
 			this.tabTesting.PerformLayout();
 			this.tabQuery.ResumeLayout(false);
+			this.groupBox1.ResumeLayout(false);
 			this.tabNotify.ResumeLayout(false);
 			this.tabSubscribed.ResumeLayout(false);
 			this.tabTree.ResumeLayout(false);
@@ -1010,5 +1066,10 @@
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.TextBox textDocumentationVersion;
 		private System.Windows.Forms.Timer timerDocumentationVersion;
+		private System.Windows.Forms.GroupBox groupBox1;
+		private System.Windows.Forms.Label label6;
+		private System.Windows.Forms.Label label2;
+		private System.Windows.Forms.DateTimePicker dateTo;
+		private System.Windows.Forms.DateTimePicker dateFrom;
 	}
 }

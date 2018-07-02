@@ -11,6 +11,7 @@ using OpenDental.UI;
 using OpenDentBusiness;
 using CodeBase;
 using System.Diagnostics;
+using System.IO;
 
 namespace OpenDental.InternalTools.Job_Manager {
 	
@@ -48,6 +49,7 @@ namespace OpenDental.InternalTools.Job_Manager {
 
 		public delegate void JobOverrideEvent(object sender,bool isOverride);
 		public event JobOverrideEvent JobOverride=null;
+		private DataObject _dragObject=null;
 
 		//PROPERTIES
 		public bool IsChanged {
@@ -88,12 +90,22 @@ namespace OpenDental.InternalTools.Job_Manager {
 			return job;
 		}
 
+		//Allows save to be called from outside this control.
+		public void ForceSave() {
+			if(_jobCur==null || IsChanged==false) {
+				return;
+			}
+			if(!ValidateJob(_jobCur)) {
+				return;
+			}
+			SaveJob(_jobCur);
+		}
+
 		///<summary>Should only be called once when new job should be loaded into control. If called again, changes will be lost.</summary>
 		public void LoadJob(Job job,TreeNode treeNode) {
 			_isLoading=true;
 			this.Enabled=false;//disable control while it is filled.
 			_isOverride=false;
-			IsChanged=false;
 			_treeNode=treeNode;
 			if(job==null) {
 				_jobCur=new Job();
@@ -140,6 +152,95 @@ namespace OpenDental.InternalTools.Job_Manager {
 				this.Enabled=true;
 			}
 			_isLoading=false;
+		}		
+		
+		///<summary>When editing a job, and the job has been changed, this loads changes into the current control.</summary>
+		public void LoadMergeJob(Job newJob) {
+			_isLoading=true;
+			Job jobMerge = newJob.Copy();//otherwise changes would be made to the tree view.
+			//Set _jobCur lists to the new lists made above.
+			_jobCur.ListJobLinks		=jobMerge.ListJobLinks;
+			_jobCur.ListJobNotes		=jobMerge.ListJobNotes;
+			_jobCur.ListJobQuotes		=jobMerge.ListJobQuotes;
+			_jobCur.ListJobReviews	=jobMerge.ListJobReviews;
+			_jobCur.ListJobTimeLogs	=jobMerge.ListJobTimeLogs;
+			_jobCur.ListJobLogs			=jobMerge.ListJobLogs;
+			//Update Old lists too
+			_jobOld.ListJobLinks		=jobMerge.ListJobLinks.Select(x=>x.Copy()).ToList();
+			_jobOld.ListJobNotes		=jobMerge.ListJobNotes.Select(x => x.Copy()).ToList();
+			_jobOld.ListJobQuotes		=jobMerge.ListJobQuotes.Select(x => x.Copy()).ToList();
+			_jobOld.ListJobReviews	=jobMerge.ListJobReviews.Select(x => x.Copy()).ToList();
+			_jobOld.ListJobTimeLogs	=jobMerge.ListJobTimeLogs.Select(x => x.Copy()).ToList();
+			_jobOld.ListJobLogs			=jobMerge.ListJobLogs.Select(x => x.Copy()).ToList();
+			//JOB ROLE USER NUMS
+			_jobCur.UserNumApproverChange=jobMerge.UserNumApproverChange;
+			_jobCur.UserNumApproverConcept=jobMerge.UserNumApproverConcept;
+			_jobCur.UserNumApproverJob=jobMerge.UserNumApproverJob;
+			_jobCur.UserNumCheckout=jobMerge.UserNumCheckout;
+			_jobCur.UserNumConcept=jobMerge.UserNumConcept;
+			_jobCur.UserNumDocumenter=jobMerge.UserNumDocumenter;
+			_jobCur.UserNumCustContact=jobMerge.UserNumCustContact;
+			_jobCur.UserNumEngineer=jobMerge.UserNumEngineer;
+			_jobCur.UserNumExpert=jobMerge.UserNumExpert;
+			_jobCur.UserNumInfo=jobMerge.UserNumInfo;
+			//old
+			_jobOld.UserNumApproverChange=jobMerge.UserNumApproverChange;
+			_jobOld.UserNumApproverConcept=jobMerge.UserNumApproverConcept;
+			_jobOld.UserNumApproverJob=jobMerge.UserNumApproverJob;
+			_jobOld.UserNumCheckout=jobMerge.UserNumCheckout;
+			_jobOld.UserNumConcept=jobMerge.UserNumConcept;
+			_jobOld.UserNumDocumenter=jobMerge.UserNumDocumenter;
+			_jobOld.UserNumCustContact=jobMerge.UserNumCustContact;
+			_jobOld.UserNumEngineer=jobMerge.UserNumEngineer;
+			_jobOld.UserNumExpert=jobMerge.UserNumExpert;
+			_jobOld.UserNumInfo=jobMerge.UserNumInfo;
+			FillAllGrids();
+			//All changes below this point will be lost if there is a conflicting chage detected.
+			//TITLE
+			if(_jobCur.Title!=jobMerge.Title) {
+				if(_jobCur.Title==_jobOld.Title) {//Was edited, AND user has not already edited it themselves.
+					_jobCur.Title=jobMerge.Title;
+					_jobOld.Title=jobMerge.Title;
+					textTitle.Text=_jobCur.Title;
+				}
+				else {
+					//MessageBox.Show("Job Title has been changed to:\r\n"+jobMerge.Title);
+				}
+			}
+			//IMPLEMENTATION
+			if(_jobCur.Implementation!=jobMerge.Implementation) {
+				if(textEditorMain.MainRtf==_jobOld.Implementation) {//Was edited, AND user has not already edited it themselves.
+					_jobCur.Implementation=jobMerge.Implementation;
+					_jobOld.Implementation=jobMerge.Implementation;
+					try {
+						textEditorMain.MainRtf=_jobCur.Implementation;
+					}
+					catch {
+						textEditorMain.MainText=_jobCur.Implementation;
+					}
+				}
+				else {
+					//MessageBox.Show("Job Writeup has been changed.");
+				}
+			}
+			//PRIORITY
+			if(_jobCur.Priority!=jobMerge.Priority) {
+				_jobCur.Priority=jobMerge.Priority;
+				_jobOld.Priority=jobMerge.Priority;
+				comboPriority.SetSelectedItem<Def>(x => x.DefNum==_jobCur.Priority,"Normal");
+			}
+			//STATUS
+			if(_jobCur.PhaseCur!=jobMerge.PhaseCur) {
+				_jobCur.PhaseCur=jobMerge.PhaseCur;
+				_jobOld.PhaseCur=jobMerge.PhaseCur;
+				comboPhase.SelectedIndex=(int)_jobCur.PhaseCur;
+			}
+			textQuoteHours.Text=_jobCur.ListJobQuotes.FirstOrDefault().Hours.ToString();
+			textQuoteAmount.Text=_jobCur.ListJobQuotes.FirstOrDefault().Amount.ToString();
+			checkApproved.Checked=_jobCur.ListJobQuotes.FirstOrDefault().IsCustomerApproved;
+			//DATEENTRY - Cannot change
+			_isLoading=false;
+			CheckPermissions();
 		}
 
 		private void FillAllGrids() {
@@ -150,6 +251,7 @@ namespace OpenDental.InternalTools.Job_Manager {
 			FillGridFiles();
 			FillGridNote();
 			FillGridHistory();
+			FillGridReviews();
 		}
 
 		#region FillGrids
@@ -318,6 +420,39 @@ namespace OpenDental.InternalTools.Job_Manager {
 			gridNotes.EndUpdate();
 		}
 
+		private void FillGridReviews() {
+			long selectedReviewNum=0;
+			if(gridReview.GetSelectedIndex()!=-1 && (gridReview.Rows[gridReview.GetSelectedIndex()].Tag is JobReview)) {
+				selectedReviewNum=((JobReview)gridReview.Rows[gridReview.GetSelectedIndex()].Tag).JobNum;
+			}
+			gridReview.BeginUpdate();
+			gridReview.Columns.Clear();
+			gridReview.Columns.Add(new ODGridColumn("Date Last Edited",100));
+			gridReview.Columns.Add(new ODGridColumn("Reviewer",80));
+			gridReview.Columns.Add(new ODGridColumn("Status",90));
+			gridReview.Columns.Add(new ODGridColumn("Hours",80));
+			gridReview.Columns.Add(new ODGridColumn("Description",200));
+			gridReview.Rows.Clear();
+			ODGridRow row;
+			foreach(JobReview jobReview in _jobCur.ListJobReviews) {
+				row=new ODGridRow();
+				row.Cells.Add(jobReview.DateTStamp.ToShortDateString());
+				row.Cells.Add(Userods.GetName(jobReview.ReviewerNum));
+				row.Cells.Add(Enum.GetName(typeof(JobReviewStatus),(int)jobReview.ReviewStatus));
+				row.Cells.Add(Math.Round(jobReview.Hours,2).ToString());
+				row.Cells.Add(jobReview.Description.Left(500,true));
+				row.Tag=jobReview;
+				gridReview.Rows.Add(row);
+			}
+			gridReview.EndUpdate();
+			for(int i=0;i<gridReview.Rows.Count;i++) {
+				if(gridReview.Rows[i].Tag is JobReview && ((JobReview)gridReview.Rows[i].Tag).JobReviewNum==selectedReviewNum) {
+					gridReview.SetSelected(i,true);
+					break;
+				}
+			}
+		}
+
 		private void FillGridHistory() {
 			gridHistory.BeginUpdate();
 			gridHistory.Columns.Clear();
@@ -458,9 +593,8 @@ namespace OpenDental.InternalTools.Job_Manager {
 					}
 					perm=JobPermissions.IsAuthorized(JobPerm.SeniorQueryCoordinator,true) && (_jobCur.UserNumExpert==0 || _jobCur.UserNumExpert==Security.CurUser.UserNum);
 					actionMenu.MenuItems.Add(new MenuItem("Send to Development",actionMenu_SendInDevelopmentClick) { Enabled=perm });//x
-					bool isSQC =JobPermissions.IsAuthorized(JobPerm.SeniorQueryCoordinator,true) && (_jobCur.UserNumExpert==0 || _jobCur.UserNumExpert==Security.CurUser.UserNum);
-					perm=isSQC;
-					actionMenu.MenuItems.Add(new MenuItem("Mark as Complete",actionMenu_ImplementedClick) { Enabled=perm });
+					bool hasCompleteReview =_jobCur.ListJobReviews.Exists(x => x.ReviewStatus==JobReviewStatus.Done);
+					actionMenu.MenuItems.Add(new MenuItem("Mark as Complete",actionMenu_ImplementedClick) { Enabled=hasCompleteReview });
 					break;
 				case JobPhase.Complete:
 					actionMenu.MenuItems.Add(new MenuItem("Completed Job") { Enabled=false });
@@ -777,6 +911,22 @@ namespace OpenDental.InternalTools.Job_Manager {
 			Signalods.SetInvalid(InvalidType.Jobs,KeyType.Job,_jobCur.JobNum);
 		}
 
+		private void textQuoteDate_Leave(object sender,EventArgs e) {
+			if(_isLoading || IsNew) {
+				return;
+			}
+			DateTime date;
+			if(!DateTime.TryParse(textQuoteDate.Text,out date)) {
+				MsgBox.Show(this,"Not a valid date");
+			}
+			else {
+				_jobCur.DateTimeCustContact=date;
+			}
+			textQuoteDate.Text=_jobCur.DateTimeCustContact.Year<1880?"":_jobCur.DateTimeCustContact.ToShortDateString();
+			Jobs.Update(_jobCur);
+			Signalods.SetInvalid(InvalidType.Jobs,KeyType.Job,_jobCur.JobNum);
+		}
+
 		private void textSchedDate_Leave(object sender,EventArgs e) {
 			if(_isLoading || IsNew) {
 				return;
@@ -788,7 +938,7 @@ namespace OpenDental.InternalTools.Job_Manager {
 			else {
 				_jobCur.AckDateTime=date;
 			}
-			textSchedDate.Text=_jobCur.AckDateTime.Year<1880?"":_jobCur.AckDateTime.ToString();
+			textSchedDate.Text=_jobCur.AckDateTime.Year<1880?"":_jobCur.AckDateTime.ToShortDateString();
 			Jobs.Update(_jobCur);
 			Signalods.SetInvalid(InvalidType.Jobs,KeyType.Job,_jobCur.JobNum);
 		}
@@ -980,6 +1130,34 @@ namespace OpenDental.InternalTools.Job_Manager {
 			FillGridNote();
 		}
 
+		private void gridReview_TitleAddClick(object sender,EventArgs e) {
+			if(_isLoading) {
+				return;
+			}
+			if(_jobCur==null) {
+				return;//should never happen
+			}
+			long userNumReviewer=0;
+			if(!PickUserByJobPermission("Pick Reviewer",JobPerm.SeniorQueryCoordinator,out userNumReviewer,_jobCur.UserNumExpert,false,false)) {
+				return;
+			}
+			FormJobReviewEdit FormJRE=new FormJobReviewEdit(new JobReview { ReviewerNum=userNumReviewer,JobNum=_jobCur.JobNum,IsNew=true });
+			FormJRE.ShowDialog();
+			if(FormJRE.DialogResult!=DialogResult.OK || FormJRE.JobReviewCur==null) {
+				return;
+			}
+			if(!IsNew) {
+				JobReviews.Insert(FormJRE.JobReviewCur);
+				Signalods.SetInvalid(InvalidType.Jobs,KeyType.Job,_jobCur.JobNum);
+			}
+			else {
+				IsChanged=true;
+			}
+			_jobCur.ListJobReviews.Add(FormJRE.JobReviewCur);
+			_jobOld.ListJobReviews.Add(FormJRE.JobReviewCur);
+			FillGridReviews();
+		}
+
 		private void gridTasks_CellDoubleClick(object sender,ODGridClickEventArgs e) {
 			if(!(gridTasks.Rows[e.Row].Tag is long)) {
 				return;//should never happen
@@ -1078,6 +1256,40 @@ namespace OpenDental.InternalTools.Job_Manager {
 			FillGridNote();
 		}
 
+		private void gridReview_CellDoubleClick(object sender,ODGridClickEventArgs e) {
+			if(_isLoading) {
+				return;
+			}
+			if(!(gridReview.Rows[e.Row].Tag is JobReview)) {
+				return;//should never happen.
+			}
+			JobReview jobReview=(JobReview)gridReview.Rows[e.Row].Tag;
+			FormJobReviewEdit FormJRE=new FormJobReviewEdit(jobReview);
+			FormJRE.ShowDialog();
+			if(FormJRE.DialogResult!=DialogResult.OK) {
+				return;
+			}
+			if(IsNew) {
+				IsChanged=true;
+			}
+			else {
+				if(FormJRE.JobReviewCur==null) {
+					JobReviews.Delete(jobReview.JobReviewNum);
+				}
+				else {
+					JobReviews.Update(FormJRE.JobReviewCur);
+				}
+			}
+			_jobCur.ListJobReviews.RemoveAt(e.Row);
+			_jobOld.ListJobReviews.RemoveAt(e.Row);
+			if(FormJRE.JobReviewCur!=null) {
+				_jobCur.ListJobReviews.Add(FormJRE.JobReviewCur);
+				_jobOld.ListJobReviews.Add(FormJRE.JobReviewCur);
+			}
+			FillGridReviews();
+			Signalods.SetInvalid(InvalidType.Jobs,KeyType.Job,_jobCur.JobNum);
+		}
+
 		private void gridWatchers_CellClick(object sender,ODGridClickEventArgs e) {
 			if(_isLoading) {
 				return;
@@ -1168,6 +1380,87 @@ namespace OpenDental.InternalTools.Job_Manager {
 		///<summary>Does nothing, just used to make those annoying compile warnings go away.</summary>
 		private void DoNothing() {
 			var x = new object[] { TitleChanged,JobOverride };//simplest way to get rid of the "variable assigned but not used" warning.
+		}
+		
+		///<summary>This is fired whenever a change is made to the textboxes: Concept, Writeup, Documentation.</summary>
+		private void textEditorMain_OnTextEdited() {
+			if(_isLoading) {
+				return;
+			}
+			IsChanged=true;
+			if(IsNew) {
+				//do nothing
+			}
+			else {
+				if(!_isLoading && _jobCur.UserNumCheckout==0) {
+					_jobCur.UserNumCheckout=Security.CurUser.UserNum;
+					Job jobFromDB = Jobs.GetOne(_jobCur.JobNum);//Get from DB to ensure freshest copy (Lists not filled)
+					jobFromDB.UserNumCheckout=Security.CurUser.UserNum;//change only the userNumCheckout.
+					Jobs.Update(jobFromDB);//update the checkout num.
+					Signalods.SetInvalid(InvalidType.Jobs,KeyType.Job,_jobCur.JobNum);//send signal that the job has been checked out.
+				}
+			}
+		}
+
+		private void butCommlog_Click(object sender,EventArgs e) {
+			FormCommItem FormCI=new FormCommItem();
+			if(FormCI.ShowDialog(
+				new CommItemModel() { CommlogCur=GetNewCommlog() },
+				new CommItemController(FormCI) { IsNew=true })==DialogResult.OK) 
+			{
+				//Do Nothing
+			}
+		}
+
+		///<summary>This is a helper method to get a new commlog object for the commlog tool bar buttons.</summary>
+		private Commlog GetNewCommlog() {
+			Commlog commlog=new Commlog();
+			commlog.PatNum=_jobCur.ListJobQuotes.FirstOrDefault().PatNum;
+			commlog.CommDateTime=DateTime.Now;
+			commlog.CommType=Commlogs.GetTypeAuto(CommItemTypeAuto.MISC);
+			if(PrefC.GetBool(PrefName.DistributorKey)) {//for OD HQ
+				commlog.Mode_=CommItemMode.None;
+				commlog.SentOrReceived=CommSentOrReceived.Neither;
+			}
+			else {
+				commlog.Mode_=CommItemMode.Phone;
+				commlog.SentOrReceived=CommSentOrReceived.Received;
+			}
+			commlog.UserNum=Security.CurUser.UserNum;
+			return commlog;
+		}
+
+		private void butEmail_Click(object sender,EventArgs e) {
+			EmailMessage message=new EmailMessage();
+			Patient pat=Patients.GetPat(_jobCur.ListJobQuotes.FirstOrDefault().PatNum);
+			message.PatNum=pat.PatNum;
+			message.ToAddress=pat.Email;
+			message.FromAddress=EmailAddresses.GetOne(PrefC.GetLong(PrefName.EmailDefaultAddressNum)).GetFrom();				
+			message.Subject=PrefC.GetString(PrefName.ConfirmEmailSubject);
+			FormEmailMessageEdit FormEME = new FormEmailMessageEdit(message);
+			FormEME.ShowDialog();
+			if(FormEME.DialogResult!=DialogResult.OK) {
+				return;
+			}
+		}
+
+		private void gridFiles_MouseMove(object sender,System.Windows.Forms.MouseEventArgs e) {
+			if(e.Button!=MouseButtons.Left || gridFiles.Rows.Count==0 || gridFiles.SelectedIndices.Count()==0) {
+				return;
+			}
+			if(_dragObject==null) {
+				JobLink link = (JobLink)gridFiles.Rows[gridFiles.GetSelectedIndex()].Tag;
+				if(File.Exists(link.Tag)) {
+					string[] fileList=new string[] { link.Tag };
+					_dragObject = new DataObject(DataFormats.FileDrop,fileList);
+				}
+				else {
+					_dragObject=null;
+					return;
+				}
+				DoDragDrop(_dragObject,DragDropEffects.Copy);
+				_dragObject=null;
+			}
 		}
 	}//end class
 
