@@ -1312,6 +1312,7 @@ namespace OpenDental{
 			gridP.Focus();
 			_curLocation=gridP.GetCurrentCell();
 			switch(e.Command.ActionToPerform) {
+				#region Initialization
 				case VoiceCommandAction.StartListening:
 					labelListening.Visible=true;
 					break;
@@ -1328,6 +1329,7 @@ namespace OpenDental{
 					}
 					butCopyPrevious.PerformClick();
 					break;
+				#endregion Initialization
 				#region Probing Depths
 				case VoiceCommandAction.Zero:
 					but0.PerformClick();
@@ -1399,7 +1401,108 @@ namespace OpenDental{
 					but10.PerformClick();
 					but9.PerformClick();
 					break;
+				case VoiceCommandAction.ThreeTwoThree:
+					but3.PerformClick();
+					but2.PerformClick();
+					but3.PerformClick();
+					break;
+				case VoiceCommandAction.FourThreeFour:
+					but4.PerformClick();
+					but3.PerformClick();
+					but4.PerformClick();
+					break;
+				case VoiceCommandAction.ThreeThreeThree:
+					but3.PerformClick();
+					but3.PerformClick();
+					but3.PerformClick();
+					break;
+				case VoiceCommandAction.TwoTwoTwo:
+					but2.PerformClick();
+					but2.PerformClick();
+					but2.PerformClick();
+					break;
+				case VoiceCommandAction.FourFourFour:
+					but4.PerformClick();
+					but4.PerformClick();
+					but4.PerformClick();
+					break;
+				case VoiceCommandAction.TwoOneTwo:
+					but2.PerformClick();
+					but1.PerformClick();
+					but2.PerformClick();
+					break;
+				case VoiceCommandAction.FourThreeThree:
+					but4.PerformClick();
+					but3.PerformClick();
+					but3.PerformClick();
+					break;
+				case VoiceCommandAction.ThreeThreeFour:
+					but3.PerformClick();
+					but3.PerformClick();
+					but4.PerformClick();
+					break;
+				case VoiceCommandAction.TwoTwoThree:
+					but2.PerformClick();
+					but2.PerformClick();
+					but3.PerformClick();
+					break;
+				case VoiceCommandAction.ThreeTwoTwo:
+					but3.PerformClick();
+					but2.PerformClick();
+					but2.PerformClick();
+					break;
+				case VoiceCommandAction.FiveFourFive:
+					but5.PerformClick();
+					but4.PerformClick();
+					but5.PerformClick();
+					break;
+				case VoiceCommandAction.FiveThreeFive:
+					but5.PerformClick();
+					but3.PerformClick();
+					but5.PerformClick();
+					break;
+				case VoiceCommandAction.ThreeThreeFive:
+					but3.PerformClick();
+					but3.PerformClick();
+					but5.PerformClick();
+					break;
+				case VoiceCommandAction.FiveThreeThree:
+					but5.PerformClick();
+					but3.PerformClick();
+					but3.PerformClick();
+					break;
+				case VoiceCommandAction.FourFourFive:
+					but4.PerformClick();
+					but4.PerformClick();
+					but5.PerformClick();
+					break;
+				case VoiceCommandAction.FiveFourFour:
+					but5.PerformClick();
+					but4.PerformClick();
+					but4.PerformClick();
+					break;
+				case VoiceCommandAction.FiveFiveFive:
+					but5.PerformClick();
+					but5.PerformClick();
+					but5.PerformClick();
+					break;
+				case VoiceCommandAction.ThreeFourThree:
+					but3.PerformClick();
+					but4.PerformClick();
+					but3.PerformClick();
+					break;
+				case VoiceCommandAction.FourThreeFive:
+					but4.PerformClick();
+					but3.PerformClick();
+					but5.PerformClick();
+					break;
+				case VoiceCommandAction.FiveThreeFour:
+					but5.PerformClick();
+					but3.PerformClick();
+					but4.PerformClick();
+					break;
 				#endregion Probing Depths
+				#region Misc Buttons/Checkboxes
 				case VoiceCommandAction.Triplets:
 					checkThree.Checked=(!checkThree.Checked);
 					gridP.ThreeAtATime=checkThree.Checked;
@@ -1424,6 +1527,8 @@ namespace OpenDental{
 				case VoiceCommandAction.Suppuration:
 					butPus.PerformClick();
 					break;
+				#endregion Misc Buttons/Checkboxes
+				#region Navigation Keys
 				case VoiceCommandAction.Backspace:
 					SendKeys.Send("{BACKSPACE}");
 					break;
@@ -1436,6 +1541,7 @@ namespace OpenDental{
 				case VoiceCommandAction.Delete:
 					SendKeys.Send("{DELETE}");
 					break;
+				#endregion Navigation Keys
 				#region Go To Tooth
 				case VoiceCommandAction.GoToToothOneFacial:
 					GoToTooth(1,true);

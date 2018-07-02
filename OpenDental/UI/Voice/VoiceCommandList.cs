@@ -202,6 +202,146 @@ namespace OpenDental.UI.Voice {
 				},
 				new VoiceCommand {
 					Commands=new List<string> {
+						"three two three"
+					},
+					ActionToPerform=VoiceCommandAction.ThreeTwoThree,
+					ListAreas=new List<VoiceCommandArea> { VoiceCommandArea.PerioChart }
+				},
+				new VoiceCommand {
+					Commands=new List<string> {
+						"four three four"
+					},
+					ActionToPerform=VoiceCommandAction.FourThreeFour,
+					ListAreas=new List<VoiceCommandArea> { VoiceCommandArea.PerioChart }
+				},
+				new VoiceCommand {
+					Commands=new List<string> {
+						"three three three"
+					},
+					ActionToPerform=VoiceCommandAction.ThreeThreeThree,
+					ListAreas=new List<VoiceCommandArea> { VoiceCommandArea.PerioChart }
+				},
+				new VoiceCommand {
+					Commands=new List<string> {
+						"two two two"
+					},
+					ActionToPerform=VoiceCommandAction.TwoTwoTwo,
+					ListAreas=new List<VoiceCommandArea> { VoiceCommandArea.PerioChart }
+				},
+				new VoiceCommand {
+					Commands=new List<string> {
+						"four four four"
+					},
+					ActionToPerform=VoiceCommandAction.FourFourFour,
+					ListAreas=new List<VoiceCommandArea> { VoiceCommandArea.PerioChart }
+				},
+				new VoiceCommand {
+					Commands=new List<string> {
+						"two one two"
+					},
+					ActionToPerform=VoiceCommandAction.TwoOneTwo,
+					ListAreas=new List<VoiceCommandArea> { VoiceCommandArea.PerioChart }
+				},
+				new VoiceCommand {
+					Commands=new List<string> {
+						"four three three"
+					},
+					ActionToPerform=VoiceCommandAction.FourThreeThree,
+					ListAreas=new List<VoiceCommandArea> { VoiceCommandArea.PerioChart }
+				},
+				new VoiceCommand {
+					Commands=new List<string> {
+						"three three four"
+					},
+					ActionToPerform=VoiceCommandAction.ThreeThreeFour,
+					ListAreas=new List<VoiceCommandArea> { VoiceCommandArea.PerioChart }
+				},
+				new VoiceCommand {
+					Commands=new List<string> {
+						"two two three"
+					},
+					ActionToPerform=VoiceCommandAction.TwoTwoThree,
+					ListAreas=new List<VoiceCommandArea> { VoiceCommandArea.PerioChart }
+				},
+				new VoiceCommand {
+					Commands=new List<string> {
+						"three two two"
+					},
+					ActionToPerform=VoiceCommandAction.ThreeTwoTwo,
+					ListAreas=new List<VoiceCommandArea> { VoiceCommandArea.PerioChart }
+				},
+				new VoiceCommand {
+					Commands=new List<string> {
+						"five four five"
+					},
+					ActionToPerform=VoiceCommandAction.FiveFourFive,
+					ListAreas=new List<VoiceCommandArea> { VoiceCommandArea.PerioChart }
+				},
+				new VoiceCommand {
+					Commands=new List<string> {
+						"five three five"
+					},
+					ActionToPerform=VoiceCommandAction.FiveThreeFive,
+					ListAreas=new List<VoiceCommandArea> { VoiceCommandArea.PerioChart }
+				},
+				new VoiceCommand {
+					Commands=new List<string> {
+						"three three five"
+					},
+					ActionToPerform=VoiceCommandAction.ThreeThreeFive,
+					ListAreas=new List<VoiceCommandArea> { VoiceCommandArea.PerioChart }
+				},
+				new VoiceCommand {
+					Commands=new List<string> {
+						"five three three"
+					},
+					ActionToPerform=VoiceCommandAction.FiveThreeThree,
+					ListAreas=new List<VoiceCommandArea> { VoiceCommandArea.PerioChart }
+				},
+				new VoiceCommand {
+					Commands=new List<string> {
+						"four four five"
+					},
+					ActionToPerform=VoiceCommandAction.FourFourFive,
+					ListAreas=new List<VoiceCommandArea> { VoiceCommandArea.PerioChart }
+				},
+				new VoiceCommand {
+					Commands=new List<string> {
+						"five four four"
+					},
+					ActionToPerform=VoiceCommandAction.FiveFourFour,
+					ListAreas=new List<VoiceCommandArea> { VoiceCommandArea.PerioChart }
+				},
+				new VoiceCommand {
+					Commands=new List<string> {
+						"five five five"
+					},
+					ActionToPerform=VoiceCommandAction.FiveFiveFive,
+					ListAreas=new List<VoiceCommandArea> { VoiceCommandArea.PerioChart }
+				},
+				new VoiceCommand {
+					Commands=new List<string> {
+						"three four three"
+					},
+					ActionToPerform=VoiceCommandAction.ThreeFourThree,
+					ListAreas=new List<VoiceCommandArea> { VoiceCommandArea.PerioChart }
+				},
+				new VoiceCommand {
+					Commands=new List<string> {
+						"four three five"
+					},
+					ActionToPerform=VoiceCommandAction.FourThreeFive,
+					ListAreas=new List<VoiceCommandArea> { VoiceCommandArea.PerioChart }
+				},
+				new VoiceCommand {
+					Commands=new List<string> {
+						"five three four"
+					},
+					ActionToPerform=VoiceCommandAction.FiveThreeFour,
+					ListAreas=new List<VoiceCommandArea> { VoiceCommandArea.PerioChart }
+				},
+				new VoiceCommand {
+					Commands=new List<string> {
 						"triplet",
 						"triplets",
 					},
