@@ -711,6 +711,7 @@ namespace CodeBase {
 	public enum LogPath {
 		Signals,
 		ChartModule,
-		AccountModule
+		AccountModule,
+		OrthoChart,
 	}
 }

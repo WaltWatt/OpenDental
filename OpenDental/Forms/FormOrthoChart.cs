@@ -9,6 +9,7 @@ using System.Text;
 using System.Windows.Forms;
 using OpenDental.UI;
 using OpenDentBusiness;
+using CodeBase;
 
 namespace OpenDental {
 	public partial class FormOrthoChart:ODForm {
@@ -68,7 +69,9 @@ namespace OpenDental {
 				tabControl.SelectedIndex=_indexInitialTab;
 			}
 			else {//Tab index hasn't changed, fill the grid.
-				FillGrid();
+				Logger.LogAction("FormOrthoChart_Load",LogPath.OrthoChart,() => {
+					FillGrid();
+				},"FillGrid");
 			}
 			FillGridPat();
 			if(PrefC.GetBool(PrefName.OrthoCaseInfoInOrthoChart)) {
@@ -306,12 +309,16 @@ namespace OpenDental {
 			if(form.ShowDialog()==DialogResult.OK) {
 				FillTabs();
 				FillDictionary();
-				FillGrid();
+				Logger.LogAction("menuItemSetup_Click",LogPath.OrthoChart,() => {
+					FillGrid();
+				},"FillGrid");
 			}
 		}
 
 		private void tabControl_TabIndexChanged(object sender,EventArgs e) {
-			FillGrid();
+			Logger.LogAction("tabControl_TabIndexChanged",LogPath.OrthoChart,() => {
+				FillGrid();
+			},"FillGrid");
 		}
 
 		private void signatureBoxWrapper_ClearSignatureClicked(object sender,EventArgs e) {
@@ -353,7 +360,9 @@ namespace OpenDental {
 
 		///<summary>This is necessary in addition to CellClick for when the user tabs or uses the arrow keys to enter a cell.</summary>
 		private void gridMain_CellEnter(object sender,ODGridClickEventArgs e) {
-			SaveAndSetSignatures(e.Row);
+			Logger.LogAction("gridMain_CellEnter",LogPath.OrthoChart,() => {
+				SaveAndSetSignatures(e.Row);
+			});
 		}
 
 		///<summary>Saves the signature to the data table if it hasn't been and displays the signature for this row.</summary>
@@ -375,87 +384,95 @@ namespace OpenDental {
 		}
 
 		private void gridMain_CellLeave(object sender,ODGridClickEventArgs e) {
-			//Get the date for the ortho chart that was just edited.
-			DateTime orthoDate=GetOrthoDate(e.Row);
-			string oldText=GetValueFromDict(orthoDate,(string)gridMain.Columns[e.Col].Tag);
-			string newText=gridMain.Rows[e.Row].Cells[e.Col].Text;
-			if(CanEditRow(orthoDate)) {
-				if(newText != oldText) {
-					SetValueInDict(newText,orthoDate,(string)gridMain.Columns[e.Col].Tag);
-					//Cannot be placed in if statement below as we only want to clear the signature when the grid text has changed.
-					//We cannot use a textchanged event to call the .dll as this causes massive slowness for certain customers.
-					if(_showSigBox) {
-						signatureBoxWrapper.ClearSignature();
+			Logger.LogAction("gridMain_CellLeave",LogPath.OrthoChart,() => {
+				//Get the date for the ortho chart that was just edited.
+				DateTime orthoDate=GetOrthoDate(e.Row);
+				string oldText=GetValueFromDict(orthoDate,(string)gridMain.Columns[e.Col].Tag);
+				string newText=gridMain.Rows[e.Row].Cells[e.Col].Text;
+				if(CanEditRow(orthoDate)) {
+					if(newText != oldText) {
+						SetValueInDict(newText,orthoDate,(string)gridMain.Columns[e.Col].Tag);
+						//Cannot be placed in if statement below as we only want to clear the signature when the grid text has changed.
+						//We cannot use a textchanged event to call the .dll as this causes massive slowness for certain customers.
+						if(_showSigBox) {
+							Logger.LogAction("gridMain_CellLeave",LogPath.OrthoChart,() => { signatureBoxWrapper.ClearSignature(); },"signature.ClearSignature");
+						}
+						_hasChanged=true;//They had permission and they made a change.
 					}
-					_hasChanged=true;//They had permission and they made a change.
+					if(_showSigBox) {
+						SaveSignatureToDict(e.Row);
+						DisplaySignature(e.Row);
+					}
 				}
-				if(_showSigBox) {
-					SaveSignatureToDict(e.Row);
-					DisplaySignature(e.Row);
+				else {
+					//User is not authorized to edit this cell.  Check if they changed the old value and if they did, put it back to the way it was and warn them about security.
+					if(newText!=oldText) {
+						//The user actually changed the cell's value and we need to change it back and warn them that they don't have permission.
+						gridMain.Rows[e.Row].Cells[e.Col].Text=oldText;
+						gridMain.Invalidate();
+						MsgBox.Show(this,"You need either Ortho Chart Edit (full) or Ortho Chart Edit (same user, signed) to edit this ortho chart.");
+					}
 				}
-			}
-			else {
-				//User is not authorized to edit this cell.  Check if they changed the old value and if they did, put it back to the way it was and warn them about security.
-				if(newText!=oldText) {
-					//The user actually changed the cell's value and we need to change it back and warn them that they don't have permission.
-					gridMain.Rows[e.Row].Cells[e.Col].Text=oldText;
-					gridMain.Invalidate();
-					MsgBox.Show(this,"You need either Ortho Chart Edit (full) or Ortho Chart Edit (same user, signed) to edit this ortho chart.");
-				}
-			}
+			});
 		}
-		
+
 		///<summary>Displays the signature that is saved in the dictionary in the signature box. Colors the grid row green if the signature is valid, 
 		///red if invalid, or white if blank. Puts "Valid" or "Invalid" in the grid's signature column.</summary>
-		private void DisplaySignature(int gridRow,bool hasRefresh=true) {
-			if(!_showSigBox || gridRow<0) {
-				return;
-			}
-			DateTime orthoDate=GetOrthoDate(gridRow);
-			List<OrthoChart> listOrthoCharts=_dictOrthoCharts[orthoDate];
-			//Get the "translated" name for the signature column.
-			string sigColumnName=_listOrthDisplayFields.FirstOrDefault(x => x.InternalName=="Signature").Description;
-			if(!listOrthoCharts.Exists(x => x.FieldName==sigColumnName)) {
-				signatureBoxWrapper.ClearSignature();
-				return;
-			}
-			OrthoSignature sig=new OrthoSignature(listOrthoCharts.Find(x => x.FieldName==sigColumnName).FieldValue);
-			if(sig.SigString=="") {
-				signatureBoxWrapper.ClearSignature();
-				gridMain.Rows[gridRow].ColorBackG=SystemColors.Window;
-				//Empty out the signature column displaying to the user.
-				if(_sigColIdx > 0) {//User might be vieweing a tab that does not have the signature column.  Greater than 0 because index 0 is a Date column.
-					gridMain.Rows[gridRow].Cells[_sigColIdx].Text="";
+		private void DisplaySignature(int gridRow,bool hasRefresh = true) {
+			Logger.LogAction("DisplaySignature",LogPath.OrthoChart,() => {
+				if(!_showSigBox || gridRow<0) {
+					return;
+				}
+				DateTime orthoDate=GetOrthoDate(gridRow);
+				List<OrthoChart> listOrthoCharts=_dictOrthoCharts[orthoDate];
+				//Get the "translated" name for the signature column.
+				string sigColumnName=_listOrthDisplayFields.FirstOrDefault(x => x.InternalName=="Signature").Description;
+				if(!listOrthoCharts.Exists(x => x.FieldName==sigColumnName)) {
+					Logger.LogAction("DisplaySignature",LogPath.OrthoChart,() => { signatureBoxWrapper.ClearSignature(); },"signature.ClearSignature1");
+					return;
+				}
+				OrthoSignature sig=new OrthoSignature(listOrthoCharts.Find(x => x.FieldName==sigColumnName).FieldValue);
+				if(sig.SigString=="") {
+					Logger.LogAction("DisplaySignature",LogPath.OrthoChart,() => { signatureBoxWrapper.ClearSignature(); },"signature.ClearSignature2");
+					gridMain.Rows[gridRow].ColorBackG=SystemColors.Window;
+					//Empty out the signature column displaying to the user.
+					if(_sigColIdx > 0) {//User might be vieweing a tab that does not have the signature column.  Greater than 0 because index 0 is a Date column.
+						gridMain.Rows[gridRow].Cells[_sigColIdx].Text="";
+					}
+					if(hasRefresh) {
+						gridMain.Refresh();
+					}
+					return;
+				}
+				string keyData=OrthoCharts.GetKeyDataForSignatureHash(_patCur,listOrthoCharts
+				.FindAll(x => x.DateService==orthoDate && x.FieldValue!="" && x.FieldName!=sigColumnName),orthoDate);
+				Logger.LogAction("DisplaySignature",LogPath.OrthoChart,() => {
+					signatureBoxWrapper.FillSignature(sig.IsTopaz,keyData,sig.SigString);
+				},"signature.FillSignature1 IsTopaz="+(sig.IsTopaz ? "true" : "false"));
+				if(!signatureBoxWrapper.IsValid) {
+					//This ortho chart may have been signed when we were using the patient name in the hash. Try hashing the signature with the patient name.
+					keyData=OrthoCharts.GetKeyDataForSignatureHash(_patCur,listOrthoCharts
+						.FindAll(x => x.DateService==orthoDate && x.FieldValue!="" && x.FieldName!=sigColumnName),orthoDate,doUsePatName: true);
+					Logger.LogAction("DisplaySignature",LogPath.OrthoChart,() => {
+						signatureBoxWrapper.FillSignature(sig.IsTopaz,keyData,sig.SigString);
+					},"signature.FillSignature2 IsTopaz="+(sig.IsTopaz ? "true" : "false"));
+				}
+				if(signatureBoxWrapper.IsValid) {
+					gridMain.Rows[gridRow].ColorBackG=Color.FromArgb(0,245,165);//A lighter version of Color.MediumSpringGreen
+					if(_sigColIdx > 0) {//User might be vieweing a tab that does not have the signature column.  Greater than 0 because index 0 is a Date column.
+						gridMain.Rows[gridRow].Cells[_sigColIdx].Text=Lan.g(this,"Valid");
+					}
+				}
+				else {
+					gridMain.Rows[gridRow].ColorBackG=Color.FromArgb(255,140,143);//A darker version of Color.LightPink
+					if(_sigColIdx > 0) {//User might be vieweing a tab that does not have the signature column.  Greater than 0 because index 0 is a Date column.
+						gridMain.Rows[gridRow].Cells[_sigColIdx].Text=Lan.g(this,"Invalid");
+					}
 				}
 				if(hasRefresh) {
 					gridMain.Refresh();
 				}
-				return;
-			}
-			string keyData=OrthoCharts.GetKeyDataForSignatureHash(_patCur,listOrthoCharts
-				.FindAll(x => x.DateService==orthoDate && x.FieldValue!="" && x.FieldName!=sigColumnName),orthoDate);
-			signatureBoxWrapper.FillSignature(sig.IsTopaz,keyData,sig.SigString);
-			if(!signatureBoxWrapper.IsValid) {
-				//This ortho chart may have been signed when we were using the patient name in the hash. Try hashing the signature with the patient name.
-				keyData=OrthoCharts.GetKeyDataForSignatureHash(_patCur,listOrthoCharts
-					.FindAll(x => x.DateService==orthoDate && x.FieldValue!="" && x.FieldName!=sigColumnName),orthoDate,doUsePatName:true);
-				signatureBoxWrapper.FillSignature(sig.IsTopaz,keyData,sig.SigString);
-			}
-			if(signatureBoxWrapper.IsValid) {
-				gridMain.Rows[gridRow].ColorBackG=Color.FromArgb(0,245,165);//A lighter version of Color.MediumSpringGreen
-				if(_sigColIdx > 0) {//User might be vieweing a tab that does not have the signature column.  Greater than 0 because index 0 is a Date column.
-					gridMain.Rows[gridRow].Cells[_sigColIdx].Text=Lan.g(this,"Valid");
-				}
-			}
-			else {
-				gridMain.Rows[gridRow].ColorBackG=Color.FromArgb(255,140,143);//A darker version of Color.LightPink
-				if(_sigColIdx > 0) {//User might be vieweing a tab that does not have the signature column.  Greater than 0 because index 0 is a Date column.
-					gridMain.Rows[gridRow].Cells[_sigColIdx].Text=Lan.g(this,"Invalid");
-				}
-			}
-			if(hasRefresh) {
-				gridMain.Refresh();
-			}
+			});
 		}
 
 		///<summary>Removes the Sign Topaz button and the Clear Signature button from the signature box if the user does not have OrthoChartEdit
@@ -615,13 +632,17 @@ namespace OpenDental {
 			}
 			_listDatesAdded.Add(FormOCAD.SelectedDate);
 			if(_dictOrthoCharts.ContainsKey(FormOCAD.SelectedDate)) {
-				FillGrid();
+				Logger.LogAction("butAdd_Click",LogPath.OrthoChart,() => {
+					FillGrid();
+				},"FillGrid1");
 				return;
 			}
 			SaveAndSetSignatures(gridMain.SelectedCell.Y);
 			_dictOrthoCharts.Add(FormOCAD.SelectedDate,new List<OrthoChart>());//COULD HAVE TO DO WITH EMPTY SIG ITEM HERE??
 			_hasChanged=true;
-			FillGrid();
+			Logger.LogAction("butAdd_Click",LogPath.OrthoChart,() => {
+				FillGrid();
+			},"FillGrid2");
 		}
 
 		private void butUseAutoNote_Click(object sender,EventArgs e) {
