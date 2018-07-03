@@ -1415,6 +1415,8 @@ namespace OpenDentBusiness {
 				"610217",1,"04",claimTypes|reversalTypes|predeterminationTypes,canadianNetworkNumTelusB,
 				//groupe premier medical
 				"610266",1,"04",claimTypes|reversalTypes,canadianNetworkNumTelusB,
+				//grouphealth benefit solutions
+				"000125",1,"04",claimTypes|reversalTypes|predeterminationTypes|cobTypes,canadianNetworkNumTelusB,
 				//groupsource - Old carrier that is no longer listed one iTrans supported list.
 				"605064",1,"04",claimTypes|reversalTypes|eligibilityTypes,canadianNetworkNumCSI,
 				//Humania Assurance Inc (formerly La Survivance) (ESC)
