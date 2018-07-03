@@ -9489,12 +9489,21 @@ namespace OpenDental{
 			if(ExitCode!=0) {
 				Environment.Exit(ExitCode);
 			}
+			bool hadMultipleFormsOpen=(Application.OpenForms.Count > 1);
 			//CloseOpenForms should have already been called with isForceClose=true if we are force closing Open Dental
 			//In that scenario, calling CloseOpenForms with isForceClose=false should not leave the program open.
 			//However, if Open Dental is closing from any other means, we want to give all forms the opportunity to stop closing.
 			//Example, if you have FormWikiEdit open, it will attempt to save it as a draft unless the user wants to back out.
 			if(!CloseOpenForms(false)) {
 				e.Cancel=true;
+				return;
+			}
+			if(hadMultipleFormsOpen) {
+				//If this form is closing because someone called Application.Exit, then the call above to CloseOpenForms would cause an exception later in 
+				//Application.Exit because CloseOpenForms altered a collection inside a foreach loop inside of Application.Exit. We still want to exit, but
+				//we need to start afresh in order to not cause an exception.
+				e.Cancel=true;
+				this.BeginInvoke(() => Application.Exit());
 				return;
 			}
 			try {
