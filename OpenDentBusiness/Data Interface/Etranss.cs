@@ -463,8 +463,14 @@ namespace OpenDentBusiness{
 				+"LEFT JOIN carrier carrier2 ON carrier2.CarrierNum=insplan2.CarrierNum "
 				+"WHERE claim.ClaimNum="+POut.Long(claimNum);
 			DataTable table=Db.GetTable(command);
-			etrans.CarrierNum=PIn.Long(table.Rows[0][0].ToString());
-			etrans.CarrierNum2=PIn.Long(table.Rows[0][1].ToString());//might be 0 if no secondary on this claim
+			if(table.Rows.Count > 0) {//The claim could have been deleted by someone else.  Don't worry about preserving the carrier information.  Set to 0.
+				etrans.CarrierNum=PIn.Long(table.Rows[0][0].ToString());
+				etrans.CarrierNum2=PIn.Long(table.Rows[0][1].ToString());//might be 0 if no secondary on this claim
+			}
+			else {
+				etrans.Note=Lans.g(nameof(Etrans),"Primry carrier and secondary carrier are unknown due to missing claim.  Invalid ClaimNum.  "
+					+"Claim may have been deleted during sending.");
+			}
 			etrans.BatchNumber=batchNumber;
 			//if(X837.IsX12(messageText)) {
 			//	X837 x837=new X837(messageText);
@@ -542,10 +548,11 @@ namespace OpenDentBusiness{
 				}
 			}
 			#endregion
+			DateTime dateTimeNow=MiscData.GetNowDateTime();
 			command="UPDATE claim SET ClaimStatus = 'S',"
-				+"DateSent= "+POut.Date(MiscData.GetNowDateTime())+","
+				+"DateSent= "+POut.Date(dateTimeNow)+","
 				+"DateSentOrig= "
-					+"CASE WHEN DateSentOrig = '0001-01-01' THEN "+POut.Date(MiscData.GetNowDateTime())+" ELSE DateSentOrig END "
+					+"CASE WHEN DateSentOrig = '0001-01-01' THEN "+POut.Date(dateTimeNow)+" ELSE DateSentOrig END "
 				+"WHERE claimnum = "+POut.Long(claimNum);
 			Db.NonQ(command);
 			Etranss.Insert(etrans);
