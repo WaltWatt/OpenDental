@@ -6065,6 +6065,10 @@ namespace OpenDental{
 
 		/// <summary>sends function key presses to the appointment module and chart module</summary>
 		private void FormOpenDental_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e) {
+			//This suppresses the base windows functionality for giving focus to the main menu on F10. See Job 8289
+			if(e.KeyCode==Keys.F10) {
+				e.SuppressKeyPress=true;
+			}
 			if(ContrAppt2.Visible && e.KeyCode>=Keys.F1 && e.KeyCode<=Keys.F12){
 				ContrAppt2.FunctionKeyPress(e.KeyCode);
 				return;
