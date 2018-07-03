@@ -2537,10 +2537,10 @@ namespace OpenDental {
 				gridAcctPat.SetSelected(gridAcctPat.Rows.Count-1,true);
 			}
 			else{
-				for(int i=0;i<FamCur.ListPats.Length;i++) {
-					if(FamCur.ListPats[i].PatNum==PatCur.PatNum) {
-						gridAcctPat.SetSelected(i,true);
-					}
+				int index=gridAcctPat.Rows.ToList().FindIndex(x => (long)x.Tag==PatCur.PatNum);
+				if(index>=0) {
+					//If the index is greater than the number of rows, it will return and not select anything.
+					gridAcctPat.SetSelected(index,true);
 				}
 			}
 			if(isSelectingFamily){
