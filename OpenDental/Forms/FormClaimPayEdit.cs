@@ -810,6 +810,18 @@ namespace OpenDental{
 					}
 				}
 			}
+			if(panelXcharge.Visible==false && butPayConnect.Visible==false && butPaySimple.Visible==false) {
+				//This is an office with clinics and one of the payment processing bridges is enabled but this particular clinic doesn't have one set up.
+				if(progXcharge.Enabled) {
+					panelXcharge.Visible=true;
+				}
+				if(progPayConnect.Enabled) {
+					butPayConnect.Visible=true;
+				}
+				if(progPaySimple.Enabled) {
+					butPaySimple.Visible=true;
+				}
+			}
 			groupPrepaid.Visible=(panelXcharge.Visible || butPayConnect.Visible || butPaySimple.Visible);
 		}
 
