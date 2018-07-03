@@ -165,6 +165,9 @@ namespace OpenDentBusiness{
 		}
 
 		public static void UpdateDateTStamp(HL7Msg hl7Msg) {
+			if(string.IsNullOrWhiteSpace(hl7Msg.MsgText)) {//don't update DateTStamp if MsgText is blank, that would be all messages more than 4 months old
+				return;
+			}
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
 				Meth.GetVoid(MethodBase.GetCurrentMethod(),hl7Msg);
 				return;
