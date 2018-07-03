@@ -1275,7 +1275,7 @@ namespace OpenDental{
 			if(_userPrefCurrentOnly != null && PIn.Bool(_userPrefCurrentOnly.ValueString)) {
 				checkShowCurrent.Checked=true;
 			}
-			FillGrid(false);
+			FillGrid();
 			Plugins.HookAddCode(this,"FormPerio.Load_end");
 		}
 

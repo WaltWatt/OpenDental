@@ -1213,11 +1213,11 @@ namespace OpenDental.UI.Voice {
 				},
 				new VoiceCommand {
 					Commands=new List<string> {
-						"skip tooth fouteen"
+						"skip tooth fourteen"
 					},
 					ActionToPerform=VoiceCommandAction.SkipToothFourteen,
 					ListAreas=new List<VoiceCommandArea> { VoiceCommandArea.PerioChart },
-					Response="Tooth fouteen skipped"
+					Response="Tooth fourteen skipped"
 				},
 				new VoiceCommand {
 					Commands=new List<string> {
