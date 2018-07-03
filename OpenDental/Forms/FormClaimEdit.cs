@@ -5732,6 +5732,7 @@ namespace OpenDental{
 			newClaim.InsPayEst=0;
 			newClaim.InsPayAmt=0;
 			newClaim.WriteOff=0;
+			newClaim.CustomTracking=0;
 			Claims.Insert(newClaim);//We must insert here so that we have the primary key in the loop below.
 			//Split claims can occur for two reasons:
 			//1) The insurance company rejects a claim because of one procedure.  The office staff then split off the "faulty" procedure and submit the
