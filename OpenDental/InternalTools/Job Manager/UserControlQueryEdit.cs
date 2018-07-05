@@ -1248,6 +1248,7 @@ namespace OpenDental.InternalTools.Job_Manager {
 				else {
 					JobNotes.Update(FormJNE.JobNoteCur);
 				}
+				Signalods.SetInvalid(InvalidType.Jobs,KeyType.Job,_jobCur.JobNum);
 			}
 			_jobCur.ListJobNotes.RemoveAll(x => x.JobNoteNum==jobNote.JobNoteNum);//should remove only one
 			if(FormJNE.JobNoteCur!=null) {

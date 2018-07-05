@@ -57,6 +57,8 @@ namespace OpenDental {
 			_toolTipHover.OwnerDraw=true;
 			_toolTipHover.Draw += new DrawToolTipEventHandler(toolTipHover_Draw);
 			_toolTipHover.Popup += new PopupEventHandler(toolTipHover_PopupHelper);
+			gridTesting.ContextMenu=new ContextMenu();
+			gridTesting.ContextMenu.MenuItems.Add("Assign Tester",(o,arg) => menuItemAssignTester_Click(o,arg));
 		}
 
 		private void RefreshTabs() {
@@ -469,46 +471,73 @@ namespace OpenDental {
 			gridTesting.Columns.Add(new ODGridColumn("Version",95) { TextAlign=HorizontalAlignment.Center });// X for yes, - for unassigned
 			gridTesting.Columns.Add(new ODGridColumn("",205));
 			gridTesting.Rows.Clear();
-			//Sort jobs into action dictionary
-			List<Job> listJobs=new List<Job>();
-			foreach(Job job in _listJobsAll) {
-				if(job.Category.In(JobCategory.Query,JobCategory.Research,JobCategory.Conversion)) {
-					continue;
+			//Get a list of all jobs that should be tested.
+			List<Job> listTestingJobs=_listJobsAll.FindAll(x => !x.Category.In(JobCategory.Query,JobCategory.Research,JobCategory.Conversion)
+					&& x.PhaseCur.In(JobPhase.Complete,JobPhase.Documentation)
+					&& (string.IsNullOrEmpty(textVersionText.Text) ? true : x.JobVersion.Contains(textVersionText.Text)))
+				.OrderBy(x => Userods.GetUser(x.UserNumTester)?.UserName??"ZZZ")
+				.ThenBy(x => _listJobPriorities.FirstOrDefault(y => y.DefNum==x.PriorityTesting)?.ItemOrder??1000)
+				.ToList();
+			//Make a dictionary separated by users.
+			Dictionary<long,List<Job>> dictTestingJobsByUser=listTestingJobs.GroupBy(x => x.UserNumTester).ToDictionary(x => x.Key,x => x.ToList());
+			//Fill the grid with the jobs.
+			foreach(long userNum in dictTestingJobsByUser.Keys) {
+				//Every user will have their own section.  Might hide other users later once we start getting busy with testing.
+				Userod user=Userods.GetUser(userNum)??new Userod() { UserName="Unassigned",UserNum=0 };
+				gridTesting.Rows.Add(new ODGridRow("","",user.UserName) { ColorBackG=gridDocumentation.HeaderColor,Bold=true });
+				foreach(Job job in dictTestingJobsByUser[userNum]) {
+					Def jobPriority=_listJobPriorities.FirstOrDefault(y => y.DefNum==job.PriorityTesting)??new Def() { ItemName="",ItemColor=Color.Empty };
+					gridTesting.Rows.Add(
+						new ODGridRow(
+							new ODGridCell(jobPriority.ItemName) {
+								CellColor=jobPriority.ItemColor
+							},
+							new ODGridCell(job.JobVersion),
+							new ODGridCell(job.ToString()) {
+								CellColor=(job.ToString().ToLower().Contains(textSearch.Text.ToLower()) 
+									&& !string.IsNullOrWhiteSpace(textSearch.Text) ? Color.LightYellow : Color.Empty)
+								}
+							)
+						{
+							Tag=job
+						}
+					);
 				}
-				if(!job.PhaseCur.In(JobPhase.Complete,JobPhase.Documentation)) {
-					continue;
-				}
-				if(!String.IsNullOrEmpty(textVersionText.Text) && !job.JobVersion.Contains(textVersionText.Text)) {
-					continue;
-				}
-				listJobs.Add(job);
-			}
-			listJobs.OrderBy(x => _listJobPriorities.FirstOrDefault(y => y.DefNum==x.Priority).ItemOrder).ToList();
-			//sort dictionary so actions will appear in same orderlistJobs
-			foreach(Job job in listJobs) {
-				Def jobPriority = _listJobPriorities.FirstOrDefault(y => y.DefNum==job.Priority);
-				gridTesting.Rows.Add(
-					new ODGridRow(
-						new ODGridCell(jobPriority.ItemName) {
-							CellColor=jobPriority.ItemColor
-						},
-						new ODGridCell(job.JobVersion),
-						new ODGridCell(job.ToString()) { CellColor=(job.ToString().ToLower().Contains(textSearch.Text.ToLower())&&!string.IsNullOrWhiteSpace(textSearch.Text) ? Color.LightYellow : Color.Empty) }) {
-						Tag=job
-					}
-				);
 			}
 			gridTesting.EndUpdate();
 			//RESELECT JOB
 			if(selectedJobNum>0) {
-				for(int i = 0;i<gridTesting.Rows.Count;i++) {
+				for(int i=0;i<gridTesting.Rows.Count;i++) {
 					if((gridTesting.Rows[i].Tag is Job) && ((Job)gridTesting.Rows[i].Tag).JobNum==selectedJobNum) {
 						gridTesting.SetSelected(i,true);
 						break;
 					}
 				}
 			}
-		}		
+		}
+
+		private void menuItemAssignTester_Click(object o,EventArgs arg) {
+			Job jobOld=gridTesting.SelectedTag<Job>();
+			if(jobOld==null) {
+				return;
+			}
+			List<Userod> listUsersForPicker=Userods.GetUsersByJobRole(JobPerm.TestingCoordinator,false);
+			FormUserPick FormUP=new FormUserPick();
+			FormUP.Text="Assign a Tester";
+			FormUP.IsSelectionmode=true;
+			FormUP.ListUserodsFiltered=listUsersForPicker;
+			FormUP.IsPickNoneAllowed=true;
+			FormUP.IsShowAllAllowed=false;
+			if(FormUP.ShowDialog()!=DialogResult.OK) {
+				return;
+			}
+			Job jobCur=jobOld.Copy();
+			jobCur.UserNumTester=FormUP.SelectedUserNum;
+			if(Jobs.Update(jobCur,jobOld)) {
+				Signalods.SetInvalid(InvalidType.Jobs,KeyType.Job,jobCur.JobNum);
+				GoToJob(jobCur.JobNum);
+			}
+		}
 
 		private void datePickerFrom_ValueChanged(object sender,EventArgs e) {
 			FillGridTesting();

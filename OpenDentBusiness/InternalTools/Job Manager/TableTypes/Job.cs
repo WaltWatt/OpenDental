@@ -81,6 +81,10 @@ namespace OpenDentBusiness {
 		///<summary>The requirements of the job. RTF content of the main requirements of the Job.</summary>
 		[CrudColumn(SpecialType=CrudSpecialColType.TextIsClob)]//Text
 		public string Requirements;
+		///<summary>FK to userod.UserNum.  The user that has taken or was assigned this job in order to perform testing.</summary>
+		public long UserNumTester;
+		///<summary>FK to definition.DefNum.  Since testing can happen at during any phase, the testing department has this separate Priority.</summary>
+		public long PriorityTesting;
 
 		//The following varables should be filled by the class that uses them. Not filled in S class. 
 		//Just a convenient way to package a job for passing around in the job manager.

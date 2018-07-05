@@ -51,6 +51,7 @@ namespace OpenDentBusiness.Crud{
 				jobNote.UserNum     = PIn.Long  (row["UserNum"].ToString());
 				jobNote.DateTimeNote= PIn.DateT (row["DateTimeNote"].ToString());
 				jobNote.Note        = PIn.String(row["Note"].ToString());
+				jobNote.NoteType    = (OpenDentBusiness.JobNoteTypes)PIn.Int(row["NoteType"].ToString());
 				retVal.Add(jobNote);
 			}
 			return retVal;
@@ -67,6 +68,7 @@ namespace OpenDentBusiness.Crud{
 			table.Columns.Add("UserNum");
 			table.Columns.Add("DateTimeNote");
 			table.Columns.Add("Note");
+			table.Columns.Add("NoteType");
 			foreach(JobNote jobNote in listJobNotes) {
 				table.Rows.Add(new object[] {
 					POut.Long  (jobNote.JobNoteNum),
@@ -74,6 +76,7 @@ namespace OpenDentBusiness.Crud{
 					POut.Long  (jobNote.UserNum),
 					POut.DateT (jobNote.DateTimeNote,false),
 					            jobNote.Note,
+					POut.Int   ((int)jobNote.NoteType),
 				});
 			}
 			return table;
@@ -114,7 +117,7 @@ namespace OpenDentBusiness.Crud{
 			if(useExistingPK || PrefC.RandomKeys) {
 				command+="JobNoteNum,";
 			}
-			command+="JobNum,UserNum,DateTimeNote,Note) VALUES(";
+			command+="JobNum,UserNum,DateTimeNote,Note,NoteType) VALUES(";
 			if(useExistingPK || PrefC.RandomKeys) {
 				command+=POut.Long(jobNote.JobNoteNum)+",";
 			}
@@ -122,7 +125,8 @@ namespace OpenDentBusiness.Crud{
 				     POut.Long  (jobNote.JobNum)+","
 				+    POut.Long  (jobNote.UserNum)+","
 				+    DbHelper.Now()+","
-				+    DbHelper.ParamChar+"paramNote)";
+				+    DbHelper.ParamChar+"paramNote,"
+				+    POut.Int   ((int)jobNote.NoteType)+")";
 			if(jobNote.Note==null) {
 				jobNote.Note="";
 			}
@@ -159,7 +163,7 @@ namespace OpenDentBusiness.Crud{
 			if(isRandomKeys || useExistingPK) {
 				command+="JobNoteNum,";
 			}
-			command+="JobNum,UserNum,DateTimeNote,Note) VALUES(";
+			command+="JobNum,UserNum,DateTimeNote,Note,NoteType) VALUES(";
 			if(isRandomKeys || useExistingPK) {
 				command+=POut.Long(jobNote.JobNoteNum)+",";
 			}
@@ -167,7 +171,8 @@ namespace OpenDentBusiness.Crud{
 				     POut.Long  (jobNote.JobNum)+","
 				+    POut.Long  (jobNote.UserNum)+","
 				+    DbHelper.Now()+","
-				+    DbHelper.ParamChar+"paramNote)";
+				+    DbHelper.ParamChar+"paramNote,"
+				+    POut.Int   ((int)jobNote.NoteType)+")";
 			if(jobNote.Note==null) {
 				jobNote.Note="";
 			}
@@ -187,7 +192,8 @@ namespace OpenDentBusiness.Crud{
 				+"JobNum      =  "+POut.Long  (jobNote.JobNum)+", "
 				+"UserNum     =  "+POut.Long  (jobNote.UserNum)+", "
 				+"DateTimeNote=  "+POut.DateT (jobNote.DateTimeNote)+", "
-				+"Note        =  "+DbHelper.ParamChar+"paramNote "
+				+"Note        =  "+DbHelper.ParamChar+"paramNote, "
+				+"NoteType    =  "+POut.Int   ((int)jobNote.NoteType)+" "
 				+"WHERE JobNoteNum = "+POut.Long(jobNote.JobNoteNum);
 			if(jobNote.Note==null) {
 				jobNote.Note="";
@@ -215,6 +221,10 @@ namespace OpenDentBusiness.Crud{
 				if(command!=""){ command+=",";}
 				command+="Note = "+DbHelper.ParamChar+"paramNote";
 			}
+			if(jobNote.NoteType != oldJobNote.NoteType) {
+				if(command!=""){ command+=",";}
+				command+="NoteType = "+POut.Int   ((int)jobNote.NoteType)+"";
+			}
 			if(command==""){
 				return false;
 			}
@@ -241,6 +251,9 @@ namespace OpenDentBusiness.Crud{
 				return true;
 			}
 			if(jobNote.Note != oldJobNote.Note) {
+				return true;
+			}
+			if(jobNote.NoteType != oldJobNote.NoteType) {
 				return true;
 			}
 			return false;

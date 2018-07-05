@@ -80,6 +80,9 @@ namespace OpenDental.InternalTools.Job_Manager {
 				gridFiles.ContextMenu=new ContextMenu();
 			}
 			gridFiles.ContextMenu.Popup+=FilePopupHelper;
+			if(!JobPermissions.IsAuthorized(JobPerm.TestingCoordinator,true) && tabControlMain.TabPages.Contains(tabTesting)) {
+				tabControlMain.TabPages.Remove(tabTesting);
+			}
 		}
 
 		private void menuItemReviewComplete_Click(object sender,EventArgs e) {
@@ -160,6 +163,9 @@ namespace OpenDental.InternalTools.Job_Manager {
 			if(comboPriority.SelectedIndex>-1) {
 				job.Priority=((ODBoxItem<Def>)comboPriority.SelectedItem).Tag.DefNum;
 			}
+			if(comboPriorityTesting.SelectedIndex > -1) {
+				job.PriorityTesting=comboPriorityTesting.SelectedTag<Def>().DefNum;
+			}
 			job.PhaseCur=(JobPhase)comboStatus.SelectedIndex;
 			job.Category=(JobCategory)_listCategoryNames.IndexOf(comboCategory.SelectedItem.ToString());
 			return job;
@@ -175,7 +181,10 @@ namespace OpenDental.InternalTools.Job_Manager {
 			if(comboPriority.Items.Count==0) {
 				_listPriorities=Defs.GetDefsForCategory(DefCat.JobPriorities,true).OrderBy(x => x.ItemOrder).ToList();
 				_listPrioritiesAll=Defs.GetDefsForCategory(DefCat.JobPriorities).OrderBy(x => x.ItemOrder).ToList();
-				_listPriorities.ForEach(x=>comboPriority.Items.Add(new ODBoxItem<Def>(x.ItemName,x)));
+				_listPriorities.ForEach(x => {
+					comboPriority.Items.Add(new ODBoxItem<Def>(x.ItemName,x));
+					comboPriorityTesting.Items.Add(new ODBoxItem<Def>(x.ItemName,x));
+				});
 			}
 			this.Enabled=false;//disable control while it is filled.
 			_isOverride=false;
@@ -192,6 +201,7 @@ namespace OpenDental.InternalTools.Job_Manager {
 			textTitle.Text=_jobCur.Title;
 			textJobNum.Text=_jobCur.JobNum>0?_jobCur.JobNum.ToString():Lan.g("Jobs","New Job");
 			comboPriority.IndexSelectOrSetText(_listPrioritiesAll.Select(x => x.DefNum).ToList().IndexOf(_jobCur.Priority),()=>Defs.GetName(DefCat.JobPriorities,_jobCur.Priority));
+			comboPriorityTesting.IndexSelectOrSetText(_listPrioritiesAll.Select(x => x.DefNum).ToList().IndexOf(_jobCur.PriorityTesting),()=>Defs.GetName(DefCat.JobPriorities,_jobCur.PriorityTesting));
 			comboStatus.SelectedIndex=(int)_jobCur.PhaseCur;
 			if(_jobCur.IsApprovalNeeded) {
 				textApprove.Text="Waiting";
@@ -255,7 +265,8 @@ namespace OpenDental.InternalTools.Job_Manager {
 			FillGridFeatureReq();
 			FillGridBugs();
 			FillGridFiles();
-			FillGridNote();
+			FillGridDiscussion();
+			FillGridTestingNotes();
 			FillGridReviews();
 			FillGridLog();
 		}
@@ -565,24 +576,34 @@ namespace OpenDental.InternalTools.Job_Manager {
 			menu.MenuItems.Add(new MenuItem(link.Tag) { Enabled=false });//show file path in gray
 		}
 
-		public void FillGridNote() {
-			gridNotes.BeginUpdate();
-			gridNotes.Columns.Clear();
-			gridNotes.Columns.Add(new ODGridColumn(Lan.g(this,"Date Time"),120));
-			gridNotes.Columns.Add(new ODGridColumn(Lan.g(this,"User"),80));
-			gridNotes.Columns.Add(new ODGridColumn(Lan.g(this,"Note"),400));
-			gridNotes.Rows.Clear();
+		public void FillGridDiscussion() {
+			FillGridWithJobNotes(gridNotes,_jobCur.ListJobNotes.FindAll(x => x.NoteType==JobNoteTypes.Discussion));
+		}
+
+		public void FillGridTestingNotes() {
+			FillGridWithJobNotes(gridTestingNotes,_jobCur.ListJobNotes.FindAll(x => x.NoteType==JobNoteTypes.Testing));
+		}
+
+		///<summary>Helper method that fills the grid passed in with the corresponding job notes.
+		///This is here because right now every grid that displays JobNotes shows them the same way.</summary>
+		private void FillGridWithJobNotes(ODGrid grid,List<JobNote> listJobNotes) {
+			grid.BeginUpdate();
+			grid.Columns.Clear();
+			grid.Columns.Add(new ODGridColumn(Lan.g(this,"Date Time"),120));
+			grid.Columns.Add(new ODGridColumn(Lan.g(this,"User"),80));
+			grid.Columns.Add(new ODGridColumn(Lan.g(this,"Note"),400));
+			grid.Rows.Clear();
 			ODGridRow row;
-			foreach(JobNote jobNote in _jobCur.ListJobNotes) {
+			foreach(JobNote jobNote in listJobNotes) {
 				row=new ODGridRow();
 				row.Cells.Add(jobNote.DateTimeNote.ToShortDateString()+" "+jobNote.DateTimeNote.ToShortTimeString());
 				row.Cells.Add(Userods.GetName(jobNote.UserNum));
 				row.Cells.Add(jobNote.Note);
 				row.Tag=jobNote;
-				gridNotes.Rows.Add(row);
+				grid.Rows.Add(row);
 			}
-			gridNotes.EndUpdate();
-			gridNotes.ScrollToEnd();
+			grid.EndUpdate();
+			grid.ScrollToEnd();
 		}
 
 		private void FillGridReviews() {
@@ -1866,6 +1887,12 @@ namespace OpenDental.InternalTools.Job_Manager {
 				_jobOld.Priority=jobMerge.Priority;
 				comboPriority.IndexSelectOrSetText(_listPrioritiesAll.Select(x => x.DefNum).ToList().IndexOf(_jobCur.Priority),()=>Defs.GetName(DefCat.JobPriorities,_jobCur.Priority));
 			}
+			//PRIORITY TESTING
+			if(_jobCur.PriorityTesting!=jobMerge.PriorityTesting) {
+				_jobCur.PriorityTesting=jobMerge.PriorityTesting;
+				_jobOld.PriorityTesting=jobMerge.PriorityTesting;
+				comboPriorityTesting.IndexSelectOrSetText(_listPrioritiesAll.Select(x => x.DefNum).ToList().IndexOf(_jobCur.PriorityTesting),() => Defs.GetName(DefCat.JobPriorities,_jobCur.PriorityTesting));
+			}
 			//STATUS
 			if(_jobCur.PhaseCur!=jobMerge.PhaseCur) {
 				_jobCur.PhaseCur=jobMerge.PhaseCur;
@@ -1983,6 +2010,9 @@ namespace OpenDental.InternalTools.Job_Manager {
 			if(comboPriority.SelectedIndex>-1) {
 				job.Priority=((ODBoxItem<Def>)comboPriority.SelectedItem).Tag.DefNum;
 			}
+			if(comboPriorityTesting.SelectedIndex > -1) {
+				job.PriorityTesting=comboPriorityTesting.SelectedTag<Def>().DefNum;
+			}
 			if(job.ListJobLinks.Exists(x => x.LinkType==JobLinkType.Request) && job.PhaseCur==JobPhase.Development) {
 				if(_listPrioritiesAll.FirstOrDefault(x => x.DefNum==job.Priority).ItemValue.Contains("OnHold")) {
 					FeatureRequests.MarkAsApproved(job.ListJobLinks.Where(x => x.LinkType==JobLinkType.Request).Select(x => x.FKey).ToList());
@@ -2078,6 +2108,21 @@ namespace OpenDental.InternalTools.Job_Manager {
 			if(!IsNew) {
 				Job job = Jobs.GetOne(_jobCur.JobNum);
 				job.Priority=priorityNum;
+				Jobs.Update(job);
+				Signalods.SetInvalid(InvalidType.Jobs,KeyType.Job,_jobCur.JobNum);
+			}
+		}
+
+		private void comboPriorityTesting_SelectionChangeCommitted(object sender,EventArgs e) {
+			if(_isLoading) {
+				return;
+			}
+			long priorityNum=comboPriorityTesting.SelectedTag<Def>().DefNum;
+			_jobCur.PriorityTesting=priorityNum;
+			_jobOld.PriorityTesting=priorityNum;
+			if(!IsNew) {
+				Job job=Jobs.GetOne(_jobCur.JobNum);
+				job.PriorityTesting=priorityNum;
 				Jobs.Update(job);
 				Signalods.SetInvalid(InvalidType.Jobs,KeyType.Job,_jobCur.JobNum);
 			}
@@ -2459,19 +2504,37 @@ namespace OpenDental.InternalTools.Job_Manager {
 			if(_isLoading) {
 				return;
 			}
+			if(AddJobNote()) {
+				FillGridDiscussion();
+			}
+		}
+
+		private void gridTestingNotes_TitleAddClick(object sender,EventArgs e) {
+			if(_isLoading) {
+				return;
+			}
+			if(AddJobNote(JobNoteTypes.Testing)) {
+				FillGridTestingNotes();
+			}
+		}
+
+		///<summary>Displays the Job Note Edit to the user.  Manipulates _jobCur.ListJobNotes accordingly.
+		///Returns true if the note was added; Otherwise, false.</summary>
+		private bool AddJobNote(JobNoteTypes noteType=JobNoteTypes.Discussion) {
 			if(_jobCur==null) {
-				return;//should never happen
+				return false;//should never happen
 			}
 			JobNote jobNote=new JobNote() {
 				DateTimeNote=MiscData.GetNowDateTime(),
 				IsNew=true,
 				JobNum=_jobCur.JobNum,
-				UserNum=Security.CurUser.UserNum
+				UserNum=Security.CurUser.UserNum,
+				NoteType=noteType,
 			};
 			FormJobNoteEdit FormJNE=new FormJobNoteEdit(jobNote);
 			FormJNE.ShowDialog();
 			if(FormJNE.DialogResult!=DialogResult.OK || FormJNE.JobNoteCur==null) {
-				return;
+				return false;
 			}
 			if(!IsNew) {
 				JobNotes.Insert(FormJNE.JobNoteCur);
@@ -2481,7 +2544,7 @@ namespace OpenDental.InternalTools.Job_Manager {
 				IsChanged=true;
 			}
 			_jobCur.ListJobNotes.Add(FormJNE.JobNoteCur);
-			FillGridNote();
+			return true;
 		}
 
 		private void gridCustomerQuotes_CellDoubleClick(object sender,ODGridClickEventArgs e) {
@@ -2751,11 +2814,30 @@ namespace OpenDental.InternalTools.Job_Manager {
 			if(!(gridNotes.Rows[e.Row].Tag is JobNote)) {
 				return;//should never happen.
 			}
-			JobNote jobNote = (JobNote)gridNotes.Rows[e.Row].Tag;
-			FormJobNoteEdit FormJNE = new FormJobNoteEdit(jobNote);
+			if(EditJobNote((JobNote)gridNotes.Rows[e.Row].Tag)) {
+				FillGridDiscussion();
+			}
+		}
+
+		private void gridTestingNotes_CellDoubleClick(object sender,ODGridClickEventArgs e) {
+			if(_isLoading) {
+				return;
+			}
+			if(!(gridTestingNotes.Rows[e.Row].Tag is JobNote)) {
+				return;//should never happen.
+			}
+			if(EditJobNote((JobNote)gridTestingNotes.Rows[e.Row].Tag)) {
+				FillGridTestingNotes();
+			}
+		}
+
+		///<summary>Edits the job note at the selected index provided.  Updates _jobCur.ListJobNotes accordingly.
+		///Returns true if the note was changed; Otherwise, false.</summary>
+		private bool EditJobNote(JobNote jobNote) {
+			FormJobNoteEdit FormJNE=new FormJobNoteEdit(jobNote);
 			FormJNE.ShowDialog();
 			if(FormJNE.DialogResult!=DialogResult.OK) {
-				return;
+				return false;
 			}
 			if(IsNew) {
 				IsChanged=true;
@@ -2767,12 +2849,13 @@ namespace OpenDental.InternalTools.Job_Manager {
 				else {
 					JobNotes.Update(FormJNE.JobNoteCur);
 				}
+				Signalods.SetInvalid(InvalidType.Jobs,KeyType.Job,_jobCur.JobNum);
 			}
-			_jobCur.ListJobNotes.RemoveAt(e.Row);// (x => x.JobNoteNum==jobNote.JobNoteNum);//should remove only one
+			_jobCur.ListJobNotes.RemoveAll(x => x.JobNoteNum==jobNote.JobNoteNum);
 			if(FormJNE.JobNoteCur!=null) {
 				_jobCur.ListJobNotes.Add(FormJNE.JobNoteCur);
 			}
-			FillGridNote();
+			return true;
 		}
 
 		private void gridReview_CellDoubleClick(object sender,ODGridClickEventArgs e) {

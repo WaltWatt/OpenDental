@@ -45,6 +45,15 @@ namespace OpenDentBusiness {
 			Crud.JobCrud.Update(job);
 		}
 
+		///<summary>Updates one Job in the database.  Uses an old object to compare to, and only alters changed fields.
+		///This prevents collisions and concurrency problems in heavily used tables.  Returns true if an update occurred.</summary>
+		public static bool Update(Job jobCur,Job jobOld) {
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				return Meth.GetBool(MethodBase.GetCurrentMethod(),jobCur,jobOld);
+			}
+			return Crud.JobCrud.Update(jobCur,jobOld);
+		}
+
 		///<summary>You must surround with a try-catch when calling this method.  Deletes one job from the database.  
 		///Also deletes all JobLinks, Job Events, and Job Notes associated with the job.  Jobs that have reviews or quotes on them may not be deleted and will throw an exception.</summary>
 		public static void Delete(long jobNum) {

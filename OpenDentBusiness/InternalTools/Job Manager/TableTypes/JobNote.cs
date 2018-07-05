@@ -21,6 +21,8 @@ namespace OpenDentBusiness {
 		///<summary>Note. Text that the user wishes to show on the task.</summary>
 		[CrudColumn(SpecialType=CrudSpecialColType.TextIsClob)]
 		public string Note;
+		///<summary>The type of note.</summary>
+		public JobNoteTypes NoteType;
 
 		///<summary></summary>
 		public JobNote Copy() {
@@ -29,6 +31,13 @@ namespace OpenDentBusiness {
 
 	}
 
+	///<summary></summary>
+	public enum JobNoteTypes {
+		///<summary>0 - These notes show up in the Discussion grid in the Discussion tab.</summary>
+		Discussion,
+		///<summary>1 - These notes show up in the Notes grid in the Testing tab.</summary>
+		Testing,
+	}
 
 
 
