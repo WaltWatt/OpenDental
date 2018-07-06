@@ -151,6 +151,11 @@ namespace OpenDental {
 				rtb.Text=textbox.Text;
 				rtb.Font=textbox.Font;
 				rtb.Size=textbox.Size;
+				//According to MSDN, "If no paragraph is selected in the control, setting this property applies the alignment setting to the paragraph in
+				//which the insertion point appears as well as to paragraphs created after the paragraph that has the alignment property setting."
+				//https://msdn.microsoft.com/en-us/library/system.windows.forms.richtextbox.selectionalignment(v=vs.110).aspx
+				//Since rb is new, there is no seletion and insertion point is 0.  Therefore, the entire text will be affected by this alignment.
+				rtb.SelectionAlignment=textbox.SelectionAlignment;
 				//GetFirstCharIndexFromLine() returns -1 if lineIndex is past the last line.
 				lineInfo.FirstCharIndex=rtb.GetFirstCharIndexFromLine(lineIndex);//-1 if lineIndex >= count of lines in rtb.
 				if(lineInfo.FirstCharIndex==-1) {//Return the last line's information.
