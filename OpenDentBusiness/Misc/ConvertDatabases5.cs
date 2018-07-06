@@ -8686,5 +8686,15 @@ No Action Required in many cases, check your new patient Web Sched on your web s
 				}
 			}
 		}
+
+		private static void To18_1_33() {
+			//Per Brian: "I can’t think of any valid reason that anyone would prefer it to be blank given the recent changes.
+			//I think more likely, everyone who set it to blank did so to get around issues that are no longer problems.
+			//I think leaving some people blank will result in support calls where we have to go set a date.......
+			//update anyone with blank to 2..."
+			//A 1 in the database shows as a 2 in the UI.  A -1 in the database represents disabled (blank in UI).
+			string command="UPDATE preference SET ValueString='1' WHERE PrefName='ClaimPaymentNoShowZeroDate' AND ValueString='-1'";
+			Db.NonQ(command);
+		}
 	}
 }

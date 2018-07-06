@@ -3195,7 +3195,7 @@ namespace OpenDental{
 			// 
 			this.textClaimsReceivedDays.Location = new System.Drawing.Point(380, 372);
 			this.textClaimsReceivedDays.MaxVal = 999999;
-			this.textClaimsReceivedDays.MinVal = 0;
+			this.textClaimsReceivedDays.MinVal = 1;
 			this.textClaimsReceivedDays.Name = "textClaimsReceivedDays";
 			this.textClaimsReceivedDays.Size = new System.Drawing.Size(60, 20);
 			this.textClaimsReceivedDays.TabIndex = 248;
@@ -3960,7 +3960,7 @@ namespace OpenDental{
 			checkRxSendNewToQueue.Checked=PrefC.GetBool(PrefName.RxSendNewToQueue);
 			int claimZeroPayRollingDays=PrefC.GetInt(PrefName.ClaimPaymentNoShowZeroDate);
 			if(claimZeroPayRollingDays>=0) {
-				textClaimsReceivedDays.Text=claimZeroPayRollingDays.ToString();
+				textClaimsReceivedDays.Text=(claimZeroPayRollingDays+1).ToString();//The minimum value is now 1 ("today"), to match other areas of OD.
 			}
 			for(int i=0;i<7;i++) {
 				comboTimeCardOvertimeFirstDayOfWeek.Items.Add(Lan.g("enumDayOfWeek",Enum.GetNames(typeof(DayOfWeek))[i]));
@@ -4313,7 +4313,7 @@ namespace OpenDental{
 				return;
 			}
 			if(textClaimsReceivedDays.errorProvider1.GetError(textClaimsReceivedDays)!="") {
-				MsgBox.Show(this,"Show claims received after days must be a non-negative integer or blank.");
+				MsgBox.Show(this,"Show claims received after days must be a positive integer or blank.");
 				return;
 			}
 			claimSnapshotRunTime=new DateTime(1881,01,01,claimSnapshotRunTime.Hour,claimSnapshotRunTime.Minute,claimSnapshotRunTime.Second);
@@ -4504,7 +4504,7 @@ namespace OpenDental{
 				| Prefs.UpdateBool(PrefName.IntermingleFamilyDefault,checkIntermingleDefault.Checked)
 				| Prefs.UpdateInt(PrefName.BillingElectBatchMax,PIn.Int(textBillingElectBatchMax.Text))
 				| Prefs.UpdateBool(PrefName.BillingShowSendProgress,checkBillingShowProgress.Checked)
-				| Prefs.UpdateInt(PrefName.ClaimPaymentNoShowZeroDate,(textClaimsReceivedDays.Text=="")?-1:PIn.Int(textClaimsReceivedDays.Text))
+				| Prefs.UpdateInt(PrefName.ClaimPaymentNoShowZeroDate,(textClaimsReceivedDays.Text=="")?-1:(PIn.Int(textClaimsReceivedDays.Text)-1))
 				| Prefs.UpdateBool(PrefName.ClaimPaymentBatchOnly,checkClaimPaymentBatchOnly.Checked)
 				| Prefs.UpdateBool(PrefName.EraPrintOneClaimPerPage,checkEraOneClaimPerPage.Checked)
 				| Prefs.UpdateBool(PrefName.ShowAutoDeposit,checkShowAutoDeposit.Checked)
