@@ -19,6 +19,7 @@ namespace OpenDental {
 			if(!string.IsNullOrEmpty(textCloseButton)) {
 				butClose.Text=textCloseButton;
 			}
+			this.Text+=" - "+DateTime.Now.ToString();//Append to title of form.
 		}
 
 		private void FormFriendlyException_Load(object sender,EventArgs e) {
@@ -59,7 +60,7 @@ namespace OpenDental {
 
 		private void butCopyAll_Click(object sender,EventArgs e) {
 			try {
-				string content=textDetails.Text+GetQueryText();
+				string content=this.Text+"\r\n"+textDetails.Text+GetQueryText();
 				System.Windows.Clipboard.SetData("Text",content);
 			}
 			catch(Exception ex) {
@@ -102,12 +103,6 @@ namespace OpenDental {
 			baseY+=textSize.Height;
 			text=Text;
 			font=new Font(Font.FontFamily,16,FontStyle.Bold);
-			textSize=g.MeasureString(text,font);
-			g.DrawString(text,font,Brushes.Black,(margins.Width-textSize.Width)/2,baseY);
-			baseY+=textSize.Height;
-			font.Dispose();
-			font=new Font(Font.FontFamily,14,FontStyle.Bold);
-			text=DateTime.Now.ToString();
 			textSize=g.MeasureString(text,font);
 			g.DrawString(text,font,Brushes.Black,(margins.Width-textSize.Width)/2,baseY);
 			baseY+=textSize.Height;
