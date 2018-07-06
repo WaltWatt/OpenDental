@@ -612,10 +612,18 @@ namespace OpenDentBusiness {
 			if(progress.IsPauseOrCancel()) {
 				return Lans.g(progress.LanThis,"Import canceled by user.");
 			}
-			string[] files=Directory.GetFiles(clearinghouseClin.ResponsePath);
-			string archiveDir=ODFileUtils.CombinePaths(clearinghouseClin.ResponsePath,"Archive"+"_"+DateTime.Now.Year.ToString());
-			if(!Directory.Exists(archiveDir)) {
-				Directory.CreateDirectory(archiveDir);
+			string[] files=null;
+			string archiveDir;
+			try {
+				files=Directory.GetFiles(clearinghouseClin.ResponsePath);
+				archiveDir=ODFileUtils.CombinePaths(clearinghouseClin.ResponsePath,"Archive"+"_"+DateTime.Now.Year.ToString());
+				if(!Directory.Exists(archiveDir)) {
+					Directory.CreateDirectory(archiveDir);
+				}
+			}
+			catch(UnauthorizedAccessException ex) {
+				ex.DoNothing();
+				return Lans.g("FormClaimReports","Access to the Report Path is denied.  Try running as administrator or contact your network administrator.");
 			}
 			List<string> listFailedFiles=new List<string>();
 			progress.UpdateProgress(Lans.g(progress.LanThis,"Files read."));
