@@ -138,8 +138,13 @@ namespace OpenDental {
 				return;
 			}
 			Task task=Tasks.GetOne(taskNum);
-			FormTaskEdit FormTE=new FormTaskEdit(task,task.Copy());
-			FormTE.Show();
+			if(task!=null) {
+				FormTaskEdit FormTE=new FormTaskEdit(task,task.Copy());
+				FormTE.Show();
+			}
+			else {
+				MsgBox.Show(this,"The task no longer exists.");
+			}
 		}
 
 		private void butPatPicker_Click(object sender,EventArgs e) {
