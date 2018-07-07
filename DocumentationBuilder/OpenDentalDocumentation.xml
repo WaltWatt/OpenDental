@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet type="text/xsl" href="OpenDentalDocumentation.xsl"?>
-<database version="18.1.22.0">
+<database version="18.1.33.0">
     <table name="account">
         <summary>Used in the accounting section in chart of accounts.  Not related to patient accounts in any way.</summary>
         <column order="0" name="AccountNum" type="bigint(20)">
@@ -132,6 +132,10 @@
                 <EnumValue name="DoseSpotProviderRegistered">14 - Alerts related to DoseSpot provider registration.</EnumValue>
                 <EnumValue name="DoseSpotClinicRegistered">15 - Alerts related to DoseSpot clinic registration.</EnumValue>
                 <EnumValue name="WebSchedRecallApptCreated">16 - An appointment has been created via Web Sched Recall.</EnumValue>
+                <EnumValue name="ClinicsChanged">17 - Alerts related to turning clinics on or off for eServices.</EnumValue>
+                <EnumValue name="ClinicsChangedInternal">18 - Alerts related to turning clinics on or off for eServices. Internal, not displayed to the customer.
+            Will be processed by the eConnector and then deleted.</EnumValue>
+                <EnumValue name="MultipleOpenDentalServices">19 - Multiple computers are running OpenDentalServices. There should only ever be one.</EnumValue>
             </Enumeration>
         </column>
     </table>
@@ -168,6 +172,10 @@
                 <EnumValue name="DoseSpotProviderRegistered">14 - Alerts related to DoseSpot provider registration.</EnumValue>
                 <EnumValue name="DoseSpotClinicRegistered">15 - Alerts related to DoseSpot clinic registration.</EnumValue>
                 <EnumValue name="WebSchedRecallApptCreated">16 - An appointment has been created via Web Sched Recall.</EnumValue>
+                <EnumValue name="ClinicsChanged">17 - Alerts related to turning clinics on or off for eServices.</EnumValue>
+                <EnumValue name="ClinicsChangedInternal">18 - Alerts related to turning clinics on or off for eServices. Internal, not displayed to the customer.
+            Will be processed by the eConnector and then deleted.</EnumValue>
+                <EnumValue name="MultipleOpenDentalServices">19 - Multiple computers are running OpenDentalServices. There should only ever be one.</EnumValue>
             </Enumeration>
         </column>
         <column order="4" name="Severity" type="tinyint(4)">
@@ -860,6 +868,7 @@
                 <EnumValue name="CreateAppt"></EnumValue>
                 <EnumValue name="ScheduleProcedure">Attaching a procedure to a scheduled appointment.</EnumValue>
                 <EnumValue name="SetBillingType"></EnumValue>
+                <EnumValue name="RxCreate">Creating a new Rx</EnumValue>
             </Enumeration>
         </column>
         <column order="3" name="ProcCodes" type="text">
@@ -931,6 +940,8 @@
                 <EnumValue name="Labresult"></EnumValue>
                 <EnumValue name="InsuranceNotEffective"></EnumValue>
                 <EnumValue name="BillingType"></EnumValue>
+                <EnumValue name="IsProcRequired"></EnumValue>
+                <EnumValue name="IsControlled"></EnumValue>
             </Enumeration>
         </column>
         <column order="3" name="Comparison" type="tinyint(4)">
@@ -975,7 +986,7 @@
         <column order="2" name="ControlType" type="varchar(50)">
             <summary>'Text', 'OneResponse', or 'MultiResponse'.  More types to be added later.</summary>
         </column>
-        <column order="3" name="ControlLabel" type="varchar(50)">
+        <column order="3" name="ControlLabel" type="varchar(255)">
             <summary>The prompt text.</summary>
         </column>
         <column order="4" name="ControlOptions" type="text">
