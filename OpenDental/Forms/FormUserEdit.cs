@@ -799,6 +799,10 @@ namespace OpenDental{
 				MsgBox.Show(this,"Please enter a username.");
 				return;
 			}
+			if(IsNew && PrefC.GetBool(PrefName.PasswordsMustBeStrong) && string.IsNullOrWhiteSpace(_passwordTyped)) {
+				MsgBox.Show(this,"Password may not be blank when the strong password feature is turned on.");
+				return;
+			}
 			if(PrefC.HasClinicsEnabled && listClinic.SelectedIndex==-1) {
 				MsgBox.Show(this,"This user does not have a User Default Clinic set.  Please choose one to continue.");
 				return;
