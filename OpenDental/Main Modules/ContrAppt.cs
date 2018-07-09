@@ -1649,6 +1649,7 @@ namespace OpenDental {
 			DateTime startDate;
 			DateTime endDate;
 			if(ApptDrawing.IsWeeklyView) {
+				SetWeekDates();
 				startDate=WeekStartDate;
 				endDate=WeekEndDate;
 			}
@@ -1688,6 +1689,20 @@ namespace OpenDental {
 				viewCur=_listApptViews[comboView.SelectedIndex-1];
 			}
 			ApptViewItemL.GetForCurView(viewCur,ApptDrawing.IsWeeklyView,SchedListPeriod);
+		}
+		
+		///<summary>Sets WeekStartDate and WeekEndDate if week format is selected in the Appointment Module.</summary>
+		private void SetWeekDates() {
+			if(!ApptDrawing.IsWeeklyView) {
+				return;
+			}
+			if(AppointmentL.DateSelected.DayOfWeek==DayOfWeek.Sunday) {
+				WeekStartDate=AppointmentL.DateSelected.AddDays(-6).Date;//go back to previous monday
+			}
+			else {
+				WeekStartDate=AppointmentL.DateSelected.AddDays(1-(int)AppointmentL.DateSelected.DayOfWeek).Date;//go back to current monday
+			}
+			WeekEndDate=WeekStartDate.AddDays(ApptDrawing.NumOfWeekDaysToDisplay-1).Date;
 		}
 
 		/// <summary>Called from both ModuleSelected and from RefreshPeriod.  Do not call it from any event like Layout.  This also clears listConfirmed.</summary>
@@ -2684,13 +2699,7 @@ namespace OpenDental {
 				butFwd.Enabled=true;
 				butBack.Enabled=true;
 			}
-			if((int)AppointmentL.DateSelected.DayOfWeek==0) {//if sunday
-				WeekStartDate=AppointmentL.DateSelected.AddDays(-6).Date;//go back to previous monday
-			}
-			else {
-				WeekStartDate=AppointmentL.DateSelected.AddDays(1-(int)AppointmentL.DateSelected.DayOfWeek).Date;//go back to current monday
-			}
-			WeekEndDate=WeekStartDate.AddDays(ApptDrawing.NumOfWeekDaysToDisplay-1).Date;
+			SetWeekDates();
 			ApptDrawing.IsWeeklyView=isWeeklyView;
 			if(!InitializedOnStartup) {
 				return;//prevent refreshing repeatedly on startup
