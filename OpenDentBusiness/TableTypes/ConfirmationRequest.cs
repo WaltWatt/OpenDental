@@ -130,6 +130,9 @@ namespace OpenDentBusiness {
 		///OD proper will simply delete these ConfirmationRequests. HQ will move them to the terminated table and mark them ApptChanged.</summary>
 		[Description("ApptChanged")]
 		ApptChanged,
+		///<summary> 8 - The EConnector attempted to send more than 2 confirmations for the same appointment in a single day, so HQ terminated the confirmation intentionally.</summary>
+		[Description("Too Many Requests")]
+		TooManyRequests,
 	}
 
 }
