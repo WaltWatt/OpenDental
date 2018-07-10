@@ -580,7 +580,7 @@ namespace OpenDental{
 					wrdMailMerge.Destination = Word.WdMailMergeDestination.wdSendToNewDocument;
 					wrdMailMerge.Execute(ref oFalse);
 					WrdApp.Activate();
-					string tempFilePath=ODFileUtils.CreateRandomFile(Path.GetTempPath(),".doc");
+					string tempFilePath=ODFileUtils.CreateRandomFile(Path.GetTempPath(),GetFileExtensionForWordDoc(templateFile));
 					Object oFileName=tempFilePath;
 					WrdApp.ActiveDocument.SaveAs(oFileName);//save the document 
 					WrdApp.ActiveDocument.Close();
@@ -668,7 +668,7 @@ namespace OpenDental{
 				//Open document from the atoz folder.
 				try {
 					WrdApp.Activate();
-					string tempFilePath=ODFileUtils.CreateRandomFile(Path.GetTempPath(),".doc");
+					string tempFilePath=ODFileUtils.CreateRandomFile(Path.GetTempPath(),GetFileExtensionForWordDoc(templateFile));
 					Object oFileName=tempFilePath;
 					WrdApp.ActiveDocument.SaveAs(oFileName);//save the document to temp location
 					Document doc=SaveToImageFolder(tempFilePath,letterCur);
@@ -730,6 +730,17 @@ namespace OpenDental{
 			DialogResult=DialogResult.OK;
 		}
 
+		///<summary>Returns default Microsoft Word extension of .docx. Returns extension .doc If the file passed in has an extension of .dot,.doc,or .dotm.</summary>
+		private string GetFileExtensionForWordDoc(string filePath) {
+			string retVal=".docx";//default file extension
+			string ext=Path.GetExtension(filePath).ToLower();
+			List<string> listBackwardCompat=new List<string> { ".dot",".doc",".dotm" };
+			if(listBackwardCompat.Contains(ext)) {
+				retVal=".doc";
+			}
+			return retVal;
+		}
+
 		private Document SaveToImageFolder(string fileSourcePath,LetterMerge letterCur) {
 			if(letterCur.ImageFolder==0) {//This shouldn't happen
 				return new Document();
@@ -743,9 +754,9 @@ namespace OpenDental{
 			docSave.DateCreated=DateTime.Now;
 			docSave.PatNum=PatCur.PatNum;
 			docSave.DocCategory=letterCur.ImageFolder;
-			docSave.Description=letterCur.Description+docSave.DocNum; ;//no extension.
+			docSave.Description=letterCur.Description;//no extension.
 			docSave.RawBase64=rawBase64;//blank if using AtoZfolder
-			docSave.FileName=".doc";//file extension used for both DB images and AtoZ images. The insert will generate the file name.
+			docSave.FileName=GetFileExtensionForWordDoc(fileSourcePath);//file extension used for both DB images and AtoZ images. The insert will generate the file name.
 			docSave=Documents.InsertAndGet(docSave,PatCur);
 			string fileDestPath=ImageStore.GetFilePath(docSave,ImageStore.GetPatientFolder(PatCur,ImageStore.GetPreferredAtoZpath()));
 			FileAtoZ.Copy(fileSourcePath,fileDestPath,FileAtoZSourceDestination.LocalToAtoZ);
