@@ -3832,7 +3832,7 @@ namespace OpenDental {
 
 		private void checkPayTypeNone_Click(object sender,EventArgs e) {
 			_listSplitsCur.Clear();
-			Init(_loadData);
+			Init();
 		}
 
 		///<summary>Updates the underlying data structures when a manual split is created or edited.</summary>
