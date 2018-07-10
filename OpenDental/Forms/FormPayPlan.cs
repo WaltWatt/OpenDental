@@ -2301,7 +2301,7 @@ namespace OpenDental{
 				MsgBox.Show(this,"A provider must be selected first.");
 				return true;
 			}
-			if(_payPlanCur.PayPlanDate > DateTime.Today.Date && !PrefC.GetBool(PrefName.FutureTransDatesAllowed)) {
+			if(PIn.Date(textDate.Text) > DateTime.Today && !PrefC.GetBool(PrefName.FutureTransDatesAllowed)) {
 				MsgBox.Show(this,"Payment plan date cannot be set for the future.");
 				return true;
 			}
