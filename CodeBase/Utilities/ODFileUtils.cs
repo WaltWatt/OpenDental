@@ -167,5 +167,10 @@ namespace CodeBase {
 			string ext=Path.GetExtension(filePath);
 			return CombinePaths(Path.GetDirectoryName(filePath),Path.GetFileNameWithoutExtension(filePath)+suffix+ext);
 		}
+
+		///<summary>Removes invalid characters from the passed in file name.</summary>
+		public static string CleanFileName(string fileName) {
+			return string.Join("_",fileName.Split(Path.GetInvalidFileNameChars()));
+		}
 	}
 }

@@ -750,16 +750,17 @@ namespace OpenDental{
 				rawBase64=Convert.ToBase64String(File.ReadAllBytes(fileSourcePath));
 			}
 			Document docSave=new Document();
+			docSave.DocNum=Documents.Insert(docSave);
 			docSave.ImgType=ImageType.Document;
 			docSave.DateCreated=DateTime.Now;
 			docSave.PatNum=PatCur.PatNum;
 			docSave.DocCategory=letterCur.ImageFolder;
-			docSave.Description=letterCur.Description;//no extension.
+			docSave.Description=letterCur.Description+docSave.DocNum;//no extension.
 			docSave.RawBase64=rawBase64;//blank if using AtoZfolder
-			docSave.FileName=GetFileExtensionForWordDoc(fileSourcePath);//file extension used for both DB images and AtoZ images. The insert will generate the file name.
-			docSave=Documents.InsertAndGet(docSave,PatCur);
+			docSave.FileName=ODFileUtils.CleanFileName(letterCur.Description)+GetFileExtensionForWordDoc(fileSourcePath);
 			string fileDestPath=ImageStore.GetFilePath(docSave,ImageStore.GetPatientFolder(PatCur,ImageStore.GetPreferredAtoZpath()));
 			FileAtoZ.Copy(fileSourcePath,fileDestPath,FileAtoZSourceDestination.LocalToAtoZ);
+			Documents.Update(docSave);
 			return docSave;
 		}
 
