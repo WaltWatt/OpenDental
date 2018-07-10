@@ -960,7 +960,7 @@ namespace OpenDental {
 				}
 			}
 			string pdfFile=EmailSheet(emailAddress,subject);
-			if(SheetCur.SheetType==SheetTypeEnum.Statement && SaveStatementToDocDelegate!=null) {
+			if(HasEmailBeenSent && SheetCur.SheetType==SheetTypeEnum.Statement && SaveStatementToDocDelegate!=null) {
 				SaveStatementToDocDelegate(Stmt,SheetCur,pdfFile);
 			}
 		}
