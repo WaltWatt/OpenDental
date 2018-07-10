@@ -285,7 +285,7 @@ namespace OpenDentBusiness{
 				//Normal pattern is to comment out the FALSE cases. 
 				//This is the opposite so that the default behavior for new security permissions to be to show in the audit trail. In case it wasn't added to this function.
 				case Permissions.None:
-				//case Permissions.AppointmentsModule:
+				case Permissions.AppointmentsModule:
 				//case Permissions.FamilyModule:
 				//case Permissions.AccountModule:
 				//case Permissions.TPModule:
@@ -318,7 +318,7 @@ namespace OpenDentBusiness{
 				//case Permissions.DepositSlips:
 				//case Permissions.AccountingEdit:
 				//case Permissions.AccountingCreate:
-				case Permissions.Accounting:
+				//case Permissions.Accounting:
 				case Permissions.AnesthesiaIntakeMeds:
 				case Permissions.AnesthesiaControlMeds:
 				//case Permissions.InsPayCreate:
@@ -344,7 +344,7 @@ namespace OpenDentBusiness{
 				case Permissions.InsPlanChangeSubsc:
 				//case Permissions.RefAttachAdd:
 				//case Permissions.RefAttachDelete:
-				case Permissions.CarrierCreate:
+				//case Permissions.CarrierCreate:
 				case Permissions.GraphicalReports:
 				//case Permissions.AutoNoteQuickNoteEdit:
 				case Permissions.EquipmentSetup:
@@ -352,7 +352,7 @@ namespace OpenDentBusiness{
 				//case Permissions.ProblemEdit:
 				//case Permissions.ProcFeeEdit:
 				//case Permissions.InsPlanChangeCarrierName:
-				case Permissions.TaskNoteEdit:
+				//case Permissions.TaskNoteEdit:
 				case Permissions.WikiListSetup:
 				case Permissions.Copy:
 				//case Permissions.Printing:
@@ -374,7 +374,7 @@ namespace OpenDentBusiness{
 				//case Permissions.TaskEdit:
 				//case Permissions.EmailSend:
 				//case Permissions.WebmailSend:
-				//case Permissions.UserQueryAdmin:
+				case Permissions.UserQueryAdmin:
 				//case Permissions.InsPlanChangeAssign:
 				//case Permissions.ImageEdit:
 				//case Permissions.EhrMeasureEventEdit:
@@ -401,7 +401,7 @@ namespace OpenDentBusiness{
 				//case Permissions.TaskListCreate:
 				//case Permissions.PatientCreate:
 				//case Permissions.GraphicalReportSetup:
-				//case Permissions.PreAuthSentEdit:
+				case Permissions.PreAuthSentEdit:
 				//case Permissions.PatientEdit:
 				//case Permissions.InsPlanCreate:
 				//case Permissions.InsPlanEdit:
@@ -414,7 +414,8 @@ namespace OpenDentBusiness{
 				//case Permissions.SplitCreatePastLockDate:
 				//case Permissions.ProcComplEditLimited:
 				//case Permissions.ClaimDelete:
-				//case Permissions.InsWriteOffEdit:
+				case Permissions.InsWriteOffEdit:
+				case Permissions.ProviderAlphabetize:
 				//case Permissions.ApptConfirmStatusEdit:
 				//case Permissions.GraphicsRemoteEdit:
 				//case Permissions.AuditTrail:
@@ -437,8 +438,8 @@ namespace OpenDentBusiness{
 				//case Permissions.InsuranceCarrierCombine:
 				case Permissions.PopupEdit://Popups are archived, so they don't need to show in the audit trail.
 				case Permissions.InsPlanPickListExisting:
-				//case Permissions.GroupNoteUser:
-				//case Permissions.WikiAdmin:
+				//case Permissions.GroupNoteEditSigned:
+				case Permissions.WikiAdmin:
 				//case Permissions.PayPlanEdit:
 				//case Permissions.ClaimEdit:
 				//case Permissions.LogFeeEdit:
