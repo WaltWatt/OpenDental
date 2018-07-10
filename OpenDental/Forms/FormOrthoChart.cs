@@ -171,6 +171,7 @@ namespace OpenDental {
 				col.Tag=field.Description;
 				gridMain.Columns.Add(col);
 			}
+			_showSigBox=_listOrthDisplayFields.Any(x => x.InternalName=="Signature");//Must be set before CanEditRow(...)
 			gridMain.Rows.Clear();
 			ODGridRow row;
 			foreach(KeyValuePair<DateTime, List<OrthoChart>> kvPair in _dictOrthoCharts) {
@@ -203,7 +204,7 @@ namespace OpenDental {
 				if(!areAllColumnsBlank || _listDatesAdded.Contains(tempDate)) {
 					gridMain.Rows.Add(row);
 				}
-				CanEditRow(tempDate);
+				CanEditRow(tempDate);//Function uses _showSigBox, must be set prior to calling.
 			}
 			gridMain.EndUpdate();
 			if(gridMainScrollValue==0) {
@@ -214,7 +215,6 @@ namespace OpenDental {
 				gridMainScrollValue=0;
 			}
 			//Show the signature control if a signature display field is present on any tab.
-			_showSigBox=_listOrthDisplayFields.Any(x => x.InternalName=="Signature");
 			signatureBoxWrapper.Visible=_showSigBox;//Hide the signature box if this tab does not have the signature column present.
 			if(_showSigBox) {
 				for(int i=0;i<gridMain.Rows.Count;i++) {
