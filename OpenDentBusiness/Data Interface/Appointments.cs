@@ -2252,23 +2252,29 @@ namespace OpenDentBusiness{
 			return listProcs;
 		}
 
-		///<summary>Insert an appointment, and an invalid appointment signalod.</summary>
-		public static void Insert(Appointment appt) {
+		///<summary>Insert an appointment, and an invalid appointment signalod. Only pass in secUserNum if InsertIncludeAptNum would otherwise overwrite it. </summary>
+		public static void Insert(Appointment appt,long secUserNum=0) {
 			//No need to check RemotingRole; no call to db.
 			if(DataConnection.DBtype==DatabaseType.MySql) {
-				InsertIncludeAptNum(appt,false);
+				InsertIncludeAptNum(appt,false,secUserNum);
 			}
 			else {//Oracle must always have a valid PK.
 				appt.AptNum=DbHelper.GetNextOracleKey("appointment","AptNum");
-				InsertIncludeAptNum(appt,true);
+				InsertIncludeAptNum(appt,true,secUserNum);
 			}
 			Signalods.SetInvalidAppt(appt);
 		}
 
-		///<summary>Set includeAptNum to true only in rare situations.  Like when we are inserting for eCW. Inserts an invalid appointment signalod.</summary>
-		public static long InsertIncludeAptNum(Appointment appt,bool useExistingPK) {
+		///<summary>Set includeAptNum to true only in rare situations.  Like when we are inserting for eCW. Inserts an invalid appointment signalod.
+		///Only include the secUserNum if a user is not available via Security.CurUser (e.g. MobileWeb calls). </summary>
+		public static long InsertIncludeAptNum(Appointment appt,bool useExistingPK,long secUserNum=0) {
 			if(RemotingClient.RemotingRole!=RemotingRole.ServerWeb) {
-				appt.SecUserNumEntry=Security.CurUser.UserNum;//must be before normal remoting role check to get user at workstation
+				if(secUserNum!=0) {
+					appt.SecUserNumEntry=secUserNum;
+				}
+				else {
+					appt.SecUserNumEntry=Security.CurUser.UserNum;//must be before normal remoting role check to get user at workstation
+				}
 			}
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
 				appt.AptNum=Meth.GetLong(MethodBase.GetCurrentMethod(),appt,useExistingPK);
@@ -3540,15 +3546,32 @@ namespace OpenDentBusiness{
 				appt.DateTimeSeated=appt.AptDateTime.Date;
 				appt.DateTimeDismissed=appt.AptDateTime.Date;
 				#endregion
-				Insert(appt);//Inserts the invalid signal
-				SecurityLogs.MakeLogEntry(Permissions.AppointmentCreate,appt.PatNum,"New appointment created from MobileWeb by "+appt.SecUserNumEntry,
-					appt.AptNum,secLogSource,appt.SecDateEntry);
-				apptOld=appt.Copy();
+				Insert(appt,appt.SecUserNumEntry);//Inserts the invalid signal
+				SecurityLogs.MakeLogEntry(new SecurityLog()
+				{
+					PermType=Permissions.AppointmentCreate,
+					UserNum=appt.SecUserNumEntry,
+					LogDateTime=DateTime.Now,
+					LogText="New appointment created from MobileWeb by "+Userods.GetUser(appt.SecUserNumEntry).UserName,
+					PatNum=appt.PatNum,
+					FKey=appt.AptNum,
+					LogSource=LogSources.MobileWeb,
+					DateTPrevious=appt.SecDateEntry
+				});
 			}
 			else {
 				Update(appt,apptOld);//Inserts the invalid signal
-				SecurityLogs.MakeLogEntry(Permissions.AppointmentEdit,appt.PatNum,"Appointment updated from MobileWeb "+appt.SecUserNumEntry,appt.AptNum,
-					secLogSource,appt.SecDateEntry);
+				SecurityLogs.MakeLogEntry(new SecurityLog()
+				{
+					PermType=Permissions.AppointmentEdit,
+					UserNum=appt.SecUserNumEntry,
+					LogDateTime=DateTime.Now,
+					LogText="Appointment updated from MobileWeb by "+Userods.GetUser(appt.SecUserNumEntry).UserName,
+					PatNum=appt.PatNum,
+					FKey=appt.AptNum,
+					LogSource=LogSources.MobileWeb,
+					DateTPrevious=appt.SecDateEntry
+				});
 			}
 			#endregion
 			#region Mimic FormApptEdit proc selection logic
