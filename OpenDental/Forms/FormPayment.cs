@@ -4018,6 +4018,10 @@ namespace OpenDental {
 			for(int i=gridSplits.SelectedIndices.Length-1;i>=0;i--) {
 				int idx=gridSplits.SelectedIndices[i];
 				PaySplit paySplit=(PaySplit)gridSplits.Rows[idx].Tag;
+				if(paySplit.SplitNum!=0 && PaySplits.GetAllocatedElseWhere(paySplit.SplitNum).Count>0) {
+					MsgBox.Show(this,"Splits in this payment have been allocated elsewhere.  Please delete those first.");
+					return new List<long>();
+				}
 				if(paySplit.DateEntry!=DateTime.MinValue && !Security.IsAuthorized(Permissions.PaymentEdit,paySplit.DatePay,suppressMessage)) {
 					suppressMessage=true;
 					continue;//Don't delete this paysplit
